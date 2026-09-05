@@ -1,0 +1,23 @@
+{
+  "name": "odd-index",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "playwright test",
+    "test:update-previews": "UPDATE_PREVIEWS=1 playwright test tests/previews.spec.ts"
+  },
+  "dependencies": {
+    "three": "^0.180.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^22.18.0",
+    "@types/three": "^0.180.0",
+    "typescript": "~5.9.2",
+    "vite": "^7.1.5"
+  }
+}
