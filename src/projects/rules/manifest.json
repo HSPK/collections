@@ -1,0 +1,14 @@
+{
+  "id": "rules",
+  "order": 23,
+  "title": "Garden of Rules",
+  "subtitle": "Plant a pattern. Let a small rule decide what grows.",
+  "description": "An editable cellular-automata field guide with Life, HighLife and Seeds, a library of verified patterns, manual stepping, custom B/S rules and keepable board snapshots.",
+  "category": "learn",
+  "format": "page",
+  "medium": "Interactive cellular-automata lab",
+  "tags": ["Cellular automata", "Mathematics", "Patterns", "Learning"],
+  "color": "#f1f0e6",
+  "ink": "#233e2f",
+  "instruction": "The garden starts still. Try Step, paint a cell, or plant a pattern from the seed library."
+}

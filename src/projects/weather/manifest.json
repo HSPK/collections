@@ -1,0 +1,14 @@
+{
+  "id": "weather",
+  "order": 28,
+  "title": "Atlas of Impossible Weather",
+  "subtitle": "Six places. Four watches. No familiar weather.",
+  "description": "Explore six imaginary destinations through original landscape diagrams, 24 coherent fictional forecasts, observatory field notes, unusual units, and a locally saved expedition packing checklist. Entirely fictional, never a live weather service.",
+  "category": "explore",
+  "format": "page",
+  "medium": "Illustrated fictional expedition atlas",
+  "tags": ["Worldbuilding", "Cartography", "Weather", "Local-first"],
+  "color": "#244bce",
+  "ink": "#f5f3df",
+  "instruction": "Choose a station and an expedition watch. Every reading is fiction; your packing checks stay on this device."
+}

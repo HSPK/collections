@@ -1,4 +1,5 @@
 import { canvas2D, pointerPosition } from '../core/canvas';
+import { holdGainAtTime } from '../core/audio';
 import { controlButton, controlRange, controlToggle, stageHint } from '../core/controls';
 import { createLoop } from '../core/loop';
 import { clamp, random } from '../core/math';
@@ -43,16 +44,6 @@ interface AudioGraph {
   voices: Set<Voice>;
   closeTimer: number | undefined;
   closed: boolean;
-}
-
-function holdGainAtTime(parameter: AudioParam, time: number): void {
-  if (typeof parameter.cancelAndHoldAtTime === 'function') {
-    parameter.cancelAndHoldAtTime(time);
-    return;
-  }
-  const currentValue = parameter.value;
-  parameter.cancelScheduledValues(time);
-  parameter.setValueAtTime(currentValue, time);
 }
 
 export function mount(context: ExperimentContext): ExperimentInstance {

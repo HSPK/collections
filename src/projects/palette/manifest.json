@@ -1,0 +1,14 @@
+{
+  "id": "palette",
+  "order": 15,
+  "title": "Palette Kitchen",
+  "subtitle": "Good color, from scratch.",
+  "description": "A tactile color recipe laboratory with six original recipes, editable and pinnable pigments, real WCAG contrast tasting, a local recipe pantry, and useful CSS and SVG exports.",
+  "category": "create",
+  "format": "page",
+  "medium": "Color recipe laboratory",
+  "tags": ["Color", "Design", "Accessibility", "Making"],
+  "color": "#f4eee3",
+  "ink": "#302b27",
+  "instruction": "Choose a recipe or mix your own base color. Select a pigment to edit it, taste the contrast, then keep your CSS or SVG card."
+}

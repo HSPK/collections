@@ -1,0 +1,14 @@
+{
+  "id": "newspaper",
+  "order": 27,
+  "title": "Signals from 2086",
+  "subtitle": "An ordinary day in an extraordinary century.",
+  "description": "A complete fictional future newspaper with seven original stories, illustrated reporting, section archives, and a local reading list. Borrow a municipal cloud, visit a lunar seed library, and meet the people making an imagined city work.",
+  "category": "read",
+  "format": "page",
+  "medium": "An original illustrated fictional broadsheet",
+  "tags": ["Original fiction", "Newspaper", "Worldbuilding", "Reading"],
+  "color": "#f4f0e6",
+  "ink": "#29261f",
+  "instruction": "Choose a headline to read the full fictional story. Use the section links, save a story for later, or switch to larger type."
+}

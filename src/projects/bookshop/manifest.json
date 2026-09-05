@@ -1,0 +1,14 @@
+{
+  "id": "bookshop",
+  "order": 13,
+  "title": "The Last Bookshop",
+  "subtitle": "A light under the door. Three ways into morning.",
+  "description": "Step into a strange, warmly lit bookshop and read an original branching story in 22 scenes. Explore six invented books, carry useful discoveries, and choose one of three consequence-driven endings.",
+  "category": "read",
+  "format": "page",
+  "medium": "A bookcase, a reading room, and an original branching story",
+  "tags": ["Interactive fiction", "Books", "Choices", "Reading"],
+  "color": "#d8b87e",
+  "ink": "#39251e",
+  "instruction": "Come in out of the rain, read a book, and decide what becomes of the shop."
+}

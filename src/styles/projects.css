@@ -1,0 +1,31 @@
+.project-app {
+  --app-accent: #244d3a;
+  --app-ink: #26362d;
+  --app-line: #cfd7ca;
+  width: 100%;
+  min-width: 0;
+  min-height: calc(100svh - 46px);
+  color: var(--app-ink);
+  font-size: 16px;
+  line-height: 1.55;
+}
+.project-app svg { max-width: 100%; height: auto; }
+.project-app img { max-width: 100%; }
+.project-app button, .project-app input, .project-app textarea, .project-app select { font: inherit; }
+.project-app h1, .project-app h2, .project-app h3 { line-height: 1.15; }
+.project-app p { overflow-wrap: break-word; }
+.app-button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 42px; padding: 10px 16px; background: var(--app-accent, #244d3a); color: white; border: 1px solid transparent; border-radius: 5px; font-size: 14px; line-height: 1.3; font-weight: 500; cursor: pointer; text-decoration: none; }
+.app-button--quiet { background: transparent; border-color: var(--app-line, #cfd7ca); color: inherit; }
+.app-button svg { width: 18px; height: 18px; }
+.app-button[aria-pressed="true"] { background: var(--app-ink, #26362d); color: white; }
+.app-button:disabled { opacity: .45; cursor: not-allowed; }
+.app-input { width: 100%; min-width: 0; min-height: 42px; border: 1px solid var(--app-line, #cfd7ca); border-radius: 5px; padding: 10px 12px; color: inherit; background: #ffffffcc; font-size: 15px; }
+textarea.app-input { resize: vertical; line-height: 1.6; }
+.app-label { display: flex; flex-direction: column; gap: 7px; font-size: 13px; font-weight: 500; }
+.app-note { font-size: 13px; line-height: 1.6; opacity: .75; }
+.app-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.app-status { font-size: 14px; line-height: 1.55; }
+@media (max-width: 600px) {
+  .app-button { min-height: 44px; }
+  .app-input { font-size: 16px; }
+}

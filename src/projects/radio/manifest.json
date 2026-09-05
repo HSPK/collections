@@ -1,0 +1,14 @@
+{
+  "id": "radio",
+  "order": 30,
+  "title": "Radio 404",
+  "subtitle": "Tune to somewhere that isn't on the map.",
+  "description": "Four fictional radio stations with original, locally synthesized ambient soundscapes, illustrated field notebooks, and imaginary program guides. Read quietly or choose to listen.",
+  "category": "explore",
+  "format": "page",
+  "medium": "Procedural radio & fictional field notes",
+  "tags": ["Ambient sound", "Fictional places", "Field notes"],
+  "color": "#eee0b8",
+  "ink": "#303729",
+  "instruction": "Choose a station to open its notebook. Press Listen to hear sound generated on your device."
+}

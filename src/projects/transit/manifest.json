@@ -1,0 +1,14 @@
+{
+  "id": "transit",
+  "order": 17,
+  "title": "Transit Weaver",
+  "subtitle": "A map of nowhere. A way to somewhere.",
+  "description": "Invent a subway for a fictional city. Shape a connected network of original stations, edit and reorder colorful routes, and keep a printable SVG poster or an editable project file.",
+  "category": "create",
+  "format": "page",
+  "medium": "Imaginary subway map maker",
+  "tags": ["Mapmaking", "Design", "Fictional cities", "SVG"],
+  "color": "#e9eddf",
+  "ink": "#26382f",
+  "instruction": "Select a station in Brindleport, give it a new name, then follow the route into your own imaginary city."
+}

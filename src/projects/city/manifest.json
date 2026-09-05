@@ -1,0 +1,14 @@
+{
+  "id": "city",
+  "order": 26,
+  "title": "Recipe for a City",
+  "subtitle": "A pinch of park. A handful of doorsteps. Stir in a street.",
+  "description": "Compose an original isometric neighborhood with eleven illustrated tiles, three small recipes, undoable edits, and honest shared-side road-graph notes. Keep a printable SVG or reopen your local JSON plan.",
+  "category": "explore",
+  "format": "page",
+  "medium": "An illustrated neighborhood worktable",
+  "tags": ["Isometric", "Local maker", "Graphs", "SVG keepsakes"],
+  "color": "#f7f0df",
+  "ink": "#304b40",
+  "instruction": "Choose an ingredient and an address, then place it. Read the road groups, try a small recipe, and keep your illustration."
+}

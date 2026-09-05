@@ -1,19 +1,37 @@
 import { expect, test } from '@playwright/test';
+import { readProjectManifests } from '../scripts/project-pages';
 
-const ids = ['orbital', 'flow', 'soft', 'terrain', 'chroma', 'echo', 'gravity', 'type', 'fold', 'ribbon'];
+const projects = readProjectManifests(process.cwd()).sort((a, b) => a.order - b.order);
 
-test.describe('Artwork editions', () => {
-  test.skip(!process.env.UPDATE_PREVIEWS, 'Run npm run test:update-previews to regenerate the gallery images.');
+test.describe('Project covers', () => {
+  test.skip(!process.env.UPDATE_PREVIEWS, 'Run npm run test:update-previews to regenerate actual site covers.');
   test.use({ viewport: { width: 1322, height: 1160 }, deviceScaleFactor: 1 });
-  for (const id of ids) {
-    test(`Capture ${id}`, async ({ page }) => {
-      await page.goto(`./#/experiment/${id}`);
-      const stage = page.locator('[data-stage]');
-      await expect(stage).toHaveAttribute('data-ready', 'true');
-      await page.waitForTimeout(id === 'flow' ? 5500 : 2200);
-      await page.getByRole('button', { name: 'Pause animation', exact: true }).click();
-      await page.addStyleTag({ content: '.stage-hint { visibility: hidden !important; }' });
-      await stage.screenshot({ path: `public/previews/${id}.jpg`, type: 'jpeg', quality: 88, animations: 'disabled' });
+  for (const project of projects) {
+    test(`Capture ${project.id}`, async ({ page }) => {
+      test.skip(Boolean(project.preview && !project.preview.endsWith('.jpg')), 'This project supplies its own preview asset.');
+      if (project.format === 'page') await page.emulateMedia({ reducedMotion: 'reduce' });
+      await page.goto(`./projects/${project.id}/`);
+      const surface = page.locator('#main-content > [data-stage]');
+      await expect(surface).toHaveAttribute('data-ready', 'true');
+      await page.waitForTimeout(project.id === 'flow' ? 4000 : project.format === 'page' ? 300 : 1500);
+      if (project.format === 'immersive') {
+        await page.getByRole('button', { name: 'Pause animation', exact: true }).click();
+        await page.addStyleTag({ content: '.stage-hint { visibility: hidden !important; }' });
+        await surface.screenshot({ path: `public/previews/${project.id}.jpg`, type: 'jpeg', quality: 88, animations: 'disabled' });
+      } else {
+        const focus = surface.locator('[data-project-preview]').first();
+        const target = await focus.count() ? focus : surface;
+        await target.evaluate((element) => element.scrollIntoView({ block: 'start', behavior: 'instant' }));
+        const bounds = (await target.boundingBox())!;
+        const top = Math.max(0, bounds.y);
+        await page.screenshot({
+          path: `public/previews/${project.id}.jpg`,
+          type: 'jpeg',
+          quality: 88,
+          animations: 'disabled',
+          clip: { x: 0, y: top, width: 1322, height: Math.min(850, Math.max(400, bounds.height), 1160 - top) },
+        });
+      }
     });
   }
 });

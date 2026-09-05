@@ -1,0 +1,14 @@
+{
+  "id": "parcel",
+  "order": 22,
+  "title": "Parcel Panic",
+  "subtitle": "Small streets. Big deliveries.",
+  "description": "Plan your postal round across five handmade street grids. Collect matching parcels, manage a limited mailbag, and navigate one-way bridges before your moves run out—with full undo and verified route hints.",
+  "category": "play",
+  "format": "page",
+  "medium": "Postal route-planning puzzle",
+  "tags": ["Route planning", "Puzzles", "Original game", "Touch friendly"],
+  "color": "#f2d27d",
+  "ink": "#203e3c",
+  "instruction": "Drive over parcels, then deliver each one to its matching lettered shop. Use arrow keys on the map or the direction buttons; undo any turn."
+}

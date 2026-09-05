@@ -1,7 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
 
+// Workers share their run's directory; simultaneous project reviews never delete one another's traces.
+const outputDir = process.env.ODD_TEST_OUTPUT_DIR || `test-results/run-${process.pid}`;
+process.env.ODD_TEST_OUTPUT_DIR = outputDir;
+
 export default defineConfig({
   testDir: './tests',
+  outputDir,
   fullyParallel: false,
   workers: 1,
   timeout: 45_000,
@@ -12,8 +17,8 @@ export default defineConfig({
     trace: 'retain-on-failure',
     ...devices['Desktop Chrome'],
     launchOptions: {
-      // Keep dense Canvas2D paths out of SwiftShader's software GPU compositor.
-      args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--disable-accelerated-2d-canvas'],
+      // Allow software WebGL without forcing the ordinary page compositor through it.
+      args: ['--enable-unsafe-swiftshader', '--disable-accelerated-2d-canvas'],
     },
   },
   webServer: process.env.SITE_URL ? undefined : {

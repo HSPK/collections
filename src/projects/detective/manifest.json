@@ -1,0 +1,14 @@
+{
+  "id": "detective",
+  "order": 20,
+  "title": "The Tiny Detective",
+  "subtitle": "Small mysteries. Excellent questions.",
+  "description": "An illustrated casebook of three original, nonviolent mysteries. Inspect evidence, compare fictional suspects, reconstruct a timeline, and present a conclusion that leaves no alternative.",
+  "category": "play",
+  "format": "page",
+  "medium": "An illustrated deduction casebook",
+  "tags": ["Deduction", "Mysteries", "Original fiction", "Case files"],
+  "color": "#eee3ce",
+  "ink": "#352837",
+  "instruction": "Open a case, inspect and pin the identifying exhibits, then choose a person and present your reasoning."
+}

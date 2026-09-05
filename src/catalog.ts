@@ -1,140 +1,24 @@
-import type { Project } from './core/types';
+import { parseManifest, validateCollection } from './core/manifest';
+import type { Project, ProjectModule } from './core/types';
 
-export const projects: Project[] = [
-  {
-    id: 'orbital',
-    number: '01',
-    title: 'Orbital',
-    subtitle: 'A beautiful little system.',
-    description: 'A kinetic sculpture with nowhere to go. Set a handful of polished rings in motion, change their material, and find an orbit of your own.',
-    category: 'space',
-    medium: '3D / KINETIC SCULPTURE',
-    color: '#d9e4cf',
-    ink: '#273127',
-    instruction: 'Drag to orbit. Scroll to get closer.',
-    load: () => import('./experiments/orbital'),
-  },
-  {
-    id: 'flow',
-    number: '02',
-    title: 'Flow State',
-    subtitle: 'Order is overrated.',
-    description: 'Thousands of particles, one invisible current. Move through a living vector field and watch the smallest gestures become something much bigger.',
-    category: 'motion',
-    medium: 'PARTICLES / VECTOR FIELDS',
-    color: '#161c26',
-    ink: '#e9b480',
-    instruction: 'Move to bend the current. Hold to gather particles.',
-    load: () => import('./experiments/flow'),
-  },
-  {
-    id: 'soft',
-    number: '03',
-    title: 'Soft Signal',
-    subtitle: 'Somewhere between states.',
-    description: 'A study in almost-touching. Liquid forms merge, separate, and negotiate their edges in a soft, ever-changing sculpture.',
-    category: 'space',
-    medium: '3D / METABALLS',
-    color: '#f2b4b9',
-    ink: '#692c3a',
-    instruction: 'Move to influence the sculpture. Drag to look around.',
-    load: () => import('./experiments/soft'),
-  },
-  {
-    id: 'terrain',
-    number: '04',
-    title: 'Terrarium',
-    subtitle: 'Take the long way home.',
-    description: 'A landscape that never quite repeats. Travel across a procedural world, lift its mountains, and see the structure beneath the surface.',
-    category: 'space',
-    medium: '3D / GENERATIVE LANDSCAPES',
-    color: '#c9c5de',
-    ink: '#35334d',
-    instruction: 'Move to steer your view. Build a landscape with the controls.',
-    load: () => import('./experiments/terrain'),
-  },
-  {
-    id: 'chroma',
-    number: '05',
-    title: 'Chroma',
-    subtitle: 'Color, without the lines.',
-    description: 'A color field with a mind of its own. Stretch a pool of liquid pigment into new shapes, or step back and let the colors do the talking.',
-    category: 'motion',
-    medium: 'SHADERS / COLOR STUDIES',
-    color: '#e96b37',
-    ink: '#512212',
-    instruction: 'Move slowly to pull the pigment. Try a different palette.',
-    load: () => import('./experiments/chroma'),
-  },
-  {
-    id: 'echo',
-    number: '06',
-    title: 'Echo',
-    subtitle: 'Every touch leaves a trace.',
-    description: 'An instrument you can see. Make a mark, send a ripple, and build a quiet composition out of overlapping circles and gentle tones.',
-    category: 'play',
-    medium: 'AUDIO / INTERFERENCE',
-    color: '#172c29',
-    ink: '#d1dd95',
-    instruction: 'Tap anywhere to make a ripple. Enable sound for the full experience.',
-    load: () => import('./experiments/echo'),
-  },
-  {
-    id: 'gravity',
-    number: '07',
-    title: 'Gravity Garden',
-    subtitle: 'A little room for chaos.',
-    description: 'A pocket universe of colorful, colliding objects. Plant a few more, change the pull of gravity, and rearrange your own small cosmos.',
-    category: 'play',
-    medium: 'PHYSICS / PLAYGROUND',
-    color: '#e9e3d4',
-    ink: '#484338',
-    instruction: 'Drag the shapes. Tap an empty spot to plant another.',
-    load: () => import('./experiments/gravity'),
-  },
-  {
-    id: 'type',
-    number: '08',
-    title: 'Type Playground',
-    subtitle: 'Words with a little give.',
-    description: 'Typography, off its best behavior. Turn a word into a field of elastic particles, scatter the letters, and watch them find their way back.',
-    category: 'play',
-    medium: 'TYPOGRAPHY / SPRINGS',
-    color: '#d9eb6c',
-    ink: '#252c18',
-    instruction: 'Move through the letters. Type something of your own.',
-    load: () => import('./experiments/type'),
-  },
-  {
-    id: 'fold',
-    number: '09',
-    title: 'Fold Study',
-    subtitle: 'One sheet. Many possibilities.',
-    description: 'Light and shadow, made from a single idea. Shape a sheet of digital paper and explore the surprisingly complicated life of a simple crease.',
-    category: 'space',
-    medium: '3D / PAPER & LIGHT',
-    color: '#bed2ec',
-    ink: '#2a3e5b',
-    instruction: 'Drag to change your perspective. Adjust the fold to reshape the paper.',
-    load: () => import('./experiments/fold'),
-  },
-  {
-    id: 'ribbon',
-    number: '10',
-    title: 'Afterimage',
-    subtitle: 'Nothing stays. Make a mark anyway.',
-    description: 'An open canvas for a fleeting thought. Draw ribbons of light, layer a few gestures, and save a moment before it slips away.',
-    category: 'motion',
-    medium: 'GESTURES / GENERATIVE DRAWING',
-    color: '#202027',
-    ink: '#eabdb4',
-    instruction: 'Drag to draw. Change your ink, clear the canvas, or keep a print.',
-    load: () => import('./experiments/ribbon'),
-  },
-];
+export { categories, categoryNames, isCategory } from './core/manifest';
 
-export const categoryNames = {
-  space: 'Space',
-  motion: 'Motion',
-  play: 'Play',
-} as const;
+const manifests = import.meta.glob<{ default: unknown }>('./projects/*/manifest.json', { eager: true });
+const entrypoints = import.meta.glob<ProjectModule>('./projects/*/index.ts');
+
+export const projects: Project[] = Object.entries(manifests).map(([path, module]) => {
+  const manifest = parseManifest(module.default, path);
+  const folder = path.split('/')[2];
+  if (manifest.id !== folder) throw new Error(`${path}: id must match its project folder.`);
+  const entrypoint = path.replace('/manifest.json', '/index.ts');
+  const load = entrypoints[entrypoint];
+  if (!load) throw new Error(`${manifest.title} needs an index.ts entrypoint.`);
+  return {
+    ...manifest,
+    number: String(manifest.order).padStart(2, '0'),
+    sourcePath: `src/projects/${manifest.id}`,
+    load,
+  };
+}).sort((a, b) => a.order - b.order);
+
+validateCollection(projects);

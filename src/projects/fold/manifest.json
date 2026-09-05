@@ -1,0 +1,8 @@
+{
+  "id": "fold", "order": 9, "title": "Fold Study",
+  "subtitle": "One sheet. Many possibilities.",
+  "description": "Shape a sheet of digital paper. Change its creases, material, and perspective in a study of dimensional light and shadow.",
+  "category": "art", "format": "immersive", "medium": "Digital paper",
+  "tags": ["3D", "Paper", "Materials"], "color": "#bed2ec", "ink": "#2a3e5b",
+  "instruction": "Drag to change your perspective. Adjust the fold to reshape the paper."
+}

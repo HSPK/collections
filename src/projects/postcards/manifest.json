@@ -1,0 +1,14 @@
+{
+  "id": "postcards",
+  "order": 12,
+  "title": "Letters from Elsewhere",
+  "subtitle": "Eight imagined places. Letters worth bringing home.",
+  "description": "Follow an illustrated fictional postal route through eight original landscapes and eight complete letters. Turn each postcard over, keep correspondence in a local satchel, or take home plain-text letters and printable offline postcards.",
+  "category": "read",
+  "format": "page",
+  "medium": "An illustrated epistolary atlas",
+  "tags": ["Original fiction", "Postcards", "Imaginary atlas", "Offline keepsakes"],
+  "color": "#e4eaf0",
+  "ink": "#234d70",
+  "instruction": "Choose a place on the atlas, turn its postcard over, and keep a letter for the way home."
+}

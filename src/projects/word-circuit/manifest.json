@@ -1,0 +1,14 @@
+{
+  "id": "word-circuit",
+  "order": 21,
+  "title": "Word Circuit",
+  "subtitle": "Four letters. One change. A way through.",
+  "description": "Connect English words one letter at a time across eight hand-picked word-ladder routes. Explore a disclosed curated dictionary, rewind your circuit, and ask for real shortest-path hints.",
+  "category": "play",
+  "format": "page",
+  "medium": "A four-letter routing puzzle",
+  "tags": ["Words", "Logic", "Puzzles"],
+  "color": "#f4f1e6",
+  "ink": "#203e35",
+  "instruction": "Change one letter in the current word, then press Enter or Connect word to add it to your route."
+}

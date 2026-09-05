@@ -1,0 +1,14 @@
+{
+  "id": "synth",
+  "order": 29,
+  "title": "Pocket Synth",
+  "subtitle": "Five voices. Sixteen steps. Your little rhythm machine.",
+  "description": "Make original loops on a tactile five-voice Web Audio sequencer. Edit steps, tune the bass, try four original patterns, and keep your work with local saves and real JSON import and export.",
+  "category": "create",
+  "format": "page",
+  "medium": "Browser synthesizer & 16-step sequencer",
+  "tags": ["Sound", "Sequencer", "Web Audio", "Local-first"],
+  "color": "#bf302b",
+  "ink": "#fff9e9",
+  "instruction": "Choose a starting pattern, toggle a few pads, then press Play. Save locally or export your pattern as JSON."
+}

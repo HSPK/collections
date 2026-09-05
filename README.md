@@ -1,128 +1,181 @@
 # odd/index
 
-**An exercise in curiosity.** Ten interactive experiments in space, motion, and play, collected in a small, editorial-style website.
+**A content-first collection of independent websites.** Tools to make with,
+games to play, stories to read, and worlds that do not quite exist.
 
 [Explore the collection](https://hspk.github.io/collections/)
 
-![The Odd Index gallery, with editorial typography and an interactive metal sculpture](public/cover.jpg)
+![The Odd Index project browser](public/cover.jpg)
 
-This is a fully static, English-language creative-coding collection. The work is AI-assisted, not an AI service: there are no API keys, accounts, server functions, analytics, or runtime requests to third-party services. Everything is rendered in the visitor's browser.
+The library is deliberately small: search, project types, useful previews,
+and links. Projects are the main event. Each one opens its **own complete
+website** at `/projects/<id>/`, with its own content, layout, and behavior.
+There are no iframes and no requirement to fit a project inside an animation
+viewport.
 
-## The collection
+Everything is statically hosted and runs in the visitor's browser. "AI-made"
+describes how this collection was created, not a hosted inference service.
+There are no AI API keys, accounts, analytics, or backend functions. Some
+projects keep preferences or work locally on the visitor's device.
 
-| # | Experiment | Medium | Play |
-|---|------------|--------|------|
-| 01 | **Orbital** | Three.js kinetic sculpture | Orbit polished rings; change their material and movement. |
-| 02 | **Flow State** | Canvas particle vector fields | Bend a current; gather and redirect its particles. |
-| 03 | **Soft Signal** | Three.js metaballs | Shape a liquid sculpture as its forms merge and separate. |
-| 04 | **Terrarium** | Procedural 3D landscapes | Reshape the terrain and travel across its surface. |
-| 05 | **Chroma** | Domain-warped color shaders | Pull liquid pigment through a selection of artist palettes. |
-| 06 | **Echo** | Canvas and Web Audio | Send ripples through a field; optionally hear their tones. |
-| 07 | **Gravity Garden** | Interactive collision physics | Plant shapes, drag them around, and change gravity. |
-| 08 | **Type Playground** | Particle typography and springs | Write a word, scatter its particles, and watch it reform. |
-| 09 | **Fold Study** | Dimensional paper geometry | Change a sheet's folds, material, and perspective. |
-| 10 | **Afterimage** | Generative ribbon drawing | Draw with satin ribbons and download a local PNG print. |
+## The websites
 
-Each experiment is a separate, lazy-loaded TypeScript project module with its own controls, rendering, and lifecycle. They share the gallery, accessible controls, and a lightweight static-page shell.
+| Project | Kind | Inside |
+|---------|------|--------|
+| [The Museum of Unmade Things](https://hspk.github.io/collections/projects/museum/) | Stories & archives | An original speculative design museum and its impossible exhibits. |
+| [Letters from Elsewhere](https://hspk.github.io/collections/projects/postcards/) | Stories & archives | An illustrated atlas of imaginary places and their correspondence. |
+| [The Last Bookshop](https://hspk.github.io/collections/projects/bookshop/) | Stories & archives | A branching literary world with choices, discoveries, and endings. |
+| [A Dictionary of Almost](https://hspk.github.io/collections/projects/almost/) | Stories & archives | Invented words for specific, not-quite-nameable experiences. |
+| [Palette Kitchen](https://hspk.github.io/collections/projects/palette/) | Tools & makers | Color recipes, actual contrast ratios, and keepable palettes. |
+| [Pixel Loom](https://hspk.github.io/collections/projects/pixel-loom/) | Tools & makers | Pixel drawing, fill, symmetry, undo, and image export. |
+| [Transit Weaver](https://hspk.github.io/collections/projects/transit/) | Tools & makers | An editable fictional transit network and a map to take away. |
+| [Zine Machine](https://hspk.github.io/collections/projects/zine/) | Tools & makers | A small print studio for an editable eight-page mini-zine. |
+| [Nonogram Club](https://hspk.github.io/collections/projects/nonogram/) | Games & puzzles | Original picture-logic puzzles with real clues and solving tools. |
+| [The Tiny Detective](https://hspk.github.io/collections/projects/detective/) | Games & puzzles | Nonviolent mysteries, evidence, and explainable deductions. |
+| [Word Circuit](https://hspk.github.io/collections/projects/word-circuit/) | Games & puzzles | Word ladders with a real dictionary graph and useful hints. |
+| [Parcel Panic](https://hspk.github.io/collections/projects/parcel/) | Games & puzzles | Postal route puzzles with pickups, deliveries, and undo. |
+| [Garden of Rules](https://hspk.github.io/collections/projects/rules/) | Learning | Editable cellular automata, rules, presets, and step-by-step evolution. |
+| [The Scale of Things](https://hspk.github.io/collections/projects/scale/) | Learning | Logarithmic size comparisons with clearly approximate facts. |
+| [Algorithm Theatre](https://hspk.github.io/collections/projects/algorithms/) | Learning | Actual sorting traces with explanations and editable inputs. |
+| [Recipe for a City](https://hspk.github.io/collections/projects/city/) | Worlds & explorations | A city-building toy with meaningful neighborhood rules. |
+| [Signals from 2086](https://hspk.github.io/collections/projects/newspaper/) | Stories & archives | A clearly fictional future newspaper with full original stories. |
+| [Atlas of Impossible Weather](https://hspk.github.io/collections/projects/weather/) | Worlds & explorations | Illustrated forecasts from imaginary destinations. |
+| [Pocket Synth](https://hspk.github.io/collections/projects/synth/) | Tools & makers | An actual browser-based step sequencer. |
+| [Radio 404](https://hspk.github.io/collections/projects/radio/) | Worlds & explorations | Locally synthesized stations from fictional places. |
+| [Orbital](https://hspk.github.io/collections/projects/orbital/) | Art & motion | Polished kinetic rings and material studies. |
+| [Flow State](https://hspk.github.io/collections/projects/flow/) | Art & motion | A dense, touchable vector-field particle study. |
+| [Soft Signal](https://hspk.github.io/collections/projects/soft/) | Art & motion | Organic merging and separating liquid forms. |
+| [Terrarium](https://hspk.github.io/collections/projects/terrain/) | Art & motion | Procedural landscapes, contours, and biomes. |
+| [Chroma](https://hspk.github.io/collections/projects/chroma/) | Art & motion | Domain-warped marbling and color fields. |
+| [Echo](https://hspk.github.io/collections/projects/echo/) | Art & motion | An opt-in audiovisual ripple instrument. |
+| [Gravity Garden](https://hspk.github.io/collections/projects/gravity/) | Games & puzzles | Physical toys to plant, move, and rearrange. |
+| [Type Playground](https://hspk.github.io/collections/projects/type/) | Art & motion | Elastic particle lettering and custom words. |
+| [Fold Study](https://hspk.github.io/collections/projects/fold/) | Art & motion | Dimensional paper, folds, and light. |
+| [Afterimage](https://hspk.github.io/collections/projects/ribbon/) | Art & motion | Satin-ribbon drawing and local PNG prints. |
 
-## Run locally
+## Run and build
 
-Node.js 22 or later is recommended.
+Use Node.js 22 or later.
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open the local URL printed by Vite. To make and serve the production build:
+The development server supports both the library and each independent
+`/projects/<id>/` website. To build and serve the production output:
 
 ```sh
 npm run build
 npm run preview
 ```
 
-Only `dist/` is needed on the web server.
+Deploy the complete `dist/` directory, preserving its structure:
+
+```text
+dist/
+  index.html
+  assets/
+  previews/
+  projects/
+    museum/index.html
+    palette/index.html
+    orbital/index.html
+    ...
+```
+
+Every project URL has a real HTML entrypoint, its own page metadata, and
+lazy-loaded application code. Direct links and refreshes work on static
+hosting without a server-side routing fallback. Older links such as
+`/#/experiment/orbital` redirect to the corresponding independent website.
+Projects may use their own hash navigation for chapters, articles, or views.
+
+## Extending a project
+
+Each project directory contains its own manifest, entrypoint, content or
+engine files, styles, and extension notes. Start with that directory's
+`README.md`, rather than changing the collection UI.
+
+```text
+src/projects/<id>/
+  manifest.json   Title, type, tags, order, and discovery metadata
+  index.ts        Website mount entrypoint
+  data.ts         Content, levels, recipes, or presets
+  engine.ts       Pure rules or algorithms, where appropriate
+  style.css       Project-scoped visual design
+  README.md       Local extension guide
+```
+
+There is no central switch statement or manual project registration.
+`src/catalog.ts` discovers the manifests, and `scripts/project-pages.ts`
+generates the standalone entrypoints. Adding a complete project folder
+adds its website and library entry. Invalid IDs, categories, duplicate
+orders, or missing entrypoints fail explicitly.
+
+See [the project authoring guide](src/projects/README.md) for the manifest
+schema and a minimal entrypoint.
+
+`ProjectInstance` requires only `destroy`; playback and reset are optional.
+Reading websites do not inherit irrelevant animation controls. Shared
+helpers cover lifecycle cleanup, accessible notifications, downloads,
+safe markup, clipboard access, local data, animation loops, and compatible
+audio automation. The original ten renderers remain in `src/experiments/`
+behind the same per-folder manifest interface.
+
+## Browsing and accessibility
+
+- Discovery interleaves project types rather than presenting an entire row
+  of near-identical effects. Categories, search, and layout preferences
+  survive navigation between independent websites.
+- Press **/** to focus library search or **Ctrl/Command + K** to find a
+  project from anywhere. Dialogs support Tab, Enter, and Escape.
+- The library starts with project content, not a heavyweight 3D hero.
+  Its first load does not request Three.js.
+- Controls, labels, and body copy use readable sizes. Sites are designed
+  for narrow screens and provide keyboard or touch alternatives.
+- Motion respects the system preference where appropriate. The original
+  art studies retain explicit Play/Pause controls; project-specific keys
+  take precedence over collection shortcuts.
+- Sound always requires explicit opt-in. Audio graphs, rendering loops,
+  observers, and listeners are released when leaving a project.
+- Fictional archives, newspapers, forecasts, and radio stations are
+  identified as fiction. Scientific comparisons distinguish approximate
+  illustrations from measured reference data.
 
 ## GitHub Pages
 
-The repository includes `.github/workflows/deploy.yml`. It builds, runs the browser suite, and deploys `dist/` whenever `main` is updated. It can also be run manually.
+The existing workflow, `.github/workflows/deploy.yml`, builds all project
+websites, runs the browser suite, and deploys the artifact on pushes to
+`main`. The repository uses **Settings > Pages > GitHub Actions**.
 
-1. Push this project to a GitHub repository with a `main` branch.
-2. In **Settings > Pages > Build and deployment**, select **GitHub Actions**.
-3. Push a change to `main`, or run **Deploy to GitHub Pages** in the Actions tab.
+Relative assets and per-page base markers support repository Pages
+(`https://<owner>.github.io/<repository>/`) without broken nested paths.
+All public assets are local; there are no CDN font or runtime library
+dependencies. If deploying under a different brand/domain, also update
+the canonical social URLs in `index.html` and `scripts/project-pages.ts`.
 
-The default build uses relative asset URLs. Both repository Pages (`https://<owner>.github.io/<repository>/`) and root/custom-domain Pages work without changing source code.
-
-Experiment links use hash routing, for example:
-
-```text
-https://<owner>.github.io/<repository>/#/experiment/orbital
-https://<owner>.github.io/<repository>/#/experiment/type
-```
-
-These URLs can be opened directly and refreshed without a server-side route fallback or a custom `404.html`. When hosting beneath a fixed path elsewhere, an explicit base can be supplied with `VITE_BASE_PATH=/your-path/ npm run build`.
-
-## Interaction and accessibility
-
-- The index has working category filters, grid/list layouts, and project search. Filter and layout choices survive a trip into an experiment.
-- Open search with **Ctrl/Command + K**. Enter opens the first result; Tab moves through results; Escape closes a dialog.
-- Every experiment has a **Play/Pause** control. Space toggles playback outside form controls and links; an experiment's own keyboard interaction takes precedence when its canvas is focused.
-- The operating system's **reduced-motion** preference starts each artwork paused. Direct input and controls still work.
-- Sound in Echo is **off by default** and starts only after an explicit click. No microphone access is requested.
-- Touch dragging, narrow screens, high-density displays, keyboard controls, and visible focus states are supported.
-- Rendering is paused while the browser tab is hidden. The homepage sculpture also rests when it leaves the viewport.
-- The five WebGL experiments need hardware acceleration. A visible error with an alternative Canvas experiment is shown when WebGL is unavailable; the gallery retains an illustrated hero.
-- Exports stay local. Afterimage's **Keep a print** button downloads an actual PNG, without uploading it.
-
-## Project structure
-
-```text
-src/
-  main.ts                 Gallery, hash router, search, dialogs, experiment shell
-  catalog.ts              The collection manifest and lazy imports
-  style.css               Editorial gallery design and responsive layouts
-  core/
-    types.ts              Shared experiment contract
-    canvas.ts             Responsive, DPR-aware canvas and sizing utilities
-    controls.ts           Labeled range, select, toggle, and button controls
-    loop.ts               Pausable, visibility-aware animation lifecycle
-    math.ts               Small deterministic math helpers
-  gallery/hero.ts         Interactive homepage sculpture
-  experiments/            Ten independent creative-coding projects
-  styles/experiments.css  Shared experiment shell and toolbar styles
-public/
-  previews/               Real captures of each experiment, served locally
-  cover.jpg               Actual homepage capture for social sharing
-  favicon.svg
-tests/                    Browser behavior and preview-generation scripts
-.github/workflows/       Static GitHub Pages deployment
-```
-
-### Adding an experiment
-
-Create a module that exports `mount(context: ExperimentContext): ExperimentInstance`, then add its metadata and dynamic import to `src/catalog.ts`.
-
-The stage and toolbar are provided by the shell. An instance must implement `setPaused` and `destroy`, and may implement `reset`. Use `context.signal` for listeners, the shared loop for motion, and `context.report` for useful accessible feedback. Release renderers, geometries, materials, audio, observers, and animation frames on teardown.
-
-Keep the default artwork composed and interesting before the first interaction. Every visible control must actually change the work. Prefer a specific visual idea over generic gradients, glass panels, decorative dashboards, or unnecessary UI.
-
-### Browser suite and artwork captures
+## Browser coverage and real previews
 
 ```sh
 npx playwright install chromium
 npm test
 ```
 
-The suite covers all ten routes, real controls, pause behavior, navigation cleanup, search, filters, narrow viewports, reduced motion, and PNG downloads. Chromium's software WebGL backend allows the 3D projects to run in headless environments.
-
-Canvas2D artwork is compared at the source-bitmap level so compositor color dithering cannot masquerade as motion. Audio coverage confirms that no sound starts before opt-in and that audio contexts close on navigation.
-
-Point the same browser suite at a deployed site with `SITE_URL=https://<owner>.github.io/<repository>/ npm test`. All navigation is relative to that base, including direct experiment links.
-
-Gallery images are real renders, not stock artwork or unrelated mockups. Regenerate them after changing an experiment:
+The suite covers the content-first library, manifests, standalone entry
+documents, direct refreshes, original art controls, reduced motion, audio
+consent and cleanup, editable typography, and the new sites' own rules and
+interactions. New `page` projects automatically enter the shared
+standalone/mobile coverage.
 
 ```sh
 npm run test:update-previews
 ```
 
-Commit the updated `public/previews/*.jpg` files together with the source. Preview generation is opt-in and is skipped during ordinary test runs.
+This opt-in command captures the actual registered websites into
+`public/previews/`. It does not replace custom non-JPEG preview assets.
+Commit changed previews with the corresponding site code.
+
+Use `SITE_URL=https://hspk.github.io/collections/ npm test` to point the
+browser suite at the published collection. Canvas2D motion comparisons use
+source bitmaps to avoid compositor dithering; the test browser allows
+software WebGL without forcing ordinary website rendering through it.

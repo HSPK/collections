@@ -1,0 +1,221 @@
+.project-palette {
+  --pk-paper: #f4eee3;
+  --pk-ink: #302b27;
+  --pk-red: #a53928;
+  --pk-rule: #c8beae;
+  color: var(--pk-ink);
+  background: var(--pk-paper);
+  background-image: repeating-linear-gradient(0deg, transparent, transparent 31px, #302b2705 31px, #302b2705 32px);
+  font: 16px/1.55 "Segoe UI", Arial, sans-serif;
+  padding: 16px clamp(18px, 4vw, 64px) 28px;
+  isolation: isolate;
+}
+.project-palette *, .project-palette *::before, .project-palette *::after { box-sizing: border-box; }
+.project-palette [hidden] { display: none !important; }
+.project-palette .pk-wrap { max-width: 1320px; margin: 0 auto; }
+.project-palette :is(h1, h2, h3, p) { margin: 0; }
+.project-palette :is(button, input, select, textarea) { font: inherit; }
+.project-palette :is(button, a, input, select, textarea, summary):focus-visible { outline: 3px solid #245c99; outline-offset: 4px; }
+.project-palette button { color: var(--pk-ink); border: 1px solid var(--pk-ink); background: transparent; border-radius: 3px; min-height: 44px; padding: 9px 15px; cursor: pointer; font-size: 14px; font-weight: 600; }
+.project-palette button:hover { background: #302b270b; }
+.project-palette button:disabled { cursor: default; opacity: .5; }
+.project-palette .pk-solid-button { background: var(--pk-ink); color: var(--pk-paper); }
+.project-palette .pk-solid-button:hover { background: #514539; }
+.project-palette a { color: inherit; text-underline-offset: 5px; }
+.project-palette input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--pk-red); margin: 0; flex: 0 0 auto; }
+.project-palette :is(input[type="text"], select, textarea) { min-width: 0; border: 1px solid #948879; border-radius: 3px; padding: 10px 12px; color: var(--pk-ink); background: #fffaf1; min-height: 44px; width: 100%; }
+.project-palette label { font-size: 14px; font-weight: 600; }
+.project-palette label > span:not(.pk-chip-label) { font-size: 12px; font-weight: 400; }
+.project-palette .pk-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; border-bottom: 1px solid var(--pk-ink); gap: 16px; }
+.project-palette .pk-wordmark { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; font: 12px/1.4 "Courier New", monospace; text-transform: uppercase; letter-spacing: .8px; }
+.project-palette .pk-wordmark svg { width: 44px; height: 44px; color: var(--pk-red); flex-shrink: 0; }
+.project-palette .pk-header nav { display: flex; flex-wrap: wrap; gap: 14px; }
+.project-palette .pk-header nav a { min-height: 44px; min-width: 44px; display: flex; justify-content: center; align-items: center; padding: 6px 8px; font-size: 14px; font-weight: 600; }
+.project-palette .pk-hero { padding: 14px 0 18px; display: flex; justify-content: space-between; align-items: center; gap: 24px; }
+.project-palette .pk-small-label { font: 12px/1.45 "Courier New", monospace; letter-spacing: .6px; }
+.project-palette h1 { font: 400 clamp(42px, 4.2vw, 64px)/1.05 Georgia, "Times New Roman", serif; letter-spacing: -.065em; }
+.project-palette h1 em { color: var(--pk-red); font-weight: 400; }
+.project-palette .pk-period { color: var(--pk-red); }
+.project-palette .pk-intro { max-width: 330px; font-size: 16px; line-height: 1.5; }
+.project-palette :is(.pk-counter, .pk-tasting, .pk-keeping) { scroll-margin-top: 24px; }
+.project-palette .pk-section-heading { border-top: 1px solid var(--pk-ink); padding-top: 8px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; }
+.project-palette h2 { font: 400 25px/1.2 Georgia, serif; display: flex; align-items: center; gap: 12px; }
+.project-palette h2 > span { font: 12px/1 "Courier New", monospace; border: 1px solid var(--pk-ink); border-radius: 50%; width: 28px; height: 28px; display: inline-grid; place-items: center; }
+.project-palette .pk-proof-toggle { display: inline-flex; gap: 8px; align-items: center; min-height: 44px; font-size: 12px; cursor: pointer; }
+.project-palette .pk-spectrum { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); box-shadow: 0 8px 0 -3px #cfc5b3; border: 1px solid var(--pk-ink); }
+.project-palette .pk-chip { min-width: 0; border: 0; border-radius: 0; height: clamp(215px, 24vw, 324px); display: flex; flex-direction: column; text-align: left; justify-content: space-between; padding: 20px; position: relative; }
+.project-palette .pk-chip + .pk-chip { border-left: 1px solid #302b2729; }
+.project-palette .pk-chip[aria-pressed="true"] { box-shadow: inset 0 -7px currentColor; }
+.project-palette .pk-chip[aria-pressed="true"]::after { content: ""; width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 7px solid currentColor; position: absolute; bottom: 7px; left: calc(50% - 6px); }
+.project-palette .pk-chip:focus-visible { z-index: 1; outline-offset: -5px; }
+.project-palette .pk-chip-label { display: flex; gap: 8px; font: 13px/1.4 "Courier New", monospace; }
+.project-palette .pk-chip-type { font: 400 clamp(56px, 7vw, 94px)/1 Georgia, serif; letter-spacing: -.07em; padding-right: 8px; }
+.project-palette .pk-chip-hex { font: 15px/1.5 "Courier New", monospace; letter-spacing: .3px; padding-bottom: 6px; }
+.project-palette .pk-pin-mark { margin-left: auto; font-size: 18px; }
+.project-palette .pk-caption { font-size: 13px; color: #625648; margin: 20px 0 24px; max-width: 920px; }
+.project-palette .pk-caption span { display: block; margin-top: 4px; }
+.project-palette .pk-workbench { display: grid; grid-template-columns: 1.2fr 1fr; border: 1px solid var(--pk-rule); background: #fbf6eb; }
+.project-palette :is(.pk-recipe-controls, .pk-pigment-editor) { padding: 26px; min-width: 0; }
+.project-palette .pk-pigment-editor { background: #eee5d6; border-left: 1px solid var(--pk-rule); }
+.project-palette .pk-card-heading { display: flex; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.project-palette h3 { font: 400 27px/1.25 Georgia, serif; letter-spacing: -.025em; }
+.project-palette .pk-input-row { display: grid; grid-template-columns: 48px minmax(80px, 1fr) auto; align-items: center; gap: 9px; margin-top: 8px; }
+.project-palette .pk-color-input { display: block; width: 48px; height: 46px; padding: 3px; border: 1px solid #948879; border-radius: 3px; background: transparent; cursor: pointer; }
+.project-palette .pk-hex-input { font-family: "Courier New", monospace; text-transform: uppercase; }
+.project-palette .pk-base-form label { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.project-palette .pk-error { color: #982d1e; font-size: 13px; margin-top: 6px; }
+.project-palette .pk-error:empty { margin: 0; }
+.project-palette input[aria-invalid="true"] { border: 2px solid #982d1e; }
+.project-palette .pk-field { display: block; margin-top: 18px; }
+.project-palette .pk-field select { margin-top: 6px; }
+.project-palette .pk-field-note { font-size: 14px; line-height: 1.6; color: #625648; margin: 10px 0 18px; }
+.project-palette .pk-sliders { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; margin-top: 24px; }
+.project-palette .pk-sliders label { display: block; }
+.project-palette .pk-sliders output { float: right; font: 14px/1.6 "Courier New", monospace; color: var(--pk-red); }
+.project-palette .pk-sliders input { width: 100%; margin: 5px 0; height: 44px; display: block; accent-color: var(--pk-red); cursor: pointer; }
+.project-palette .pk-sliders label > span { display: block; color: #625648; }
+.project-palette .pk-selected-dot { width: 34px; height: 34px; flex: 0 0 auto; border-radius: 48% 52% 46% 54%; transform: rotate(-12deg); border: 1px solid #302b274d; }
+.project-palette .pk-pin-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+.project-palette .pk-pin-note { font-size: 13px; margin: 10px 0 20px; color: #625648; }
+.project-palette .pk-ink-comparisons { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.project-palette .pk-ink-sample { padding: 16px 12px; border: 1px solid #302b2720; font-weight: 600; }
+.project-palette .pk-ink-comparisons strong { display: block; font: 21px/1.5 "Courier New", monospace; margin-top: 6px; }
+.project-palette .pk-ink-comparisons span { display: block; font-size: 12px; }
+.project-palette .pk-presets-heading { display: flex; gap: 18px; align-items: center; justify-content: space-between; margin: 30px 0 0; flex-wrap: wrap; }
+.project-palette .pk-presets-heading h3 { font-size: 24px; }
+.project-palette .pk-presets-heading button { font-size: 12px; border-color: var(--pk-rule); }
+.project-palette .pk-recipes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.project-palette .pk-recipe { text-align: left; min-width: 0; background: #fbf6eb; border: 1px solid var(--pk-rule); padding: 16px 16px 0; overflow: hidden; display: flex; flex-direction: column; align-items: stretch; }
+.project-palette .pk-recipe:hover { background: #fffaf1; }
+.project-palette .pk-recipe[aria-pressed="true"] { border-color: var(--pk-red); outline: 1px solid var(--pk-red); }
+.project-palette .pk-recipe-number { font: 12px/1.4 "Courier New", monospace; text-transform: uppercase; letter-spacing: .5px; color: #625648; margin-bottom: 8px; }
+.project-palette .pk-recipe strong { font: 400 23px/1.15 Georgia, serif; margin-bottom: 6px; }
+.project-palette .pk-recipe-note { font-size: 13px; font-weight: 400; flex: 1; }
+.project-palette .pk-recipe-colors { display: flex; height: 30px; margin: 18px -16px 0; }
+.project-palette .pk-recipe-colors i { flex: 1; }
+.project-palette .pk-tasting, .project-palette .pk-keeping { margin-top: 56px; }
+.project-palette .pk-taste-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 40px; }
+.project-palette .pk-pairing { min-width: 0; }
+.project-palette .pk-pair-selectors { display: grid; grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1fr); gap: 12px; margin-bottom: 16px; align-items: end; }
+.project-palette .pk-pair-selectors label { min-width: 0; }
+.project-palette .pk-pair-selectors select { margin-top: 5px; font-size: 14px; padding-left: 8px; }
+.project-palette .pk-swap { padding: 8px 0; font-size: 24px; height: 44px; }
+.project-palette .pk-specimen { border: 1px solid #302b2740; padding: clamp(24px, 3vw, 40px); }
+.project-palette .pk-specimen-kicker { font: 13px/1.4 "Courier New", monospace; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+.project-palette .pk-specimen h3 { font-size: 37px; line-height: 1.06; margin-bottom: 20px; max-width: 400px; }
+.project-palette .pk-specimen-body { font-size: 17px; line-height: 1.65; }
+.project-palette .pk-specimen.pk-large-type .pk-specimen-body { font-size: 24px; line-height: 1.45; }
+.project-palette .pk-specimen.pk-large-type .pk-specimen-kicker { font-size: 24px; text-transform: none; letter-spacing: 0; }
+.project-palette .pk-verdict { border: 1px solid var(--pk-rule); border-top: 0; display: flex; align-items: center; gap: 16px; padding: 14px 16px; background: #fbf6eb; }
+.project-palette .pk-verdict strong { font: 24px/1 "Courier New", monospace; white-space: nowrap; }
+.project-palette .pk-verdict span { font-size: 13px; }
+.project-palette .pk-verdict [data-passes="false"] { color: #982d1e; }
+.project-palette .pk-specimen-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.project-palette .pk-specimen-actions label { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-size: 13px; }
+.project-palette .pk-contrast-guide { padding: 24px 0 0 20px; border-left: 1px solid var(--pk-rule); }
+.project-palette .pk-contrast-guide h3 { font-size: 32px; max-width: 290px; margin-bottom: 18px; }
+.project-palette .pk-contrast-guide dl { margin: 24px 0; padding: 0; }
+.project-palette .pk-contrast-guide dl > div { display: flex; align-items: baseline; gap: 18px; border-top: 1px solid var(--pk-rule); padding: 9px 0; }
+.project-palette .pk-contrast-guide dt { font: 27px/1.2 "Courier New", monospace; width: 99px; }
+.project-palette .pk-contrast-guide dd { margin: 0; font-size: 14px; }
+.project-palette .pk-matrix-details { margin-top: 28px; border: 1px solid var(--pk-rule); padding: 4px 20px; }
+.project-palette .pk-matrix-details summary { padding: 14px 0; cursor: pointer; font-size: 16px; }
+.project-palette .pk-matrix-details summary span { font-size: 12px; margin-left: 12px; color: #625648; }
+.project-palette .pk-matrix-details > p { font-size: 14px; margin: 8px 0 14px; }
+.project-palette .pk-table-scroll { max-width: 100%; overflow-x: auto; margin-bottom: 18px; padding: 4px; }
+.project-palette table { border-collapse: collapse; width: 100%; min-width: 510px; text-align: center; table-layout: fixed; }
+.project-palette table caption { text-align: left; font-size: 12px; padding: 8px 0 14px; }
+.project-palette table th { font: 12px/1.4 "Courier New", monospace; padding: 10px 3px; }
+.project-palette table td { padding: 4px; }
+.project-palette table td button { width: 100%; min-height: 62px; padding: 8px 3px; border-color: var(--pk-rule); border-radius: 0; }
+.project-palette table td button strong { display: block; font: 18px/1.4 "Courier New", monospace; }
+.project-palette table td button span { display: block; font-size: 12px; font-weight: 400; }
+.project-palette table [data-grade="pass"] { background: #dce3cd; }
+.project-palette table [data-grade="large"] { background: #eedbb4; }
+.project-palette table [data-grade="fail"] { background: #eee6db; }
+.project-palette .pk-keep-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; }
+.project-palette .pk-export > p, .project-palette .pk-pantry > p { margin: 16px 0 22px; }
+.project-palette .pk-export { min-width: 0; }
+.project-palette .pk-code-label { display: block; margin-bottom: 8px; }
+.project-palette textarea[data-css] { font: 13px/1.65 "Courier New", monospace; background: #e9e0d2; resize: vertical; white-space: pre; min-height: 280px; }
+.project-palette .pk-export-buttons { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+.project-palette .pk-pantry { padding: 24px; background: #e9e0d2; border: 1px solid #d4c8b5; min-width: 0; }
+.project-palette .pk-pantry form label { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.project-palette .pk-pantry form input { margin-top: 7px; }
+.project-palette .pk-pantry form button { margin-top: 12px; }
+.project-palette .pk-shelf { margin-top: 24px; border-top: 1px solid #b8aa96; }
+.project-palette .pk-empty-shelf { font: italic 21px/1.5 Georgia, serif; color: #665545; padding: 30px 0 10px; }
+.project-palette .pk-saved-recipe { display: flex; gap: 12px; align-items: center; border-bottom: 1px solid #b8aa96; padding: 14px 0; min-width: 0; }
+.project-palette .pk-saved-recipe > button:first-child { border: 0; padding: 0; text-align: left; flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.project-palette .pk-saved-recipe strong { font-size: 16px; overflow-wrap: anywhere; }
+.project-palette .pk-saved-recipe > button:first-child > span:last-child { font-size: 12px; font-weight: 400; }
+.project-palette .pk-saved-colors { display: flex; width: min(100%, 140px); height: 18px; }
+.project-palette .pk-saved-colors i { flex: 1; }
+.project-palette .pk-remove-recipe { font-size: 12px; padding: 8px; border-color: #948879; }
+.project-palette .pk-status { border: 1px dashed #948879; margin: 36px 0 28px; padding: 14px 18px; font-size: 14px; min-height: 53px; background: #fbf6eb; }
+.project-palette .pk-footer { border-top: 1px solid var(--pk-ink); padding-top: 18px; display: flex; justify-content: space-between; gap: 14px; font: 12px/1.6 "Courier New", monospace; flex-wrap: wrap; }
+.project-palette.pk-grayscale :is(.pk-spectrum, .pk-specimen) { filter: grayscale(1); }
+@media (max-width: 1100px) {
+  .project-palette .pk-chip { padding: 16px; }
+  .project-palette .pk-workbench { grid-template-columns: 1.1fr 1fr; }
+  .project-palette .pk-recipe-controls, .project-palette .pk-pigment-editor { padding: 22px; }
+  .project-palette .pk-card-heading { flex-wrap: wrap; }
+  .project-palette .pk-taste-grid, .project-palette .pk-keep-grid { gap: 26px; }
+}
+@media (max-width: 780px) {
+  .project-palette .pk-hero { display: block; }
+  .project-palette .pk-intro { max-width: none; margin-top: 8px; }
+  .project-palette .pk-workbench, .project-palette .pk-taste-grid, .project-palette .pk-keep-grid { grid-template-columns: 1fr; }
+  .project-palette .pk-pigment-editor { border-left: 0; border-top: 1px solid var(--pk-rule); }
+  .project-palette .pk-contrast-guide { border-left: 0; border-top: 1px solid var(--pk-rule); padding: 26px 0 0; }
+  .project-palette .pk-contrast-guide h3 { max-width: 100%; }
+  .project-palette .pk-recipes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .project-palette .pk-chip-label > span:first-child { display: none; }
+  .project-palette .pk-chip { padding: 14px 10px; }
+  .project-palette .pk-chip-hex { font-size: 13px; letter-spacing: 0; }
+  .project-palette .pk-tasting, .project-palette .pk-keeping { margin-top: 40px; }
+}
+@media (max-width: 450px) {
+  .project-palette { padding: 12px 18px 24px; }
+  .project-palette .pk-header { gap: 8px; padding-bottom: 6px; }
+  .project-palette .pk-wordmark { font-size: 12px; letter-spacing: 0; gap: 6px; }
+  .project-palette .pk-wordmark svg { width: 32px; height: 38px; }
+  .project-palette .pk-header nav { gap: 0; flex-wrap: nowrap; }
+  .project-palette .pk-header nav a { font-size: 12px; padding-inline: 7px; }
+  .project-palette .pk-hero { padding: 12px 0; }
+  .project-palette h1 { font-size: clamp(36px, 10.7vw, 46px); line-height: 1; }
+  .project-palette h1 em { display: inline; }
+  .project-palette .pk-intro { margin-top: 6px; font-size: 15px; }
+  .project-palette .pk-section-heading { gap: 8px; margin-bottom: 8px; }
+  .project-palette h2 { font-size: 23px; gap: 8px; }
+  .project-palette .pk-proof-toggle { min-height: 44px; }
+  .project-palette .pk-chip { height: 184px; padding: 12px 5px; }
+  .project-palette .pk-chip-type { font-size: 39px; padding-right: 0; }
+  .project-palette .pk-chip-label { font-size: 12px; gap: 0; }
+  .project-palette .pk-chip-hex { font-size: 12px; letter-spacing: -.5px; }
+  .project-palette .pk-pin-mark { position: absolute; top: 34px; right: 10px; }
+  .project-palette .pk-caption { font-size: 12px; }
+  .project-palette .pk-recipe-controls, .project-palette .pk-pigment-editor { padding: 18px; }
+  .project-palette .pk-card-heading h3 { font-size: 25px; }
+  .project-palette .pk-input-row { grid-template-columns: 44px minmax(0, 1fr) auto; gap: 7px; }
+  .project-palette .pk-color-input { width: 44px; }
+  .project-palette .pk-input-row button { padding-inline: 10px; }
+  .project-palette .pk-sliders { grid-template-columns: 1fr; gap: 22px; }
+  .project-palette .pk-presets-heading h3 { font-size: 23px; }
+  .project-palette .pk-recipe { padding: 14px 12px 0; }
+  .project-palette .pk-recipe strong { font-size: 21px; }
+  .project-palette .pk-recipe-colors { margin-inline: -12px; }
+  .project-palette .pk-pair-selectors { grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1fr); gap: 8px; }
+  .project-palette .pk-pair-selectors select { font-size: 12px; padding-inline: 6px; }
+  .project-palette .pk-specimen { padding: 26px 22px; }
+  .project-palette .pk-specimen h3 { font-size: 35px; }
+  .project-palette .pk-verdict { align-items: start; }
+  .project-palette .pk-matrix-details { padding-inline: 12px; }
+  .project-palette .pk-matrix-details summary span { display: block; margin: 7px 0 0; }
+  .project-palette .pk-pantry { padding: 20px; }
+  .project-palette .pk-export-buttons button { flex: 1 1 auto; }
+  .project-palette .pk-specimen-actions { align-items: stretch; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .project-palette *, .project-palette *::before, .project-palette *::after { scroll-behavior: auto; animation: none; transition: none; }
+}

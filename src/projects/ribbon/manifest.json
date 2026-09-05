@@ -1,0 +1,8 @@
+{
+  "id": "ribbon", "order": 10, "title": "Afterimage",
+  "subtitle": "Make a mark worth keeping.",
+  "description": "Draw with ribbons of light, change your ink, and keep a local PNG print of your composition. A canvas for an unrepeatable gesture.",
+  "category": "art", "format": "immersive", "medium": "Ribbon drawing",
+  "tags": ["Drawing", "Generative", "Export"], "color": "#202027", "ink": "#eabdb4",
+  "instruction": "Drag to draw. Change your ink, clear the canvas, or keep a print."
+}

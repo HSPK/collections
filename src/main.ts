@@ -1,345 +1,388 @@
 import './style.css';
-import { categoryNames, projects } from './catalog';
-import type { Category, ExperimentInstance, Project } from './core/types';
+import { categories, categoryNames, isCategory, projects } from './catalog';
+import { escapeMarkup } from './core/markup';
+import { projectUrl, siteBase, siteUrl } from './core/urls';
+import type { Category, Project, ProjectInstance } from './core/types';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
 const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
-const arrow = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="1.5"/></svg>';
-const diagonalArrow = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12" stroke="currentColor" stroke-width="1.5"/></svg>';
+const arrow = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="1.7"/></svg>';
+const diagonal = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 18 18 6M6 6h12v12" stroke="currentColor" stroke-width="1.7"/></svg>';
+const searchIcon = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.7"/></svg>';
+const codeIcon = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m8 7-5 5 5 5m8-10 5 5-5 5m-3-13-2 16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const mark = '<svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true"><ellipse cx="20" cy="20" rx="17" ry="10" transform="rotate(-40 20 20)" stroke="currentColor" stroke-width="2.8"/><circle cx="31" cy="11" r="4.5" fill="currentColor"/></svg>';
-const categoryCounts: Record<Category, number> = { space: 0, motion: 0, play: 0 };
-for (const project of projects) categoryCounts[project.category]++;
-let routeController = new AbortController();
-let disposeRoute: (() => void) | undefined;
-let currentProject: Project | undefined;
-let category: Category | 'all' = 'all';
-let layout: 'grid' | 'list' = 'grid';
-let galleryScroll = 0;
-let routeGeneration = 0;
-let playbackButton: HTMLButtonElement | undefined;
-let instance: ExperimentInstance | undefined;
-let paused = motionPreference.matches;
+const storageKey = 'odd-index:library:v2';
+let storageWarning = '';
 
-if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-
-function header(inExperiment = false) {
-  return `
-    <header class="site-header">
-      <a class="brand" href="#/" aria-label="Odd Index home">${mark}<span>odd<span class="brand-slash">/</span>index</span></a>
-      <span class="header-note"><span class="status-dot"></span> AN EXERCISE IN CURIOSITY</span>
-      <nav class="main-nav" aria-label="Main navigation">
-        <a class="nav-index ${inExperiment ? '' : 'is-active'}" href="#/" data-index-link>Index <span class="nav-count">${projects.length}</span></a>
-        <button class="nav-about" type="button" data-about>About</button>
-        <button class="search-trigger" type="button" aria-label="Search experiments" title="Search experiments (Ctrl or Command K)" data-search>
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.5"/></svg><kbd>K</kbd>
-        </button>
-      </nav>
-    </header>`;
+interface LibraryState {
+  category: Category | 'all';
+  query: string;
+  layout: 'grid' | 'list';
+  sort: 'discover' | 'newest' | 'az';
+  scroll: number;
 }
 
-function bindHeader(signal: AbortSignal) {
-  app.querySelector('[data-about]')?.addEventListener('click', () => aboutDialog.showModal(), { signal });
-  app.querySelector('[data-search]')?.addEventListener('click', openSearch, { signal });
-  app.querySelector('[data-index-link]')?.addEventListener('click', (event) => {
-    if (!currentProject && document.querySelector('#index')) {
-      event.preventDefault();
-      document.querySelector('#index')?.scrollIntoView({ behavior: motionPreference.matches ? 'instant' : 'smooth' });
+function validLibraryState(value: unknown): value is LibraryState {
+  return typeof value === 'object' && value !== null &&
+    'category' in value && (value.category === 'all' || isCategory(value.category)) &&
+    'query' in value && typeof value.query === 'string' && value.query.length <= 200 &&
+    'layout' in value && (value.layout === 'grid' || value.layout === 'list') &&
+    'sort' in value && ['discover', 'newest', 'az'].some((sort) => sort === value.sort) &&
+    'scroll' in value && typeof value.scroll === 'number' && Number.isFinite(value.scroll) && value.scroll >= 0;
+}
+
+function readLibraryState(): LibraryState {
+  try {
+    const saved = sessionStorage.getItem(storageKey);
+    if (saved) {
+      const parsed: unknown = JSON.parse(saved);
+      if (validLibraryState(parsed)) return parsed;
+      storageWarning = 'Your previous browse settings could not be restored.';
     }
-  }, { signal });
+  } catch (error) {
+    if (!(error instanceof DOMException) && !(error instanceof SyntaxError)) throw error;
+    storageWarning = 'Browse settings cannot be saved in this browser session.';
+    console.warn(storageWarning, error);
+  }
+  return { category: 'all', query: '', layout: 'grid', sort: 'discover', scroll: 0 };
 }
 
-function projectCard(project: Project) {
-  return `
-    <a class="project-card" href="#/experiment/${project.id}" data-project="${project.id}" aria-label="${project.title}: ${project.subtitle}">
+let library = readLibraryState();
+let routeController = new AbortController();
+let instance: ProjectInstance | undefined;
+let activeProject: Project | undefined;
+let playbackButton: HTMLButtonElement | undefined;
+let paused = motionPreference.matches;
+let reportTimer = 0;
+let mountGeneration = 0;
+
+function saveLibrary() {
+  try {
+    sessionStorage.setItem(storageKey, JSON.stringify(library));
+  } catch (error) {
+    if (!(error instanceof DOMException)) throw error;
+    storageWarning = 'Browse settings cannot be saved in this browser session.';
+    console.warn(storageWarning, error);
+    const note = app.querySelector<HTMLElement>('[data-storage-note]');
+    if (note) { note.textContent = storageWarning; note.hidden = false; }
+  }
+}
+
+function sourceUrl(project: Project): string {
+  return `https://github.com/HSPK/collections/tree/main/${project.sourcePath}`;
+}
+
+function categoryIcon(category: Category): string {
+  const paths: Record<Category, string> = {
+    create: '<path d="m5 16-1 4 4-1L20 7l-3-3L5 16Zm9-9 3 3"/>',
+    play: '<path d="M7 7h10l4 10-3 2-4-4h-4l-4 4-3-2L7 7Z"/><path d="M7 10v4m-2-2h4m7-1h.01m2 2h.01"/>',
+    read: '<path d="M12 6c-3-3-7-2-9-1v14c3-2 6-2 9 0 3-2 6-2 9 0V5c-2-1-6-2-9 1Zm0 0v13"/>',
+    learn: '<path d="M8 3h8M10 3v6l-6 9a2 2 0 0 0 2 3h12a2 2 0 0 0 2-3l-6-9V3M7 15h10"/>',
+    explore: '<circle cx="12" cy="12" r="9"/><path d="m16 8-3 5-5 3 3-5 5-3Z"/>',
+    art: '<circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9" transform="rotate(40 12 12)"/>',
+  };
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[category]}</svg>`;
+}
+
+function header() {
+  return `<header class="site-header">
+    <a class="brand" href="${siteUrl()}" aria-label="Odd Index home">${mark}<span>odd/index</span></a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a class="nav-current" href="${siteUrl()}">Projects <span>${projects.length}</span></a>
+      <button type="button" data-about>About</button>
+      <a class="header-code" href="https://github.com/HSPK/collections" target="_blank" rel="noopener noreferrer" aria-label="Collection source code">${codeIcon}<span>Source</span></a>
+    </nav>
+  </header>`;
+}
+
+function bindCommon(signal: AbortSignal) {
+  app.querySelectorAll('[data-about]').forEach((button) => button.addEventListener('click', () => aboutDialog.showModal(), { signal }));
+  app.querySelectorAll('[data-search]').forEach((button) => button.addEventListener('click', openSearch, { signal }));
+}
+
+function queryMatches(project: Project): boolean {
+  const words = library.query.toLowerCase().trim().split(/\s+/).filter(Boolean);
+  const haystack = `${project.title} ${project.subtitle} ${project.description} ${project.medium} ${project.tags.join(' ')} ${categoryNames[project.category]}`.toLowerCase();
+  return words.every((word) => haystack.includes(word));
+}
+
+function discoveryOrder(items: Project[]): Project[] {
+  const pools = categories.map((category) => items.filter((project) => project.category === category.id).sort((a, b) => b.order - a.order));
+  const result: Project[] = [];
+  while (pools.some((pool) => pool.length)) {
+    for (const pool of pools) {
+      const item = pool.shift();
+      if (item) result.push(item);
+    }
+  }
+  return result;
+}
+
+function card(project: Project) {
+  return `<article class="project-card" data-category="${project.category}">
+    <a class="project-open" data-project="${project.id}" href="${projectUrl(project.id)}" aria-label="${escapeMarkup(project.title)}: ${escapeMarkup(project.subtitle)}">
       <div class="card-art" style="--art-color:${project.color};--art-ink:${project.ink}">
-        <img src="${import.meta.env.BASE_URL}previews/${project.id}.jpg" alt="${project.title} interactive artwork" width="1200" height="800" loading="lazy" decoding="async" />
-        <span class="art-number">${project.number} /</span>
-        <span class="art-action">ENTER EXPERIMENT ${diagonalArrow}</span>
+        <div class="card-placeholder" aria-hidden="true"><span>${escapeMarkup(project.medium)}</span><strong>${escapeMarkup(project.title)}</strong></div>
+        <img src="${siteUrl(project.preview || `previews/${project.id}.jpg`)}" alt="${escapeMarkup(project.title)} website preview" loading="lazy" decoding="async" width="1200" height="800" />
+        <span class="card-open-indicator">${diagonal}</span>
       </div>
-      <div class="card-caption">
-        <div><span class="card-medium">${project.medium}</span><h3>${project.title}</h3><p>${project.subtitle}</p></div>
-        <span class="card-arrow">${diagonalArrow}</span>
-      </div>
-    </a>`;
+      <div class="card-copy"><h2>${escapeMarkup(project.title)}</h2><p>${escapeMarkup(project.description)}</p></div>
+    </a>
+    <div class="card-tags">${project.tags.slice(0, 3).map((tag) => `<span>${escapeMarkup(tag)}</span>`).join('')}</div>
+    <footer class="card-footer"><span>${categoryIcon(project.category)}${categoryNames[project.category]}</span><a href="${sourceUrl(project)}" target="_blank" rel="noopener noreferrer" aria-label="View source for ${escapeMarkup(project.title)}">${codeIcon}</a></footer>
+  </article>`;
 }
 
-function updateGrid() {
+function updateLibrary() {
   const grid = app.querySelector<HTMLElement>('[data-project-grid]');
   if (!grid) return;
-  const filtered = projects.filter((project) => category === 'all' || project.category === category);
-  grid.className = `project-grid ${layout === 'list' ? 'project-grid--list' : ''}`;
-  grid.innerHTML = filtered.map(projectCard).join('');
-  app.querySelectorAll<HTMLButtonElement>('[data-filter]').forEach((button) => {
-    button.setAttribute('aria-pressed', String(button.dataset.filter === category));
+  const matches = projects.filter(queryMatches);
+  let filtered = matches.filter((project) => library.category === 'all' || project.category === library.category);
+  if (library.sort === 'discover') filtered = discoveryOrder(filtered);
+  else if (library.sort === 'newest') filtered.sort((a, b) => b.order - a.order);
+  else filtered.sort((a, b) => a.title.localeCompare(b.title));
+  grid.className = `project-grid${library.layout === 'list' ? ' project-grid--list' : ''}`;
+  grid.innerHTML = filtered.length ? filtered.map(card).join('') : `<div class="empty-results"><h2>No projects found.</h2><p>Try another word or browse all project types.</p><button class="app-button" type="button" data-clear-filters>Clear filters</button></div>`;
+  grid.querySelectorAll<HTMLImageElement>('img').forEach((image) => {
+    image.addEventListener('error', () => { image.hidden = true; }, { once: true, signal: routeController.signal });
   });
-  const count = app.querySelector('[data-result-count]');
-  if (count) count.textContent = `${String(filtered.length).padStart(2, '0')} experiments`;
+  grid.querySelectorAll<HTMLAnchorElement>('.project-open').forEach((link) => {
+    link.addEventListener('click', () => { library.scroll = window.scrollY; saveLibrary(); }, { signal: routeController.signal });
+  });
+  grid.querySelector('[data-clear-filters]')?.addEventListener('click', resetFilters, { signal: routeController.signal });
+  app.querySelectorAll<HTMLElement>('[data-category-count]').forEach((label) => {
+    label.textContent = String(label.dataset.categoryCount === 'all' ? matches.length : matches.filter((project) => project.category === label.dataset.categoryCount).length);
+  });
+  app.querySelectorAll<HTMLButtonElement>('[data-filter]').forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.filter === library.category)));
+  app.querySelectorAll<HTMLButtonElement>('[data-layout]').forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.layout === library.layout)));
+  const select = app.querySelector<HTMLSelectElement>('[data-mobile-category]');
+  if (select) select.value = library.category;
+  const status = app.querySelector('[data-result-count]');
+  if (status) status.textContent = `${filtered.length} ${filtered.length === 1 ? 'project' : 'projects'}${library.category === 'all' ? '' : ` in ${categoryNames[library.category]}`}`;
+  const clear = app.querySelector<HTMLButtonElement>('[data-clear-search]');
+  if (clear) clear.hidden = !library.query;
 }
 
-async function renderGallery(signal: AbortSignal, restoreScroll: boolean) {
-  document.title = 'Odd Index - An exercise in curiosity';
-  app.className = 'gallery-root';
-  app.innerHTML = `
-    ${header()}
-    <main id="main-content" tabindex="-1">
-      <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-copy">
-          <div class="eyebrow"><span class="tiny-cross">+</span> A COLLECTION OF INTERACTIVE POSSIBILITIES</div>
-          <h1 id="hero-title">An exercise<br>in <em>curiosity.</em></h1>
-          <p class="hero-description">A little physics. A little code.<br>A healthy disregard for the ordinary.</p>
-          <a class="explore-link" href="#/index" data-explore>Find something to play with <span>${arrow}</span></a>
-          <div class="hero-edition"><span>INDEPENDENT EXPERIMENTS</span><span>VOL. 001 &nbsp;/&nbsp; 2026</span></div>
+function resetFilters() {
+  library.category = 'all';
+  library.query = '';
+  library.scroll = 0;
+  const input = app.querySelector<HTMLInputElement>('[data-library-search]');
+  if (input) input.value = '';
+  saveLibrary();
+  updateLibrary();
+}
+
+function renderLibrary() {
+  routeController.abort();
+  routeController = new AbortController();
+  const signal = routeController.signal;
+  document.title = 'Odd Index - Small websites. Wide possibilities.';
+  app.className = 'library-root';
+  app.innerHTML = `${header()}
+    <main id="main-content" class="library-shell" tabindex="-1">
+      <aside class="library-sidebar" aria-label="Project categories">
+        <h2>Explore projects</h2>
+        <nav class="category-nav" aria-label="Browse by type">
+          <button type="button" data-filter="all" aria-pressed="true"><span class="all-icon" aria-hidden="true">+</span><span>All projects</span><span data-category-count="all">${projects.length}</span></button>
+          ${categories.map((category) => `<button type="button" data-filter="${category.id}" aria-pressed="false">${categoryIcon(category.id)}<span>${category.label}</span><span data-category-count="${category.id}"></span></button>`).join('')}
+        </nav>
+        <div class="sidebar-note"><p>Independent websites.<br>Different ways to be curious.</p><a href="https://github.com/HSPK/collections/blob/main/src/projects/README.md" target="_blank" rel="noopener noreferrer">Build on a project ${diagonal}</a></div>
+      </aside>
+      <section class="library-content" id="index" aria-labelledby="library-title">
+        <div class="library-intro"><div><h1 id="library-title">Discover projects</h1><p>Tools, games, stories, and unexpected ideas.</p></div><span class="collection-count">${projects.length} projects</span></div>
+        <div class="library-tools">
+          <div class="library-search">${searchIcon}<label class="sr-only" for="library-search">Search projects</label><input id="library-search" data-library-search type="search" maxlength="200" placeholder="Search projects, ideas, or tags..." autocomplete="off" spellcheck="false" /><button type="button" data-clear-search aria-label="Clear search" hidden>&times;</button><kbd>/</kbd></div>
+          <label class="sort-label"><span class="sr-only">Sort projects</span><select aria-label="Sort projects" data-sort><option value="discover">Discover</option><option value="newest">Recently added</option><option value="az">A to Z</option></select></label>
+          <div class="layout-switch" role="group" aria-label="Collection layout"><button type="button" data-layout="grid" aria-label="Grid view" aria-pressed="true"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 2h6v6H2zm10 0h6v6h-6zM2 12h6v6H2zm10 0h6v6h-6z" fill="currentColor"/></svg></button><button type="button" data-layout="list" aria-label="List view" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 3h16v2H2zm0 6h16v2H2zm0 6h16v2H2z" fill="currentColor"/></svg></button></div>
         </div>
-        <div class="hero-art-wrap">
-          <div class="hero-art" data-hero aria-label="An interactive sculptural arrangement of rings">
-            <div class="hero-fallback" aria-hidden="true">
-              <svg viewBox="0 0 640 620"><g fill="none" stroke="#424a3c"><ellipse cx="320" cy="310" rx="222" ry="108" stroke-width="32" transform="rotate(-38 320 310)"/><ellipse cx="320" cy="310" rx="153" ry="102" stroke-width="24" transform="rotate(53 320 310)"/><ellipse cx="320" cy="310" rx="87" ry="48" stroke-width="19" transform="rotate(-18 320 310)"/></g><circle cx="457" cy="161" r="29" fill="#e65a36"/></svg>
-            </div>
-          </div>
-          <div class="hero-art-label"><span>FIG. 01 &nbsp; OBJECTS IN MOTION</span><span class="spin-label">GIVE IT A SPIN ${diagonalArrow}</span></div>
-          <span class="hero-coordinate" aria-hidden="true">POLISHED OBJECTS / UNPOLISHED IDEAS</span>
-        </div>
-      </section>
-      <div class="collection-note"><span>NOT EVERYTHING NEEDS TO BE USEFUL.</span><span>SOMETIMES, INTERESTING IS ENOUGH. <span class="note-star" aria-hidden="true">*</span></span></div>
-      <section class="index-section" id="index" aria-labelledby="index-title">
-        <div class="index-heading"><h2 id="index-title">The index<span>(${projects.length})</span></h2><p>Open one. Get a little lost.</p></div>
-        <div class="index-toolbar">
-          <div class="filters" role="group" aria-label="Filter experiments by category">
-            <button type="button" data-filter="all" aria-pressed="true">All work <sup>${projects.length}</sup></button>
-            <button type="button" data-filter="space" aria-pressed="false">Space <sup>${String(categoryCounts.space).padStart(2, '0')}</sup></button>
-            <button type="button" data-filter="motion" aria-pressed="false">Motion <sup>${String(categoryCounts.motion).padStart(2, '0')}</sup></button>
-            <button type="button" data-filter="play" aria-pressed="false">Play <sup>${String(categoryCounts.play).padStart(2, '0')}</sup></button>
-          </div>
-          <div class="layout-switch" role="group" aria-label="Collection layout">
-            <button type="button" data-layout="grid" aria-label="Grid view" aria-pressed="${layout === 'grid'}"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 2h6v6H2zm10 0h6v6h-6zM2 12h6v6H2zm10 0h6v6h-6z" fill="currentColor"/></svg></button>
-            <button type="button" data-layout="list" aria-label="List view" aria-pressed="${layout === 'list'}"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 3h16v2H2zm0 6h16v2H2zm0 6h16v2H2z" fill="currentColor"/></svg></button>
-          </div>
-        </div>
-        <span class="sr-only" aria-live="polite" data-result-count>${projects.length} experiments</span>
+        <div class="results-line"><p role="status" aria-live="polite" data-result-count></p><label class="mobile-category"><span class="sr-only">Project type</span><select aria-label="Project type" data-mobile-category><option value="all">All types</option>${categories.map((category) => `<option value="${category.id}">${category.label}</option>`).join('')}</select></label><span class="local-note"><span></span>Runs in your browser</span></div>
+        <p class="storage-note" data-storage-note ${storageWarning ? '' : 'hidden'}>${escapeMarkup(storageWarning)}</p>
         <div class="project-grid" data-project-grid></div>
       </section>
-      <section class="closing-note" aria-label="About the collection">
-        <span class="closing-asterisk" aria-hidden="true">*</span>
-        <p>The browser is a playground.<br>We intend to <em>keep it that way.</em></p>
-        <button type="button" data-footer-about>More about this little corner of the internet ${diagonalArrow}</button>
-      </section>
     </main>
-    <footer class="site-footer"><a class="footer-brand" href="#/">odd/index</a><span>AI-ASSISTED. CURIOSITY-LED. OPEN TO EVERYONE.</span><button type="button" data-top>BACK TO TOP ${arrow}</button></footer>`;
-
-  bindHeader(signal);
-  updateGrid();
-  app.querySelector('[data-explore]')?.addEventListener('click', (event) => {
-    event.preventDefault();
-    document.querySelector('#index')?.scrollIntoView({ behavior: motionPreference.matches ? 'instant' : 'smooth' });
+    <footer class="site-footer"><span>odd/index <span class="footer-divider">/</span> AI-made, curiosity-led.</span><div><button type="button" data-about>About this collection</button><a href="https://github.com/HSPK/collections" target="_blank" rel="noopener noreferrer">Source & documentation ${diagonal}</a></div></footer>`;
+  bindCommon(signal);
+  const input = app.querySelector<HTMLInputElement>('[data-library-search]')!;
+  input.value = library.query;
+  const sort = app.querySelector<HTMLSelectElement>('[data-sort]')!;
+  sort.value = library.sort;
+  input.addEventListener('input', () => { library.query = input.value; library.scroll = 0; saveLibrary(); updateLibrary(); }, { signal });
+  app.querySelector('[data-clear-search]')?.addEventListener('click', () => { input.value = ''; library.query = ''; saveLibrary(); updateLibrary(); input.focus(); }, { signal });
+  const changeCategory = (value: string) => {
+    if (value !== 'all' && !isCategory(value)) return;
+    library.category = value;
+    library.scroll = 0;
+    saveLibrary();
+    updateLibrary();
+    app.querySelector('.library-content')?.scrollIntoView({ block: 'start', behavior: 'instant' });
+  };
+  app.querySelectorAll<HTMLButtonElement>('[data-filter]').forEach((button) => button.addEventListener('click', () => changeCategory(button.dataset.filter || 'all'), { signal }));
+  app.querySelector<HTMLSelectElement>('[data-mobile-category]')?.addEventListener('change', (event) => {
+    if (event.currentTarget instanceof HTMLSelectElement) changeCategory(event.currentTarget.value);
   }, { signal });
-  app.querySelector('[data-footer-about]')?.addEventListener('click', () => aboutDialog.showModal(), { signal });
-  app.querySelector('[data-top]')?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: motionPreference.matches ? 'instant' : 'smooth' }), { signal });
-  app.querySelectorAll<HTMLButtonElement>('[data-filter]').forEach((button) => {
-    button.addEventListener('click', () => {
-      category = button.dataset.filter as Category | 'all';
-      updateGrid();
-    }, { signal });
-  });
-  app.querySelectorAll<HTMLButtonElement>('[data-layout]').forEach((button) => {
-    button.addEventListener('click', () => {
-      layout = button.dataset.layout as 'grid' | 'list';
-      app.querySelectorAll('[data-layout]').forEach((other) => other.setAttribute('aria-pressed', String(other === button)));
-      updateGrid();
-    }, { signal });
-  });
-  requestAnimationFrame(() => {
-    if (signal.aborted) return;
-    if (location.hash === '#/index') document.querySelector('#index')?.scrollIntoView({ behavior: 'instant' });
-    else window.scrollTo({ top: restoreScroll ? galleryScroll : 0, behavior: 'instant' });
-  });
-
-  const hero = app.querySelector<HTMLElement>('[data-hero]')!;
-  try {
-    const { mountHero } = await import('./gallery/hero');
-    if (signal.aborted) return;
-    const destroy = mountHero(hero, signal, motionPreference.matches);
-    if (signal.aborted) destroy();
-    else disposeRoute = destroy;
-  } catch (error) {
-    if (signal.aborted) return;
-    console.warn('The interactive hero is unavailable; showing the illustrated edition.', error);
-    const label = app.querySelector('.spin-label');
-    if (label) label.textContent = 'ILLUSTRATED EDITION / WEBGL UNAVAILABLE';
-  }
+  sort.addEventListener('change', () => {
+    const value = sort.value;
+    if (value === 'discover' || value === 'newest' || value === 'az') { library.sort = value; saveLibrary(); updateLibrary(); }
+  }, { signal });
+  app.querySelectorAll<HTMLButtonElement>('[data-layout]').forEach((button) => button.addEventListener('click', () => {
+    library.layout = button.dataset.layout === 'list' ? 'list' : 'grid';
+    saveLibrary();
+    updateLibrary();
+  }, { signal }));
+  updateLibrary();
+  requestAnimationFrame(() => { if (!signal.aborted) window.scrollTo({ top: library.scroll, behavior: 'instant' }); });
 }
 
 function setPlayback(value: boolean) {
   paused = value;
-  instance?.setPaused(paused);
+  instance?.setPaused?.(paused);
   if (playbackButton) {
     playbackButton.innerHTML = `${paused ? '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 3 11 7-11 7z" fill="currentColor"/></svg>' : '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3h3v14H5zm7 0h3v14h-3z" fill="currentColor"/></svg>'}<span>${paused ? 'Play' : 'Pause'}</span>`;
     playbackButton.setAttribute('aria-label', paused ? 'Play animation' : 'Pause animation');
   }
 }
 
-async function renderExperiment(project: Project, signal: AbortSignal) {
-  document.title = `${project.title} - Odd Index`;
+function projectTrail(project: Project) {
+  return `<div class="project-trail"><a class="back-index" href="${siteUrl()}" aria-label="Back to index">${arrow}<span>All projects</span></a><span class="trail-title">${escapeMarkup(project.title)}</span><div><button type="button" data-search aria-label="Search projects">${searchIcon}</button><button type="button" data-project-info aria-label="About this project">About</button><a href="${sourceUrl(project)}" target="_blank" rel="noopener noreferrer">${codeIcon}<span>Source</span></a></div></div>`;
+}
+
+function destroyProject() {
+  routeController.abort();
+  instance?.destroy();
+  instance = undefined;
+  playbackButton = undefined;
+  window.clearTimeout(reportTimer);
+}
+
+async function renderProject(project: Project) {
+  const generation = ++mountGeneration;
+  destroyProject();
+  routeController = new AbortController();
+  const signal = routeController.signal;
+  activeProject = project;
   paused = motionPreference.matches;
-  app.className = 'lab-root';
+  document.title = `${project.title} - Odd Index`;
+  const immersive = project.format === 'immersive';
+  app.className = immersive ? 'immersive-root' : 'standalone-root';
   const position = projects.indexOf(project);
   const previous = projects[(position + projects.length - 1) % projects.length];
   const next = projects[(position + 1) % projects.length];
-  app.innerHTML = `
-    ${header(true)}
-    <main id="main-content" class="lab-page" tabindex="-1">
-      <div class="lab-heading">
-        <div class="lab-title"><a class="back-index" href="#/" aria-label="Back to index">${arrow}</a><div><div class="eyebrow">${project.number} / ${categoryNames[project.category].toUpperCase()}</div><h1>${project.title}</h1></div></div>
-        <p class="lab-subtitle">${project.subtitle}<span>${project.medium}</span></p>
-        <nav class="experiment-pager" aria-label="Browse experiments"><a href="#/experiment/${previous.id}" aria-label="Previous experiment: ${previous.title}">${arrow}</a><span>${project.number} <span>/</span> ${String(projects.length).padStart(2, '0')}</span><a href="#/experiment/${next.id}" aria-label="Next experiment: ${next.title}">${arrow}</a></nav>
+  app.innerHTML = `${projectTrail(project)}
+    <main id="main-content" class="${immersive ? 'lab-page' : 'standalone-site'}" tabindex="-1">
+      ${immersive ? `<div class="lab-heading"><div><h1>${escapeMarkup(project.title)}</h1><p>${escapeMarkup(project.subtitle)}</p></div><nav class="experiment-pager" aria-label="Browse projects"><a href="${projectUrl(previous.id)}" aria-label="Previous experiment: ${escapeMarkup(previous.title)}">${arrow}</a><span>${project.number} / ${projects.length}</span><a href="${projectUrl(next.id)}" aria-label="Next experiment: ${escapeMarkup(next.title)}">${arrow}</a></nav></div>` : ''}
+      <div class="${immersive ? 'experiment-stage' : 'project-surface'}" data-stage data-experiment="${project.id}" data-format="${project.format}" ${immersive ? `style="background:${project.color};color:${project.ink}"` : ''} aria-label="${escapeMarkup(project.title)} website">
+        <div class="project-loading" role="status"><span class="loading-orbit"></span>Opening ${escapeMarkup(project.title)}...</div>
       </div>
-      <div class="experiment-stage" data-stage data-experiment="${project.id}" style="background:${project.color};color:${project.ink}" aria-label="${project.title} interactive stage">
-        <div class="experiment-loading" role="status"><span class="loading-orbit"></span>PREPARING A LITTLE SOMETHING</div>
-      </div>
-      <div class="experiment-toolbar">
-        <div class="playback-controls">
-          <button type="button" class="playback-button" data-playback disabled aria-label="Pause animation"></button>
-          <button type="button" class="reset-button" data-reset disabled title="Reset experiment"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 8a6 6 0 1 1 0 5M4 3v5h5" stroke="currentColor" stroke-width="1.5"/></svg><span>Reset</span></button>
-        </div>
-        <div class="experiment-controls" data-controls aria-label="Experiment controls"></div>
-      </div>
-      <div class="lab-status"><p role="status" aria-live="polite" data-report>${project.instruction}</p><span>REAL-TIME. RIGHT HERE IN YOUR BROWSER.</span></div>
-      <details class="experiment-about"><summary>Notes on this experiment <span>+</span></summary><div><p>${project.description}</p><p>Made with ${project.category === 'space' || project.id === 'chroma' ? 'WebGL' : 'Canvas'} and a little curiosity. Everything runs locally. No account, no API keys, no data collection. Use the controls to play without a pointer; pause motion at any time.</p></div></details>
+      ${immersive ? `<div class="experiment-toolbar"><div class="playback-controls"><button type="button" class="playback-button" data-playback disabled aria-label="Pause animation"></button><button type="button" class="reset-button" data-reset disabled><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 8a6 6 0 1 1 0 5M4 3v5h5" stroke="currentColor" stroke-width="1.5"/></svg>Reset</button></div><div class="experiment-controls" data-controls aria-label="Experiment controls"></div></div><div class="lab-status"><p role="status" aria-live="polite" data-report>${escapeMarkup(project.instruction)}</p><a href="${sourceUrl(project)}" target="_blank" rel="noopener noreferrer">Project code & notes ${diagonal}</a></div>` : '<div data-controls hidden></div>'}
     </main>
-    <footer class="lab-footer"><a href="#/">BACK TO THE INDEX ${arrow}</a><span>ODD INDEX &nbsp;/&nbsp; EXPERIMENT ${project.number}</span><a href="#/experiment/${next.id}">UP NEXT: ${next.title.toUpperCase()} ${arrow}</a></footer>`;
-  bindHeader(signal);
-  playbackButton = app.querySelector<HTMLButtonElement>('[data-playback]')!;
-  const reset = app.querySelector<HTMLButtonElement>('[data-reset]')!;
+    ${immersive ? '' : '<div class="project-feedback" data-feedback hidden><p role="status" aria-live="polite" data-report></p><button type="button" aria-label="Dismiss message" data-dismiss-feedback>&times;</button></div>'}`;
+  bindCommon(signal);
+  app.querySelector('[data-project-info]')?.addEventListener('click', () => {
+    projectInfo.querySelector('h2')!.textContent = project.title;
+    projectInfo.querySelector('[data-info-description]')!.textContent = project.description;
+    projectInfo.querySelector('[data-info-medium]')!.textContent = `${categoryNames[project.category]} / ${project.medium}`;
+    const link = projectInfo.querySelector<HTMLAnchorElement>('a')!;
+    link.href = sourceUrl(project);
+    projectInfo.showModal();
+  }, { signal });
   const container = app.querySelector<HTMLElement>('[data-stage]')!;
   const controls = app.querySelector<HTMLElement>('[data-controls]')!;
-  const report = app.querySelector<HTMLElement>('[data-report]')!;
-  setPlayback(paused);
-  playbackButton.addEventListener('click', () => setPlayback(!paused), { signal });
-  reset.addEventListener('click', () => {
-    instance?.reset?.();
-    report.textContent = 'A fresh start. Make it your own.';
-  }, { signal });
-  window.scrollTo({ top: 0, behavior: 'instant' });
-
+  const reportElement = app.querySelector<HTMLElement>('[data-report]')!;
+  const feedback = app.querySelector<HTMLElement>('[data-feedback]');
+  app.querySelector('[data-dismiss-feedback]')?.addEventListener('click', () => { if (feedback) feedback.hidden = true; }, { signal });
+  if (immersive) {
+    playbackButton = app.querySelector<HTMLButtonElement>('[data-playback]')!;
+    setPlayback(paused);
+    playbackButton.addEventListener('click', () => setPlayback(!paused), { signal });
+    app.querySelector('[data-reset]')?.addEventListener('click', () => {
+      instance?.reset?.();
+      reportElement.textContent = 'A fresh start. Make it your own.';
+    }, { signal });
+  }
   try {
     const module = await project.load();
     if (signal.aborted) return;
     container.replaceChildren();
     const mounted = await module.mount({
-      container,
-      controls,
-      signal,
-      reducedMotion: motionPreference.matches,
-      report: (message) => { if (!signal.aborted) report.textContent = message; },
+      container, controls, signal, reducedMotion: motionPreference.matches,
+      report(message) {
+        if (signal.aborted) return;
+        reportElement.textContent = message;
+        if (feedback) {
+          feedback.hidden = false;
+          window.clearTimeout(reportTimer);
+          reportTimer = window.setTimeout(() => { feedback.hidden = true; }, 7000);
+        }
+      },
     });
-    if (signal.aborted) {
-      mounted.destroy();
-      return;
-    }
+    if (signal.aborted || generation !== mountGeneration) { mounted.destroy(); return; }
     instance = mounted;
-    disposeRoute = mounted.destroy;
-    playbackButton.disabled = false;
-    reset.disabled = !mounted.reset;
-    if (!mounted.reset) reset.hidden = true;
     container.dataset.ready = 'true';
-    if (paused) mounted.setPaused(true);
+    if (immersive) {
+      if (playbackButton) { playbackButton.disabled = !mounted.setPaused; playbackButton.hidden = !mounted.setPaused; }
+      const reset = app.querySelector<HTMLButtonElement>('[data-reset]')!;
+      reset.disabled = !mounted.reset;
+      reset.hidden = !mounted.reset;
+      if (paused) mounted.setPaused?.(true);
+    }
   } catch (error) {
     if (signal.aborted) return;
-    console.error(`Could not start ${project.title}.`, error);
-    container.replaceChildren();
+    console.error(`Could not open ${project.title}.`, error);
     controls.replaceChildren();
-    const message = document.createElement('div');
-    message.className = 'experiment-error';
-    message.setAttribute('role', 'alert');
-    const heading = document.createElement('h2');
-    heading.textContent = 'This one needs a little more from your browser.';
-    const detail = document.createElement('p');
-    detail.textContent = error instanceof Error ? error.message : 'The experiment could not be started.';
-    const recommendation = document.createElement('p');
-    recommendation.textContent = 'Try enabling hardware acceleration or opening this page in a current browser. Our canvas experiments do not require WebGL.';
-    const link = document.createElement('a');
-    link.href = '#/experiment/flow';
-    link.textContent = 'Try Flow State instead';
-    message.append(heading, detail, recommendation, link);
-    container.append(message);
-    report.textContent = 'Experiment unavailable. See the message above for alternatives.';
+    const heading = immersive ? 'This one needs a little more from your browser.' : 'This website could not be opened.';
+    container.innerHTML = `<div class="project-error" role="alert"><h1>${heading}</h1><p data-error-message></p><p>${immersive ? 'Try enabling hardware acceleration or use a current browser. Canvas projects do not require WebGL.' : 'Reload the page to try again. Your other projects are still available.'}</p><div><a class="app-button" href="${projectUrl('flow')}">Try Flow State instead</a><a class="app-button app-button--quiet" href="${siteUrl()}">All projects</a></div></div>`;
+    container.querySelector('[data-error-message]')!.textContent = error instanceof Error ? error.message : 'The project could not be started.';
+    reportElement.textContent = 'Project unavailable. See the message above.';
   }
 }
 
-async function route() {
-  const generation = ++routeGeneration;
-  const wasExperiment = Boolean(currentProject);
-  if (!wasExperiment && app.querySelector('#index')) galleryScroll = window.scrollY;
-  routeController.abort();
-  disposeRoute?.();
-  disposeRoute = undefined;
-  instance = undefined;
-  playbackButton = undefined;
-  routeController = new AbortController();
-  const signal = routeController.signal;
-  const path = location.hash.slice(1) || '/';
-  const match = /^\/experiment\/([a-z-]+)\/?$/.exec(path);
-  currentProject = match ? projects.find((project) => project.id === match[1]) : undefined;
-  if (currentProject) {
-    await renderExperiment(currentProject, signal);
-  } else if (path === '/' || path === '/index') {
-    await renderGallery(signal, wasExperiment);
-  } else {
-    document.title = 'A little too far - Odd Index';
-    app.className = 'gallery-root';
-    app.innerHTML = `${header()}<main id="main-content" class="not-found" tabindex="-1"><span class="eyebrow">404 / AN UNCHARTED CORNER</span><h1>A little <em>too far.</em></h1><p>There is plenty to get lost in here. This page is not one of those things.</p><a class="explore-link" href="#/">Find your way back ${arrow}</a></main>`;
-    bindHeader(signal);
-  }
-  if (generation !== routeGeneration) return;
+function renderNotFound() {
+  document.title = 'Project not found - Odd Index';
+  app.className = 'library-root';
+  app.innerHTML = `${header()}<main id="main-content" class="not-found" tabindex="-1"><span>404 / Project not found</span><h1>A little too far.</h1><p>That project is not in the collection. There are ${projects.length} other places to start.</p><a class="app-button" href="${siteUrl()}">Find your way back ${arrow}</a></main>`;
+  bindCommon(routeController.signal);
 }
 
-const aboutDialog = document.createElement('dialog');
-aboutDialog.className = 'about-dialog';
-aboutDialog.setAttribute('aria-labelledby', 'about-title');
-aboutDialog.innerHTML = `
-  <div class="dialog-top"><span class="eyebrow">A NOTE FROM ODD INDEX</span><button type="button" class="dialog-close" aria-label="Close about dialog">&times;</button></div>
-  <span class="about-mark" aria-hidden="true">*</span>
-  <h2 id="about-title">For the sake<br>of <em>interesting.</em></h2>
-  <p>Odd Index is an AI-assisted collection of creative-coding experiments, curated around one idea: the browser can still surprise you.</p>
-  <p>No grand promises. No productivity hacks. Just ${projects.length} little worlds made of physics, light, type, and sound. Things to touch, pull apart, and get happily lost in.</p>
-  <div class="about-facts"><span>${projects.length} EXPERIMENTS</span><span>100% IN YOUR BROWSER</span><span>ZERO ACCOUNTS</span></div>
-  <p class="about-small">Built with TypeScript, Three.js, Canvas, and Web Audio. All experiments run on your device, without AI API calls, tracking, or external services. Sound is off until you choose otherwise.</p>`;
-document.body.append(aboutDialog);
-aboutDialog.querySelector('.dialog-close')?.addEventListener('click', () => aboutDialog.close());
+function openLibraryRoute() {
+  const hash = location.hash || '#/';
+  const oldProject = /^#\/(?:experiment|project)\/([a-z][a-z0-9-]*)\/?$/.exec(hash);
+  if (oldProject) {
+    const project = projects.find((item) => item.id === oldProject[1]);
+    if (project) location.replace(projectUrl(project.id));
+    else renderNotFound();
+    return;
+  }
+  if (!['#/', '#/index', '#index', '#main-content', ''].includes(hash)) { renderNotFound(); return; }
+  renderLibrary();
+}
 
-const searchDialog = document.createElement('dialog');
-searchDialog.className = 'search-dialog';
-searchDialog.setAttribute('aria-labelledby', 'search-title');
-searchDialog.innerHTML = `
-  <div class="dialog-top"><h2 id="search-title">Find your next distraction.</h2><button class="dialog-close" type="button" aria-label="Close search">&times;</button></div>
-  <label class="sr-only" for="experiment-search">Search experiments</label>
-  <div class="search-input-wrap"><input id="experiment-search" type="search" placeholder="Try particles, type, sound..." autocomplete="off" spellcheck="false" /><kbd>ESC</kbd></div>
-  <p class="search-result-count" aria-live="polite"></p><div class="search-results"></div>
-  <div class="search-help">TAB TO EXPLORE &nbsp;&nbsp; ENTER TO OPEN &nbsp;&nbsp; ESC TO RETURN</div>`;
-document.body.append(searchDialog);
+function makeDialog(className: string, labelledBy: string, html: string): HTMLDialogElement {
+  const dialog = document.createElement('dialog');
+  dialog.className = className;
+  dialog.setAttribute('aria-labelledby', labelledBy);
+  dialog.innerHTML = html;
+  document.body.append(dialog);
+  dialog.querySelector('.dialog-close')?.addEventListener('click', () => dialog.close());
+  dialog.addEventListener('click', (event) => {
+    if (event.target !== dialog) return;
+    const bounds = dialog.getBoundingClientRect();
+    if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.close();
+  });
+  return dialog;
+}
+
+const aboutDialog = makeDialog('about-dialog', 'about-title', `<div class="dialog-top"><h2 id="about-title">A collection, not a template.</h2><button class="dialog-close" type="button" aria-label="Close about dialog">&times;</button></div><p>Odd Index collects independent, AI-made websites: useful little tools, original games, invented worlds, stories, and visual experiments.</p><p>Each project has its own page and its own point of view. Open one, use it, read it, or take apart its source code.</p><div class="about-facts"><strong>${projects.length} projects</strong><span>No accounts</span><span>No hosted AI calls</span></div><p>Everything runs in your browser. Some projects save work or progress on your device; nothing is uploaded. Sound is off until you choose to play it. Fictional worlds are labeled as fiction.</p><a class="text-link" href="https://github.com/HSPK/collections/blob/main/src/projects/README.md" target="_blank" rel="noopener noreferrer">How the independent project system works ${diagonal}</a>`);
+const projectInfo = makeDialog('project-info-dialog', 'project-info-title', '<div class="dialog-top"><h2 id="project-info-title">About this project</h2><button class="dialog-close" type="button" aria-label="Close project information">&times;</button></div><p class="info-medium" data-info-medium></p><p data-info-description></p><a class="text-link" href="https://github.com/HSPK/collections" target="_blank" rel="noopener noreferrer">Source code & extension notes</a>');
+const searchDialog = makeDialog('search-dialog', 'search-title', `<div class="dialog-top"><h2 id="search-title">Find a project</h2><button class="dialog-close" type="button" aria-label="Close search">&times;</button></div><label class="sr-only" for="project-search">Search all projects</label><div class="search-input-wrap">${searchIcon}<input id="project-search" type="search" placeholder="Tools, stories, games, ideas..." autocomplete="off" spellcheck="false" /></div><p class="search-result-count" aria-live="polite"></p><div class="search-results"></div><p class="search-help">Tab to browse results. Enter to open. Escape to return.</p>`);
 const searchInput = searchDialog.querySelector<HTMLInputElement>('input')!;
 const searchResults = searchDialog.querySelector<HTMLElement>('.search-results')!;
 
 function updateSearch() {
   const query = searchInput.value.trim().toLowerCase();
-  const results = projects.filter((project) =>
-    `${project.title} ${project.subtitle} ${project.medium} ${project.description} ${categoryNames[project.category]}`.toLowerCase().includes(query),
-  );
-  searchDialog.querySelector('.search-result-count')!.textContent = `${results.length} ${results.length === 1 ? 'experiment' : 'experiments'} to explore`;
-  searchResults.replaceChildren();
-  for (const project of results) {
-    const link = document.createElement('a');
-    link.className = 'search-result';
-    link.href = `#/experiment/${project.id}`;
-    link.innerHTML = `<span class="search-number">${project.number}</span><span>${project.title}<small>${project.medium}</small></span>${diagonalArrow}`;
-    link.addEventListener('click', () => searchDialog.close());
-    searchResults.append(link);
-  }
-  if (!results.length) {
-    const empty = document.createElement('p');
-    empty.className = 'search-empty';
-    empty.textContent = 'Nothing here by that name. Try a color, a medium, or a little less specificity.';
-    searchResults.append(empty);
-  }
+  const results = projects.filter((project) => `${project.title} ${project.description} ${project.medium} ${project.tags.join(' ')}`.toLowerCase().includes(query));
+  searchDialog.querySelector('.search-result-count')!.textContent = `${results.length} projects`;
+  searchResults.innerHTML = results.length ? results.map((project) => `<a class="search-result" href="${projectUrl(project.id)}"><span class="search-project-icon" style="--icon-color:${project.color};--icon-ink:${project.ink}">${categoryIcon(project.category)}</span><span><strong>${escapeMarkup(project.title)}</strong><small>${escapeMarkup(project.medium)}</small></span>${diagonal}</a>`).join('') : '<p class="search-empty">No projects by that name. Try a different word or idea.</p>';
 }
 
 function openSearch() {
@@ -351,46 +394,45 @@ function openSearch() {
 
 searchInput.addEventListener('input', updateSearch);
 searchInput.addEventListener('keydown', (event) => {
-  if (event.key === 'Enter') {
-    const first = searchResults.querySelector<HTMLAnchorElement>('a');
-    if (first) {
-      event.preventDefault();
-      first.click();
-    }
-  } else if (event.key === 'ArrowDown') {
-    event.preventDefault();
-    searchResults.querySelector<HTMLAnchorElement>('a')?.focus();
-  }
+  const first = searchResults.querySelector<HTMLAnchorElement>('a');
+  if (event.key === 'Enter' && first) { event.preventDefault(); first.click(); }
+  if (event.key === 'ArrowDown' && first) { event.preventDefault(); first.focus(); }
 });
-searchDialog.querySelector('.dialog-close')?.addEventListener('click', () => searchDialog.close());
-
-for (const dialog of [aboutDialog, searchDialog]) {
-  dialog.addEventListener('click', (event) => {
-    if (event.target !== dialog) return;
-    const bounds = dialog.getBoundingClientRect();
-    if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.close();
-  });
-}
 
 document.querySelector('.skip-link')?.addEventListener('click', (event) => {
   event.preventDefault();
   document.querySelector<HTMLElement>('#main-content')?.focus();
 });
-window.addEventListener('hashchange', () => { void route(); });
 window.addEventListener('keydown', (event) => {
   if (event.defaultPrevented) return;
   const target = event.target;
   const editing = target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName));
-  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
-    event.preventDefault();
-    if (!searchDialog.open && !aboutDialog.open) openSearch();
-  }
-  if (event.code === 'Space' && !editing && currentProject && instance && !aboutDialog.open && !searchDialog.open && !(target instanceof HTMLButtonElement) && !(target instanceof HTMLAnchorElement)) {
+  const dialogOpen = aboutDialog.open || searchDialog.open || projectInfo.open;
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k' && !dialogOpen) { event.preventDefault(); openSearch(); }
+  if (event.key === '/' && !editing && !activeProject && !dialogOpen) { event.preventDefault(); app.querySelector<HTMLInputElement>('[data-library-search]')?.focus(); }
+  if (event.code === 'Space' && !editing && !dialogOpen && activeProject?.format === 'immersive' && instance?.setPaused && !(target instanceof HTMLButtonElement) && !(target instanceof HTMLAnchorElement)) {
     event.preventDefault();
     setPlayback(!paused);
   }
 });
 motionPreference.addEventListener('change', () => {
-  if (currentProject) setPlayback(motionPreference.matches);
+  if (activeProject?.format === 'immersive') setPlayback(motionPreference.matches);
 });
-void route();
+window.addEventListener('pagehide', () => {
+  if (activeProject) destroyProject();
+  else { library.scroll = window.scrollY; saveLibrary(); }
+});
+window.addEventListener('pageshow', (event) => {
+  if (event.persisted && activeProject) void renderProject(activeProject);
+});
+const standaloneId = document.body.dataset.project;
+if (standaloneId) {
+  const project = projects.find((item) => item.id === standaloneId);
+  if (project) void renderProject(project);
+  else renderNotFound();
+} else {
+  window.addEventListener('hashchange', openLibraryRoute);
+  openLibraryRoute();
+}
+
+if (siteBase.origin !== location.origin) console.warn('The collection base points to another origin.');

@@ -1,0 +1,14 @@
+{
+  "id": "nonogram",
+  "order": 19,
+  "title": "Nonogram Club",
+  "subtitle": "Four little pictures. One square at a time.",
+  "description": "A quiet, paper-and-ink puzzle club. Uncover four original pixel pictures with logical clues, honest one-square hints, and a little collection of solved keepsakes.",
+  "category": "play",
+  "format": "page",
+  "medium": "Interactive picture-logic puzzles",
+  "tags": ["Picture logic", "Puzzles", "Quiet play"],
+  "color": "#f4f0e6",
+  "ink": "#294f3c",
+  "instruction": "Read the runs, fill the picture, and mark empty squares with X if it helps."
+}

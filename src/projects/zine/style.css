@@ -1,0 +1,304 @@
+.project-zine {
+  --zine-paper: #f3eee3;
+  --zine-white: #fffdf6;
+  --zine-ink: #202019;
+  --zine-red: #ce3825;
+  --zine-muted: #6a6155;
+  --zine-line: #c8c0b1;
+  background: var(--zine-paper);
+  color: var(--zine-ink);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-wrap: break-word;
+  -webkit-font-smoothing: antialiased;
+}
+
+.project-zine *,
+.project-zine *::before,
+.project-zine *::after { box-sizing: border-box; }
+.project-zine [hidden] { display: none !important; }
+.project-zine h1,
+.project-zine h2,
+.project-zine h3,
+.project-zine p,
+.project-zine figure { margin: 0; }
+.project-zine button,
+.project-zine input,
+.project-zine textarea,
+.project-zine select { font: inherit; color: inherit; }
+.project-zine button,
+.project-zine a,
+.project-zine input,
+.project-zine select { touch-action: manipulation; }
+.project-zine button { cursor: pointer; }
+.project-zine button:disabled { cursor: not-allowed; opacity: .48; }
+.project-zine :focus-visible { outline: 3px solid var(--zine-red); outline-offset: 4px; }
+.project-zine a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+.project-zine .zine-shell { max-width: 1440px; margin: 0 auto; padding: 0 clamp(18px, 4.5vw, 72px); }
+
+.project-zine .zine-masthead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding-block: 12px 14px;
+}
+.project-zine .zine-masthead-name { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: .045em; }
+.project-zine .zine-press-mark { display: grid; place-items: center; width: 22px; height: 22px; background: var(--zine-ink); color: var(--zine-paper); font-size: 21px; line-height: 1; flex: 0 0 auto; }
+.project-zine .zine-masthead nav { display: flex; gap: 20px; }
+.project-zine .zine-masthead a { min-height: 44px; display: inline-flex; align-items: center; gap: 14px; font-size: 14px; font-weight: 700; text-decoration: none; }
+.project-zine .zine-masthead a span { font-size: 24px; }
+.project-zine .zine-masthead a:hover { color: var(--zine-red); }
+.project-zine h1 { font-family: "Arial Black", Arial, Helvetica, sans-serif; font-size: clamp(38px, 3.7vw, 50px); font-weight: 900; letter-spacing: -.075em; line-height: 1; margin-top: 5px; }
+.project-zine h1 > span { color: var(--zine-red); }
+.project-zine .zine-title-dot { color: var(--zine-ink); }
+
+.project-zine .zine-section-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 20px; margin-bottom: 17px; }
+.project-zine .zine-section-heading h2 { font-size: 22px; letter-spacing: -.045em; line-height: 1.2; }
+.project-zine .zine-section-heading h2 > span { color: var(--zine-red); font: 12px Arial, Helvetica, sans-serif; font-weight: 700; letter-spacing: .06em; display: inline-block; margin-right: 11px; vertical-align: middle; }
+.project-zine .zine-section-heading > p { font-size: 14px; color: var(--zine-muted); }
+.project-zine .zine-starters { padding: 28px 0 0; margin-top: 28px; border-top: 1px solid var(--zine-ink); scroll-margin-top: 16px; }
+.project-zine .zine-starter-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--zine-ink); }
+.project-zine .zine-starter { position: relative; min-height: 162px; padding: 17px 34px 17px 18px; border: 0; border-right: 1px solid var(--zine-ink); text-align: left; background: transparent; display: flex; flex-direction: column; gap: 8px; transition: background-color .15s; }
+.project-zine .zine-starter:last-child { border-right: 0; }
+.project-zine .zine-starter:hover { background: var(--zine-white); }
+.project-zine .zine-starter:active { background: #e9e0cf; }
+.project-zine .zine-starter strong { font-size: 21px; line-height: 1.15; letter-spacing: -.035em; max-width: 13ch; }
+.project-zine .zine-starter > span:not(.zine-starter-index, .zine-starter-arrow) { font-size: 14px; color: var(--zine-muted); max-width: 24ch; line-height: 1.4; }
+.project-zine .zine-starter-index { font-size: 12px; letter-spacing: .015em; color: var(--zine-red); }
+.project-zine .zine-starter-arrow { position: absolute; right: 13px; top: 11px; font-size: 25px; font-weight: 400; }
+.project-zine .zine-starter-blank { background: repeating-linear-gradient(-45deg, transparent 0 7px, #20201906 7px 8px); }
+.project-zine .zine-starter-blank strong { font-family: Georgia, "Times New Roman", serif; font-style: italic; font-weight: 400; font-size: 23px; }
+.project-zine .zine-replace-note { font-size: 12px; color: var(--zine-muted); padding-top: 11px; }
+.project-zine .zine-replace-note strong { font-weight: 400; color: var(--zine-ink); }
+
+.project-zine .zine-worktable { border: 1px solid var(--zine-ink); scroll-margin-top: 16px; }
+.project-zine .zine-worktable-top { display: flex; justify-content: space-between; align-items: center; gap: 14px; color: var(--zine-paper); background: var(--zine-ink); padding: 6px 22px; }
+.project-zine .zine-worktable-top h2 { font-size: 16px; font-weight: 700; letter-spacing: -.02em; }
+.project-zine .zine-editor-jump { min-height: 44px; min-width: 44px; padding: 6px 8px; margin-left: auto; border: 0; background: transparent; color: inherit; font-size: 13px; text-decoration: underline; text-underline-offset: 4px; }
+.project-zine .zine-editor-jump:hover { background: #46463b; }
+.project-zine .zine-history { display: flex; align-items: center; gap: 5px; }
+.project-zine .zine-history button { background: transparent; border: 1px solid #8d897d; color: inherit; min-height: 44px; padding: 6px 11px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+.project-zine .zine-history button:not(:disabled):hover { background: #46463b; }
+.project-zine .zine-history button span { font-size: 22px; line-height: 1; }
+.project-zine .zine-issue-title { grid-column: 2; grid-row: 1; padding: 16px 24px 12px; background: var(--zine-white); border-left: 1px solid var(--zine-ink); border-bottom: 1px solid var(--zine-line); min-width: 0; }
+.project-zine .zine-issue-title label { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; font-size: 13px; font-weight: 700; }
+.project-zine .zine-issue-title label span { color: var(--zine-muted); font-size: 12px; font-weight: 400; }
+.project-zine .zine-issue-title input { display: block; width: 100%; min-height: 44px; background: transparent; border: 0; border-bottom: 1px solid var(--zine-line); border-radius: 0; font-size: 23px; font-weight: 700; letter-spacing: -.03em; padding: 5px 0; }
+.project-zine .zine-title-meta { display: flex; justify-content: space-between; gap: 14px; font-size: 12px; color: var(--zine-muted); padding-top: 8px; }
+.project-zine .zine-workspace { display: grid; grid-template-columns: minmax(0, 1fr) 365px; }
+.project-zine .zine-preview-column { grid-column: 1; grid-row: 1 / span 2; min-width: 0; background: #e7e0d2; padding: 16px 22px 22px; }
+.project-zine .zine-preview-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; margin-bottom: 10px; }
+.project-zine .zine-view-switch { display: inline-flex; border: 1px solid var(--zine-ink); }
+.project-zine .zine-view-switch button { min-height: 44px; padding: 9px 14px; font-size: 13px; border: 0; border-radius: 0; background: transparent; }
+.project-zine .zine-view-switch button + button { border-left: 1px solid var(--zine-ink); }
+.project-zine .zine-view-switch button[aria-pressed="true"] { background: var(--zine-ink); color: var(--zine-white); }
+.project-zine .zine-view-switch button[aria-pressed="false"]:hover { background: var(--zine-white); }
+.project-zine .zine-page-navigation { display: flex; flex: 1; align-items: center; justify-content: space-between; gap: 7px; min-width: 190px; }
+.project-zine .zine-page-navigation button { background: transparent; border: 0; padding: 6px 0; min-width: 44px; min-height: 44px; font-size: 20px; display: flex; align-items: center; gap: 7px; }
+.project-zine .zine-page-navigation button span { display: none; }
+.project-zine .zine-page-navigation button:not(:disabled):hover { color: var(--zine-red); }
+.project-zine .zine-page-announcement { font-size: 12px; text-align: center; }
+.project-zine .zine-reading-mat { padding: 5px 12px 19px; }
+.project-zine .zine-reader { display: flex; flex-direction: column; margin: 0 auto; max-width: 465px; min-height: 545px; background: var(--zine-white); color: var(--zine-page-ink); padding: clamp(22px, 3vw, 36px); box-shadow: 4px 5px 0 #cfc6b7, 6px 7px 0 #a79e8c; border: 1px solid #d8d0c0; }
+.project-zine .zine-reader-masthead { display: flex; justify-content: space-between; gap: 14px; border-bottom: 2px solid var(--zine-page-ink); padding-bottom: 10px; margin-bottom: 23px; font-size: 12px; letter-spacing: .06em; line-height: 1.2; }
+.project-zine .zine-reader-subtitle { font-size: 13px; color: var(--zine-page-ink); line-height: 1.4; margin-bottom: 11px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.project-zine .zine-reader h3 { font-family: var(--zine-page-display); font-size: clamp(30px, 3.4vw, 47px); line-height: 1.04; letter-spacing: -.035em; font-weight: 700; overflow-wrap: anywhere; white-space: pre-wrap; }
+.project-zine .zine-reader h3.zine-reader-cover-title { font-size: clamp(34px, 4.2vw, 59px); color: var(--zine-page-accent); line-height: 1.01; letter-spacing: -.035em; }
+.project-zine .zine-reader[data-theme="field-notes"] h3 { font-weight: 400; letter-spacing: -.045em; }
+.project-zine .zine-reader-art { display: block; width: 100%; height: auto; max-height: 115px; margin: 20px 0 22px; flex-shrink: 0; }
+.project-zine .zine-reader-body { font-family: var(--zine-page-body); font-size: 17px; line-height: 1.58; white-space: pre-wrap; overflow-wrap: anywhere; }
+.project-zine .zine-reader-hint { font-family: Georgia, "Times New Roman", serif; font-size: 18px; font-style: italic; line-height: 1.5; color: var(--zine-muted); }
+.project-zine .zine-reader-footer { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: auto; padding-top: 25px; font-size: 12px; }
+.project-zine .zine-reader-footer span:last-child { font-size: 21px; font-family: Georgia, "Times New Roman", serif; }
+.project-zine .zine-view-note { max-width: 55ch; margin: 5px auto 18px; text-align: center; font-size: 12px; color: #5e5549; line-height: 1.5; }
+.project-zine .zine-view-note strong { font-weight: 700; }
+.project-zine .zine-overview { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 5px; margin-top: 20px; }
+.project-zine .zine-mini { min-width: 0; min-height: 105px; padding: 8px 7px; background: var(--zine-white); border: 1px solid #aea594; border-radius: 0; text-align: left; display: flex; flex-direction: column; gap: 8px; }
+.project-zine .zine-mini:hover { border-color: var(--zine-ink); }
+.project-zine .zine-mini[aria-current="page"] { border-color: var(--zine-red); box-shadow: inset 0 0 0 1px var(--zine-red); color: var(--zine-red); }
+.project-zine .zine-mini-number { font-size: 12px; font-weight: 700; display: flex; justify-content: space-between; gap: 3px; }
+.project-zine .zine-mini-number > span { font-size: 14px; font-weight: 400; line-height: 1.1; }
+.project-zine .zine-mini-title { font-size: 12px; line-height: 1.25; font-weight: 700; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.project-zine .zine-mini-rule { width: 65%; height: 3px; border-top: 1px solid currentColor; border-bottom: 1px solid currentColor; display: block; margin-top: auto; opacity: .55; }
+.project-zine .zine-mini-error { background: #f9e4d7; }
+.project-zine .zine-overview-help { font-size: 12px; color: #5e5549; padding-top: 11px; }
+.project-zine .zine-sheet-caption { display: flex; flex-direction: column; gap: 7px; padding: 30px 0 20px; }
+.project-zine .zine-sheet-caption strong { font-family: Georgia, "Times New Roman", serif; font-size: 28px; font-weight: 400; font-style: italic; line-height: 1.1; }
+.project-zine .zine-sheet-caption span { font-size: 14px; color: var(--zine-muted); max-width: 48ch; }
+.project-zine .zine-sheet { background: #fff; border: 1px solid var(--zine-line); box-shadow: 3px 4px 0 #cfc6b7; }
+.project-zine .zine-sheet > svg { display: block; width: 100%; height: auto; }
+.project-zine .zine-guide-key { display: flex; flex-wrap: wrap; gap: 10px 24px; margin-top: 22px; font-size: 12px; }
+.project-zine .zine-guide-key > span { display: inline-flex; align-items: center; gap: 7px; }
+.project-zine .zine-guide-key i { width: 24px; display: inline-block; }
+.project-zine .zine-key-fold { border-top: 1px dashed #71685b; }
+.project-zine .zine-key-cut { border-top: 2px solid var(--zine-red); }
+.project-zine .zine-sheet-size { font-size: 12px; color: #5e5549; margin: 12px 0 27px; }
+.project-zine .zine-sheet-problem { padding: 34px 28px; min-height: 340px; font-size: 16px; display: flex; flex-direction: column; gap: 16px; justify-content: center; }
+.project-zine .zine-sheet-problem strong { color: var(--zine-red); font-size: 25px; line-height: 1.15; }
+
+.project-zine .zine-editor { grid-column: 2; grid-row: 2; border-left: 1px solid var(--zine-ink); padding: 20px 24px 24px; background: var(--zine-white); min-width: 0; }
+.project-zine .zine-editor-heading { padding-bottom: 22px; }
+.project-zine .zine-eyebrow { font-size: 12px; color: var(--zine-red); letter-spacing: .1em; }
+.project-zine .zine-editor-heading h3 { font-size: 22px; letter-spacing: -.045em; margin-top: 4px; line-height: 1.2; }
+.project-zine .zine-field { margin-bottom: 17px; }
+.project-zine .zine-field label,
+.project-zine .zine-paper-field label,
+.project-zine .zine-style-field legend { display: block; font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+.project-zine .zine-field input,
+.project-zine .zine-field textarea,
+.project-zine .zine-paper-field select { width: 100%; display: block; min-height: 46px; border: 1px solid #a99f8d; border-radius: 0; background: #f9f6ee; padding: 10px 11px; font-size: 16px; line-height: 1.5; }
+.project-zine .zine-field textarea { resize: vertical; min-height: 216px; }
+.project-zine .zine-field input[aria-invalid="true"],
+.project-zine .zine-field textarea[aria-invalid="true"],
+.project-zine .zine-issue-title input[aria-invalid="true"] { border-color: var(--zine-red); background: #fff0e9; }
+.project-zine .zine-field-count { padding-top: 6px; font-size: 12px; color: var(--zine-muted); }
+.project-zine .zine-field-help { font-size: 12px; color: var(--zine-muted); line-height: 1.55; padding-top: 8px; }
+.project-zine .zine-field-error { color: #a02e1f; font-size: 13px; line-height: 1.45; padding-top: 8px; }
+.project-zine .zine-field-error:empty { display: none; }
+.project-zine .zine-fit-status { border-top: 1px solid var(--zine-line); border-bottom: 1px solid var(--zine-line); padding: 11px 0; font-size: 12px; color: #3e5a3b; margin-bottom: 21px; }
+.project-zine .zine-fit-problem { color: #a02e1f; }
+.project-zine .zine-style-field { border: 0; padding: 0; margin: 0 0 18px; min-width: 0; }
+.project-zine .zine-theme-options { display: flex; flex-wrap: wrap; gap: 6px; }
+.project-zine .zine-theme-options button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 44px; padding: 7px 10px; border: 1px solid var(--zine-line); border-radius: 0; background: transparent; font-size: 12px; }
+.project-zine .zine-theme-options button[aria-pressed="true"] { border: 1px solid var(--zine-ink); box-shadow: inset 0 0 0 1px var(--zine-ink); }
+.project-zine .zine-theme-options button:hover { background: #eee7d9; }
+.project-zine .zine-swatch { display: inline-block; height: 14px; width: 14px; border-radius: 50%; flex-shrink: 0; }
+.project-zine .zine-swatch-red-letter { background: #ce3825; }
+.project-zine .zine-swatch-field-notes { background: #526741; }
+.project-zine .zine-swatch-carbon-copy { background: #202019; }
+.project-zine .zine-paper-field { margin-bottom: 10px; }
+.project-zine .zine-paper-field select { padding-right: 26px; cursor: pointer; }
+.project-zine .zine-guide-toggle { display: flex; align-items: flex-start; gap: 10px; min-height: 56px; padding: 9px 0; font-size: 13px; cursor: pointer; }
+.project-zine .zine-guide-toggle input { height: 20px; width: 20px; margin: 0; flex-shrink: 0; accent-color: var(--zine-red); }
+.project-zine .zine-guide-toggle small { display: block; font-size: 12px; color: var(--zine-muted); line-height: 1.45; margin-top: 3px; }
+.project-zine .zine-download { display: flex; align-items: center; justify-content: space-between; gap: 15px; min-height: 62px; width: 100%; border: 1px solid var(--zine-red); background: var(--zine-red); color: var(--zine-white); padding: 12px 17px; font-size: 16px; font-weight: 700; line-height: 1.3; text-align: left; margin-top: 16px; }
+.project-zine .zine-download > span:last-child { font-size: 28px; font-weight: 400; }
+.project-zine .zine-download:not(:disabled):hover { background: #a82d1d; border-color: #a82d1d; }
+.project-zine .zine-download-help { font-size: 12px; color: var(--zine-muted); line-height: 1.5; padding-top: 10px; }
+.project-zine .zine-export-warning { font-size: 13px; color: #a02e1f; line-height: 1.45; margin-top: 12px; }
+.project-zine .zine-export-warning:empty { display: none; }
+.project-zine .zine-worktable-bottom { border-top: 1px solid var(--zine-ink); padding: 13px 22px; display: flex; justify-content: space-between; gap: 9px 24px; flex-wrap: wrap; font-size: 12px; background: var(--zine-white); }
+.project-zine .zine-save-status { color: var(--zine-muted); }
+.project-zine .zine-save-problem { color: #a02e1f; }
+.project-zine .zine-notice { color: #3e5a3b; }
+.project-zine .zine-notice:empty { display: none; }
+
+.project-zine .zine-folding { padding: 51px 0 34px; scroll-margin-top: 22px; }
+.project-zine .zine-folding > .zine-section-heading { border-top: 1px solid var(--zine-ink); padding-top: 26px; }
+.project-zine .zine-fold-intro { display: grid; grid-template-columns: 1.1fr 1fr; align-items: center; gap: 48px; padding: 12px 0 31px; }
+.project-zine .zine-fold-deck { font-size: clamp(27px, 3vw, 43px); font-family: Georgia, "Times New Roman", serif; line-height: 1.14; letter-spacing: -.045em; margin-bottom: 17px; }
+.project-zine .zine-fold-intro p:not(.zine-fold-deck) { max-width: 50ch; color: #5b5246; line-height: 1.65; }
+.project-zine .zine-fold-diagram { max-width: 410px; width: 100%; justify-self: end; }
+.project-zine .zine-fold-diagram svg { display: block; width: 100%; height: auto; }
+.project-zine .zine-fold-diagram figcaption { text-align: center; font-size: 13px; color: var(--zine-red); margin-top: 7px; }
+.project-zine .zine-fold-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 27px 32px; list-style: none; padding: 0; margin: 0; counter-reset: fold; }
+.project-zine .zine-fold-steps li { border-top: 1px solid var(--zine-line); padding-top: 15px; counter-increment: fold; }
+.project-zine .zine-fold-steps li::before { content: "0" counter(fold); display: block; color: var(--zine-red); font-family: Georgia, "Times New Roman", serif; font-size: 31px; line-height: 1; margin-bottom: 13px; }
+.project-zine .zine-fold-steps h3 { font-size: 19px; line-height: 1.2; letter-spacing: -.03em; margin-bottom: 11px; }
+.project-zine .zine-fold-steps p { font-size: 15px; line-height: 1.6; color: #5b5246; }
+.project-zine .zine-fold-steps strong { color: var(--zine-ink); font-weight: 700; }
+.project-zine .zine-print-note { font-size: 13px; line-height: 1.6; color: var(--zine-muted); border-left: 3px solid var(--zine-red); padding: 2px 0 2px 16px; margin-top: 34px; max-width: 95ch; }
+.project-zine .zine-footer { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; padding: 25px 0 32px; border-top: 1px solid var(--zine-ink); }
+.project-zine .zine-footer strong { font-family: Georgia, "Times New Roman", serif; font-size: 25px; font-weight: 400; font-style: italic; letter-spacing: -.035em; }
+.project-zine .zine-footer span { font-size: 12px; color: var(--zine-muted); }
+
+@media (min-width: 1240px) {
+  .project-zine .zine-preview-column { padding: 25px 32px; }
+}
+@media (max-width: 1090px) {
+  .project-zine .zine-workspace { grid-template-columns: minmax(0, 1fr) 325px; }
+  .project-zine .zine-editor { padding: 21px; }
+  .project-zine .zine-preview-column { padding: 16px; }
+  .project-zine .zine-overview { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .project-zine .zine-mini { min-height: 98px; }
+  .project-zine .zine-starter { padding: 17px 30px 15px 14px; }
+  .project-zine .zine-starter strong { font-size: 19px; }
+}
+@media (max-width: 800px) {
+  .project-zine .zine-shell { padding: 0 24px; }
+  .project-zine .zine-starter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .project-zine .zine-starter { min-height: 143px; padding: 18px 35px 18px 18px; }
+  .project-zine .zine-starter:nth-child(2) { border-right: 0; }
+  .project-zine .zine-starter:nth-child(-n+2) { border-bottom: 1px solid var(--zine-ink); }
+  .project-zine .zine-starter strong { font-size: 21px; max-width: none; }
+  .project-zine .zine-section-heading { flex-direction: column; gap: 7px; }
+  .project-zine .zine-workspace { grid-template-columns: minmax(0, 1fr); }
+  .project-zine .zine-issue-title { grid-column: 1; grid-row: 2; border-left: 0; }
+  .project-zine .zine-editor { grid-column: 1; grid-row: 3; border-left: 0; border-top: 1px solid var(--zine-ink); padding: 25px; }
+  .project-zine .zine-preview-column { grid-column: 1; grid-row: 1; padding: 16px 24px 24px; }
+  .project-zine .zine-reader { min-height: 550px; padding: 32px; }
+  .project-zine .zine-reader h3 { font-size: 39px; }
+  .project-zine .zine-reader h3.zine-reader-cover-title { font-size: 49px; }
+  .project-zine .zine-overview { grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 6px; }
+  .project-zine .zine-mini { padding: 8px 6px; }
+  .project-zine .zine-fold-intro { gap: 28px; }
+  .project-zine .zine-fold-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px; }
+}
+@media (max-width: 560px) {
+  .project-zine .zine-shell { padding: 0 18px; }
+  .project-zine .zine-masthead { align-items: flex-start; gap: 6px; padding-block: 10px; }
+  .project-zine .zine-masthead-name { gap: 6px; font-size: 12px; letter-spacing: 0; line-height: 1.3; max-width: 235px; }
+  .project-zine .zine-masthead nav { display: flex; flex-direction: column; gap: 0; flex: 0 0 auto; }
+  .project-zine .zine-masthead a { font-size: 12px; gap: 5px; }
+  .project-zine h1 { font-size: 35px; margin-top: 6px; }
+  .project-zine .zine-starters { padding: 22px 0 0; }
+  .project-zine .zine-section-heading h2 { font-size: 22px; }
+  .project-zine .zine-section-heading > p { font-size: 13px; }
+  .project-zine .zine-starter { min-height: 175px; padding: 13px 20px 15px 12px; }
+  .project-zine .zine-starter-index { font-size: 12px; line-height: 1.3; min-height: 32px; padding-right: 7px; }
+  .project-zine .zine-starter strong { font-size: 20px; line-height: 1.12; }
+  .project-zine .zine-starter > span:not(.zine-starter-index, .zine-starter-arrow) { font-size: 13px; }
+  .project-zine .zine-starter-arrow { right: 8px; top: 7px; font-size: 21px; }
+  .project-zine .zine-replace-note { line-height: 1.5; }
+  .project-zine .zine-worktable-top { padding: 6px 12px; gap: 8px; align-items: center; }
+  .project-zine .zine-worktable-top h2 { font-size: 15px; max-width: 115px; line-height: 1.3; }
+  .project-zine .zine-history { gap: 4px; }
+  .project-zine .zine-history button { padding: 6px 9px; min-width: 62px; font-size: 12px; gap: 4px; }
+  .project-zine .zine-history button span { font-size: 20px; }
+  .project-zine .zine-issue-title { padding: 10px 16px; }
+  .project-zine .zine-issue-title label { flex-wrap: wrap; gap: 5px 14px; }
+  .project-zine .zine-issue-title input { font-size: 24px; }
+  .project-zine .zine-preview-column { padding: 12px; }
+  .project-zine .zine-preview-toolbar { gap: 8px; }
+  .project-zine .zine-view-switch { display: inline-flex; width: auto; }
+  .project-zine .zine-view-switch button { padding: 9px 8px; font-size: 12px; }
+  .project-zine .zine-page-navigation { flex-basis: 0; min-width: 124px; gap: 4px; }
+  .project-zine .zine-page-navigation button:last-child { justify-content: flex-end; }
+  .project-zine .zine-page-announcement { font-size: 12px; }
+  .project-zine .zine-reading-mat { padding: 4px 5px 17px 0; }
+  .project-zine .zine-reader { padding: 23px; min-height: 490px; }
+  .project-zine .zine-reader h3 { font-size: 32px; }
+  .project-zine .zine-reader h3.zine-reader-cover-title { font-size: 39px; }
+  .project-zine .zine-reader-body { font-size: 17px; line-height: 1.55; }
+  .project-zine .zine-reader-art { margin: 19px 0; }
+  .project-zine .zine-reader-masthead { font-size: 12px; letter-spacing: .025em; margin-bottom: 20px; }
+  .project-zine .zine-overview { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; margin-top: 17px; }
+  .project-zine .zine-mini { min-height: 105px; padding: 8px 7px; }
+  .project-zine .zine-mini-title { font-size: 12px; }
+  .project-zine .zine-editor { padding: 24px 17px; }
+  .project-zine .zine-editor-heading h3 { font-size: 24px; }
+  .project-zine .zine-theme-options { gap: 6px; }
+  .project-zine .zine-theme-options button { padding: 8px 9px; flex-grow: 1; }
+  .project-zine .zine-download { min-height: 62px; font-size: 17px; }
+  .project-zine .zine-sheet-caption { padding-top: 23px; }
+  .project-zine .zine-sheet-caption strong { font-size: 26px; }
+  .project-zine .zine-sheet-caption span { font-size: 13px; }
+  .project-zine .zine-sheet-problem { padding: 24px 18px; min-height: 310px; }
+  .project-zine .zine-worktable-bottom { padding: 13px 16px; }
+  .project-zine .zine-folding { padding: 34px 0 26px; }
+  .project-zine .zine-fold-intro { grid-template-columns: minmax(0, 1fr); gap: 26px; padding-top: 9px; }
+  .project-zine .zine-fold-deck { font-size: 29px; }
+  .project-zine .zine-fold-intro p:not(.zine-fold-deck) { font-size: 15px; }
+  .project-zine .zine-fold-diagram { max-width: 400px; justify-self: center; }
+  .project-zine .zine-fold-steps { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+  .project-zine .zine-fold-steps li { position: relative; padding: 17px 0 0 44px; min-height: 90px; }
+  .project-zine .zine-fold-steps li::before { position: absolute; left: 0; top: 16px; font-size: 29px; }
+  .project-zine .zine-fold-steps h3 { font-size: 20px; }
+  .project-zine .zine-footer { flex-direction: column; gap: 9px; padding-bottom: 25px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .project-zine .zine-starter { transition: none; }
+}

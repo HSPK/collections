@@ -1,0 +1,8 @@
+{
+  "id": "terrain", "order": 4, "title": "Terrarium",
+  "subtitle": "Take the long way home.",
+  "description": "Travel across a procedural landscape, lift its mountains, choose a biome, and uncover the contour lines beneath its surface.",
+  "category": "art", "format": "immersive", "medium": "Generative landscape",
+  "tags": ["3D", "Landscapes", "Generative"], "color": "#c9c5de", "ink": "#35334d",
+  "instruction": "Move to steer your view. Build a landscape with the controls."
+}

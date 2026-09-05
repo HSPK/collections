@@ -1,0 +1,14 @@
+{
+  "id": "scale",
+  "order": 24,
+  "title": "The Scale of Things",
+  "subtitle": "From a strand of DNA to a galaxy we call home.",
+  "description": "An illustrated field atlas of seventeen source-backed dimensions and distances. Explore a logarithmic ruler, browse detailed reference notes, and compare any two lengths with reversible ratios and a model-scale calculator.",
+  "category": "learn",
+  "format": "page",
+  "medium": "Interactive illustrated atlas",
+  "tags": ["Science", "Scale", "Reference", "Illustration"],
+  "color": "#f4efe3",
+  "ink": "#292d27",
+  "instruction": "Move the logarithmic ruler, then choose two references to see their ratio and build a smaller-scale model."
+}

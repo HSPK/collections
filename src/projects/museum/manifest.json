@@ -1,0 +1,14 @@
+{
+  "id": "museum",
+  "order": 11,
+  "title": "The Museum of Unmade Things",
+  "subtitle": "Useful impossibilities, carefully labeled.",
+  "description": "A fictional museum of ten original impossible design objects, with hand-drawn SVG studies, substantial stories, four filterable rooms, imagined provenance, and a downloadable reading catalog.",
+  "category": "read",
+  "format": "page",
+  "medium": "An illustrated speculative-design museum",
+  "tags": ["Fiction", "Design", "Museum", "Illustration", "Reading"],
+  "color": "#f4efe3",
+  "ink": "#25382d",
+  "instruction": "Choose a room, read its object labels, and open a story. Take an entry or the full catalog with you as plain text."
+}

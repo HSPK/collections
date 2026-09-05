@@ -1,0 +1,14 @@
+{
+  "id": "zine",
+  "order": 18,
+  "title": "Zine Machine",
+  "subtitle": "One sheet. Eight pages. Your point of view.",
+  "description": "An independent pocket-publishing studio with three original starter books, editable pages, expressive ink treatments, and real-size A4 or Letter sheet exports. Write a little, make one careful cut, and fold a book worth passing on.",
+  "category": "create",
+  "format": "page",
+  "medium": "Single-sheet publishing studio",
+  "tags": ["Zines", "Writing", "Print", "Paper craft"],
+  "color": "#f3eee3",
+  "ink": "#ce3825",
+  "instruction": "Choose a starter, edit your eight pages, then download the SVG sheet and follow the folding guide."
+}

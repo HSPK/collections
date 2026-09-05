@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { createHash } from 'node:crypto';
+import { readProjectManifests } from '../scripts/project-pages';
 
 declare global {
   interface Window {
@@ -10,41 +11,46 @@ declare global {
 }
 
 const ids = ['orbital', 'flow', 'soft', 'terrain', 'chroma', 'echo', 'gravity', 'type', 'fold', 'ribbon'];
+const manifests = readProjectManifests(process.cwd());
+const artCount = manifests.filter((project) => project.category === 'art').length;
+const playCount = manifests.filter((project) => project.category === 'play').length;
 
-test('The editorial index filters, changes layout, and opens its real projects', async ({ page }) => {
+test('The content-first library filters and remembers its state across websites', async ({ page }) => {
   await page.goto('./');
-  await expect(page.getByRole('heading', { name: /An exercise/ })).toBeVisible();
-  await expect(page.locator('.project-card')).toHaveCount(10);
-  await page.getByRole('button', { name: /Space 04/ }).click();
-  await expect(page.locator('.project-card')).toHaveCount(4);
-  await page.getByRole('button', { name: /Motion 03/ }).click();
-  await expect(page.locator('.project-card')).toHaveCount(3);
+  await expect(page.getByRole('heading', { name: 'Discover projects' })).toBeVisible();
+  await expect(page.locator('.project-card')).toHaveCount(manifests.length);
+  await page.locator('[data-filter="play"]').click();
+  await expect(page.locator('.project-card')).toHaveCount(playCount);
+  await page.locator('[data-filter="art"]').click();
+  await expect(page.locator('.project-card')).toHaveCount(artCount);
   await page.getByRole('button', { name: 'List view' }).click();
   await expect(page.locator('[data-project-grid]')).toHaveClass(/project-grid--list/);
   await page.locator('[data-project="flow"]').click();
+  await expect(page).toHaveURL(/\/projects\/flow\/$/);
   await expect(page.locator('[data-stage]')).toHaveAttribute('data-ready', 'true');
   await page.getByRole('link', { name: 'Back to index', exact: true }).click();
-  await expect(page.locator('.project-card')).toHaveCount(3);
+  await expect(page.locator('.project-card')).toHaveCount(artCount);
   await expect(page.getByRole('button', { name: 'List view' })).toHaveAttribute('aria-pressed', 'true');
 });
 
 test('Search, about, invalid routes, and keyboard entry work', async ({ page }) => {
   await page.goto('./');
   await page.getByRole('button', { name: 'About', exact: true }).click();
-  await expect(page.getByRole('dialog', { name: /For the sake/ })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'A collection, not a template.' })).toBeVisible();
   await page.keyboard.press('Escape');
-  await page.getByRole('button', { name: 'Search experiments', exact: true }).click();
-  await page.getByRole('searchbox').fill('not-a-real-experiment');
+  await page.keyboard.press('ControlOrMeta+k');
+  const search = page.getByRole('dialog', { name: 'Find a project', exact: true });
+  await search.getByRole('searchbox').fill('not-a-real-experiment');
   await expect(page.locator('.search-empty')).toBeVisible();
-  await page.getByRole('searchbox').fill('typography');
+  await search.getByRole('searchbox').fill('Type Playground');
   await expect(page.locator('.search-result')).toHaveCount(1);
   await page.keyboard.press('Enter');
-  await expect(page).toHaveURL(/#\/experiment\/type$/);
+  await expect(page).toHaveURL(/\/projects\/type\/$/);
   await expect(page.locator('[data-stage]')).toHaveAttribute('data-ready', 'true');
   await page.goto('./#/experiment/missing');
   await expect(page.getByRole('heading', { name: 'A little too far.' })).toBeVisible();
   await page.getByRole('link', { name: /Find your way back/ }).click();
-  await expect(page.locator('.project-card')).toHaveCount(10);
+  await expect(page.locator('.project-card')).toHaveCount(manifests.length);
 });
 
 for (const id of ids) {
@@ -52,7 +58,7 @@ for (const id of ids) {
     const errors: string[] = [];
     page.on('pageerror', (error) => errors.push(error.message));
     page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
-    await page.goto(`./#/experiment/${id}`);
+    await page.goto(`./projects/${id}/`);
     const stage = page.locator('[data-stage]');
     await expect(stage).toHaveAttribute('data-ready', 'true');
     await expect(stage.locator('canvas')).toBeVisible();
@@ -96,7 +102,7 @@ for (const id of ids) {
     const reset = page.getByRole('button', { name: 'Reset', exact: true });
     if (await reset.isVisible()) await reset.click();
     await page.getByRole('link', { name: 'Back to index', exact: true }).click();
-    await expect(page.locator('.project-card')).toHaveCount(10);
+    await expect(page.locator('.project-card')).toHaveCount(manifests.length);
     expect(errors).toEqual([]);
   });
 }
@@ -105,7 +111,7 @@ test('Every experiment respects reduced motion at entry', async ({ page }) => {
   test.setTimeout(120_000);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   for (const id of ids) {
-    await page.goto(`./#/experiment/${id}`);
+    await page.goto(`./projects/${id}/`);
     await expect(page.locator('[data-stage]')).toHaveAttribute('data-ready', 'true');
     await expect(page.getByRole('button', { name: 'Play animation', exact: true })).toBeVisible();
   }
@@ -115,10 +121,10 @@ test('The index and all experiments fit a narrow touch viewport', async ({ page 
   test.setTimeout(120_000);
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto('./');
-  await expect(page.locator('.project-card')).toHaveCount(10);
+  await expect(page.locator('.project-card')).toHaveCount(manifests.length);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   for (const id of ids) {
-    await page.goto(`./#/experiment/${id}`);
+    await page.goto(`./projects/${id}/`);
     await expect(page.locator('[data-stage]')).toHaveAttribute('data-ready', 'true');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), `${id} should not overflow`).toBe(true);
     const stage = (await page.locator('[data-stage]').boundingBox())!;
@@ -128,7 +134,7 @@ test('The index and all experiments fit a narrow touch viewport', async ({ page 
 });
 
 test('Afterimage exports an actual local PNG', async ({ page }) => {
-  await page.goto('./#/experiment/ribbon');
+  await page.goto('./projects/ribbon/');
   await expect(page.locator('[data-stage]')).toHaveAttribute('data-ready', 'true');
   const download = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Keep a print', exact: true }).click();
@@ -149,7 +155,7 @@ test('An unsupported WebGL browser gets an honest error and a usable alternative
       },
     });
   });
-  await page.goto('./#/experiment/orbital');
+  await page.goto('./projects/orbital/');
   await expect(page.getByRole('alert')).toContainText('This one needs a little more');
   await page.getByRole('link', { name: 'Try Flow State instead' }).click();
   await expect(page.locator('[data-stage]')).toHaveAttribute('data-ready', 'true');
@@ -200,10 +206,15 @@ for (const legacyAutomation of [false, true]) {
             tones++;
             return super.createOscillator();
           }
+          close() {
+            const calls = Number(sessionStorage.getItem('odd-test-audio-closes') || '0');
+            sessionStorage.setItem('odd-test-audio-closes', String(calls + 1));
+            return super.close();
+          }
         },
       });
     }, legacyAutomation);
-    await page.goto('./#/experiment/echo');
+    await page.goto('./projects/echo/');
     await expect(page.locator('[data-stage]')).toHaveAttribute('data-ready', 'true');
     if (legacyAutomation) {
       await page.getByRole('button', { name: 'Pause animation', exact: true }).click();
@@ -232,14 +243,15 @@ for (const legacyAutomation of [false, true]) {
     await expect.poll(() => page.evaluate(() => window.__oddAudioStates)).toEqual(['closed', 'running']);
     await page.getByRole('link', { name: 'Next experiment: Gravity Garden', exact: true }).click();
     await expect(page.locator('[data-stage]')).toHaveAttribute('data-ready', 'true');
-    await expect.poll(() => page.evaluate(() => window.__oddAudioStates)).toEqual(['closed', 'closed']);
+    await expect.poll(() => page.evaluate(() => Number(sessionStorage.getItem('odd-test-audio-closes')))).toBe(2);
+    expect(await page.evaluate(() => window.__oddAudioStates)).toEqual([]);
     expect(errors).toEqual([]);
   });
 }
 
 test('Custom typography and keyboard scattering work while motion is paused', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('./#/experiment/type');
+  await page.goto('./projects/type/');
   await expect(page.locator('[data-stage]')).toHaveAttribute('data-ready', 'true');
   const canvas = page.locator('[data-stage] canvas');
   const fingerprint = async () => createHash('sha256').update(

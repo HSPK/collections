@@ -1,0 +1,14 @@
+{
+  "id": "pixel-loom",
+  "order": 16,
+  "title": "Pixel Loom",
+  "subtitle": "Good things come in little squares.",
+  "description": "A cozy 16×16 pixel-art workshop with original starter patterns, lovely palettes, mirrored drawing, reversible edits, live previews, and crisp PNG downloads.",
+  "category": "create",
+  "format": "page",
+  "medium": "Pixel-art maker",
+  "tags": ["Pixel art", "Drawing", "Creative tools", "PNG", "Original patterns"],
+  "color": "#f5efdf",
+  "ink": "#24473b",
+  "instruction": "Choose a thread color and drag to paint. Try mirror drawing, or focus the canvas and use arrows + Space. Download your little patch as a PNG."
+}

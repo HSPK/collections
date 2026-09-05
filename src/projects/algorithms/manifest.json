@@ -1,0 +1,14 @@
+{
+  "id": "algorithms",
+  "order": 25,
+  "title": "Algorithm Theatre",
+  "subtitle": "Every move has a motive. Watch sorting think.",
+  "description": "An independent sorting field manual with three genuine algorithms, immutable operation traces, an editable array workbench, exact counters, linked pseudocode, and practical notes on complexity and stability.",
+  "category": "learn",
+  "format": "page",
+  "medium": "Interactive computer science field manual",
+  "tags": ["Algorithms", "Sorting", "Step by step", "Computer science"],
+  "color": "#162f50",
+  "ink": "#edf3fb",
+  "instruction": "Choose an algorithm, then use Next to inspect its first decision. Play is always opt-in."
+}
