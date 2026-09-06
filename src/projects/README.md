@@ -30,6 +30,8 @@ my-project/
 The index automatically discovers manifests and lazy-loads entrypoints.
 No central list, route switch, or build entry needs updating. Manifests are
 validated in both the browser registry and static-site build.
+Manifest tags also populate the library's filters automatically. Case and
+whitespace aliases are grouped, and a tag counts a project only once.
 
 ```json
 {

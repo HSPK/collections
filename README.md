@@ -11,8 +11,8 @@ games, stories, 3D worlds, educational labs, and ideas that do not fit a box.
 
 ![The Odd Index project browser](public/cover.jpg)
 
-The library is deliberately small: search, project types, useful previews,
-and links. Its header and search area stay in place while the project list
+The library is deliberately small: search, project types, tag filters, useful
+previews, and links. Its header and search area stay in place while the project list
 scrolls independently. Projects are the main event. Each one opens its **own complete
 website** at `/projects/<id>/`, with its own content, layout, and behavior.
 There are no iframes and no requirement to fit a project inside an animation
@@ -213,8 +213,13 @@ All project manifests use `format: "page"`.
 ## Browsing and accessibility
 
 - Discovery interleaves project types rather than presenting an entire row
-  of near-identical effects. Categories, search, and layout preferences
+  of near-identical effects. Categories, selected tags, search, and layout preferences
   and the list's own scroll position survive navigation between websites.
+- Left-side tag filters match **all selected tags** and combine with search
+  and project type. Counts reflect the current result set; tag-name search
+  only narrows the available controls. Clear tags keeps the other filters.
+  On phones, the Tags button opens the same controls in a keyboard-accessible
+  dialog without moving the fixed header or search.
 - The header contains About, Source, and Contribute, without a project-count
   badge or introductory headline. There is no bottom status/footer bar.
   Header, search, and filters remain visible; the list has a restrained,

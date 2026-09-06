@@ -1,6 +1,7 @@
 import './style.css';
 import { categories, categoryNames, isCategory, projects } from './catalog';
 import { escapeMarkup } from './core/markup';
+import { collectTags, matchesTags, normalizeTag } from './core/tags';
 import { projectUrl, siteBase, siteUrl } from './core/urls';
 import type { Category, Project, ProjectInstance } from './core/types';
 
@@ -12,6 +13,8 @@ const searchIcon = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><cir
 const codeIcon = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m8 7-5 5 5 5m8-10 5 5-5 5m-3-13-2 16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const mark = '<svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true"><ellipse cx="20" cy="20" rx="17" ry="10" transform="rotate(-40 20 20)" stroke="currentColor" stroke-width="2.8"/><circle cx="31" cy="11" r="4.5" fill="currentColor"/></svg>';
 const storageKey = 'odd-index:library:v2';
+const projectTags = collectTags(projects);
+const tagLabels = new Map(projectTags.map((tag) => [tag.key, tag.label]));
 let storageWarning = '';
 
 interface LibraryState {
@@ -20,15 +23,22 @@ interface LibraryState {
   layout: 'grid' | 'list';
   sort: 'discover' | 'newest' | 'az';
   scroll: number;
+  tags: string[];
 }
 
-function validLibraryState(value: unknown): value is LibraryState {
+interface SavedLibraryState extends Omit<LibraryState, 'tags'> {
+  tags?: string[];
+}
+
+function validLibraryState(value: unknown): value is SavedLibraryState {
   return typeof value === 'object' && value !== null &&
     'category' in value && (value.category === 'all' || isCategory(value.category)) &&
     'query' in value && typeof value.query === 'string' && value.query.length <= 200 &&
     'layout' in value && (value.layout === 'grid' || value.layout === 'list') &&
     'sort' in value && ['discover', 'newest', 'az'].some((sort) => sort === value.sort) &&
-    'scroll' in value && typeof value.scroll === 'number' && Number.isFinite(value.scroll) && value.scroll >= 0;
+    'scroll' in value && typeof value.scroll === 'number' && Number.isFinite(value.scroll) && value.scroll >= 0 &&
+    (!('tags' in value) || (Array.isArray(value.tags) && value.tags.length <= 1000 &&
+      value.tags.every((tag: unknown) => typeof tag === 'string' && tag.trim().length > 0 && tag.length <= 1000)));
 }
 
 function readLibraryState(): LibraryState {
@@ -36,7 +46,12 @@ function readLibraryState(): LibraryState {
     const saved = sessionStorage.getItem(storageKey);
     if (saved) {
       const parsed: unknown = JSON.parse(saved);
-      if (validLibraryState(parsed)) return parsed;
+      if (validLibraryState(parsed)) {
+        const previousTags = [...new Set((parsed.tags || []).map(normalizeTag))];
+        const tags = previousTags.filter((tag) => tagLabels.has(tag));
+        if (tags.length !== previousTags.length) storageWarning = 'Some saved tags are no longer available. Your other browse settings were restored.';
+        return { category: parsed.category, query: parsed.query, layout: parsed.layout, sort: parsed.sort, scroll: parsed.scroll, tags };
+      }
       storageWarning = 'Your previous browse settings could not be restored.';
     }
   } catch (error) {
@@ -44,7 +59,7 @@ function readLibraryState(): LibraryState {
     storageWarning = 'Browse settings cannot be saved in this browser session.';
     console.warn(storageWarning, error);
   }
-  return { category: 'all', query: '', layout: 'grid', sort: 'discover', scroll: 0 };
+  return { category: 'all', query: '', layout: 'grid', sort: 'discover', scroll: 0, tags: [] };
 }
 
 let library = readLibraryState();
@@ -138,16 +153,115 @@ function card(project: Project) {
   </article>`;
 }
 
+function tagControls(instance: 'sidebar' | 'dialog') {
+  return `<section class="library-tag-panel" data-tag-panel aria-label="Tag filters">
+    <div class="tag-panel-heading"><h2>Tags <span data-selected-tag-count></span></h2><button type="button" data-clear-tags hidden>Clear tags</button></div>
+    <p class="tag-match-note">Match all selected tags.</p>
+    <div class="tag-selection" data-tag-selection role="group" aria-label="Selected tags" hidden></div>
+    <label class="tag-search"><span class="sr-only">Search tags</span>${searchIcon}<input type="search" data-tag-search maxlength="80" placeholder="Find a tag..." autocomplete="off" spellcheck="false" /></label>
+    <div class="tag-options" role="group" aria-label="Available tags">
+      ${projectTags.map((tag, index) => `<label class="tag-option" data-tag-option="${escapeMarkup(tag.key)}" for="tag-${instance}-${index}"><input id="tag-${instance}-${index}" type="checkbox" data-tag-key="${escapeMarkup(tag.key)}" /><span class="tag-label">${escapeMarkup(tag.label)}</span><span class="tag-count" data-tag-count aria-hidden="true">${tag.count}</span></label>`).join('')}
+      <p class="tag-search-empty" data-tag-search-empty hidden>No matching tags.</p>
+    </div>
+  </section>`;
+}
+
+function filterTagOptions(panel: HTMLElement) {
+  const query = normalizeTag(panel.querySelector<HTMLInputElement>('[data-tag-search]')!.value);
+  let visible = 0;
+  panel.querySelectorAll<HTMLElement>('[data-tag-option]').forEach((row) => {
+    row.hidden = !row.dataset.tagOption!.includes(query);
+    if (!row.hidden) visible++;
+  });
+  panel.querySelector<HTMLElement>('[data-tag-search-empty]')!.hidden = visible !== 0;
+}
+
+function updateTagControls(filtered: Project[]) {
+  const selected = new Set(library.tags);
+  const counts = new Map(collectTags(filtered).map((tag) => [tag.key, tag.count]));
+  app.querySelectorAll<HTMLElement>('[data-tag-panel]').forEach((panel) => {
+    panel.querySelector<HTMLElement>('[data-selected-tag-count]')!.textContent = selected.size ? `(${selected.size})` : '';
+    panel.querySelector<HTMLButtonElement>('[data-clear-tags]')!.hidden = selected.size === 0;
+    panel.querySelectorAll<HTMLInputElement>('[data-tag-key]').forEach((input) => {
+      const key = input.dataset.tagKey!;
+      const count = counts.get(key) || 0;
+      input.checked = selected.has(key);
+      input.disabled = count === 0 && !input.checked;
+      const row = input.closest<HTMLElement>('[data-tag-option]')!;
+      row.classList.toggle('tag-option--unavailable', input.disabled);
+      row.querySelector<HTMLElement>('[data-tag-count]')!.textContent = String(count);
+    });
+    const chips = panel.querySelector<HTMLElement>('[data-tag-selection]')!;
+    chips.hidden = selected.size === 0;
+    chips.replaceChildren(...library.tags.map((key) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'tag-chip';
+      button.dataset.removeTag = key;
+      const label = tagLabels.get(key)!;
+      button.setAttribute('aria-label', `Remove ${label} tag`);
+      button.title = label;
+      const name = document.createElement('span');
+      name.textContent = label;
+      const close = document.createElement('span');
+      close.setAttribute('aria-hidden', 'true');
+      close.textContent = '×';
+      button.append(name, close);
+      return button;
+    }));
+    filterTagOptions(panel);
+  });
+  const count = app.querySelector<HTMLElement>('[data-tags-count]');
+  if (count) { count.hidden = selected.size === 0; count.textContent = String(selected.size); }
+  app.querySelector('[data-open-tags]')?.classList.toggle('has-tags', selected.size > 0);
+  const apply = app.querySelector<HTMLElement>('[data-tags-apply]');
+  if (apply) apply.textContent = `Show ${filtered.length} ${filtered.length === 1 ? 'project' : 'projects'}`;
+  const status = app.querySelector<HTMLElement>('[data-tags-result]');
+  if (status) status.textContent = selected.size ? `${selected.size} selected. Counts include your current search and project type.` : 'Choose one or more tags. Counts include your current search and project type.';
+}
+
+function bindTagControls(signal: AbortSignal) {
+  const change = (tags: string[]) => {
+    library.tags = [...new Set(tags)];
+    library.scroll = 0;
+    saveLibrary();
+    updateLibrary();
+  };
+  app.querySelectorAll<HTMLElement>('[data-tag-panel]').forEach((panel) => {
+    const search = panel.querySelector<HTMLInputElement>('[data-tag-search]')!;
+    search.addEventListener('input', () => filterTagOptions(panel), { signal });
+    panel.addEventListener('change', (event) => {
+      const input = event.target;
+      if (!(input instanceof HTMLInputElement) || !input.hasAttribute('data-tag-key')) return;
+      const key = input.dataset.tagKey;
+      if (!key || !tagLabels.has(key)) throw new Error('Unknown project tag.');
+      change(input.checked ? [...library.tags, key] : library.tags.filter((tag) => tag !== key));
+      if (input.disabled) search.focus();
+    }, { signal });
+    panel.addEventListener('click', (event) => {
+      const button = event.target instanceof Element ? event.target.closest<HTMLButtonElement>('button') : null;
+      if (!button) return;
+      if (button.hasAttribute('data-clear-tags')) {
+        change([]);
+        search.focus();
+      } else if (button.dataset.removeTag) {
+        change(library.tags.filter((tag) => tag !== button.dataset.removeTag));
+        search.focus();
+      }
+    }, { signal });
+  });
+}
+
 function updateLibrary() {
   const grid = app.querySelector<HTMLElement>('[data-project-grid]');
   if (!grid) return;
-  const matches = projects.filter(queryMatches);
+  const matches = projects.filter((project) => queryMatches(project) && matchesTags(project, library.tags));
   let filtered = matches.filter((project) => library.category === 'all' || project.category === library.category);
   if (library.sort === 'discover') filtered = discoveryOrder(filtered);
   else if (library.sort === 'newest') filtered.sort((a, b) => b.order - a.order);
   else filtered.sort((a, b) => a.title.localeCompare(b.title));
   grid.className = `project-grid${library.layout === 'list' ? ' project-grid--list' : ''}`;
-  grid.innerHTML = filtered.length ? filtered.map(card).join('') : `<div class="empty-results"><h2>No projects found.</h2><p>Try another word or browse all project types.</p><button class="app-button" type="button" data-clear-filters>Clear filters</button></div>`;
+  grid.innerHTML = filtered.length ? filtered.map(card).join('') : `<div class="empty-results"><h2>No projects found.</h2><p>Try another search, project type, or tag.</p><button class="app-button" type="button" data-clear-filters>Clear filters</button></div>`;
   grid.querySelectorAll<HTMLImageElement>('img').forEach((image) => {
     image.addEventListener('error', () => { image.hidden = true; }, { once: true, signal: routeController.signal });
   });
@@ -166,17 +280,21 @@ function updateLibrary() {
   if (status) status.textContent = `${filtered.length} ${filtered.length === 1 ? 'project' : 'projects'}${library.category === 'all' ? '' : ` in ${categoryNames[library.category]}`}`;
   const clear = app.querySelector<HTMLButtonElement>('[data-clear-search]');
   if (clear) clear.hidden = !library.query;
+  updateTagControls(filtered);
   grid.scrollTop = library.scroll;
 }
 
 function resetFilters() {
   library.category = 'all';
   library.query = '';
+  library.tags = [];
   library.scroll = 0;
   const input = app.querySelector<HTMLInputElement>('[data-library-search]');
   if (input) input.value = '';
+  app.querySelectorAll<HTMLInputElement>('[data-tag-search]').forEach((search) => { search.value = ''; });
   saveLibrary();
   updateLibrary();
+  input?.focus();
 }
 
 function renderLibrary() {
@@ -188,12 +306,13 @@ function renderLibrary() {
   app.className = 'library-root';
   app.innerHTML = `${header()}
     <main id="main-content" class="library-shell" tabindex="-1">
-      <aside class="library-sidebar" aria-label="Project categories">
+      <aside class="library-sidebar" aria-label="Project filters">
         <h2>Explore projects</h2>
         <nav class="category-nav" aria-label="Browse by type">
           <button type="button" data-filter="all" aria-pressed="true"><span class="all-icon" aria-hidden="true">+</span><span>All projects</span><span data-category-count="all">${projects.length}</span></button>
           ${categories.map((category) => `<button type="button" data-filter="${category.id}" aria-pressed="false">${categoryIcon(category.id)}<span>${category.label}</span><span data-category-count="${category.id}"></span></button>`).join('')}
         </nav>
+        ${tagControls('sidebar')}
         <div class="sidebar-note"><p>Independent websites.<br>Different ways to be curious.</p><a href="https://github.com/HSPK/collections/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer">Add your AI-made site ${diagonal}</a></div>
       </aside>
       <section class="library-content" id="index" aria-labelledby="library-title">
@@ -203,11 +322,27 @@ function renderLibrary() {
           <label class="sort-label"><span class="sr-only">Sort projects</span><select aria-label="Sort projects" data-sort><option value="discover">Discover</option><option value="newest">Recently added</option><option value="az">A to Z</option></select></label>
           <div class="layout-switch" role="group" aria-label="Collection layout"><button type="button" data-layout="grid" aria-label="Grid view" aria-pressed="true"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 2h6v6H2zm10 0h6v6h-6zM2 12h6v6H2zm10 0h6v6h-6z" fill="currentColor"/></svg></button><button type="button" data-layout="list" aria-label="List view" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 3h16v2H2zm0 6h16v2H2zm0 6h16v2H2z" fill="currentColor"/></svg></button></div>
         </div>
-        <div class="results-line"><p role="status" aria-live="polite" data-result-count></p><label class="mobile-category"><span class="sr-only">Project type</span><select aria-label="Project type" data-mobile-category><option value="all">All types</option>${categories.map((category) => `<option value="${category.id}">${category.label}</option>`).join('')}</select></label><span class="local-note"><span></span>Runs in your browser</span></div>
+        <div class="results-line"><p role="status" aria-live="polite" data-result-count></p><label class="mobile-category"><span class="sr-only">Project type</span><select aria-label="Project type" data-mobile-category><option value="all">All types</option>${categories.map((category) => `<option value="${category.id}">${category.label}</option>`).join('')}</select></label><button class="mobile-tags-button" type="button" data-open-tags aria-label="Filter projects by tags" aria-haspopup="dialog" aria-controls="library-tags-dialog" aria-expanded="false">Tags <span data-tags-count hidden></span></button><span class="local-note"><span></span>Runs in your browser</span></div>
         <p class="storage-note" data-storage-note ${storageWarning ? '' : 'hidden'}>${escapeMarkup(storageWarning)}</p>
         <div class="project-grid" data-project-grid role="region" aria-label="Project list" tabindex="0"></div>
       </section>
     </main>`;
+  const tagsDialog = makeDialog('library-tags-dialog', 'library-tags-title', `<div class="dialog-top"><h2 id="library-tags-title">Filter by tags</h2><button class="dialog-close" type="button" aria-label="Close tag filters">&times;</button></div>${tagControls('dialog')}<p class="tag-dialog-result" data-tags-result role="status"></p><button class="tag-apply" type="button" data-tags-apply>Show projects</button>`, app);
+  tagsDialog.id = 'library-tags-dialog';
+  const openTags = app.querySelector<HTMLButtonElement>('[data-open-tags]')!;
+  openTags.addEventListener('click', () => {
+    tagsDialog.showModal();
+    openTags.setAttribute('aria-expanded', 'true');
+    tagsDialog.querySelector<HTMLInputElement>('[data-tag-search]')!.focus();
+  }, { signal });
+  tagsDialog.querySelector('[data-tags-apply]')!.addEventListener('click', () => tagsDialog.close(), { signal });
+  tagsDialog.addEventListener('close', () => {
+    openTags.setAttribute('aria-expanded', 'false');
+    if (openTags.getClientRects().length) openTags.focus({ preventScroll: true });
+    else app.querySelector<HTMLInputElement>('.library-sidebar [data-tag-search]')?.focus({ preventScroll: true });
+  }, { signal });
+  signal.addEventListener('abort', () => tagsDialog.close(), { once: true });
+  bindTagControls(signal);
   bindCommon(signal);
   const input = app.querySelector<HTMLInputElement>('[data-library-search]')!;
   input.value = library.query;
@@ -376,13 +511,19 @@ function openLibraryRoute() {
   renderLibrary();
 }
 
-function makeDialog(className: string, labelledBy: string, html: string): HTMLDialogElement {
+function makeDialog(className: string, labelledBy: string, html: string, parent: HTMLElement = document.body): HTMLDialogElement {
   const dialog = document.createElement('dialog');
   dialog.className = className;
   dialog.setAttribute('aria-labelledby', labelledBy);
   dialog.innerHTML = html;
-  document.body.append(dialog);
+  parent.append(dialog);
   dialog.querySelector('.dialog-close')?.addEventListener('click', () => dialog.close());
+  dialog.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !event.defaultPrevented) {
+      event.preventDefault();
+      dialog.close();
+    }
+  });
   dialog.addEventListener('click', (event) => {
     if (event.target !== dialog) return;
     const bounds = dialog.getBoundingClientRect();
@@ -427,8 +568,11 @@ window.addEventListener('keydown', (event) => {
   if (event.defaultPrevented) return;
   const target = event.target;
   const editing = target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName));
-  const dialogOpen = aboutDialog.open || searchDialog.open || projectInfo.open;
-  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k' && !dialogOpen) { event.preventDefault(); openSearch(); }
+  const dialogOpen = document.querySelector('dialog[open]') !== null;
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+    event.preventDefault();
+    if (!dialogOpen) openSearch();
+  }
   if (event.key === '/' && !editing && !activeProject && !dialogOpen) { event.preventDefault(); app.querySelector<HTMLInputElement>('[data-library-search]')?.focus(); }
 });
 window.addEventListener('pagehide', () => {
