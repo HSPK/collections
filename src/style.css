@@ -38,7 +38,7 @@ svg { display: block; flex-shrink: 0; }
 .brand-mark { width: 31px; height: 31px; }
 .main-nav { display: flex; gap: 28px; align-items: center; font-size: 14px; }
 .main-nav > a, .main-nav > button { min-height: 44px; display: flex; align-items: center; padding: 0; gap: 8px; }
-.nav-current { font-weight: 600; }
+.header-contribute { font-weight: 600; color: #315f48; }
 .header-code svg { width: 20px; height: 20px; }
 .library-shell { width: 100%; max-width: 1900px; min-height: 0; flex: 1; margin: 0 auto; display: grid; grid-template-columns: 196px minmax(0, 1fr); gap: 28px; padding: 20px 22px 12px 32px; overflow: hidden; }
 .library-sidebar { padding-top: 7px; min-height: 0; overflow: auto; scrollbar-width: thin; scrollbar-color: #b4c0b0 transparent; }
@@ -116,12 +116,6 @@ kbd { font: 12px var(--mono); min-width: 21px; border: 1px solid var(--line); bo
 .empty-results { grid-column: 1 / -1; border: 1px dashed #c7d1c1; border-radius: 8px; padding: 60px 28px; text-align: center; }
 .empty-results h2 { font-size: 25px; margin: 0 0 12px; }
 .empty-results p { color: var(--muted); font-size: 15px; margin: 0 0 22px; }
-.site-footer { max-width: 1836px; flex-shrink: 0; margin: 0 32px; border-top: 1px solid var(--line); padding: 13px 0; display: flex; justify-content: space-between; gap: 24px; color: var(--muted); font-size: 12px; }
-.footer-divider { margin: 0 8px; color: #b4bdb0; }
-.site-footer > div { display: flex; align-items: center; gap: 28px; }
-.site-footer button { font-size: inherit; padding: 0; }
-.site-footer a { display: inline-flex; align-items: center; gap: 6px; }
-.site-footer svg { width: 14px; height: 14px; }
 dialog { color: var(--ink); background: #fafbf7; border: 1px solid var(--line); border-radius: 10px; width: 600px; max-width: calc(100vw - 32px); max-height: calc(100svh - 40px); padding: 30px; box-shadow: 0 24px 90px #1123182b; }
 dialog::backdrop { background: #14261980; backdrop-filter: blur(4px); }
 .dialog-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; margin-bottom: 20px; }
@@ -152,7 +146,6 @@ dialog::backdrop { background: #14261980; backdrop-filter: blur(4px); }
 .not-found h1 { font-size: 50px; letter-spacing: -2px; line-height: 1.1; margin: 30px 0 20px; }
 .not-found p { color: var(--muted); font-size: 17px; line-height: 1.7; margin-bottom: 30px; }
 
-@media (min-width: 1900px) { .site-footer { margin-inline: auto; } }
 @media (max-width: 1100px) {
   .library-shell { grid-template-columns: 176px minmax(0, 1fr); padding-inline: 24px; gap: 20px; }
   .category-nav button { padding-inline: 8px; gap: 7px; font-size: 12px; }
@@ -168,8 +161,8 @@ dialog::backdrop { background: #14261980; backdrop-filter: blur(4px); }
   .site-header { height: 60px; padding-inline: 18px; gap: 15px; }
   .brand { font-size: 23px; gap: 7px; }
   .brand-mark { width: 29px; height: 29px; }
-  .main-nav { gap: 20px; font-size: 13px; }
-  .header-code span { display: none; }
+  .main-nav { gap: 12px; font-size: 12px; }
+  .header-code svg { display: none; }
   .library-shell { display: flex; padding: 14px 10px 8px 16px; }
   .library-content { flex: 1; }
   .library-sidebar { display: none; }
@@ -202,9 +195,6 @@ dialog::backdrop { background: #14261980; backdrop-filter: blur(4px); }
   .project-grid--list .card-copy { padding: 12px 14px; }
   .project-grid--list .card-copy h2 { font-size: 16px; }
   .project-grid--list .card-copy p { font-size: 12px; -webkit-line-clamp: 3; }
-  .site-footer { margin: 0 16px; flex-direction: row; gap: 12px; padding: 11px 0; font-size: 12px; }
-  .site-footer > span { display: none; }
-  .site-footer > div { gap: 22px; flex-wrap: wrap; }
   dialog { padding: 24px; }
   .dialog-top h2 { font-size: 23px; }
   .about-dialog p, .project-info-dialog p { font-size: 15px; }
@@ -212,8 +202,8 @@ dialog::backdrop { background: #14261980; backdrop-filter: blur(4px); }
   .search-result strong { font-size: 15px; }
 }
 @media (max-width: 380px) {
-  .site-header { padding-inline: 15px; }
-  .main-nav { gap: 15px; }
+  .site-header { padding-inline: 15px; gap: 10px; }
+  .main-nav { gap: 10px; }
   .brand { font-size: 21px; }
   .library-shell { padding-inline: 15px; }
 }

@@ -18,7 +18,7 @@ const playCount = manifests.filter((project) => project.category === 'play').len
 
 test('The content-first library filters and remembers its state across websites', async ({ page }) => {
   await page.goto('./');
-  await expect(page.locator('.nav-current')).toHaveText('Projects');
+  await expect(page.locator('.main-nav > button, .main-nav > a')).toHaveText(['About', 'Source', 'Contribute']);
   await expect(page.locator('.project-card')).toHaveCount(manifests.length);
   await page.locator('[data-filter="play"]').click();
   await expect(page.locator('.project-card')).toHaveCount(playCount);

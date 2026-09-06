@@ -93,9 +93,9 @@ function header() {
   return `<header class="site-header">
     <a class="brand" href="${siteUrl()}" aria-label="Odd Index home">${mark}<span>odd/index</span></a>
     <nav class="main-nav" aria-label="Main navigation">
-      <a class="nav-current" href="${siteUrl()}">Projects</a>
       <button type="button" data-about>About</button>
       <a class="header-code" href="https://github.com/HSPK/collections" target="_blank" rel="noopener noreferrer" aria-label="Collection source code">${codeIcon}<span>Source</span></a>
+      <a class="header-contribute" href="https://github.com/HSPK/collections/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer">Contribute</a>
     </nav>
   </header>`;
 }
@@ -207,8 +207,7 @@ function renderLibrary() {
         <p class="storage-note" data-storage-note ${storageWarning ? '' : 'hidden'}>${escapeMarkup(storageWarning)}</p>
         <div class="project-grid" data-project-grid role="region" aria-label="Project list" tabindex="0"></div>
       </section>
-    </main>
-    <footer class="site-footer"><span>odd/index <span class="footer-divider">/</span> AI-made, curiosity-led.</span><div><button type="button" data-about>About this collection</button><a href="https://github.com/HSPK/collections" target="_blank" rel="noopener noreferrer">Source & documentation ${diagonal}</a></div></footer>`;
+    </main>`;
   bindCommon(signal);
   const input = app.querySelector<HTMLInputElement>('[data-library-search]')!;
   input.value = library.query;

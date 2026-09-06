@@ -4,8 +4,9 @@ import { openCollectionMenu, returnToCollection } from './helpers/navigation';
 test('The header and search stay fixed while only the project list scrolls', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('./');
-  await expect(page.locator('.nav-current')).toHaveText('Projects');
-  await expect(page.locator('.nav-current span, .library-intro, .collection-count')).toHaveCount(0);
+  await expect(page.locator('.main-nav > button, .main-nav > a')).toHaveText(['About', 'Source', 'Contribute']);
+  await expect(page.locator('.nav-current, .library-intro, .collection-count, #app > footer')).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Contribute', exact: true })).toHaveAttribute('href', 'https://github.com/HSPK/collections/blob/main/CONTRIBUTING.md');
   await expect(page.getByText('Discover projects', { exact: true })).toHaveCount(0);
   await expect(page.getByText('Tools, games, stories, and unexpected ideas.', { exact: true })).toHaveCount(0);
   const header = (await page.locator('.site-header').boundingBox())!;
@@ -28,6 +29,10 @@ test('The header and search stay fixed while only the project list scrolls', asy
 test('The mobile library retains its fixed search controls and usable inner scrolling', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto('./');
+  await expect(page.locator('.main-nav > button, .main-nav > a')).toHaveText(['About', 'Source', 'Contribute']);
+  await expect(page.locator('.header-code span')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Contribute', exact: true })).toBeVisible();
+  await expect(page.locator('#app > footer')).toHaveCount(0);
   const search = (await page.locator('.library-search').boundingBox())!;
   const list = page.locator('[data-project-grid]');
   await list.evaluate((element) => { element.scrollTop = 900; });

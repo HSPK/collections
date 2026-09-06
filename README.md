@@ -177,7 +177,8 @@ All project manifests use `format: "page"`.
 - Discovery interleaves project types rather than presenting an entire row
   of near-identical effects. Categories, search, and layout preferences
   and the list's own scroll position survive navigation between websites.
-- The header has no project-count badge or introductory headline.
+- The header contains About, Source, and Contribute, without a project-count
+  badge or introductory headline. There is no bottom status/footer bar.
   Header, search, and filters remain visible; the list has a restrained,
   independently scrollable viewport.
 - Press **/** to focus library search or **Ctrl/Command + K** to find a
