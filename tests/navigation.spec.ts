@@ -45,6 +45,18 @@ test('The mobile library retains its fixed search controls and usable inner scro
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(375);
 });
 
+test('Reduced motion disables transitions without creating responsive layout animation', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('./');
+  const layout = page.locator('.library-shell');
+  const card = page.locator('.project-card').first();
+  await expect(layout).toHaveCSS('transition-property', 'none');
+  await expect(card).toHaveCSS('transition-property', 'none');
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await expect(layout).toHaveCSS('transition-duration', '0s');
+  await expect(card).toHaveCSS('transition-property', 'border-color, box-shadow');
+});
+
 test('Floating collection navigation is collapsible, keyboard accessible, and out of page flow', async ({ page }) => {
   await page.goto('./projects/postcards/');
   await expect(page.locator('#main-content > [data-stage]')).toHaveAttribute('data-ready', 'true');

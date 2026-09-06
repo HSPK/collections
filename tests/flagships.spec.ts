@@ -71,6 +71,7 @@ for (const id of ids) {
     await expect(page.locator('#main-content > [data-stage]')).toHaveAttribute('data-ready', 'true');
     const root = page.locator(`.project-${id}`);
     await expect(root.getByRole('heading', { level: 1 }).first()).toBeVisible();
+    await expect(root).toHaveCSS('transition-property', 'none');
     await expect(page.locator('#main-content > [data-stage] [data-project-preview]').first()).toBeAttached();
     for (const width of [1440, 320]) {
       await page.setViewportSize({ width, height: 780 });

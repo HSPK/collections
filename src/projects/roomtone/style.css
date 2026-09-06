@@ -296,9 +296,3 @@
   .project-roomtone .roomtone-comparison .roomtone-section-top { flex-wrap: wrap; }
   .project-roomtone .roomtone-status { padding: 12px 16px; }
 }
-@media (prefers-reduced-motion: reduce) {
-  /* A duration-only global override otherwise transitions every layout property. */
-  .project-roomtone, .project-roomtone *, .project-roomtone *::before, .project-roomtone *::after {
-    transition: none !important;
-  }
-}
