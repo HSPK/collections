@@ -7,6 +7,7 @@ import { categoryNames } from '../src/core/manifest';
 const editions = [
   { name: 'original flagship edition', firstOrder: 61, tag: 'Flagship', ids: ['apsis', 'lumen', 'relay', 'palinode', 'roomtone'] },
   { name: 'spatial flagship edition', firstOrder: 66, tag: 'Spatial flagship', ids: ['section', 'passage', 'morrow', 'parallax', 'loadpath'] },
+  { name: 'solar observatory edition', firstOrder: 71, tag: 'Solar system', ids: ['helios'] },
 ];
 const ids = editions.flatMap((edition) => edition.ids);
 const manifests = readProjectManifests(process.cwd());

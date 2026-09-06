@@ -12,6 +12,7 @@
     "test:update-previews": "UPDATE_PREVIEWS=1 playwright test tests/previews.spec.ts"
   },
   "dependencies": {
+    "astronomy-engine": "2.1.19",
     "three": "^0.180.0"
   },
   "devDependencies": {

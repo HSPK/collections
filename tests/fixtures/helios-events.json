@@ -1,0 +1,65 @@
+{
+  "description": "Independent local solar-eclipse regression anchors from the US Naval Observatory, with NASA's published greatest-eclipse coordinates for Nazas.",
+  "conventions": {
+    "referenceTime": "UT1, written as an ISO instant for comparison with Astronomy Engine's UTC approximately equal to UT1 convention",
+    "observerHeightMeters": 0,
+    "heightNote": "A reproducible model input, not the surveyed elevation of each city",
+    "referenceSolarRadiusKm": 696000,
+    "engineSolarRadiusKm": 695700,
+    "engineContactLunarRadiusKm": 1737.4,
+    "engineObscurationLunarRadiusKm": 1736,
+    "timingToleranceSeconds": 60,
+    "accuracyNote": "These fixtures establish classification and minute-scale agreement, not second-exact contacts, terrain visibility, weather, or lunar-limb predictions."
+  },
+  "methodology": "https://aa.usno.navy.mil/data/Eclipse2024#notes",
+  "nazasCoordinates": "https://eclipse.gsfc.nasa.gov/SEpath/SEpath2001/SE2024Apr08Tpath.html",
+  "events": [
+    {
+      "id": "nazas-2024",
+      "date": "2024-04-08",
+      "latitude": 25.2866667,
+      "longitude": -104.1383333,
+      "expectedKind": "total",
+      "referencePeakUT1": "2024-04-08T18:17:14.700Z",
+      "source": "https://aa.usno.navy.mil/api/eclipses/solar/date?date=2024-04-08&coords=25.2866667,-104.1383333&height=0"
+    },
+    {
+      "id": "dallas-2024",
+      "date": "2024-04-08",
+      "latitude": 32.7767,
+      "longitude": -96.797,
+      "expectedKind": "total",
+      "referencePeakUT1": "2024-04-08T18:42:32.900Z",
+      "source": "https://aa.usno.navy.mil/api/eclipses/solar/date?date=2024-04-08&coords=32.7767,-96.797&height=0"
+    },
+    {
+      "id": "albuquerque-2023",
+      "date": "2023-10-14",
+      "latitude": 35.0844,
+      "longitude": -106.6504,
+      "expectedKind": "annular",
+      "referencePeakUT1": "2023-10-14T16:36:54.200Z",
+      "source": "https://aa.usno.navy.mil/api/eclipses/solar/date?date=2023-10-14&coords=35.0844,-106.6504&height=0"
+    },
+    {
+      "id": "san-francisco-2024",
+      "date": "2024-04-08",
+      "latitude": 37.76,
+      "longitude": -122.44,
+      "expectedKind": "partial",
+      "referencePeakUT1": "2024-04-08T18:13:12.500Z",
+      "source": "https://aa.usno.navy.mil/api/eclipses/solar/date?date=2024-04-08&coords=37.76,-122.44&height=0"
+    },
+    {
+      "id": "tokyo-2024",
+      "date": "2024-04-08",
+      "latitude": 35.6762,
+      "longitude": 139.6503,
+      "expectedKind": "not-visible",
+      "referencePeakUT1": null,
+      "comparisonTimeUTC": "2024-04-08T18:42:37.000Z",
+      "sunBelowHorizonAtComparison": true,
+      "source": "https://aa.usno.navy.mil/api/eclipses/solar/date?date=2024-04-08&coords=35.6762,139.6503&height=0"
+    }
+  ]
+}

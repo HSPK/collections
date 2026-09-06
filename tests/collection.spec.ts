@@ -37,7 +37,7 @@ test('The library gives the first screen to readable project content, not a hero
   expect(visible).toBeGreaterThanOrEqual(6);
   expect(await page.locator('.card-copy p').first().evaluate((element) => parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(14);
   expect(await page.locator('.card-tags span').first().evaluate((element) => parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(12);
-  expect(requested.filter((url) => /\/three[^/]*\.js|\/deps\/three\.js/.test(url))).toEqual([]);
+  expect(requested.filter((url) => /\/(?:three|astronomy)[^/]*\.js|\/deps\/(?:three|astronomy-engine)\.js/.test(url))).toEqual([]);
 });
 
 test('Old shared links lead to real standalone pages and survive direct refresh', async ({ page }) => {

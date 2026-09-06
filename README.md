@@ -44,6 +44,24 @@ the site publishes automatically after the main-branch quality gate.
 
 ## The websites
 
+### Helios: the sky, from here
+
+[**Open the solar observatory**](https://hspk.github.io/collections/projects/helios/).
+Follow all eight planets, choose an Earth location and UTC time, and observe
+the Moon's changing phase and local orientation. Scrub computed contacts for
+total, annular, or partial solar eclipses; moving the observer can remove the
+eclipse or put it below the horizon. Keep an observation as JSON or a share link.
+The overview's compressed distances and enlarged bodies never enter the
+true-angular Earth-sky calculations.
+
+Helios uses the locally bundled
+[Astronomy Engine](https://github.com/cosinekitty/astronomy) rather than a hosted
+API or a scripted eclipse. Its [project notes](src/projects/helios/README.md)
+describe frames, assumptions, extension points, and accuracy limits; the
+[third-party license](public/third-party/astronomy-engine-LICENSE.txt) is included
+with the site. Non-Earth cameras are orbital reference views, not calibrated
+surface observatories.
+
 ### Spatial systems
 
 Five independent studios where space is part of the computation, not just
@@ -66,7 +84,7 @@ for physical robot control or certified structural design.
 
 Five deeper dives, built around systems you can inspect and change rather
 than effects you can only watch. Search **Flagship** in the library to
-browse both editions; each is still its own independent website.
+browse every flagship; each is still its own independent website.
 
 | Project | Inside |
 |---------|--------|
@@ -227,7 +245,7 @@ All project manifests use `format: "page"`.
 - Press **/** to focus library search or **Ctrl/Command + K** to find a
   project from anywhere. Dialogs support Tab, Enter, and Escape.
 - The library starts with project content, not a heavyweight 3D hero.
-  Its first load does not request Three.js.
+  Its first load does not request Three.js or the astronomy engine.
 - Controls, labels, and body copy use readable sizes. Sites are designed
   for narrow screens and provide keyboard or touch alternatives.
 - Motion respects the system preference where appropriate. The original

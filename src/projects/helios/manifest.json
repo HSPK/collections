@@ -1,0 +1,14 @@
+{
+  "id": "helios",
+  "order": 71,
+  "title": "Helios",
+  "subtitle": "An independent solar-system & sky observatory.",
+  "description": "Travel with every planet, stand anywhere on Earth, and trace the real geometry of Moon phases and local solar eclipses. A true-angular sky and a living orbital atlas, computed entirely in your browser.",
+  "category": "explore",
+  "format": "page",
+  "medium": "Computational astronomy observatory",
+  "tags": ["Flagship", "Solar system", "3D", "Astronomy", "Moon phases", "Solar eclipses", "Earth observation", "Simulation"],
+  "color": "#102027",
+  "ink": "#ead8af",
+  "instruction": "Begin inside the Moon’s shadow at Nazas, move the observer, then explore the Moon or travel with another planet. Every time is UTC."
+}
