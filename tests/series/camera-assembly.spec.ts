@@ -50,6 +50,8 @@ test('camera choreography stages overlap deliberately and reverse scrubbing is h
 });
 
 async function openExhibit(page: Page, reducedMotion: 'reduce' | 'no-preference' = 'reduce') {
+  // Software WebGL in CI can spend several seconds on each real frame-dependent interaction.
+  test.setTimeout(90_000);
   // Concurrent sibling edits must not replace this test's page through Vite HMR.
   await page.routeWebSocket(/^ws:\/\/127\.0\.0\.1:4173\//, (socket) => {
     const server = socket.connectToServer();
@@ -124,7 +126,12 @@ test('camera browser controls scrub, inspect all groups, and orbit while paused'
   await scrub(page, 0.24);
   await scrub(page, 0.72);
   await renderedFrames(page);
-  expect(await canvas.screenshot()).toEqual(pose);
+  const repeatedPose = await canvas.screenshot();
+  if (!repeatedPose.equals(pose)) {
+    await testInfo.attach('camera-first-pose', { body: pose, contentType: 'image/png' });
+    await testInfo.attach('camera-repeated-pose', { body: repeatedPose, contentType: 'image/png' });
+  }
+  expect(repeatedPose.equals(pose), 'Revisiting a paused timeline position must preserve the exact rendered pose.').toBe(true);
   await page.getByRole('button', { name: 'Jump to print stage' }).click();
   await expect(root).toHaveAttribute('data-progress', '1.00000');
   await expect(canvas).toHaveAttribute('data-print', 'visible');
