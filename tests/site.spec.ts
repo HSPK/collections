@@ -56,6 +56,8 @@ test('Search, about, invalid routes, and keyboard entry work', async ({ page }) 
 
 for (const id of ids) {
   test(`${id}: renders, responds to controls, pauses, and tears down cleanly`, async ({ page }, testInfo) => {
+    // Software WebGL can spend nearly a second on each real pointer step in CI.
+    if (['orbital', 'soft', 'terrain', 'chroma', 'fold'].includes(id)) test.setTimeout(90_000);
     const errors: string[] = [];
     page.on('pageerror', (error) => errors.push(error.message));
     page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
