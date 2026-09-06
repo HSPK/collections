@@ -1,0 +1,14 @@
+{
+  "id": "parallax",
+  "order": 69,
+  "title": "Parallax",
+  "subtitle": "The depth between two pictures.",
+  "description": "Recover the structure of a folded coastal observatory from two calibrated images. Edit pixel correspondences, inspect intersecting rays, measure depth uncertainty and keep the reconstruction.",
+  "category": "learn",
+  "format": "page",
+  "medium": "Calibrated stereo reconstruction studio",
+  "tags": ["Spatial flagship", "3D", "Computer vision", "Flagship", "Stereo reconstruction", "Epipolar geometry"],
+  "color": "#f0eee5",
+  "ink": "#1c2824",
+  "instruction": "Find a landmark in both images. Move a match, follow its rays and discover why a small baseline makes depth uncertain."
+}

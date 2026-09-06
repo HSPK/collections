@@ -1,0 +1,14 @@
+{
+  "id": "morrow",
+  "order": 68,
+  "title": "Morrow",
+  "subtitle": "Motion has to fit the world.",
+  "description": "An original six-axis robotics atelier. Solve full tool poses, route around obstacles, carry a real transformed payload and inspect every joint of a collision-checked motion.",
+  "category": "create",
+  "format": "page",
+  "medium": "Spatial robotics workbench",
+  "tags": ["Spatial flagship", "3D", "Robotics", "Flagship", "Kinematics", "Motion planning", "Workcell"],
+  "color": "#273532",
+  "ink": "#efeee6",
+  "instruction": "Solve the source pose, plan and run the approach, grip the coupon, then plan its journey to the receiver."
+}

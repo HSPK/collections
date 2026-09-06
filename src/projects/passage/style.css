@@ -1,0 +1,227 @@
+.project-passage {
+  --passage-paper: #f6f2e8;
+  --passage-ink: #30382e;
+  --passage-muted: #656957;
+  --passage-rule: #c9c6b4;
+  --passage-red: #b83d24;
+  --passage-olive: #4e613f;
+  color: var(--passage-ink);
+  background: var(--passage-paper);
+  min-height: 100vh;
+  padding: 26px clamp(16px, 3vw, 48px) 40px;
+  font: 16px/1.5 "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+  overflow-wrap: anywhere;
+}
+.project-passage *, .project-passage *::before, .project-passage *::after { box-sizing: border-box; }
+.project-passage h1, .project-passage h2, .project-passage p { margin: 0; }
+.project-passage button, .project-passage select, .project-passage input { font: inherit; color: inherit; }
+.project-passage button, .project-passage select, .project-passage input[type="number"] { min-height: 40px; border: 1px solid var(--passage-rule); background: #fcfaf3; border-radius: 2px; }
+.project-passage button { padding: 7px 12px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.project-passage button:hover:not(:disabled) { background: #e9e6d7; border-color: var(--passage-olive); }
+.project-passage button:disabled { cursor: not-allowed; opacity: .42; }
+.project-passage select { padding: 6px 28px 6px 9px; width: 100%; min-width: 0; font-size: 15px; }
+.project-passage input[type="number"] { width: 100%; padding: 6px 9px; min-width: 0; font-size: 16px; }
+.project-passage input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--passage-olive); margin: 0; flex: 0 0 auto; }
+.project-passage input[type="range"] { width: 100%; accent-color: var(--passage-red); cursor: pointer; min-height: 30px; margin: 0; }
+.project-passage label { font-size: 14px; font-weight: 500; }
+.project-passage :focus-visible { outline: 3px solid #315e7d; outline-offset: 3px; }
+.project-passage [hidden] { display: none !important; }
+.project-passage .passage-masthead { display: flex; align-items: flex-end; gap: 28px; border-bottom: 2px solid var(--passage-ink); padding-bottom: 12px; }
+.project-passage .passage-kicker { font-size: 12px; font-weight: 700; letter-spacing: .16em; }
+.project-passage h1 { font: 500 clamp(44px, 5vw, 60px)/1 Georgia, "Times New Roman", serif; letter-spacing: -.055em; }
+.project-passage h1 span { color: var(--passage-red); font: 400 .8em Arial, sans-serif; display: inline-block; margin-left: 12px; }
+.project-passage .passage-deck { border-left: 1px solid var(--passage-rule); padding: 2px 0 3px 24px; margin-bottom: 2px; }
+.project-passage .passage-deck p { font: italic 24px/1.2 Georgia, serif; }
+.project-passage .passage-deck > span { display: block; margin-top: 8px; color: var(--passage-muted); font-size: 14px; }
+.project-passage .passage-history { margin-left: auto; display: flex; gap: 6px; padding-bottom: 3px; }
+.project-passage .passage-building-line { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 12px 0; }
+.project-passage .passage-building-line strong { display: block; font-size: 19px; }
+.project-passage .passage-building-line > div > span { color: var(--passage-muted); font-size: 15px; }
+.project-passage .passage-building-line > label { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.project-passage .passage-building-line select { width: 235px; }
+.project-passage .passage-journey { display: grid; grid-template-columns: minmax(0, 1fr) 40px minmax(0, 1fr) minmax(145px, .58fr); gap: 14px; align-items: end; padding: 10px 18px; background: #e8e7da; border: 1px solid var(--passage-rule); }
+.project-passage .passage-journey label { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 7px; }
+.project-passage .passage-endpoint-a, .project-passage .passage-endpoint-b { display: inline-grid; place-items: center; color: #fffaf0; background: var(--passage-red); width: 21px; height: 21px; border-radius: 50%; font: 700 12px Arial; }
+.project-passage .passage-endpoint-b { background: var(--passage-olive); }
+.project-passage .passage-swap { padding: 0; font-size: 24px; }
+.project-passage .passage-viewbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 0 12px; }
+.project-passage .passage-pane-nav { display: flex; gap: 0; margin-right: auto; border: 1px solid var(--passage-rule); }
+.project-passage .passage-pane-nav button { border: 0; border-radius: 0; min-width: 67px; background: transparent; }
+.project-passage .passage-pane-nav button[aria-pressed="true"] { background: var(--passage-ink); color: var(--passage-paper); }
+.project-passage .passage-viewbar > label { display: flex; align-items: center; gap: 8px; }
+.project-passage .passage-viewbar select { width: auto; max-width: 220px; }
+.project-passage .passage-workbench { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(355px, 1fr); grid-template-rows: auto auto; border: 1px solid var(--passage-rule); gap: 0; }
+.project-passage .passage-pane { min-width: 0; background: #f9f6ee; }
+.project-passage .passage-space-pane { grid-row: 1 / 3; display: flex; flex-direction: column; position: relative; background: #e9e6d9; border-right: 1px solid var(--passage-rule); }
+.project-passage .passage-panel-heading { min-height: 48px; padding: 8px 14px; display: flex; justify-content: space-between; align-items: center; gap: 8px; border-bottom: 1px solid var(--passage-rule); font-size: 12px; letter-spacing: .05em; }
+.project-passage .passage-panel-heading b { color: var(--passage-red); margin-right: 8px; }
+.project-passage .passage-panel-heading > span { white-space: nowrap; }
+.project-passage .passage-panel-heading > div { display: flex; gap: 6px; }
+.project-passage .passage-panel-heading button { min-height: 32px; padding: 4px 8px; }
+.project-passage .passage-panel-heading > label { font-size: 14px; letter-spacing: 0; }
+.project-passage .passage-space { min-height: 480px; flex: 1; position: relative; overflow: hidden; }
+.project-passage .passage-space canvas { display: block; width: 100%; height: 100%; position: absolute; inset: 0; touch-action: none; }
+.project-passage .passage-space-labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.project-passage .passage-space-labels span { position: absolute; left: 0; top: 0; background: #f6f2e8ec; border-left: 3px solid #7a8268; padding: 3px 6px; font-size: 12px; white-space: nowrap; letter-spacing: .01em; }
+.project-passage .passage-space-labels span.is-active { border-color: var(--passage-red); color: #a43722; }
+.project-passage .passage-space-labels b { display: none; }
+.project-passage .passage-space-labels em { font-style: normal; }
+.project-passage .passage-space-footer { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 14px 20px; border-top: 1px solid #ccc8b5; color: var(--passage-muted); }
+.project-passage .passage-space-footer p { font-size: 13px; line-height: 1.5; }
+.project-passage .passage-north { font: 500 21px Georgia, serif; color: var(--passage-ink); white-space: nowrap; }
+.project-passage .passage-scale { font-size: 12px; text-align: right; letter-spacing: .08em; white-space: nowrap; }
+.project-passage .passage-plan { margin: 6px 12px 0; min-height: 220px; touch-action: pan-y; }
+.project-passage .passage-plan svg { display: block; width: 100%; height: auto; max-height: 320px; }
+.project-passage .passage-plan-key { display: flex; justify-content: space-between; gap: 6px; padding: 5px 14px 8px; color: var(--passage-muted); font-size: 12px; }
+.project-passage .passage-plan-key > span { display: inline-flex; align-items: center; gap: 4px; }
+.project-passage .passage-plan-key i { width: 10px; height: 10px; display: inline-block; }
+.project-passage .passage-plan-tools { display: flex; align-items: center; gap: 6px; padding: 2px 14px 10px; font-size: 14px; }
+.project-passage .passage-plan-tools > span { margin-right: auto; }
+.project-passage .passage-plan-tools button { min-width: 35px; min-height: 34px; padding: 4px 8px; }
+.project-passage .passage-key-path { background: #c64228; }
+.project-passage .passage-key-open { background: #638365; }
+.project-passage .passage-key-solid { background: #464b3e; }
+.project-passage .passage-pick-hint { font-size: 14px; line-height: 1.45; color: var(--passage-muted); padding: 0 14px 12px; }
+.project-passage .passage-route-pane { border-top: 1px solid var(--passage-rule); }
+.project-passage .passage-metrics { display: grid; grid-template-columns: 1fr 1fr 1fr; padding: 12px 14px 8px; }
+.project-passage .passage-metrics > div { display: flex; flex-direction: column; padding-left: 10px; border-left: 1px solid var(--passage-rule); }
+.project-passage .passage-metrics > div:first-child { border: 0; padding: 0; }
+.project-passage .passage-metrics strong { font: 400 32px/1.2 Georgia, serif; }
+.project-passage .passage-metrics span { font-size: 14px; color: var(--passage-muted); }
+.project-passage .passage-walk-controls { display: flex; gap: 6px; padding: 8px 14px; align-items: flex-end; flex-wrap: wrap; }
+.project-passage .passage-walk-controls label { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.project-passage .passage-walk-controls select { width: 62px; padding-right: 8px; }
+.project-passage .passage-primary { background: var(--passage-red); border-color: var(--passage-red); color: #fff9ef; }
+.project-passage .passage-primary:hover:not(:disabled) { background: #932f1d; border-color: #932f1d; }
+.project-passage .passage-scrub-label { display: block; padding: 0 14px; }
+.project-passage .passage-scrub-label output { float: right; color: var(--passage-muted); font-variant-numeric: tabular-nums; font-size: 13px; }
+.project-passage .passage-pose-readout { display: block; padding: 0 14px 8px; font: 14px/1.4 "Courier New", monospace; color: var(--passage-muted); }
+.project-passage .passage-current-step { margin: 2px 14px 12px; padding: 8px 10px; background: #ececdf; border-left: 2px solid var(--passage-olive); font-size: 14px; }
+.project-passage .passage-directions { border-top: 1px solid var(--passage-rule); }
+.project-passage summary { cursor: pointer; font-size: 15px; font-weight: 600; padding: 10px 14px; }
+.project-passage .passage-directions ol { max-height: 250px; overflow-y: auto; padding: 0 14px 12px 36px; margin: 0; }
+.project-passage .passage-directions li { padding: 3px 0; color: var(--passage-muted); }
+.project-passage .passage-directions button { border: 0; width: 100%; text-align: left; font-weight: 400; background: transparent; font-size: 14px; }
+.project-passage .passage-directions button[aria-current="step"] { background: #e8e8d8; color: #303d29; }
+.project-passage .passage-directions button > span { display: block; color: var(--passage-red); font-size: 12px; font-weight: 600; margin-bottom: 2px; }
+.project-passage .passage-no-route { padding: 12px 14px 18px; background: #f3e5d9; }
+.project-passage .passage-no-route p { margin: 6px 0 10px; font-size: 15px; }
+.project-passage .passage-no-route button { margin: 0 6px 4px 0; }
+.project-passage .passage-edit-pane { display: none; }
+.project-passage .passage-workbench[data-pane="edit"] .passage-plan-pane,
+.project-passage .passage-workbench[data-pane="edit"] .passage-route-pane { display: none; }
+.project-passage .passage-workbench[data-pane="edit"] .passage-edit-pane { display: block; grid-row: 1 / 3; }
+.project-passage .passage-editor-scroll { max-height: 650px; overflow-y: auto; padding: 0 16px 18px; }
+.project-passage fieldset { border: 0; border-bottom: 1px solid var(--passage-rule); padding: 14px 0; margin: 0 0 12px; min-width: 0; }
+.project-passage legend { font: 400 22px Georgia, serif; padding-top: 20px; }
+.project-passage .passage-field-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; margin: 6px 0 10px; }
+.project-passage .passage-field-pair label { display: flex; flex-direction: column; gap: 4px; }
+.project-passage .passage-check { display: flex; align-items: center; gap: 7px; min-height: 30px; }
+.project-passage .passage-help { color: var(--passage-muted); font-size: 14px; margin: 8px 0; }
+.project-passage .passage-door-list > div { display: flex; gap: 8px; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #d9d6c7; }
+.project-passage .passage-width-label { display: flex; flex-direction: row-reverse; align-items: center; gap: 4px; width: 85px; flex: 0 0 85px; }
+.project-passage .passage-width-label input { padding-left: 6px; padding-right: 0; }
+.project-passage .passage-portal-list > div { padding: 6px 0; }
+.project-passage .passage-portal-list small { display: block; margin-left: 25px; font-size: 14px; color: var(--passage-muted); }
+.project-passage .passage-button-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+.project-passage .passage-search-strip { border-bottom: 1px solid var(--passage-rule); display: flex; gap: 14px; justify-content: space-between; padding: 12px 0; align-items: center; }
+.project-passage .passage-search-strip > div:first-child { display: flex; gap: 10px; align-items: flex-start; }
+.project-passage .passage-search-strip p { font-size: 14px; }
+.project-passage .passage-status-dot { flex: 0 0 7px; height: 7px; margin-top: 7px; border-radius: 50%; background: #647d4b; }
+.project-passage.passage-has-error .passage-status-dot { background: var(--passage-red); }
+.project-passage.passage-has-error .passage-search-strip { color: #93351f; }
+.project-passage .passage-search-actions { flex: 0 0 auto; text-align: right; font-size: 12px; }
+.project-passage .passage-search-actions button { margin-left: 8px; }
+.project-passage .passage-bottom { display: grid; grid-template-columns: 1.1fr 1fr; gap: 50px; padding: 28px 0 0; }
+.project-passage h2 { font: 400 27px Georgia, serif; margin-bottom: 8px; }
+.project-passage .passage-bottom p { font-size: 15px; color: var(--passage-muted); }
+.project-passage .passage-method { border-top: 1px solid var(--passage-ink); }
+.project-passage .passage-method summary { padding-left: 0; font-size: 16px; }
+.project-passage .passage-method p { margin: 8px 0 14px; }
+.project-passage .passage-webgl-error { padding: 40px 20px; }
+@media (min-width: 1400px) {
+  .project-passage { max-width: 1800px; margin: auto; }
+  .project-passage .passage-space { min-height: 620px; }
+  .project-passage .passage-plan svg { max-height: 290px; }
+}
+@media (max-width: 1050px) {
+  .project-passage .passage-deck { padding-left: 18px; }
+  .project-passage .passage-deck p { font-size: 21px; }
+  .project-passage .passage-history { gap: 4px; }
+  .project-passage .passage-building-line > div > span { display: none; }
+  .project-passage .passage-workbench { grid-template-columns: minmax(0, 1.1fr) minmax(340px, 1fr); }
+  .project-passage .passage-space-footer { padding: 12px; gap: 12px; }
+  .project-passage .passage-scale { display: none; }
+}
+@media (max-width: 760px) {
+  .project-passage { padding: 18px 16px 30px; }
+  .project-passage .passage-masthead { flex-wrap: wrap; gap: 10px 20px; padding-bottom: 14px; align-items: center; }
+  .project-passage .passage-deck { border: 0; padding: 0; margin: 0; }
+  .project-passage .passage-deck p { font-size: 20px; }
+  .project-passage .passage-deck > span { display: none; }
+  .project-passage .passage-history { margin-left: auto; }
+  .project-passage .passage-history button { padding: 6px 9px; }
+  .project-passage .passage-building-line { padding: 12px 0; align-items: flex-start; }
+  .project-passage .passage-building-line strong { font-size: 17px; }
+  .project-passage .passage-building-line > label { display: block; font-size: 12px; }
+  .project-passage .passage-building-line select { width: 180px; font-size: 14px; }
+  .project-passage .passage-journey { grid-template-columns: minmax(0, 1fr) 36px minmax(0, 1fr); gap: 8px; padding: 10px; }
+  .project-passage .passage-journey label:last-child { grid-column: 1 / -1; flex-wrap: nowrap; }
+  .project-passage .passage-journey label:last-child select { margin-left: auto; width: calc(100% - 68px); }
+  .project-passage .passage-journey select { font-size: 14px; }
+  .project-passage .passage-viewbar { flex-wrap: wrap; gap: 6px; padding: 8px 0; }
+  .project-passage .passage-pane-nav { width: 100%; }
+  .project-passage .passage-pane-nav button { flex: 1; min-width: 0; font-size: 15px; min-height: 42px; }
+  .project-passage .passage-viewbar > label { width: calc(50% - 4px); gap: 4px; display: block; }
+  .project-passage .passage-viewbar select { width: 100%; max-width: none; font-size: 14px; }
+  .project-passage .passage-workbench { display: block; }
+  .project-passage .passage-workbench .passage-pane { display: none; border: 0; }
+  .project-passage .passage-workbench[data-pane="space"] .passage-space-pane { display: flex; }
+  .project-passage .passage-workbench[data-pane="plan"] .passage-plan-pane,
+  .project-passage .passage-workbench[data-pane="route"] .passage-route-pane,
+  .project-passage .passage-workbench[data-pane="edit"] .passage-edit-pane { display: block; }
+  .project-passage .passage-space { min-height: 440px; height: 440px; flex: none; }
+  .project-passage .passage-space-labels b { display: inline; }
+  .project-passage .passage-space-labels em { display: none; }
+  .project-passage .passage-space-footer p { font-size: 12px; }
+  .project-passage .passage-panel-heading { padding: 9px 10px; font-size: 11px; }
+  .project-passage .passage-panel-heading b { margin-right: 4px; }
+  .project-passage .passage-plan { margin: 4px 4px 0; min-height: 0; }
+  .project-passage .passage-plan svg { max-height: none; }
+  .project-passage .passage-plan-key { padding: 8px; flex-wrap: wrap; gap: 5px 12px; font-size: 12px; }
+  .project-passage .passage-pick-hint { padding: 4px 12px 14px; }
+  .project-passage .passage-editor-scroll { max-height: none; overflow: visible; padding: 0 12px 14px; }
+  .project-passage .passage-metrics strong { font-size: 30px; }
+  .project-passage .passage-metrics span { font-size: 14px; }
+  .project-passage .passage-walk-controls { padding: 8px 10px; }
+  .project-passage .passage-walk-controls button { padding-left: 9px; padding-right: 9px; }
+  .project-passage .passage-scrub-label { padding: 0 10px; }
+  .project-passage .passage-scrub-label output { font-size: 12px; }
+  .project-passage .passage-search-strip { display: block; padding: 10px 0; }
+  .project-passage .passage-search-actions { text-align: left; padding: 8px 0 0 17px; }
+  .project-passage .passage-bottom { display: block; padding-top: 24px; }
+  .project-passage .passage-method { margin-top: 28px; }
+}
+@media (max-width: 400px) {
+  .project-passage { padding-left: 12px; padding-right: 12px; }
+  .project-passage .passage-kicker, .project-passage .passage-deck { display: none; }
+  .project-passage h1 { font-size: 36px; }
+  .project-passage h1 span { margin-left: 6px; }
+  .project-passage .passage-masthead { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; padding-bottom: 10px; }
+  .project-passage .passage-history { gap: 2px; margin: 0; padding: 0; }
+  .project-passage .passage-history button { padding: 4px; min-height: 34px; }
+  .project-passage .passage-building-line { display: block; padding: 10px 0; }
+  .project-passage .passage-building-line > label { display: flex; margin-top: 4px; }
+  .project-passage .passage-building-line select { flex: 1; }
+  .project-passage .passage-journey { grid-template-columns: minmax(0, 1fr) 30px; gap: 8px; }
+  .project-passage .passage-journey > label:first-child { grid-column: 1; }
+  .project-passage .passage-swap { grid-column: 2; grid-row: 1 / 3; align-self: stretch; }
+  .project-passage .passage-journey > label:nth-of-type(2) { grid-column: 1; }
+  .project-passage .passage-journey > label { flex-wrap: nowrap; }
+  .project-passage .passage-journey > label select { width: 0; flex: 1; }
+  .project-passage .passage-journey > label:last-child select { width: auto; }
+  .project-passage .passage-panel-heading button { padding: 4px 6px; }
+  .project-passage .passage-space { min-height: 390px; height: 390px; }
+  .project-passage .passage-walk-controls label { width: 100%; margin-left: 0; }
+}

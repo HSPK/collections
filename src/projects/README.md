@@ -93,8 +93,9 @@ Optional microphone interactions must start only after an explicit user
 action, process input locally without recording or uploading, offer a
 pointer/keyboard alternative, and stop every media track on exit.
 
-Keep essential UI text at least 12px, body text about 15-18px, and touch
-targets generous. Provide substantive content and functioning controls.
+Keep essential controls and labels at least 14px, body text about 16-18px,
+and touch targets generous. A 320px viewport should remain usable without
+document-level horizontal scrolling. Provide substantive content and functioning controls.
 Sound must start only after explicit opt-in. Label fictional information
 as fiction and distinguish a local generator from a hosted AI model.
 

@@ -69,8 +69,8 @@ changes in an issue before coupling a small contribution to a new stack.
 
 - Make controls do what they say. Include sensible initial content,
   explicit errors, reset/back paths, and keyboard or touch alternatives.
-- Keep essential UI readable: roughly 15-18px body copy and at least 12px
-  labels. A 375px screen should not acquire document-level horizontal
+- Keep essential UI readable: roughly 16-18px body copy and at least 14px
+  controls and labels. A 320px screen should not acquire document-level horizontal
   scrolling.
 - Respect reduced motion and provide pause controls for ongoing motion.
   Audio, microphone, or other sensitive input must be explicitly enabled.

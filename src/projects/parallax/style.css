@@ -1,0 +1,253 @@
+.project-parallax {
+  --px-paper: #f0eee5;
+  --px-ink: #1c2824;
+  --px-muted: #5d685e;
+  --px-line: #c8cbbd;
+  --px-yellow: #f2d553;
+  --px-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  background: var(--px-paper);
+  color: var(--px-ink);
+  font: 16px/1.5 Arial, Helvetica, sans-serif;
+  min-height: 100dvh;
+  padding: 26px 30px 0;
+}
+.project-parallax *, .project-parallax *::before, .project-parallax *::after { box-sizing: border-box; }
+.project-parallax button, .project-parallax input, .project-parallax select, .project-parallax textarea { font: inherit; color: inherit; }
+.project-parallax button { min-height: 40px; padding: 8px 12px; border: 1px solid var(--px-line); background: transparent; border-radius: 0; font-size: 14px; line-height: 1.3; }
+.project-parallax button:hover { background: #dfdfd2; border-color: #748374; }
+.project-parallax button[aria-pressed="true"] { background: var(--px-ink); color: var(--px-paper); border-color: var(--px-ink); }
+.project-parallax :is(button,input,select,textarea,summary,svg,canvas):focus-visible { outline: 3px solid #947513; outline-offset: 3px; }
+.project-parallax input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--px-ink); margin: 0; }
+.project-parallax input[type="range"] { accent-color: #455648; width: 100%; min-width: 0; height: 28px; cursor: pointer; margin: 3px 0 0; }
+.project-parallax h1, .project-parallax h2, .project-parallax h3, .project-parallax p { margin: 0; }
+.project-parallax select { background: transparent; border: 0; border-bottom: 1px solid var(--px-line); border-radius: 0; min-height: 39px; padding: 4px 25px 4px 0; max-width: 100%; }
+.project-parallax .px-header { display: flex; justify-content: space-between; align-items: center; gap: 25px; padding: 4px 0 25px; }
+.project-parallax .px-brand { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+.project-parallax .px-brand svg { width: 45px; height: 45px; fill: none; stroke: var(--px-ink); stroke-width: 1.4; }
+.project-parallax .px-brand h1 { font-size: clamp(32px, 3.6vw, 53px); font-weight: 800; letter-spacing: -3.4px; line-height: 1; }
+.project-parallax .px-brand h1 span { display: block; font: 14px/1.4 var(--px-mono); letter-spacing: -.4px; margin-top: 9px; }
+.project-parallax .px-intro h2 { font-size: clamp(19px, 1.7vw, 27px); letter-spacing: -.8px; font-weight: 500; }
+.project-parallax .px-intro p { color: var(--px-muted); font-size: 15px; margin-top: 3px; }
+.project-parallax .px-edition { display: flex; flex-direction: column; padding-left: 23px; border-left: 1px solid var(--px-line); }
+.project-parallax .px-edition span { font: 12px/1.4 var(--px-mono); }
+.project-parallax .px-edition strong { font: 29px/1.25 var(--px-mono); letter-spacing: -2px; }
+.project-parallax .px-toolbar { display: flex; align-items: center; gap: 26px; border-block: 1px solid var(--px-ink); padding: 11px 0; }
+.project-parallax .px-study-label { display: flex; align-items: center; gap: 15px; font-size: 14px; }
+.project-parallax .px-study-label select { font-size: 16px; font-weight: 600; border: none; min-width: 210px; }
+.project-parallax .px-method-group { display: flex; gap: 0; margin-left: auto; }
+.project-parallax .px-method-group button + button { border-left: 0; }
+.project-parallax .px-history { display: flex; gap: 6px; }
+.project-parallax .px-history button { border-color: transparent; }
+.project-parallax .px-mobile-tabs { display: none; }
+.project-parallax .px-studio { display: grid; grid-template-columns: minmax(0, 1.02fr) minmax(0, 1.48fr) minmax(250px, .78fr); gap: 17px; padding-top: 17px; align-items: stretch; }
+.project-parallax .px-pair { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.project-parallax .px-camera-panel { min-width: 0; }
+.project-parallax .px-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; height: 38px; border-top: 1px solid var(--px-ink); }
+.project-parallax .px-panel-heading h2 { display: flex; gap: 8px; align-items: center; font-size: 15px; font-weight: 600; white-space: nowrap; }
+.project-parallax .px-panel-heading > span { font: 12px var(--px-mono); white-space: nowrap; }
+.project-parallax .px-view-letter { width: 21px; height: 21px; background: var(--px-ink); color: var(--px-paper); display: grid; place-items: center; font: 13px var(--px-mono); }
+.project-parallax .px-space-symbol { font-size: 26px; font-weight: 400; line-height: 1; }
+.project-parallax .px-exposure { aspect-ratio: 3 / 2; position: relative; overflow: hidden; background: #c7cbbd; border: 1px solid #a8b1a2; }
+.project-parallax .px-exposure > canvas, .project-parallax .px-exposure > svg { width: 100%; height: 100%; display: block; position: absolute; inset: 0; }
+.project-parallax .px-exposure > svg { touch-action: pan-y; }
+.project-parallax[data-edit-mode="true"] .px-exposure > svg { touch-action: none; cursor: crosshair; }
+.project-parallax .px-exposure-stamp { position: absolute; left: 12px; bottom: 9px; font: 9px var(--px-mono); color: #243528; letter-spacing: 1.1px; pointer-events: none; background: #dce0ceba; padding: 3px 5px; }
+.project-parallax .px-image-caption { display: flex; justify-content: space-between; gap: 8px; font: 11px/1.5 var(--px-mono); padding: 6px 0 0; color: var(--px-muted); }
+.project-parallax .px-image-crosshair { stroke: #1c30284d; stroke-width: 1; fill: none; }
+.project-parallax .px-epipolar { stroke: #f8d450; stroke-width: 1.7; vector-effect: non-scaling-stroke; }
+.project-parallax .px-estimated-line { stroke: white; stroke-width: 1.5; stroke-dasharray: 7 5; vector-effect: non-scaling-stroke; }
+.project-parallax .px-feature { cursor: pointer; fill: #eadd92; stroke: #28342b; stroke-width: 1; }
+.project-parallax .px-feature .px-hit { stroke: none; fill: transparent; }
+.project-parallax .px-feature.excluded { opacity: .35; }
+.project-parallax .px-feature.rejected { fill: #ad432e; stroke: #ffe1b2; }
+.project-parallax .px-feature:hover .px-feature-dot { fill: #fff8b7; stroke: #14251a; stroke-width: 3; r: 8; }
+.project-parallax .px-feature.is-selected { fill: #ffdf45; stroke: #172d20; stroke-width: 2; }
+.project-parallax .px-feature text { font: bold var(--px-label-size, 27px) var(--px-mono); fill: #102819; stroke: #f3ecbf; stroke-width: 4px; paint-order: stroke; }
+.project-parallax .px-feature:focus-visible { outline: none; stroke: #e3b626; stroke-width: 6; }
+.project-parallax .px-residual-vector { stroke: #a8402a; stroke-width: 2; vector-effect: non-scaling-stroke; }
+.project-parallax .px-reprojection { fill: none; stroke: #a63d26; stroke-width: 2; vector-effect: non-scaling-stroke; }
+.project-parallax .px-capture-tools { display: flex; align-items: center; gap: 10px; margin-top: auto; padding-top: 4px; }
+.project-parallax .px-capture-tools span { font-size: 14px; color: var(--px-muted); }
+.project-parallax .px-capture-tools button { white-space: nowrap; }
+.project-parallax .px-space-panel { display: flex; flex-direction: column; min-width: 0; }
+.project-parallax .px-space-host { position: relative; flex: 1; min-height: 480px; background: #172321; overflow: hidden; }
+.project-parallax .px-space-canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; }
+.project-parallax .px-space-canvas:focus-visible { outline-offset: -5px; outline-color: #f2d553; }
+.project-parallax .px-space-caption { position: absolute; left: 22px; top: 20px; pointer-events: none; color: #ccd8c6; }
+.project-parallax .px-space-caption span { font: 11px var(--px-mono); letter-spacing: 1.4px; }
+.project-parallax .px-space-caption strong { display: block; font-size: 22px; letter-spacing: -.5px; line-height: 1.2; font-weight: 400; margin-top: 9px; }
+.project-parallax .px-space-legend { position: absolute; left: 20px; right: 15px; bottom: 17px; display: flex; flex-wrap: wrap; gap: 7px 14px; pointer-events: none; color: #c4d0be; font: 11px var(--px-mono); }
+.project-parallax .px-space-legend i { width: 6px; height: 6px; display: inline-block; background: #e9d573; border-radius: 50%; margin-right: 2px; }
+.project-parallax .px-space-legend i.px-hollow { background: none; border: 1px solid #b3bcac; }
+.project-parallax .px-space-tools { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; padding-top: 10px; }
+.project-parallax .px-space-tools > div { display: flex; }
+.project-parallax .px-space-tools button { padding-inline: 9px; }
+.project-parallax .px-space-tools label { display: flex; align-items: center; gap: 6px; font-size: 14px; min-height: 40px; }
+.project-parallax .px-inspector { border-left: 1px solid var(--px-line); padding-left: 16px; min-width: 0; }
+.project-parallax .px-inspector-body { padding-top: 4px; }
+.project-parallax .px-landmark-label { font-size: 14px; display: block; color: var(--px-muted); }
+.project-parallax .px-landmark-label select { display: block; width: 100%; color: var(--px-ink); font-size: 14px; text-overflow: ellipsis; }
+.project-parallax .px-point-heading { display: flex; align-items: center; gap: 7px; margin-top: 15px; }
+.project-parallax .px-point-heading > strong { font: 25px var(--px-mono); letter-spacing: -1px; }
+.project-parallax .px-point-heading > span { font: 14px var(--px-mono); background: #dce1c9; padding: 3px 5px; }
+.project-parallax .px-point-heading > span[data-state="rejected"], .project-parallax .px-point-heading > span[data-state="behind"], .project-parallax .px-point-heading > span[data-state="unstable"] { background: #ead1b3; }
+.project-parallax .px-point-heading > div { display: flex; margin-left: auto; }
+.project-parallax .px-point-heading button { padding: 4px; min-width: 30px; min-height: 32px; border: 0; font-size: 18px; }
+.project-parallax .px-point-label { font-size: 14px; margin: 3px 0 12px; min-height: 20px; color: var(--px-muted); }
+.project-parallax .px-position { display: block; font: 14px/1.65 var(--px-mono); padding: 10px 0; border-block: 1px solid var(--px-line); overflow-wrap: anywhere; }
+.project-parallax .px-result-reason { font-size: 14px; line-height: 1.4; color: var(--px-muted); min-height: 29px; margin-top: 5px; }
+.project-parallax .px-metrics { margin: 4px 0 0; }
+.project-parallax .px-metrics > div { display: flex; justify-content: space-between; gap: 9px; padding: 5px 0; font-size: 14px; border-bottom: 1px dotted var(--px-line); }
+.project-parallax .px-metrics dd { margin: 0; font: 14px/1.6 var(--px-mono); text-align: right; }
+.project-parallax .px-uncertainty-note { color: var(--px-muted); font-size: 12px; line-height: 1.4; margin: 6px 0 14px; }
+.project-parallax .px-pixel-header { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 6px; }
+.project-parallax .px-pixel-header > span { font: 12px var(--px-mono); color: var(--px-muted); }
+.project-parallax .px-pixel-row { display: grid; grid-template-columns: 20px 1fr 1fr; gap: 6px; align-items: center; margin-bottom: 7px; }
+.project-parallax .px-pixel-row > span { font: bold 14px var(--px-mono); }
+.project-parallax .px-pixel-row label { display: flex; align-items: center; gap: 5px; font-size: 14px; }
+.project-parallax .px-pixel-row input { width: 100%; min-width: 0; border: 1px solid var(--px-line); background: #faf9f0; padding: 7px 4px; font: 14px var(--px-mono); height: 35px; border-radius: 0; }
+.project-parallax .px-apply { width: 100%; display: flex; justify-content: space-between; background: #dfe2ce; }
+.project-parallax .px-repair-tools { display: flex; flex-direction: column; margin-top: 5px; }
+.project-parallax .px-repair-tools button { font-size: 14px; min-height: 35px; text-align: left; padding-left: 0; border-color: transparent; text-decoration: underline; text-underline-offset: 3px; }
+.project-parallax .px-enable { display: flex; align-items: center; gap: 8px; margin-top: 5px; font-size: 14px; min-height: 35px; }
+.project-parallax .px-truth-reading { padding: 8px; margin-top: 6px; background: #e6dfbd; font-size: 13px; }
+.project-parallax .px-study-caption { display: flex; justify-content: space-between; gap: 20px; font-size: 13px; color: var(--px-muted); padding: 15px 0 20px; }
+.project-parallax .px-study-caption span:first-child { color: var(--px-ink); }
+.project-parallax .px-calibration { border-block: 1px solid var(--px-ink); display: grid; grid-template-columns: 1.05fr 1.35fr 1fr; padding: 26px 0; gap: 32px; }
+.project-parallax .px-eyebrow { font: 12px var(--px-mono); letter-spacing: .8px; }
+.project-parallax .px-calibration h2 { font-size: 30px; line-height: 1.1; font-weight: 500; letter-spacing: -1.1px; margin: 12px 0; }
+.project-parallax .px-calibration-intro p { color: var(--px-muted); font-size: 14px; max-width: 34ch; }
+.project-parallax [data-calibration-note][data-mismatch="true"] { color: #92401e; }
+.project-parallax fieldset { padding: 0; margin: 0; border: 0; min-width: 0; }
+.project-parallax legend { width: 100%; font-weight: 600; font-size: 16px; padding: 0 0 12px; }
+.project-parallax legend span { font-size: 12px; color: var(--px-muted); display: block; font-weight: 400; }
+.project-parallax fieldset > label { display: grid; grid-template-columns: 1fr auto; font-size: 14px; margin-bottom: 7px; }
+.project-parallax fieldset > label > input { grid-column: 1 / -1; }
+.project-parallax fieldset output { font: 14px var(--px-mono); }
+.project-parallax .px-sensor { padding-left: 24px; border-left: 1px solid var(--px-line); }
+.project-parallax .px-sensor p { font-size: 14px; color: var(--px-muted); margin: 4px 0 10px; max-width: 45ch; }
+.project-parallax .px-yellow-button { background: var(--px-yellow); border-color: #bfa735; display: flex; justify-content: space-between; gap: 25px; width: 100%; }
+.project-parallax .px-yellow-button:hover { background: #e6c446; }
+.project-parallax .px-notebook { display: grid; grid-template-columns: 1.2fr 1.1fr 1fr; gap: 40px; padding: 42px 0; }
+.project-parallax .px-notebook h2 { font-size: 28px; font-weight: 500; line-height: 1.14; letter-spacing: -.8px; margin: 13px 0 16px; }
+.project-parallax .px-notebook p { margin: 12px 0; color: #566052; font-size: 15px; line-height: 1.6; }
+.project-parallax .px-guide-buttons, .project-parallax .px-export-buttons { display: flex; flex-wrap: wrap; gap: 7px; margin-block: 14px; }
+.project-parallax .px-guide-buttons button:first-child { background: var(--px-ink); color: var(--px-paper); }
+.project-parallax [data-guide-reading] { display: block; border-left: 3px solid #c9b351; padding: 8px 13px; background: #e8e7d7; font: 14px/1.7 var(--px-mono); }
+.project-parallax .px-equation { font-family: var(--px-mono); color: var(--px-ink); font-size: 14px; }
+.project-parallax details { border-top: 1px solid var(--px-line); padding-top: 8px; }
+.project-parallax summary { padding: 8px 0; cursor: pointer; font-size: 14px; }
+.project-parallax pre { max-width: 100%; overflow: auto; background: #e5e5d6; font: 12px/1.8 var(--px-mono); padding: 10px; }
+.project-parallax h3 { font-size: 14px; font-weight: 600; margin-top: 12px; }
+.project-parallax .px-import label { display: block; font-size: 14px; margin: 10px 0; }
+.project-parallax .px-import input { display: block; width: 100%; font-size: 14px; margin-top: 9px; }
+.project-parallax .px-import textarea { width: 100%; display: block; background: #faf9f0; border: 1px solid var(--px-line); font: 14px var(--px-mono); padding: 8px; margin-top: 7px; resize: vertical; }
+.project-parallax .px-model-notes { border-top-color: var(--px-ink); padding-block: 10px; }
+.project-parallax .px-model-notes summary { font-size: 16px; }
+.project-parallax .px-model-notes > div { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 35px; padding: 18px 0; }
+.project-parallax .px-model-notes p { font-size: 15px; color: var(--px-muted); }
+.project-parallax .px-footer { display: flex; justify-content: space-between; border-top: 1px solid var(--px-line); padding: 24px 0 80px; font: 12px var(--px-mono); color: var(--px-muted); gap: 20px; }
+.project-parallax .px-status { background: #e5e5d6; border-top: 1px solid var(--px-line); padding: 9px 15px; margin-inline: -30px; font-size: 14px; min-height: 40px; }
+@media (min-width: 1600px) {
+  .project-parallax { padding-inline: max(30px, calc((100vw - 1600px) / 2)); }
+  .project-parallax .px-space-host { min-height: 610px; }
+}
+@media (max-width: 1190px) and (min-width: 761px) {
+  .project-parallax { padding-inline: 20px; }
+  .project-parallax .px-edition { display: none; }
+  .project-parallax .px-toolbar { gap: 10px; flex-wrap: wrap; }
+  .project-parallax .px-study-label { gap: 7px; }
+  .project-parallax .px-history { margin-left: auto; }
+  .project-parallax .px-studio { grid-template-columns: minmax(0, .9fr) minmax(0, 1.2fr); }
+  .project-parallax .px-inspector { grid-column: 1 / -1; border-left: 0; padding: 12px 0 0; }
+  .project-parallax .px-inspector-body { columns: 3; column-gap: 28px; }
+  .project-parallax .px-inspector-body > * { break-inside: avoid; }
+  .project-parallax .px-space-host { min-height: 470px; }
+  .project-parallax .px-calibration { gap: 20px; }
+  .project-parallax .px-notebook { gap: 25px; }
+  .project-parallax .px-status { margin-inline: -20px; }
+}
+@media (max-width: 760px) {
+  .project-parallax { padding: 18px 14px 0; }
+  .project-parallax .px-header { display: block; padding: 2px 0 18px; }
+  .project-parallax .px-brand { gap: 11px; }
+  .project-parallax .px-brand svg { width: 35px; height: 40px; }
+  .project-parallax .px-brand h1 { font-size: 42px; letter-spacing: -2.8px; }
+  .project-parallax .px-brand h1 span { font-size: 12px; margin-top: 7px; }
+  .project-parallax .px-intro { margin-top: 17px; }
+  .project-parallax .px-intro h2 { font-size: 22px; line-height: 1.15; max-width: 24ch; }
+  .project-parallax .px-intro p { font-size: 14px; margin-top: 7px; max-width: 31ch; }
+  .project-parallax .px-edition { display: none; }
+  .project-parallax .px-toolbar { display: grid; gap: 8px; padding-block: 8px; }
+  .project-parallax .px-study-label { display: flex; font-size: 13px; gap: 8px; }
+  .project-parallax .px-study-label select { min-width: 0; flex: 1; font-size: 15px; padding-right: 10px; }
+  .project-parallax .px-method-group { margin: 0; display: grid; grid-template-columns: 1fr 1fr 1fr; }
+  .project-parallax .px-method-group button { font-size: 14px; padding: 8px 4px; min-height: 40px; }
+  .project-parallax .px-history { justify-content: space-between; gap: 4px; }
+  .project-parallax .px-history button { padding: 4px 6px; min-height: 34px; }
+  .project-parallax .px-mobile-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin: 13px 0 0; position: sticky; top: 0; z-index: 5; background: var(--px-paper); }
+  .project-parallax .px-mobile-tabs button { min-height: 44px; border-bottom: 2px solid var(--px-line); border-top: 0; border-inline: 0; font-size: 15px; padding-inline: 5px; }
+  .project-parallax .px-mobile-tabs button[aria-selected="true"] { background: var(--px-yellow); border-bottom-color: var(--px-ink); font-weight: 600; }
+  .project-parallax .px-studio { display: block; padding-top: 11px; }
+  .project-parallax .px-pair { display: contents; }
+  .project-parallax [data-pane] { display: none; }
+  .project-parallax[data-active-pane="a"] [data-pane="a"], .project-parallax[data-active-pane="b"] [data-pane="b"], .project-parallax[data-active-pane="space"] [data-pane="space"], .project-parallax[data-active-pane="inspect"] [data-pane="inspect"] { display: block; }
+  .project-parallax .px-capture-tools { display: none; }
+  .project-parallax[data-active-pane="a"] .px-capture-tools, .project-parallax[data-active-pane="b"] .px-capture-tools { display: flex; margin-top: 10px; }
+  .project-parallax .px-capture-tools span { font-size: 14px; line-height: 1.35; }
+  .project-parallax .px-panel-heading { height: 40px; }
+  .project-parallax .px-panel-heading > span { font-size: 12px; }
+  .project-parallax .px-exposure { width: 100%; }
+  .project-parallax .px-image-caption { font-size: 10px; }
+  .project-parallax .px-exposure-stamp { font-size: 7px; }
+  .project-parallax .px-space-host { height: 440px; min-height: 0; }
+  .project-parallax .px-space-caption { top: 17px; left: 17px; }
+  .project-parallax .px-space-tools { gap: 7px; }
+  .project-parallax .px-space-tools > label { flex-basis: 100%; }
+  .project-parallax .px-space-tools button { font-size: 14px; }
+  .project-parallax .px-space-legend { font-size: 10px; gap: 7px; left: 14px; }
+  .project-parallax .px-inspector { border: 0; padding: 0; }
+  .project-parallax .px-inspector-body { padding: 8px 0; }
+  .project-parallax .px-landmark-label { font-size: 14px; }
+  .project-parallax .px-landmark-label select { font-size: 15px; min-height: 44px; }
+  .project-parallax .px-point-heading > strong { font-size: 31px; }
+  .project-parallax .px-point-heading button { min-width: 44px; min-height: 40px; }
+  .project-parallax .px-point-heading > span { font-size: 13px; }
+  .project-parallax .px-point-label, .project-parallax .px-result-reason, .project-parallax .px-uncertainty-note { font-size: 14px; }
+  .project-parallax .px-position { font-size: 15px; }
+  .project-parallax .px-metrics > div { font-size: 15px; padding-block: 7px; }
+  .project-parallax .px-metrics dd { font-size: 14px; }
+  .project-parallax .px-pixel-header { font-size: 15px; }
+  .project-parallax .px-pixel-row label { font-size: 14px; }
+  .project-parallax .px-pixel-row input { font-size: 15px; height: 44px; }
+  .project-parallax .px-repair-tools button { font-size: 14px; min-height: 44px; }
+  .project-parallax .px-enable { font-size: 14px; margin-block: 10px; }
+  .project-parallax .px-study-caption { display: block; font-size: 14px; padding-block: 17px; }
+  .project-parallax .px-study-caption > span { display: block; }
+  .project-parallax .px-study-caption > span + span { font-size: 12px; margin-top: 7px; }
+  .project-parallax .px-calibration { display: block; padding: 22px 0; }
+  .project-parallax .px-calibration h2 { font-size: 30px; }
+  .project-parallax .px-calibration h2 br { display: none; }
+  .project-parallax .px-calibration-intro p { max-width: none; font-size: 15px; }
+  .project-parallax .px-rig, .project-parallax .px-sensor { margin-top: 24px; padding: 0; border: 0; }
+  .project-parallax legend span { font-size: 14px; }
+  .project-parallax fieldset > label { font-size: 16px; }
+  .project-parallax fieldset output { font-size: 15px; }
+  .project-parallax input[type="range"] { height: 37px; }
+  .project-parallax .px-sensor p { font-size: 15px; }
+  .project-parallax .px-notebook { display: block; padding: 0; }
+  .project-parallax .px-notebook > section { padding: 27px 0; border-bottom: 1px solid var(--px-line); }
+  .project-parallax .px-notebook h2 { font-size: 30px; }
+  .project-parallax .px-notebook p { font-size: 16px; }
+  .project-parallax .px-notebook button { min-height: 44px; }
+  .project-parallax .px-notebook .px-equation { font-size: 13px; }
+  .project-parallax .px-guide-buttons button { flex: 1; padding-inline: 6px; }
+  .project-parallax .px-model-notes > div { display: block; }
+  .project-parallax .px-model-notes p + p { margin-top: 18px; }
+  .project-parallax .px-footer { display: block; font-size: 12px; padding-bottom: 60px; }
+  .project-parallax .px-footer > span { display: block; margin-top: 6px; }
+  .project-parallax .px-status { margin-inline: -14px; font-size: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .project-parallax *, .project-parallax *::before, .project-parallax *::after { scroll-behavior: auto; transition: none; animation: none; }
+}

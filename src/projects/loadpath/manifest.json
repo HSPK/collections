@@ -1,0 +1,14 @@
+{
+  "id": "loadpath",
+  "order": 70,
+  "title": "Loadpath",
+  "subtitle": "The forces inside a space.",
+  "description": "An editable spatial structural-analysis studio. Shape real 3D trusses, trace axial forces, inspect deformations and reactions, and discover what makes a frame stand.",
+  "category": "learn",
+  "format": "page",
+  "medium": "Spatial structural workbench",
+  "tags": ["Spatial flagship", "3D", "Structures", "Flagship"],
+  "color": "#edf2f5",
+  "ink": "#203644",
+  "instruction": "Pick a joint or member, edit its geometry and loads, then compare the forces inside. Fictional linear truss studies, not construction certification."
+}

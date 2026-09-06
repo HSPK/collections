@@ -1,0 +1,14 @@
+{
+  "id": "section",
+  "order": 66,
+  "title": "Section",
+  "subtitle": "A cut tells the whole story.",
+  "description": "Construct a solid from editable fields, carve its hidden spaces, and turn an arbitrary section through the result. A linked architectural atelier for real Boolean geometry, measured contours and local mesh exports.",
+  "category": "create",
+  "format": "page",
+  "medium": "Implicit-solid modeling and sectioning atelier",
+  "tags": ["Spatial flagship", "3D", "Solid geometry", "Flagship", "Constructive geometry", "Cross-sections", "Meshing", "Architecture", "STL", "SVG"],
+  "color": "#f5f4ed",
+  "ink": "#202b3b",
+  "instruction": "Build with primitive fields. Move and rotate the blue plane to discover the material and void within; save the model or export its actual geometry."
+}

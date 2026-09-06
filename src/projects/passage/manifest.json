@@ -1,0 +1,14 @@
+{
+  "id": "passage",
+  "order": 67,
+  "title": "Passage",
+  "subtitle": "A building, understood.",
+  "description": "Read a three-level library as one spatial system. Edit its geometry and openings, solve clearance-aware routes, and walk the actual paths between floors.",
+  "category": "explore",
+  "format": "page",
+  "medium": "Interior navigation and layout atlas",
+  "tags": ["Spatial flagship", "3D", "Interior routing", "Flagship", "Architecture", "Accessibility", "Pathfinding", "Spatial editing"],
+  "color": "#e9e6d9",
+  "ink": "#30382e",
+  "instruction": "Choose two landmarks, set your mobility, and inspect the route. Change a door, lift, or partition to discover how the building's connections change."
+}

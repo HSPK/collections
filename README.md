@@ -44,11 +44,29 @@ the site publishes automatically after the main-branch quality gate.
 
 ## The websites
 
-### Five flagship projects
+### Spatial systems
+
+Five independent studios where space is part of the computation, not just
+the scenery. Search **Spatial flagship** to explore this edition together.
+
+| Project | Inside |
+|---------|--------|
+| [Section](https://hspk.github.io/collections/projects/section/) | Editable implicit CSG, real surface meshing, arbitrary-plane sections with holes, measured geometry, and STL/SVG export. |
+| [Passage](https://hspk.github.io/collections/projects/passage/) | Three floors and twelve rooms with clearance-aware routing, step-free constraints, editable doors/connectors, and a timed spatial walkthrough. |
+| [Morrow](https://hspk.github.io/collections/projects/morrow/) | A six-joint robot with full-pose inverse kinematics, conservative collision checks, bounded RRT motion planning, and actual pick/place workflows. |
+| [Parallax](https://hspk.github.io/collections/projects/parallax/) | Rendered stereo exposures, pixel-only triangulation, nonlinear refinement, robust image geometry, uncertainty ellipsoids, and point-cloud export. |
+| [Loadpath](https://hspk.github.io/collections/projects/loadpath/) | Editable 3D axial finite elements: supports, load cases, self-weight, reactions, member forces, deformation, and explicit mechanism detection. |
+
+Each project keeps its model, spatial representation, and interaction
+connected. Its local notes explain coordinates, numerical limits, and
+extension points. These are exploratory browser tools, not instructions
+for physical robot control or certified structural design.
+
+### The first flagship edition
 
 Five deeper dives, built around systems you can inspect and change rather
-than effects you can only watch. Search **Flagship** in the library to find
-them together; each is still its own independent website.
+than effects you can only watch. Search **Flagship** in the library to
+browse both editions; each is still its own independent website.
 
 | Project | Inside |
 |---------|--------|

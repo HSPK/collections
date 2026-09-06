@@ -4,27 +4,39 @@ import { resolve } from 'node:path';
 import { readProjectManifests } from '../scripts/project-pages';
 import { categoryNames } from '../src/core/manifest';
 
-const ids = ['apsis', 'lumen', 'relay', 'palinode', 'roomtone'];
+const editions = [
+  { name: 'original flagship edition', firstOrder: 61, tag: 'Flagship', ids: ['apsis', 'lumen', 'relay', 'palinode', 'roomtone'] },
+  { name: 'spatial flagship edition', firstOrder: 66, tag: 'Spatial flagship', ids: ['section', 'passage', 'morrow', 'parallax', 'loadpath'] },
+];
+const ids = editions.flatMap((edition) => edition.ids);
 const manifests = readProjectManifests(process.cwd());
 
-test('The five flagships are independent, documented projects with real local covers', () => {
-  expect(manifests.length).toBeGreaterThanOrEqual(65);
-  const flagships = manifests.filter((project) => ids.includes(project.id)).sort((a, b) => a.order - b.order);
-  expect(flagships.map((project) => project.id)).toEqual(ids);
-  expect(flagships.map((project) => project.order)).toEqual([61, 62, 63, 64, 65]);
-  for (const project of flagships) {
-    expect(project.format).toBe('page');
-    expect(project.tags).toContain('Flagship');
-    expect(existsSync(resolve('src/projects', project.id, 'README.md'))).toBe(true);
-    const cover = readFileSync(resolve('public', project.preview || `previews/${project.id}.jpg`));
-    expect(cover.subarray(0, 3).equals(Buffer.from([0xff, 0xd8, 0xff])), `${project.id} needs a captured JPEG cover`).toBe(true);
-  }
+const matchingProjects = (words: string[]) => manifests.filter((project) => {
+  const text = [
+    project.title, project.subtitle, project.description, project.medium, ...project.tags, categoryNames[project.category],
+  ].join(' ').toLowerCase();
+  return words.every((word) => text.includes(word.toLowerCase()));
 });
 
+for (const edition of editions) {
+  test(`The ${edition.name} contains independent, documented projects with real covers`, () => {
+    expect(manifests.length).toBeGreaterThanOrEqual(edition.firstOrder + edition.ids.length - 1);
+    const projects = manifests.filter((project) => edition.ids.includes(project.id)).sort((a, b) => a.order - b.order);
+    expect(projects.map((project) => project.id)).toEqual(edition.ids);
+    expect(projects.map((project) => project.order)).toEqual(edition.ids.map((_, index) => edition.firstOrder + index));
+    for (const project of projects) {
+      expect(project.format).toBe('page');
+      expect(project.tags).toContain('Flagship');
+      expect(project.tags).toContain(edition.tag);
+      expect(existsSync(resolve('src/projects', project.id, 'README.md'))).toBe(true);
+      const cover = readFileSync(resolve('public', project.preview || `previews/${project.id}.jpg`));
+      expect(cover.subarray(0, 3).equals(Buffer.from([0xff, 0xd8, 0xff])), `${project.id} needs a captured JPEG cover`).toBe(true);
+    }
+  });
+}
+
 test('The flagship collection is searchable without adding index chrome', async ({ page }) => {
-  const matching = manifests.filter((project) => [
-    project.title, project.subtitle, project.description, project.medium, ...project.tags, categoryNames[project.category],
-  ].some((text) => text.toLowerCase().includes('flagship')));
+  const matching = matchingProjects(['flagship']);
   await page.goto('./');
   await expect(page.locator('.main-nav > button, .main-nav > a')).toHaveText(['About', 'Source', 'Contribute']);
   await expect(page.locator('.library-intro, #app > footer, .collection-count')).toHaveCount(0);
@@ -43,9 +55,21 @@ test('The flagship collection is searchable without adding index chrome', async 
   }
 });
 
+test('Spatial flagships can be found together without replacing the rest of the library', async ({ page }) => {
+  const matching = matchingProjects(['spatial', 'flagship']);
+  await page.goto('./');
+  await page.getByRole('searchbox', { name: 'Search projects', exact: true }).fill('Spatial flagship');
+  await expect(page.locator('.project-card')).toHaveCount(matching.length);
+  const found = await page.locator('.project-open').evaluateAll((links) => links.map((link) => link.getAttribute('data-project')));
+  expect(found).toEqual(expect.arrayContaining(editions[1].ids));
+  expect([...found].sort()).toEqual(matching.map((project) => project.id).sort());
+  await page.getByRole('button', { name: 'Clear search', exact: true }).click();
+  await expect(page.locator('.project-card')).toHaveCount(manifests.length);
+});
+
 for (const id of ids) {
   test(`${id}: small-screen controls stay readable, local, and silent until invited`, async ({ page, baseURL }) => {
-    if (id === 'apsis' || id === 'roomtone') test.setTimeout(90_000);
+    if (manifests.find((project) => project.id === id)?.tags.some((tag) => tag.toLowerCase().includes('3d'))) test.setTimeout(90_000);
     const origin = new URL(`./projects/${id}/`, baseURL).origin;
     const errors: string[] = [];
     const external: string[] = [];
