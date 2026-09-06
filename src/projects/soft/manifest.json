@@ -2,7 +2,7 @@
   "id": "soft", "order": 3, "title": "Soft Signal",
   "subtitle": "Somewhere between states.",
   "description": "Liquid forms merge, separate, and negotiate their edges in an ever-changing sculpture. Shape its material, viscosity, and movement.",
-  "category": "art", "format": "immersive", "medium": "Liquid sculpture",
+  "category": "art", "format": "page", "medium": "Liquid sculpture",
   "tags": ["3D", "Materials", "Generative"], "color": "#f2b4b9", "ink": "#692c3a",
   "instruction": "Move to influence the sculpture. Drag to look around."
 }

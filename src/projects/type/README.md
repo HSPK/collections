@@ -4,7 +4,8 @@ Independent URL: `/projects/type/`.
 
 [`type.ts`](../../experiments/type.ts) owns glyph sampling, spring
 particles, responsive word layout, and the accessible editor. Its public
-metadata and standalone entrypoint live here.
+metadata, acid-green studio stylesheet, and standalone entrypoint live
+here. Playback and the inspector belong to this website, not the index.
 
 Add typefaces, sampling schemes, or spring presets in that implementation.
 Keep input bounded and fit glyphs to narrow screens. Canvas-specific

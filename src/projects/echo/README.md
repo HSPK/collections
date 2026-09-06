@@ -4,7 +4,8 @@ Independent URL: `/projects/echo/`.
 
 [`echo.ts`](../../experiments/echo.ts) contains the ripple model, drawing,
 pentatonic tones, and audio graph lifecycle. The manifest and entrypoint
-here expose it as a standalone website.
+here expose it as a standalone website. Its local studio and forest-toned
+stylesheet own the controls and feedback instead of the collection UI.
 
 Extend ripple shapes and note/preset data in the renderer. Audio must stay
 off until explicit opt-in, and voices must remain bounded. Reuse

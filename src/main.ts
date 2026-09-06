@@ -51,8 +51,7 @@ let library = readLibraryState();
 let routeController = new AbortController();
 let instance: ProjectInstance | undefined;
 let activeProject: Project | undefined;
-let playbackButton: HTMLButtonElement | undefined;
-let paused = motionPreference.matches;
+let closeFloatingMenu: ((restoreFocus?: boolean) => void) | undefined;
 let reportTimer = 0;
 let mountGeneration = 0;
 
@@ -66,6 +65,12 @@ function saveLibrary() {
     const note = app.querySelector<HTMLElement>('[data-storage-note]');
     if (note) { note.textContent = storageWarning; note.hidden = false; }
   }
+}
+
+function rememberListPosition() {
+  const grid = app.querySelector<HTMLElement>('[data-project-grid]');
+  if (grid) library.scroll = grid.scrollTop;
+  saveLibrary();
 }
 
 function sourceUrl(project: Project): string {
@@ -88,7 +93,7 @@ function header() {
   return `<header class="site-header">
     <a class="brand" href="${siteUrl()}" aria-label="Odd Index home">${mark}<span>odd/index</span></a>
     <nav class="main-nav" aria-label="Main navigation">
-      <a class="nav-current" href="${siteUrl()}">Projects <span>${projects.length}</span></a>
+      <a class="nav-current" href="${siteUrl()}">Projects</a>
       <button type="button" data-about>About</button>
       <a class="header-code" href="https://github.com/HSPK/collections" target="_blank" rel="noopener noreferrer" aria-label="Collection source code">${codeIcon}<span>Source</span></a>
     </nav>
@@ -147,7 +152,7 @@ function updateLibrary() {
     image.addEventListener('error', () => { image.hidden = true; }, { once: true, signal: routeController.signal });
   });
   grid.querySelectorAll<HTMLAnchorElement>('.project-open').forEach((link) => {
-    link.addEventListener('click', () => { library.scroll = window.scrollY; saveLibrary(); }, { signal: routeController.signal });
+    link.addEventListener('click', rememberListPosition, { signal: routeController.signal });
   });
   grid.querySelector('[data-clear-filters]')?.addEventListener('click', resetFilters, { signal: routeController.signal });
   app.querySelectorAll<HTMLElement>('[data-category-count]').forEach((label) => {
@@ -161,6 +166,7 @@ function updateLibrary() {
   if (status) status.textContent = `${filtered.length} ${filtered.length === 1 ? 'project' : 'projects'}${library.category === 'all' ? '' : ` in ${categoryNames[library.category]}`}`;
   const clear = app.querySelector<HTMLButtonElement>('[data-clear-search]');
   if (clear) clear.hidden = !library.query;
+  grid.scrollTop = library.scroll;
 }
 
 function resetFilters() {
@@ -178,6 +184,7 @@ function renderLibrary() {
   routeController = new AbortController();
   const signal = routeController.signal;
   document.title = 'Odd Index - Small websites. Wide possibilities.';
+  document.body.classList.add('library-mode');
   app.className = 'library-root';
   app.innerHTML = `${header()}
     <main id="main-content" class="library-shell" tabindex="-1">
@@ -190,7 +197,7 @@ function renderLibrary() {
         <div class="sidebar-note"><p>Independent websites.<br>Different ways to be curious.</p><a href="https://github.com/HSPK/collections/blob/main/src/projects/README.md" target="_blank" rel="noopener noreferrer">Build on a project ${diagonal}</a></div>
       </aside>
       <section class="library-content" id="index" aria-labelledby="library-title">
-        <div class="library-intro"><div><h1 id="library-title">Discover projects</h1><p>Tools, games, stories, and unexpected ideas.</p></div><span class="collection-count">${projects.length} projects</span></div>
+        <h1 id="library-title" class="sr-only">Project library</h1>
         <div class="library-tools">
           <div class="library-search">${searchIcon}<label class="sr-only" for="library-search">Search projects</label><input id="library-search" data-library-search type="search" maxlength="200" placeholder="Search projects, ideas, or tags..." autocomplete="off" spellcheck="false" /><button type="button" data-clear-search aria-label="Clear search" hidden>&times;</button><kbd>/</kbd></div>
           <label class="sort-label"><span class="sr-only">Sort projects</span><select aria-label="Sort projects" data-sort><option value="discover">Discover</option><option value="newest">Recently added</option><option value="az">A to Z</option></select></label>
@@ -198,7 +205,7 @@ function renderLibrary() {
         </div>
         <div class="results-line"><p role="status" aria-live="polite" data-result-count></p><label class="mobile-category"><span class="sr-only">Project type</span><select aria-label="Project type" data-mobile-category><option value="all">All types</option>${categories.map((category) => `<option value="${category.id}">${category.label}</option>`).join('')}</select></label><span class="local-note"><span></span>Runs in your browser</span></div>
         <p class="storage-note" data-storage-note ${storageWarning ? '' : 'hidden'}>${escapeMarkup(storageWarning)}</p>
-        <div class="project-grid" data-project-grid></div>
+        <div class="project-grid" data-project-grid role="region" aria-label="Project list" tabindex="0"></div>
       </section>
     </main>
     <footer class="site-footer"><span>odd/index <span class="footer-divider">/</span> AI-made, curiosity-led.</span><div><button type="button" data-about>About this collection</button><a href="https://github.com/HSPK/collections" target="_blank" rel="noopener noreferrer">Source & documentation ${diagonal}</a></div></footer>`;
@@ -208,14 +215,13 @@ function renderLibrary() {
   const sort = app.querySelector<HTMLSelectElement>('[data-sort]')!;
   sort.value = library.sort;
   input.addEventListener('input', () => { library.query = input.value; library.scroll = 0; saveLibrary(); updateLibrary(); }, { signal });
-  app.querySelector('[data-clear-search]')?.addEventListener('click', () => { input.value = ''; library.query = ''; saveLibrary(); updateLibrary(); input.focus(); }, { signal });
+  app.querySelector('[data-clear-search]')?.addEventListener('click', () => { input.value = ''; library.query = ''; library.scroll = 0; saveLibrary(); updateLibrary(); input.focus(); }, { signal });
   const changeCategory = (value: string) => {
     if (value !== 'all' && !isCategory(value)) return;
     library.category = value;
     library.scroll = 0;
     saveLibrary();
     updateLibrary();
-    app.querySelector('.library-content')?.scrollIntoView({ block: 'start', behavior: 'instant' });
   };
   app.querySelectorAll<HTMLButtonElement>('[data-filter]').forEach((button) => button.addEventListener('click', () => changeCategory(button.dataset.filter || 'all'), { signal }));
   app.querySelector<HTMLSelectElement>('[data-mobile-category]')?.addEventListener('change', (event) => {
@@ -223,7 +229,7 @@ function renderLibrary() {
   }, { signal });
   sort.addEventListener('change', () => {
     const value = sort.value;
-    if (value === 'discover' || value === 'newest' || value === 'az') { library.sort = value; saveLibrary(); updateLibrary(); }
+    if (value === 'discover' || value === 'newest' || value === 'az') { library.sort = value; library.scroll = 0; saveLibrary(); updateLibrary(); }
   }, { signal });
   app.querySelectorAll<HTMLButtonElement>('[data-layout]').forEach((button) => button.addEventListener('click', () => {
     library.layout = button.dataset.layout === 'list' ? 'list' : 'grid';
@@ -231,27 +237,59 @@ function renderLibrary() {
     updateLibrary();
   }, { signal }));
   updateLibrary();
-  requestAnimationFrame(() => { if (!signal.aborted) window.scrollTo({ top: library.scroll, behavior: 'instant' }); });
+  const grid = app.querySelector<HTMLElement>('[data-project-grid]')!;
+  grid.addEventListener('scroll', () => { library.scroll = grid.scrollTop; }, { passive: true, signal });
+  requestAnimationFrame(() => { if (!signal.aborted) grid.scrollTop = library.scroll; });
 }
 
-function setPlayback(value: boolean) {
-  paused = value;
-  instance?.setPaused?.(paused);
-  if (playbackButton) {
-    playbackButton.innerHTML = `${paused ? '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 3 11 7-11 7z" fill="currentColor"/></svg>' : '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3h3v14H5zm7 0h3v14h-3z" fill="currentColor"/></svg>'}<span>${paused ? 'Play' : 'Pause'}</span>`;
-    playbackButton.setAttribute('aria-label', paused ? 'Play animation' : 'Pause animation');
-  }
+function floatingMenu(project: Project) {
+  const position = projects.indexOf(project);
+  const previous = projects[(position + projects.length - 1) % projects.length];
+  const next = projects[(position + 1) % projects.length];
+  return `<div class="collection-menu" data-collection-menu>
+    <button class="collection-menu-toggle" type="button" aria-label="Collection menu" aria-expanded="false" aria-controls="collection-menu-panel" data-menu-toggle>${mark}</button>
+    <nav class="collection-menu-panel" id="collection-menu-panel" aria-label="Collection navigation" hidden>
+      <div class="collection-menu-heading"><strong>${escapeMarkup(project.title)}</strong><span>${categoryNames[project.category]}</span></div>
+      <a href="${siteUrl()}" aria-label="Back to index">${arrow}<span>All projects</span></a>
+      <button type="button" data-search>${searchIcon}<span>Search projects</span></button>
+      <button type="button" data-project-info aria-label="About this project"><span class="menu-info-icon" aria-hidden="true">i</span><span>About this project</span></button>
+      <a href="${sourceUrl(project)}" target="_blank" rel="noopener noreferrer">${codeIcon}<span>Source & notes</span></a>
+      <div class="collection-menu-pager"><a href="${projectUrl(previous.id)}" aria-label="Previous project: ${escapeMarkup(previous.title)}">${arrow}<span>Previous</span></a><a href="${projectUrl(next.id)}" aria-label="Next project: ${escapeMarkup(next.title)}"><span>Next</span>${arrow}</a></div>
+    </nav>
+  </div>`;
 }
 
-function projectTrail(project: Project) {
-  return `<div class="project-trail"><a class="back-index" href="${siteUrl()}" aria-label="Back to index">${arrow}<span>All projects</span></a><span class="trail-title">${escapeMarkup(project.title)}</span><div><button type="button" data-search aria-label="Search projects">${searchIcon}</button><button type="button" data-project-info aria-label="About this project">About</button><a href="${sourceUrl(project)}" target="_blank" rel="noopener noreferrer">${codeIcon}<span>Source</span></a></div></div>`;
+function bindFloatingMenu(signal: AbortSignal) {
+  const menu = app.querySelector<HTMLElement>('[data-collection-menu]')!;
+  const toggle = menu.querySelector<HTMLButtonElement>('[data-menu-toggle]')!;
+  const panel = menu.querySelector<HTMLElement>('#collection-menu-panel')!;
+  const close = (restoreFocus = false) => {
+    panel.hidden = true;
+    toggle.setAttribute('aria-expanded', 'false');
+    if (restoreFocus) toggle.focus({ preventScroll: true });
+  };
+  closeFloatingMenu = close;
+  toggle.addEventListener('click', () => {
+    const open = panel.hidden;
+    panel.hidden = !open;
+    toggle.setAttribute('aria-expanded', String(open));
+  }, { signal });
+  document.addEventListener('pointerdown', (event) => {
+    if (event.target instanceof Node && !menu.contains(event.target)) close();
+  }, { signal });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !panel.hidden) { event.preventDefault(); close(true); }
+  }, { signal });
+  menu.addEventListener('focusout', (event) => {
+    if (!(event.relatedTarget instanceof Node) || !menu.contains(event.relatedTarget)) close();
+  }, { signal });
 }
 
 function destroyProject() {
   routeController.abort();
   instance?.destroy();
   instance = undefined;
-  playbackButton = undefined;
+  closeFloatingMenu = undefined;
   window.clearTimeout(reportTimer);
 }
 
@@ -261,24 +299,22 @@ async function renderProject(project: Project) {
   routeController = new AbortController();
   const signal = routeController.signal;
   activeProject = project;
-  paused = motionPreference.matches;
+  document.body.classList.remove('library-mode');
   document.title = `${project.title} - Odd Index`;
-  const immersive = project.format === 'immersive';
-  app.className = immersive ? 'immersive-root' : 'standalone-root';
-  const position = projects.indexOf(project);
-  const previous = projects[(position + projects.length - 1) % projects.length];
-  const next = projects[(position + 1) % projects.length];
-  app.innerHTML = `${projectTrail(project)}
-    <main id="main-content" class="${immersive ? 'lab-page' : 'standalone-site'}" tabindex="-1">
-      ${immersive ? `<div class="lab-heading"><div><h1>${escapeMarkup(project.title)}</h1><p>${escapeMarkup(project.subtitle)}</p></div><nav class="experiment-pager" aria-label="Browse projects"><a href="${projectUrl(previous.id)}" aria-label="Previous experiment: ${escapeMarkup(previous.title)}">${arrow}</a><span>${project.number} / ${projects.length}</span><a href="${projectUrl(next.id)}" aria-label="Next experiment: ${escapeMarkup(next.title)}">${arrow}</a></nav></div>` : ''}
-      <div class="${immersive ? 'experiment-stage' : 'project-surface'}" data-stage data-experiment="${project.id}" data-format="${project.format}" ${immersive ? `style="background:${project.color};color:${project.ink}"` : ''} aria-label="${escapeMarkup(project.title)} website">
+  app.className = 'standalone-root';
+  app.innerHTML = `
+    <main id="main-content" class="standalone-site" tabindex="-1">
+      <div class="project-surface" data-stage data-experiment="${project.id}" data-format="${project.format}" aria-label="${escapeMarkup(project.title)} website">
         <div class="project-loading" role="status"><span class="loading-orbit"></span>Opening ${escapeMarkup(project.title)}...</div>
       </div>
-      ${immersive ? `<div class="experiment-toolbar"><div class="playback-controls"><button type="button" class="playback-button" data-playback disabled aria-label="Pause animation"></button><button type="button" class="reset-button" data-reset disabled><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 8a6 6 0 1 1 0 5M4 3v5h5" stroke="currentColor" stroke-width="1.5"/></svg>Reset</button></div><div class="experiment-controls" data-controls aria-label="Experiment controls"></div></div><div class="lab-status"><p role="status" aria-live="polite" data-report>${escapeMarkup(project.instruction)}</p><a href="${sourceUrl(project)}" target="_blank" rel="noopener noreferrer">Project code & notes ${diagonal}</a></div>` : '<div data-controls hidden></div>'}
+      <div data-project-controls hidden></div>
     </main>
-    ${immersive ? '' : '<div class="project-feedback" data-feedback hidden><p role="status" aria-live="polite" data-report></p><button type="button" aria-label="Dismiss message" data-dismiss-feedback>&times;</button></div>'}`;
+    ${floatingMenu(project)}
+    <div class="project-feedback" data-feedback hidden><p role="status" aria-live="polite" data-report></p><button type="button" aria-label="Dismiss message" data-dismiss-feedback>&times;</button></div>`;
+  bindFloatingMenu(signal);
   bindCommon(signal);
   app.querySelector('[data-project-info]')?.addEventListener('click', () => {
+    closeFloatingMenu?.(true);
     projectInfo.querySelector('h2')!.textContent = project.title;
     projectInfo.querySelector('[data-info-description]')!.textContent = project.description;
     projectInfo.querySelector('[data-info-medium]')!.textContent = `${categoryNames[project.category]} / ${project.medium}`;
@@ -287,19 +323,10 @@ async function renderProject(project: Project) {
     projectInfo.showModal();
   }, { signal });
   const container = app.querySelector<HTMLElement>('[data-stage]')!;
-  const controls = app.querySelector<HTMLElement>('[data-controls]')!;
+  const controls = app.querySelector<HTMLElement>('[data-project-controls]')!;
   const reportElement = app.querySelector<HTMLElement>('[data-report]')!;
   const feedback = app.querySelector<HTMLElement>('[data-feedback]');
   app.querySelector('[data-dismiss-feedback]')?.addEventListener('click', () => { if (feedback) feedback.hidden = true; }, { signal });
-  if (immersive) {
-    playbackButton = app.querySelector<HTMLButtonElement>('[data-playback]')!;
-    setPlayback(paused);
-    playbackButton.addEventListener('click', () => setPlayback(!paused), { signal });
-    app.querySelector('[data-reset]')?.addEventListener('click', () => {
-      instance?.reset?.();
-      reportElement.textContent = 'A fresh start. Make it your own.';
-    }, { signal });
-  }
   try {
     const module = await project.load();
     if (signal.aborted) return;
@@ -319,25 +346,18 @@ async function renderProject(project: Project) {
     if (signal.aborted || generation !== mountGeneration) { mounted.destroy(); return; }
     instance = mounted;
     container.dataset.ready = 'true';
-    if (immersive) {
-      if (playbackButton) { playbackButton.disabled = !mounted.setPaused; playbackButton.hidden = !mounted.setPaused; }
-      const reset = app.querySelector<HTMLButtonElement>('[data-reset]')!;
-      reset.disabled = !mounted.reset;
-      reset.hidden = !mounted.reset;
-      if (paused) mounted.setPaused?.(true);
-    }
   } catch (error) {
     if (signal.aborted) return;
     console.error(`Could not open ${project.title}.`, error);
     controls.replaceChildren();
-    const heading = immersive ? 'This one needs a little more from your browser.' : 'This website could not be opened.';
-    container.innerHTML = `<div class="project-error" role="alert"><h1>${heading}</h1><p data-error-message></p><p>${immersive ? 'Try enabling hardware acceleration or use a current browser. Canvas projects do not require WebGL.' : 'Reload the page to try again. Your other projects are still available.'}</p><div><a class="app-button" href="${projectUrl('flow')}">Try Flow State instead</a><a class="app-button app-button--quiet" href="${siteUrl()}">All projects</a></div></div>`;
+    container.innerHTML = `<div class="project-error" role="alert"><h1>This website could not be opened.</h1><p data-error-message></p><p>Try a current browser with hardware acceleration for 3D projects, or explore a Canvas website instead.</p><div><a class="app-button" href="${projectUrl('flow')}">Try Flow State instead</a><a class="app-button app-button--quiet" href="${siteUrl()}">All projects</a></div></div>`;
     container.querySelector('[data-error-message]')!.textContent = error instanceof Error ? error.message : 'The project could not be started.';
     reportElement.textContent = 'Project unavailable. See the message above.';
   }
 }
 
 function renderNotFound() {
+  document.body.classList.remove('library-mode');
   document.title = 'Project not found - Odd Index';
   app.className = 'library-root';
   app.innerHTML = `${header()}<main id="main-content" class="not-found" tabindex="-1"><span>404 / Project not found</span><h1>A little too far.</h1><p>That project is not in the collection. There are ${projects.length} other places to start.</p><a class="app-button" href="${siteUrl()}">Find your way back ${arrow}</a></main>`;
@@ -386,6 +406,7 @@ function updateSearch() {
 }
 
 function openSearch() {
+  closeFloatingMenu?.(true);
   searchInput.value = '';
   updateSearch();
   searchDialog.showModal();
@@ -410,17 +431,10 @@ window.addEventListener('keydown', (event) => {
   const dialogOpen = aboutDialog.open || searchDialog.open || projectInfo.open;
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k' && !dialogOpen) { event.preventDefault(); openSearch(); }
   if (event.key === '/' && !editing && !activeProject && !dialogOpen) { event.preventDefault(); app.querySelector<HTMLInputElement>('[data-library-search]')?.focus(); }
-  if (event.code === 'Space' && !editing && !dialogOpen && activeProject?.format === 'immersive' && instance?.setPaused && !(target instanceof HTMLButtonElement) && !(target instanceof HTMLAnchorElement)) {
-    event.preventDefault();
-    setPlayback(!paused);
-  }
-});
-motionPreference.addEventListener('change', () => {
-  if (activeProject?.format === 'immersive') setPlayback(motionPreference.matches);
 });
 window.addEventListener('pagehide', () => {
   if (activeProject) destroyProject();
-  else { library.scroll = window.scrollY; saveLibrary(); }
+  else rememberListPosition();
 });
 window.addEventListener('pageshow', (event) => {
   if (event.persisted && activeProject) void renderProject(activeProject);

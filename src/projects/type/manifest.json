@@ -2,7 +2,7 @@
   "id": "type", "order": 8, "title": "Type Playground",
   "subtitle": "Words with a little give.",
   "description": "Turn a word into a field of elastic particles. Change its typeface, scatter the letters, and watch them find their way back.",
-  "category": "art", "format": "immersive", "medium": "Elastic typography",
+  "category": "art", "format": "page", "medium": "Elastic typography",
   "tags": ["Typography", "Particles", "Play"], "color": "#d9eb6c", "ink": "#252c18",
   "instruction": "Move through the letters. Type something of your own."
 }

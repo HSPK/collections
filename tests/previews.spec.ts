@@ -9,29 +9,24 @@ test.describe('Project covers', () => {
   for (const project of projects) {
     test(`Capture ${project.id}`, async ({ page }) => {
       test.skip(Boolean(project.preview && !project.preview.endsWith('.jpg')), 'This project supplies its own preview asset.');
-      if (project.format === 'page') await page.emulateMedia({ reducedMotion: 'reduce' });
+      await page.emulateMedia({ reducedMotion: 'reduce' });
       await page.goto(`./projects/${project.id}/`);
       const surface = page.locator('#main-content > [data-stage]');
       await expect(surface).toHaveAttribute('data-ready', 'true');
-      await page.waitForTimeout(project.id === 'flow' ? 4000 : project.format === 'page' ? 300 : 1500);
-      if (project.format === 'immersive') {
-        await page.getByRole('button', { name: 'Pause animation', exact: true }).click();
-        await page.addStyleTag({ content: '.stage-hint { visibility: hidden !important; }' });
-        await surface.screenshot({ path: `public/previews/${project.id}.jpg`, type: 'jpeg', quality: 88, animations: 'disabled' });
-      } else {
-        const focus = surface.locator('[data-project-preview]').first();
-        const target = await focus.count() ? focus : surface;
-        await target.evaluate((element) => element.scrollIntoView({ block: 'start', behavior: 'instant' }));
-        const bounds = (await target.boundingBox())!;
-        const top = Math.max(0, bounds.y);
-        await page.screenshot({
-          path: `public/previews/${project.id}.jpg`,
-          type: 'jpeg',
-          quality: 88,
-          animations: 'disabled',
-          clip: { x: 0, y: top, width: 1322, height: Math.min(850, Math.max(400, bounds.height), 1160 - top) },
-        });
-      }
+      await page.waitForTimeout(300);
+      await page.addStyleTag({ content: '.collection-menu, .project-feedback { visibility: hidden !important; }' });
+      const focus = surface.locator('[data-project-preview]').first();
+      const target = await focus.count() ? focus : surface;
+      await target.evaluate((element) => element.scrollIntoView({ block: 'start', behavior: 'instant' }));
+      const bounds = (await target.boundingBox())!;
+      const top = Math.max(0, bounds.y);
+      await page.screenshot({
+        path: `public/previews/${project.id}.jpg`,
+        type: 'jpeg',
+        quality: 88,
+        animations: 'disabled',
+        clip: { x: 0, y: top, width: 1322, height: Math.min(850, Math.max(400, bounds.height), 1160 - top) },
+      });
     });
   }
 });

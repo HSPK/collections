@@ -1,0 +1,10 @@
+.project-echo {
+  --studio-paper: #122722;
+  --studio-panel: #1c352c;
+  --studio-ink: #e3e8c3;
+  --studio-muted: #b2c69f;
+  --studio-line: #466046;
+  --studio-accent: #d1dd95;
+  --studio-accent-ink: #213623;
+}
+.project-echo .art-brand h1 { font-family: Georgia, serif; font-weight: 400; letter-spacing: -.04em; }

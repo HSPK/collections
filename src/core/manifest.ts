@@ -42,8 +42,8 @@ export function parseManifest(value: unknown, source = 'Project manifest'): Proj
     throw new Error(`${source}: "order" must be a positive integer.`);
   }
   if (!isCategory(value.category)) throw new Error(`${source}: unknown project category.`);
-  if (value.format !== 'page' && value.format !== 'immersive') {
-    throw new Error(`${source}: "format" must be "page" or "immersive".`);
+  if (value.format !== 'page') {
+    throw new Error(`${source}: "format" must be "page"; projects own their website layout.`);
   }
   const tags = value.tags;
   if (!Array.isArray(tags) || !tags.length || !tags.every((tag: unknown) => typeof tag === 'string' && tag.trim())) {

@@ -1,0 +1,10 @@
+.project-flow {
+  --studio-paper: #101720;
+  --studio-panel: #192430;
+  --studio-ink: #e9d9c8;
+  --studio-muted: #b7b2aa;
+  --studio-line: #3c4a56;
+  --studio-accent: #e3ad78;
+  --studio-accent-ink: #17212b;
+}
+.project-flow .art-brand h1 { font-family: var(--mono); font-weight: 500; }

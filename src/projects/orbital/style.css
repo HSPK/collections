@@ -1,0 +1,9 @@
+.project-orbital {
+  --studio-paper: #e8eee2;
+  --studio-panel: #f7faf1;
+  --studio-ink: #243d2d;
+  --studio-muted: #58715b;
+  --studio-line: #c9d6c3;
+  --studio-accent: #315f48;
+}
+.project-orbital .art-brand h1 { letter-spacing: -.05em; }

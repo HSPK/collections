@@ -22,7 +22,7 @@ All event listeners use `page.signal`. No observers, animation loops,
 background timers, storage or persistent page state are used. The export uses
 the shared `downloadText` helper, which revokes its own object URL. Destroying
 the page aborts listeners and removes the page root. The collection supplies
-only its return/source bar, not this site's heading, navigation or content.
+only its floating collection menu, not this site's heading, navigation or content.
 
 ## Behaviour
 

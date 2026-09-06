@@ -2,8 +2,9 @@
 
 Independent URL: `/projects/flow/`.
 
-The entrypoint re-exports [`flow.ts`](../../experiments/flow.ts); the
-manifest supplies the library description and tags.
+The entrypoint mounts [`flow.ts`](../../experiments/flow.ts) inside a
+project-owned studio. `style.css` defines its dark/copper identity; the
+manifest supplies discovery metadata, not a shared index frame.
 
 `makeField` defines the sampled vector field. Particle lifetime, density,
 prewarming, and the `INKS`, `OPACITY`, and `WIDTHS` constants control the

@@ -1,0 +1,9 @@
+.project-chroma {
+  --studio-paper: #f0e8dd;
+  --studio-panel: #fffaf0;
+  --studio-ink: #452d24;
+  --studio-muted: #8a6d5e;
+  --studio-line: #ddcebc;
+  --studio-accent: #b74d2b;
+}
+.project-chroma .art-brand h1 { font-weight: 750; letter-spacing: -.06em; }

@@ -1,0 +1,9 @@
+.project-gravity {
+  --studio-paper: #eae5d8;
+  --studio-panel: #faf7eb;
+  --studio-ink: #343e2e;
+  --studio-muted: #747b66;
+  --studio-line: #d4d5c0;
+  --studio-accent: #537146;
+}
+.project-gravity .art-brand h1 { font-weight: 750; letter-spacing: -.045em; }

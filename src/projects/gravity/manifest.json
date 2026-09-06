@@ -2,7 +2,7 @@
   "id": "gravity", "order": 7, "title": "Gravity Garden",
   "subtitle": "A little room for chaos.",
   "description": "A pocket universe of colorful, colliding toys. Plant shapes, drag them into place, and change the pull of gravity.",
-  "category": "play", "format": "immersive", "medium": "Physics playground",
+  "category": "play", "format": "page", "medium": "Physics playground",
   "tags": ["Physics", "Toys", "Sandbox"], "color": "#e9e3d4", "ink": "#484338",
   "instruction": "Drag the shapes. Tap an empty spot to plant another."
 }

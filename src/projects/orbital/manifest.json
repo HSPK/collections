@@ -2,7 +2,7 @@
   "id": "orbital", "order": 1, "title": "Orbital",
   "subtitle": "A beautiful little system.",
   "description": "A kinetic sculpture with nowhere to go. Set polished rings in motion, change their material, and find an orbit of your own.",
-  "category": "art", "format": "immersive", "medium": "Kinetic sculpture",
+  "category": "art", "format": "page", "medium": "Kinetic sculpture",
   "tags": ["3D", "Materials", "Motion"], "color": "#d9e4cf", "ink": "#273127",
   "instruction": "Drag to orbit. Scroll to get closer."
 }

@@ -2,8 +2,9 @@
 
 Independent URL: `/projects/orbital/`.
 
-`manifest.json` controls discovery metadata. `index.ts` exposes the stable
-website contract while the renderer lives in
+`manifest.json` controls discovery metadata. `index.ts` builds Orbital's
+own studio with `defineArtSite`, and `style.css` defines its sage identity.
+The renderer lives in
 [`src/experiments/orbital.ts`](../../experiments/orbital.ts).
 
 Add ring geometry, materials, or motion variants in that renderer. Shared

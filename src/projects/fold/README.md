@@ -4,7 +4,8 @@ Independent URL: `/projects/fold/`.
 
 The paper mesh, thickness, lighting, and perspective controls are in
 [`fold.ts`](../../experiments/fold.ts). This folder supplies the uniform
-manifest and site entrypoint used by the static page generator.
+manifest and project-owned studio entrypoint used by the static page
+generator. `style.css` defines the blue paper-workshop identity.
 
 Extend fold patterns and material/view presets in the implementation.
 Recompute the actual geometry when folds change, preserve mobile framing,

@@ -1,0 +1,9 @@
+.project-type {
+  --studio-paper: #dbe98c;
+  --studio-panel: #f0f5d8;
+  --studio-ink: #29341b;
+  --studio-muted: #607143;
+  --studio-line: #b9cb8b;
+  --studio-accent: #364e28;
+}
+.project-type .art-brand h1 { font-weight: 750; letter-spacing: -.06em; }

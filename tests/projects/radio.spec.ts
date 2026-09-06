@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import { returnToCollection } from '../helpers/navigation';
 
 interface RadioProbe {
   states: AudioContextState[];
@@ -287,8 +288,8 @@ test('Radio 404 stops on hiding, closes on exit, and never resumes itself after 
   await page.getByRole('button', { name: 'Listen', exact: true }).click();
   await expect(page.locator('.project-radio')).toHaveAttribute('data-radio-mode', 'playing');
   expect((await page.evaluate(() => window.__radioProbe)).states).toEqual(['closed', 'running']);
-  await page.getByRole('link', { name: 'Back to index', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Discover projects', exact: true })).toBeVisible();
+  await returnToCollection(page);
+  await expect(page.getByRole('region', { name: 'Project list', exact: true })).toBeVisible();
   expect(await page.evaluate(() => Number(sessionStorage.getItem('radio-test-closes')))).toBeGreaterThanOrEqual(2);
 });
 

@@ -2,7 +2,7 @@
   "id": "flow", "order": 2, "title": "Flow State",
   "subtitle": "Order is overrated.",
   "description": "Thousands of particles, one invisible current. Bend a living vector field and watch small gestures grow into flowing eddies.",
-  "category": "art", "format": "immersive", "medium": "Particle field",
+  "category": "art", "format": "page", "medium": "Particle field",
   "tags": ["Particles", "Generative", "Motion"], "color": "#161c26", "ink": "#e9b480",
   "instruction": "Move to bend the current. Hold to gather particles."
 }

@@ -1,0 +1,9 @@
+.project-soft {
+  --studio-paper: #f2d8d9;
+  --studio-panel: #fff3ef;
+  --studio-ink: #663441;
+  --studio-muted: #85636a;
+  --studio-line: #dec0c6;
+  --studio-accent: #8c455b;
+}
+.project-soft .art-brand h1 { font-family: Georgia, serif; font-style: italic; font-weight: 400; }

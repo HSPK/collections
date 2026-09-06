@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 import { readProjectManifests, renderProjectDocument } from '../scripts/project-pages';
 import { parseManifest, validateCollection } from '../src/core/manifest';
 import { escapeMarkup } from '../src/core/markup';
+import { openCollectionMenu } from './helpers/navigation';
 
 const projects = readProjectManifests(process.cwd());
 const websites = projects.filter((project) => project.format === 'page');
@@ -11,6 +12,7 @@ const websites = projects.filter((project) => project.format === 'page');
 test('The expanded collection includes twenty new independent websites and six kinds of work', () => {
   expect(projects.length).toBeGreaterThanOrEqual(30);
   expect(websites.length).toBeGreaterThanOrEqual(20);
+  expect(websites.length).toBe(projects.length);
   expect(new Set(projects.map((project) => project.category)).size).toBe(6);
   for (const project of projects) {
     const folder = resolve('src/projects', project.id);
@@ -28,7 +30,10 @@ test('The library gives the first screen to readable project content, not a hero
   await expect(page.locator('.project-card')).toHaveCount(projects.length);
   await expect(page.locator('canvas, iframe')).toHaveCount(0);
   expect((await page.locator('[data-project-grid]').boundingBox())!.y).toBeLessThan(250);
-  const visible = await page.locator('.project-card').evaluateAll((cards) => cards.filter((card) => card.getBoundingClientRect().bottom <= window.innerHeight).length);
+  const visible = await page.locator('.project-card').evaluateAll((cards) => {
+    const viewport = document.querySelector('[data-project-grid]')!.getBoundingClientRect();
+    return cards.filter((card) => card.getBoundingClientRect().bottom <= viewport.bottom).length;
+  });
   expect(visible).toBeGreaterThanOrEqual(6);
   expect(await page.locator('.card-copy p').first().evaluate((element) => parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(14);
   expect(await page.locator('.card-tags span').first().evaluate((element) => parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(12);
@@ -43,7 +48,9 @@ test('Old shared links lead to real standalone pages and survive direct refresh'
   await expect(page.locator('[data-stage]')).toHaveAttribute('data-ready', 'true');
   await expect(page.locator('body')).toHaveAttribute('data-project', 'orbital');
   await expect(page.locator('iframe, .library-shell')).toHaveCount(0);
-  expect(await page.locator('.project-trail').evaluate((element) => element.getBoundingClientRect().height)).toBeLessThanOrEqual(54);
+  await expect(page.locator('.project-trail, #app > .site-header, .lab-page')).toHaveCount(0);
+  await expect(page.locator('.art-website')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Collection menu', exact: true })).toBeVisible();
 });
 
 test('Manifest and HTML generation are data-driven, validated, and safely rebased', () => {
@@ -81,6 +88,8 @@ for (const project of websites) {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.waitForTimeout(100);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), `${project.id} must not overflow the phone viewport`).toBe(true);
+    await expect(page.locator('.project-trail, #app > .site-header')).toHaveCount(0);
+    await openCollectionMenu(page);
     await expect(page.getByRole('link', { name: 'Back to index', exact: true })).toBeVisible();
     expect(errors).toEqual([]);
   });

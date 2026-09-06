@@ -1,1 +1,6 @@
-export { mount } from '../../experiments/fold';
+import './style.css';
+import { defineArtSite } from '../../core/art-site';
+import { mount as artwork } from '../../experiments/fold';
+import manifest from './manifest.json';
+
+export const mount = defineArtSite(manifest, artwork);

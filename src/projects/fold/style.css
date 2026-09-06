@@ -1,0 +1,9 @@
+.project-fold {
+  --studio-paper: #d9e5f1;
+  --studio-panel: #f5f8fc;
+  --studio-ink: #2d4461;
+  --studio-muted: #627996;
+  --studio-line: #c0cfe0;
+  --studio-accent: #3a5d83;
+}
+.project-fold .art-brand h1 { font-family: Georgia, serif; font-weight: 400; }

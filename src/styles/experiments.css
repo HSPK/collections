@@ -1,32 +1,24 @@
-.project-trail { min-height: 46px; padding: 5px 24px; background: #fafbf8; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; gap: 24px; font-size: 13px; color: #58655c; }
-.project-trail .back-index { display: inline-flex; align-items: center; gap: 8px; min-height: 34px; white-space: nowrap; }
-.project-trail .back-index svg { width: 17px; height: 17px; transform: rotate(180deg); }
-.trail-title { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.project-trail > div { display: flex; align-items: center; gap: 22px; }
-.project-trail > div > a, .project-trail button { display: inline-flex; align-items: center; gap: 7px; min-height: 34px; padding: 0; font-size: 13px; }
-.project-trail svg { width: 17px; height: 17px; }
-.lab-page { padding: 0 28px 14px; max-width: 1800px; margin: auto; }
-.lab-heading { display: flex; align-items: center; justify-content: space-between; gap: 25px; min-height: 90px; }
-.lab-heading h1 { font-size: 29px; font-weight: 500; letter-spacing: -1px; margin: 0; }
-.lab-heading p { font-size: 14px; color: var(--muted); margin: 6px 0 0; }
-.experiment-pager { display: flex; align-items: center; gap: 14px; }
-.experiment-pager > span { font-size: 12px; color: var(--muted); white-space: nowrap; }
-.experiment-pager a { width: 34px; height: 40px; display: grid; place-items: center; }
-.experiment-pager a:first-child svg { transform: rotate(180deg); }
-.experiment-pager svg { width: 20px; height: 20px; }
-.experiment-stage { position: relative; width: 100%; height: clamp(420px, calc(100svh - 267px), 960px); overflow: hidden; isolation: isolate; }
+.collection-menu { position: fixed; z-index: 50; bottom: max(16px, env(safe-area-inset-bottom)); right: max(16px, env(safe-area-inset-right)); }
+.collection-menu-toggle { display: grid; place-items: center; width: 46px; height: 46px; margin-left: auto; border: 1px solid #c7d1c1; border-radius: 50%; background: #fbfcf8; color: #2b4333; box-shadow: 0 3px 15px #172f201a; }
+.collection-menu-toggle .brand-mark { width: 27px; height: 27px; }
+.collection-menu-toggle:hover, .collection-menu-toggle[aria-expanded="true"] { background: #e6eedf; border-color: #8ba181; }
+.collection-menu-panel { position: absolute; bottom: 58px; right: 0; width: 260px; max-width: calc(100vw - 32px); max-height: calc(100svh - 100px); overflow-y: auto; padding: 10px; border: 1px solid #c8d2c2; border-radius: 9px; background: #fbfcf8; color: #293d2f; box-shadow: 0 10px 40px #18302126; scrollbar-width: thin; scrollbar-color: #9cae94 transparent; }
+.collection-menu-heading { padding: 10px 10px 14px; margin-bottom: 4px; border-bottom: 1px solid #e0e6dc; }
+.collection-menu-heading strong { display: block; font-size: 15px; line-height: 1.35; }
+.collection-menu-heading span { display: block; color: #6a7866; font-size: 12px; margin-top: 5px; }
+.collection-menu-panel > a, .collection-menu-panel > button { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 10px; border-radius: 4px; text-align: left; font-size: 14px; }
+.collection-menu-panel > a:hover, .collection-menu-panel > button:hover { background: #eaf0e4; }
+.collection-menu-panel svg { width: 18px; height: 18px; }
+.collection-menu-panel > a:first-of-type svg { transform: rotate(180deg); }
+.menu-info-icon { display: grid; place-items: center; width: 18px; height: 18px; border: 1px solid currentColor; border-radius: 50%; font: 13px Georgia, serif; }
+.collection-menu-pager { display: flex; justify-content: space-between; gap: 10px; margin-top: 7px; border-top: 1px solid #e0e6dc; padding-top: 7px; }
+.collection-menu-pager a { display: inline-flex; align-items: center; gap: 5px; padding: 8px; min-height: 40px; font-size: 12px; }
+.collection-menu-pager a:first-child svg { transform: rotate(180deg); }
 .experiment-canvas { display: block; width: 100%; height: 100%; position: absolute; inset: 0; touch-action: none; }
 .stage-hint { position: absolute; left: 20px; bottom: 18px; font: 12px var(--mono); letter-spacing: .25px; line-height: 1.5; pointer-events: none; opacity: .8; max-width: calc(100% - 40px); z-index: 2; }
 .project-loading { min-height: 280px; display: flex; align-items: center; justify-content: center; gap: 18px; font-size: 15px; color: #64735c; }
-.experiment-stage .project-loading { position: absolute; inset: 0; }
 .loading-orbit { width: 25px; height: 25px; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: loading-spin 1.4s linear infinite; }
 @keyframes loading-spin { to { transform: rotate(360deg); } }
-.experiment-toolbar { display: flex; gap: 24px; align-items: stretch; border-bottom: 1px solid var(--line); padding: 20px 0; }
-.playback-controls { display: flex; gap: 20px; align-items: center; border-right: 1px solid var(--line); padding-right: 24px; }
-.playback-button, .reset-button { display: flex; align-items: center; gap: 8px; min-height: 44px; font-size: 14px; white-space: nowrap; padding: 0 2px; }
-.playback-button svg, .reset-button svg { width: 18px; height: 18px; }
-.playback-button { min-width: 78px; }
-.reset-button { color: var(--muted); }
 .experiment-controls { display: flex; gap: 22px; align-items: center; flex: 1; flex-wrap: wrap; min-width: 0; }
 .control { display: flex; flex-direction: column; gap: 9px; min-width: 120px; }
 .control-label { font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; gap: 12px; }
@@ -43,12 +35,8 @@ input[type="range"]::-moz-range-thumb { width: 12px; height: 12px; border: 0; bo
 .control-button:hover { border-color: #657a5b; }
 .control-button[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 .control input[type="text"] { max-width: 168px; height: 32px; border: 0; border-bottom: 1px solid #bdc8b7; padding: 1px 0 5px; background: transparent; color: var(--ink); font-size: 15px; border-radius: 0; }
-.lab-status { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; min-height: 55px; padding: 15px 0 0; }
-.lab-status p { font-size: 13px; color: var(--muted); margin: 0; line-height: 1.6; }
-.lab-status a { font-size: 12px; display: flex; align-items: center; gap: 7px; color: var(--muted); white-space: nowrap; min-height: 30px; }
-.lab-status a svg { width: 15px; height: 15px; }
 .standalone-site, .project-surface { width: 100%; min-width: 0; }
-.project-feedback { position: fixed; bottom: 18px; right: 18px; z-index: 30; max-width: min(470px, calc(100vw - 36px)); background: #26392f; color: #fff; border: 1px solid #647660; border-radius: 8px; display: flex; align-items: flex-start; gap: 18px; padding: 16px 18px; box-shadow: 0 8px 35px #15261b29; }
+.project-feedback { position: fixed; bottom: 78px; right: 18px; z-index: 30; max-width: min(470px, calc(100vw - 36px)); background: #26392f; color: #fff; border: 1px solid #647660; border-radius: 8px; display: flex; align-items: flex-start; gap: 18px; padding: 16px 18px; box-shadow: 0 8px 35px #15261b29; }
 .project-feedback p { font-size: 14px; line-height: 1.55; margin: 0; }
 .project-feedback button { flex-shrink: 0; color: white; font-size: 24px; line-height: 1; padding: 0; min-width: 24px; min-height: 24px; }
 .project-error { padding: 70px 8%; background: var(--paper); color: var(--ink); min-height: 450px; }
@@ -56,34 +44,12 @@ input[type="range"]::-moz-range-thumb { width: 12px; height: 12px; border: 0; bo
 .project-error p { max-width: 650px; font-size: 15px; line-height: 1.65; }
 .project-error > div { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 25px; }
 
-@media (max-width: 1000px) {
-  .experiment-toolbar { flex-wrap: wrap; gap: 14px; }
-  .playback-controls { border-right: 0; border-bottom: 1px solid var(--line); padding: 0 0 10px; width: 100%; justify-content: space-between; }
-  .experiment-controls { gap: 18px 22px; }
-}
 @media (max-width: 720px) {
-  .project-trail { min-height: 46px; padding-inline: 14px; gap: 12px; font-size: 13px; }
-  .trail-title { display: none; }
-  .project-trail > div { gap: 17px; }
-  .project-trail > div > a span { display: none; }
-  .lab-page { padding: 0 16px 14px; }
-  .lab-heading { min-height: 84px; gap: 15px; }
-  .lab-heading h1 { font-size: 26px; }
-  .lab-heading p { font-size: 13px; line-height: 1.4; }
-  .experiment-pager { gap: 4px; }
-  .experiment-pager a { width: 27px; }
-  .experiment-pager svg { width: 18px; height: 18px; }
-  .experiment-pager > span { font-size: 12px; }
-  .experiment-stage { height: clamp(360px, 57svh, 590px); }
   .stage-hint { font-size: 12px; left: 15px; bottom: 15px; max-width: calc(100% - 30px); }
-  .experiment-toolbar { padding: 14px 0 18px; }
   .experiment-controls { gap: 22px; }
   .control { min-width: 126px; }
   .control--range { width: min(143px, 41vw); }
   .control-button { min-height: 44px; font-size: 13px; }
-  .lab-status { display: block; }
-  .lab-status p { font-size: 13px; }
-  .lab-status a { margin-top: 6px; }
   .project-error { padding: 35px 20px; }
   .project-error h1 { font-size: 28px; }
 }

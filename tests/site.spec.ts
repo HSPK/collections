@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { createHash } from 'node:crypto';
 import { readProjectManifests } from '../scripts/project-pages';
+import { openCollectionMenu, returnToCollection } from './helpers/navigation';
 
 declare global {
   interface Window {
@@ -17,7 +18,7 @@ const playCount = manifests.filter((project) => project.category === 'play').len
 
 test('The content-first library filters and remembers its state across websites', async ({ page }) => {
   await page.goto('./');
-  await expect(page.getByRole('heading', { name: 'Discover projects' })).toBeVisible();
+  await expect(page.locator('.nav-current')).toHaveText('Projects');
   await expect(page.locator('.project-card')).toHaveCount(manifests.length);
   await page.locator('[data-filter="play"]').click();
   await expect(page.locator('.project-card')).toHaveCount(playCount);
@@ -28,7 +29,7 @@ test('The content-first library filters and remembers its state across websites'
   await page.locator('[data-project="flow"]').click();
   await expect(page).toHaveURL(/\/projects\/flow\/$/);
   await expect(page.locator('[data-stage]')).toHaveAttribute('data-ready', 'true');
-  await page.getByRole('link', { name: 'Back to index', exact: true }).click();
+  await returnToCollection(page);
   await expect(page.locator('.project-card')).toHaveCount(artCount);
   await expect(page.getByRole('button', { name: 'List view' })).toHaveAttribute('aria-pressed', 'true');
 });
@@ -59,8 +60,8 @@ for (const id of ids) {
     page.on('pageerror', (error) => errors.push(error.message));
     page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
     await page.goto(`./projects/${id}/`);
-    const stage = page.locator('[data-stage]');
-    await expect(stage).toHaveAttribute('data-ready', 'true');
+    await expect(page.locator('#main-content > [data-stage]')).toHaveAttribute('data-ready', 'true');
+    const stage = page.locator('[data-art-stage]');
     await expect(stage.locator('canvas')).toBeVisible();
     await expect(page.locator('[data-controls] button, [data-controls] input, [data-controls] select').first()).toBeVisible();
     const bounds = (await stage.boundingBox())!;
@@ -101,7 +102,7 @@ for (const id of ids) {
     await page.getByRole('button', { name: 'Play animation', exact: true }).click();
     const reset = page.getByRole('button', { name: 'Reset', exact: true });
     if (await reset.isVisible()) await reset.click();
-    await page.getByRole('link', { name: 'Back to index', exact: true }).click();
+    await returnToCollection(page);
     await expect(page.locator('.project-card')).toHaveCount(manifests.length);
     expect(errors).toEqual([]);
   });
@@ -127,7 +128,7 @@ test('The index and all experiments fit a narrow touch viewport', async ({ page 
     await page.goto(`./projects/${id}/`);
     await expect(page.locator('[data-stage]')).toHaveAttribute('data-ready', 'true');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), `${id} should not overflow`).toBe(true);
-    const stage = (await page.locator('[data-stage]').boundingBox())!;
+    const stage = (await page.locator('[data-art-stage]').boundingBox())!;
     expect(stage.width).toBeLessThanOrEqual(375);
     expect(stage.height).toBeGreaterThan(300);
   }
@@ -140,9 +141,9 @@ test('Afterimage exports an actual local PNG', async ({ page }) => {
   await page.getByRole('button', { name: 'Keep a print', exact: true }).click();
   expect((await download).suggestedFilename()).toBe('odd-index-afterimage.png');
   await page.getByRole('button', { name: 'Clear', exact: true }).click();
-  await expect(page.locator('[data-report]')).toContainText('Canvas cleared');
+  await expect(page.locator('[data-art-report]')).toContainText('Canvas cleared');
   await page.getByRole('button', { name: 'New gesture', exact: true }).click();
-  await expect(page.locator('[data-report]')).toContainText('new composition');
+  await expect(page.locator('[data-art-report]')).toContainText('new composition');
 });
 
 test('An unsupported WebGL browser gets an honest error and a usable alternative', async ({ page }) => {
@@ -156,7 +157,7 @@ test('An unsupported WebGL browser gets an honest error and a usable alternative
     });
   });
   await page.goto('./projects/orbital/');
-  await expect(page.getByRole('alert')).toContainText('This one needs a little more');
+  await expect(page.getByRole('alert')).toContainText('WebGL');
   await page.getByRole('link', { name: 'Try Flow State instead' }).click();
   await expect(page.locator('[data-stage]')).toHaveAttribute('data-ready', 'true');
   await expect(page.getByRole('button', { name: 'Pause animation', exact: true })).toBeEnabled();
@@ -241,7 +242,8 @@ for (const legacyAutomation of [false, true]) {
     await expect.poll(() => page.evaluate(() => window.__oddAudioStates)).toEqual(['closed']);
     await sound.click();
     await expect.poll(() => page.evaluate(() => window.__oddAudioStates)).toEqual(['closed', 'running']);
-    await page.getByRole('link', { name: 'Next experiment: Gravity Garden', exact: true }).click();
+    await openCollectionMenu(page);
+    await page.getByRole('link', { name: 'Next project: Gravity Garden', exact: true }).click();
     await expect(page.locator('[data-stage]')).toHaveAttribute('data-ready', 'true');
     await expect.poll(() => page.evaluate(() => Number(sessionStorage.getItem('odd-test-audio-closes')))).toBe(2);
     expect(await page.evaluate(() => window.__oddAudioStates)).toEqual([]);
@@ -270,7 +272,7 @@ test('Custom typography and keyboard scattering work while motion is paused', as
   await canvas.focus();
   await canvas.press('Space');
   await expect(page.getByRole('button', { name: 'Play animation', exact: true })).toBeVisible();
-  await page.locator('#main-content').focus();
+  await page.locator('.art-website').focus();
   await page.keyboard.press('Space');
   await expect(page.getByRole('button', { name: 'Pause animation', exact: true })).toBeVisible();
 });

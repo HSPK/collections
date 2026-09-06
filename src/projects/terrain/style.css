@@ -1,0 +1,9 @@
+.project-terrain {
+  --studio-paper: #dcd9e8;
+  --studio-panel: #f3f0f8;
+  --studio-ink: #38314d;
+  --studio-muted: #736985;
+  --studio-line: #c7c0d6;
+  --studio-accent: #6d598c;
+}
+.project-terrain .art-brand h1 { font-family: var(--mono); font-size: 27px; letter-spacing: -.06em; }

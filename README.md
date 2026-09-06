@@ -8,10 +8,12 @@ games to play, stories to read, and worlds that do not quite exist.
 ![The Odd Index project browser](public/cover.jpg)
 
 The library is deliberately small: search, project types, useful previews,
-and links. Projects are the main event. Each one opens its **own complete
+and links. Its header and search area stay in place while the project list
+scrolls independently. Projects are the main event. Each one opens its **own complete
 website** at `/projects/<id>/`, with its own content, layout, and behavior.
 There are no iframes and no requirement to fit a project inside an animation
-viewport.
+viewport. Collection navigation lives in a collapsible floating menu, not
+an injected page header.
 
 Everything is statically hosted and runs in the visitor's browser. "AI-made"
 describes how this collection was created, not a hosted inference service.
@@ -119,14 +121,20 @@ schema and a minimal entrypoint.
 Reading websites do not inherit irrelevant animation controls. Shared
 helpers cover lifecycle cleanup, accessible notifications, downloads,
 safe markup, clipboard access, local data, animation loops, and compatible
-audio automation. The original ten renderers remain in `src/experiments/`
-behind the same per-folder manifest interface.
+audio automation. The original ten renderers remain in `src/experiments/`,
+but each now has a project-owned studio entrypoint and theme in its own
+directory. `defineArtSite` in `src/core/art-site.ts` composes the artwork,
+local controls, notes, and lifecycle without involving the index layout.
+All thirty manifests use `format: "page"`.
 
 ## Browsing and accessibility
 
 - Discovery interleaves project types rather than presenting an entire row
   of near-identical effects. Categories, search, and layout preferences
-  survive navigation between independent websites.
+  and the list's own scroll position survive navigation between websites.
+- The header has no project-count badge or introductory headline.
+  Header, search, and filters remain visible; the list has a restrained,
+  independently scrollable viewport.
 - Press **/** to focus library search or **Ctrl/Command + K** to find a
   project from anywhere. Dialogs support Tab, Enter, and Escape.
 - The library starts with project content, not a heavyweight 3D hero.
@@ -134,8 +142,11 @@ behind the same per-folder manifest interface.
 - Controls, labels, and body copy use readable sizes. Sites are designed
   for narrow screens and provide keyboard or touch alternatives.
 - Motion respects the system preference where appropriate. The original
-  art studies retain explicit Play/Pause controls; project-specific keys
-  take precedence over collection shortcuts.
+  art websites own their Play/Pause controls and keyboard behavior;
+  the collection does not control their playback.
+- The floating collection menu provides return, search, project information,
+  source, and previous/next links. It can be closed with Escape or by
+  clicking outside and does not reserve any page-header space.
 - Sound always requires explicit opt-in. Audio graphs, rendering loops,
   observers, and listeners are released when leaving a project.
 - Fictional archives, newspapers, forecasts, and radio stations are

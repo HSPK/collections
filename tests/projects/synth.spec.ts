@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import { returnToCollection } from '../helpers/navigation';
 import { holdGainAtTime } from '../../src/core/audio';
 import {
   clonePattern, MAX_JSON_LENGTH, parsePatternJSON, patternFilename, patternJSON,
@@ -404,7 +405,7 @@ test('Pocket Synth releases its audio graph on navigation', async ({ page }) => 
   await page.goto(route);
   await page.getByRole('button', { name: 'Play pattern', exact: true }).click();
   await expect.poll(() => page.evaluate(() => window.__pocketSynthAudit.sources.length)).toBeGreaterThan(0);
-  await page.getByRole('link', { name: 'Back to index', exact: true }).click();
+  await returnToCollection(page);
   await expect(page.locator('.project-synth')).toHaveCount(0);
   const exit = await page.evaluate(() => JSON.parse(sessionStorage.getItem('pocket-synth-test-exit') ?? 'null') as { closes: number; liveSources: number; liveNodes: number } | null);
   expect(exit).not.toBeNull();

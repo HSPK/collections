@@ -3,8 +3,8 @@
 Independent URL: `/projects/soft/`.
 
 The maintained renderer is [`soft.ts`](../../experiments/soft.ts). This
-folder separates its public manifest and website entrypoint from its
-rendering implementation.
+folder separates its public manifest, project-owned studio entrypoint,
+and blush-themed stylesheet from its rendering implementation.
 
 Extend the metaball field, finishes, or control ranges in the renderer.
 The shared spatial lifecycle handles camera framing, studio setup, and

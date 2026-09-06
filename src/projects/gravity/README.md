@@ -5,6 +5,7 @@ Independent URL: `/projects/gravity/`.
 The renderer and toy-physics model live in
 [`gravity.ts`](../../experiments/gravity.ts). Discovery metadata is local
 to this folder, so new tags or copy do not require routing changes.
+The entrypoint and stylesheet also own the toy-desk studio and controls.
 
 Extend the shape catalog, rendering marks, or physical rules in the
 implementation. Preserve stable collision handling, the communicated

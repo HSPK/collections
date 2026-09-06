@@ -4,7 +4,8 @@ Independent URL: `/projects/chroma/`.
 
 The color-field shader and its controls live in
 [`chroma.ts`](../../experiments/chroma.ts). `manifest.json` is the public
-discovery record and `index.ts` is its website adapter.
+discovery record. `index.ts` owns the studio through `defineArtSite`, and
+`style.css` defines its warm pigment-laboratory identity.
 
 Add artist palettes or domain-warp variations in the renderer rather than
 in the collection. Keep pointer and keyboard stirring connected to shader

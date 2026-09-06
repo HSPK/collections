@@ -1,0 +1,10 @@
+.project-ribbon {
+  --studio-paper: #212029;
+  --studio-panel: #2e2938;
+  --studio-ink: #f0dce6;
+  --studio-muted: #bca8c1;
+  --studio-line: #51445e;
+  --studio-accent: #e5b6d0;
+  --studio-accent-ink: #39233e;
+}
+.project-ribbon .art-brand h1 { font-family: Georgia, serif; font-style: italic; font-weight: 400; }

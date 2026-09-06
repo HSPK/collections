@@ -35,7 +35,7 @@ export interface ProjectManifest {
   subtitle: string;
   description: string;
   category: Category;
-  format: 'page' | 'immersive';
+  format: 'page';
   medium: string;
   tags: string[];
   color: string;

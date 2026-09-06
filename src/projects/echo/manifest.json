@@ -2,7 +2,7 @@
   "id": "echo", "order": 6, "title": "Echo",
   "subtitle": "Every touch leaves a trace.",
   "description": "An instrument you can see. Send a ripple and build a quiet composition from overlapping circles and optional pentatonic tones.",
-  "category": "art", "format": "immersive", "medium": "Visual instrument",
+  "category": "art", "format": "page", "medium": "Visual instrument",
   "tags": ["Sound", "Generative", "Motion"], "color": "#172c29", "ink": "#d1dd95",
   "instruction": "Tap anywhere to make a ripple. Enable sound for the full experience."
 }
