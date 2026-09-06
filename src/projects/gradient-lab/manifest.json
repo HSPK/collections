@@ -1,0 +1,14 @@
+{
+  "id": "gradient-lab",
+  "order": 52,
+  "title": "Gradient Lab",
+  "subtitle": "One landscape. Three ways downhill.",
+  "description": "An inspectable optimizer workbench: run gradient descent, momentum, and Adam on real two-dimensional loss functions, compare their paths, and see exactly what each update changes.",
+  "category": "learn",
+  "format": "page",
+  "medium": "Interactive optimizer field guide",
+  "tags": ["AI education", "Optimization", "Mathematics", "Interactive"],
+  "color": "#0a1925",
+  "ink": "#d6f975",
+  "instruction": "Take one step, inspect a path, then change the learning rate."
+}

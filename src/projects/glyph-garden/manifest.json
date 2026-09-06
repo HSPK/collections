@@ -1,0 +1,14 @@
+{
+  "id": "glyph-garden",
+  "order": 32,
+  "title": "Glyph Garden",
+  "subtitle": "Draw a mark. See what takes root.",
+  "description": "Tend an original illustrated garden with circles, chevrons, and zigzags. A bounded local shape recognizer grows flowers and trees or changes the breeze, with honest match scores, three planting patches, keyboard equivalents, undo, and a motion pause.",
+  "category": "create",
+  "format": "page",
+  "medium": "Gesture-grown illustrated garden",
+  "tags": ["New interaction", "Drawing", "Gardens", "Local geometry"],
+  "color": "#f1eddc",
+  "ink": "#334d3c",
+  "instruction": "Draw a generous circle for a flower, an upright chevron for a tree, or a three-stroke zigzag for wind. Choose a planting patch, or use the field-guide buttons."
+}

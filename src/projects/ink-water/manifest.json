@@ -1,0 +1,14 @@
+{
+  "id": "ink-water",
+  "order": 42,
+  "title": "Ink in Water",
+  "subtitle": "A drop becomes a world.",
+  "description": "Release indigo, carbon, and madder into a pale water vessel. A bounded fluid-like velocity grid folds the pigment into soft plumes, carrying thousands of fine tracers through an illustrative generative painting.",
+  "category": "art",
+  "format": "page",
+  "medium": "Fluid-grid pigment painting",
+  "tags": ["Particle study", "Fluid field", "Pigment", "Canvas"],
+  "color": "#edf2f5",
+  "ink": "#293b59",
+  "instruction": "Drag through the water to pour and stir, or use Pour a ribbon. Change viscosity to soften the current."
+}

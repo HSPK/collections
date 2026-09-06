@@ -1,0 +1,14 @@
+{
+  "id": "perspective-paradox",
+  "order": 40,
+  "title": "Perspective Paradox",
+  "subtitle": "A closed loop. Until you move.",
+  "description": "An original forced-perspective architectural court: three separate tapered beams align into an impossible triangle from one exact viewpoint. Orbit to expose the gaps, trace their shared sightlines, and move the sunlight across their real shadows.",
+  "category": "art",
+  "format": "page",
+  "medium": "Anamorphic architecture",
+  "tags": ["3D scene", "Perspective", "Architecture", "Optical illusion"],
+  "color": "#e8e4dc",
+  "ink": "#2f3e37",
+  "instruction": "Find the viewpoint, then drag or use the arrow keys to make the impossible come apart."
+}

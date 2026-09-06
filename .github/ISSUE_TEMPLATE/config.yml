@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Contribute an AI-made website
+    url: https://github.com/HSPK/collections/blob/main/CONTRIBUTING.md
+    about: Start with the project generator and contribution guide.
+  - name: Explore the live collection
+    url: https://hspk.github.io/collections/
+    about: Open the independent websites before suggesting a new idea.

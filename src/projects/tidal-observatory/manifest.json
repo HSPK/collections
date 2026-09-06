@@ -1,0 +1,14 @@
+{
+  "id": "tidal-observatory",
+  "order": 36,
+  "title": "Tidal Observatory",
+  "subtitle": "Read the water. Keep the light.",
+  "description": "An imagined coastal field station around a complete lighthouse island: layered cliffs, keeper’s cottages, a small harbor, floating boats, and a sweeping lantern. Set the tide, move from daylight to blue hour, and hold a moment in the observation cycle.",
+  "category": "art",
+  "format": "page",
+  "medium": "Procedural coastline · nautical field station",
+  "tags": ["3D scene", "Coastline", "Tides", "Light", "Observation"],
+  "color": "#f4f0e7",
+  "ink": "#213d4d",
+  "instruction": "Set the tide, turn toward blue hour, and explore the coast, lantern, or harbor. Drag or use the arrow keys to look around."
+}

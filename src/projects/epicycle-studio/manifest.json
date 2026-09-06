@@ -1,0 +1,14 @@
+{
+  "id": "epicycle-studio",
+  "order": 46,
+  "title": "Epicycle Studio",
+  "subtitle": "A line, taken apart into turning circles.",
+  "description": "A real complex Fourier drawing desk: resample four original outlines or sketch your own, choose the strongest harmonics, and inspect a reversible circle-chain reconstruction.",
+  "category": "learn",
+  "format": "page",
+  "medium": "Interactive Fourier plotting desk",
+  "tags": ["Animation demo", "Fourier", "Drawing", "Mathematics"],
+  "color": "#e7eadf",
+  "ink": "#233c34",
+  "instruction": "Try four harmonics, then all 127. Scrub a cycle or draw your own closed path."
+}

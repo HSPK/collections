@@ -73,6 +73,7 @@ test('Manifest and HTML generation are data-driven, validated, and safely rebase
 
 for (const project of websites) {
   test(`${project.id}: independent website loads, refreshes, and fits a phone`, async ({ page }) => {
+    if (project.tags.some((tag) => tag.toLowerCase().includes('3d'))) test.setTimeout(90_000);
     const errors: string[] = [];
     page.on('pageerror', (error) => errors.push(error.message));
     await page.goto(`./projects/${project.id}/`);

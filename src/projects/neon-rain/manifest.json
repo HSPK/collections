@@ -1,0 +1,14 @@
+{
+  "id": "neon-rain",
+  "order": 37,
+  "title": "Neon Rain",
+  "subtitle": "Six lights left on in a neighborhood that never existed.",
+  "description": "Wander Vesper Ward: an original rain-soaked street of late cinemas, noodle counters and rooftop antennas. Reframe the camera, hold a moment, and tune the rain and neon reflected across the asphalt.",
+  "category": "art",
+  "format": "page",
+  "medium": "Procedural night street & after-dark directory",
+  "tags": ["3D scene", "Fictional places", "Neon signs", "Seeded rain"],
+  "color": "#171c1b",
+  "ink": "#d4eb73",
+  "instruction": "Choose Street, Arcade or Rooftop. Drag to look around; pause or scrub the rain to hold your favorite frame."
+}

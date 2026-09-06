@@ -1,0 +1,14 @@
+{
+  "id": "time-brush",
+  "order": 34,
+  "title": "Time Brush",
+  "subtitle": "Paint a small rebellion against the clock.",
+  "description": "Brush pockets of slow, frozen, accelerated, or backward time into a luminous kinetic scene. Each orbiter, train, and wave bead follows its own local clock.",
+  "category": "create",
+  "format": "page",
+  "medium": "Interactive time-field painting",
+  "tags": ["New interaction", "Generative art", "Local time"],
+  "color": "#17296d",
+  "ink": "#f6f2dc",
+  "instruction": "Choose a time brush, then paint directly over a moving object. Or use the arrow keys and Space to stamp."
+}

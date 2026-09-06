@@ -1,0 +1,14 @@
+{
+  "id": "motor-field-lab",
+  "order": 57,
+  "title": "Motor Field Lab",
+  "subtitle": "Three stationary coils. One rotating field.",
+  "description": "A copper-and-teal motor instrument with an exact normalized three-phase field, original stator and permanent-magnet rotor diagrams, live current traces, phase switches, and cross-product torque experiments.",
+  "category": "learn",
+  "format": "page",
+  "medium": "Interactive motor field instrument",
+  "tags": ["Engineering lab", "Electromagnetism", "Motors", "Interactive"],
+  "color": "#102329",
+  "ink": "#86f2dd",
+  "instruction": "Pause and scrub the electrical angle, then switch a phase off to see the field and torque change."
+}

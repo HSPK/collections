@@ -4,3 +4,6 @@ test-results/
 playwright-report/
 .DS_Store
 *.local
+src/projects/*/.browser-runtime/
+src/projects/*/.validation/
+src/projects/*/.review-*.png

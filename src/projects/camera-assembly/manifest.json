@@ -1,0 +1,14 @@
+{
+  "id": "camera-assembly",
+  "order": 49,
+  "title": "Camera Assembly",
+  "subtitle": "Nine floating parts. One imaginary instant camera.",
+  "description": "Explore an original saffron-and-cream instant camera in real-time 3D. Scrub a five-stage assembly, inspect nine component groups, orbit four view presets, and reveal a locally drawn print. This is a design-fiction motion study, not an engineering model or repair guide.",
+  "category": "art",
+  "format": "page",
+  "medium": "Real-time 3D object choreography",
+  "tags": ["Animation demo", "Design fiction", "3D"],
+  "color": "#e8b44f",
+  "ink": "#291f30",
+  "instruction": "Play or scrub the assembly. Drag to orbit; choose a part to pause, separate, and highlight it."
+}

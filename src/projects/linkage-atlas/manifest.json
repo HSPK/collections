@@ -1,0 +1,14 @@
+{
+  "id": "linkage-atlas",
+  "order": 59,
+  "title": "Linkage Atlas",
+  "subtitle": "Four bars, one wandering point, and the geometry of motion.",
+  "description": "A hands-on four-bar kinematics notebook with five mechanism studies, signed circle-intersection assemblies, editable link lengths, and deterministic coupler paths. Explore Grashof inversions, unreachable angles, dead centers, and an honestly approximate Chebyshev straight-line segment.",
+  "category": "learn",
+  "format": "page",
+  "medium": "Interactive kinematics notebook",
+  "tags": ["Engineering lab", "Mechanisms", "Geometry", "Interactive"],
+  "color": "#e6ecdf",
+  "ink": "#293b32",
+  "instruction": "Choose a study, then drag pin B or scrub the input angle. Change the link lengths and tracer position to discover a new coupler path."
+}

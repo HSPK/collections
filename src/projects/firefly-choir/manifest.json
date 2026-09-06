@@ -1,0 +1,14 @@
+{
+  "id": "firefly-choir",
+  "order": 43,
+  "title": "Firefly Choir",
+  "subtitle": "A night garden of little clocks learning to glow together.",
+  "description": "Tend a silent, fern-framed gathering of bioluminescent lights. Explore illustrative local phase coupling, gentle flocking, and a guiding torch, with real phase-coherence feedback and accessible playback controls.",
+  "category": "art",
+  "format": "page",
+  "medium": "Particle study · local rhythms in a moonlit garden",
+  "tags": ["Particle study", "Local coupling", "Fireflies", "Generative garden", "Silent"],
+  "color": "#142720",
+  "ink": "#e8ebdc",
+  "instruction": "Watch nearby lights find a shared rhythm. Adjust neighbor coupling, scatter their phases, or touch the clearing to lend them a torch."
+}

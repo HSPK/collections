@@ -1,0 +1,14 @@
+{
+  "id": "breath-garden",
+  "order": 35,
+  "title": "Breath Garden",
+  "subtitle": "A little wind unfolds a world.",
+  "description": "Send wind through an original coral-and-blue paper garden with a held button or Space. Optional, explicitly enabled local microphone loudness opens the same folds, with no recording or uploads.",
+  "category": "play",
+  "format": "page",
+  "medium": "Paper garden and optional local sound input",
+  "tags": ["New interaction", "Paper", "Sound", "Accessible play"],
+  "color": "#e8efeb",
+  "ink": "#3c5968",
+  "instruction": "Hold the blue wind button, hold Space, or press the garden to open the paper flowers. Microphone input is optional and starts only when you enable it."
+}

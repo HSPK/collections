@@ -1,0 +1,94 @@
+.project-sand-script {
+  --ss-ink: #633a3c;
+  --ss-line: #cfbfa5;
+  min-height: 100vh;
+  background: #f0e7d7;
+  color: var(--ss-ink);
+  font-family: Arial, Helvetica, sans-serif;
+}
+.project-sand-script * { box-sizing: border-box; }
+.project-sand-script .ss-page { width: min(1460px, 100%); margin: 0 auto; padding: 26px 42px 30px; }
+.project-sand-script .ss-header { display: flex; justify-content: space-between; align-items: end; gap: 22px; margin-bottom: 26px; }
+.project-sand-script .ss-eyebrow { margin: 0 0 9px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.13em; font-weight: 600; }
+.project-sand-script h1 { font: 54px/1 Georgia, 'Times New Roman', serif; margin: 0; letter-spacing: -0.05em; }
+.project-sand-script h1 em { font-weight: 400; }
+.project-sand-script h1 > span { color: #bb734d; }
+.project-sand-script .ss-header > p { margin: 0 70px 0 0; font: 17px/1.55 Georgia, 'Times New Roman', serif; color: #8c6e57; }
+.project-sand-script .ss-workbench { display: grid; grid-template-columns: minmax(0, 1fr) 272px; gap: 30px; align-items: start; }
+.project-sand-script .ss-editor { min-width: 0; }
+.project-sand-script button, .project-sand-script select { min-height: 44px; padding: 10px 12px; color: inherit; background: transparent; font: 14px/1.3 Arial, Helvetica, sans-serif; border: 1px solid var(--ss-line); border-radius: 3px; }
+.project-sand-script button { cursor: pointer; }
+.project-sand-script button:hover:not(:disabled) { background: #e5d7c2; border-color: #96765e; }
+.project-sand-script button:disabled { color: #827d73; cursor: default; opacity: 0.6; }
+.project-sand-script :is(button, select, input, canvas):focus-visible { outline: 2px solid #875247; outline-offset: 3px; }
+.project-sand-script .ss-tools { display: flex; border-top: 1px solid var(--ss-line); padding: 12px 0; gap: 9px; }
+.project-sand-script .ss-tools button { display: flex; align-items: center; gap: 10px; border-color: transparent; }
+.project-sand-script .ss-tools button > span { font-size: 20px; line-height: 15px; min-width: 17px; text-align: center; }
+.project-sand-script .ss-tools button[aria-pressed="true"] { background: #633a3c; color: #fcf2de; border-color: #633a3c; }
+.project-sand-script .ss-tools kbd { font: 12px Georgia, serif; opacity: 0.65; margin-left: 4px; }
+.project-sand-script .ss-tray { height: clamp(445px, 65vh, 660px); background: #e7dac0; border: 1px solid #ccba9d; border-radius: 5px; position: relative; overflow: hidden; box-shadow: inset 0 0 0 4px #e2d2b5, 0 9px 20px -18px #644a32; }
+.project-sand-script .ss-tray canvas { width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair; outline-offset: -5px; }
+.project-sand-script .ss-transport { display: flex; gap: 10px; align-items: center; margin-top: 15px; }
+.project-sand-script [data-play] { background: #633a3c; color: #fcf3df; border-color: #633a3c; min-width: 128px; }
+.project-sand-script [data-play]:hover { color: #633a3c; }
+.project-sand-script .ss-count { margin-left: auto; text-align: right; display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: #7c6550; }
+.project-sand-script .ss-count output { font: 20px/1 Georgia, 'Times New Roman', serif; font-variant-numeric: tabular-nums; color: #694849; }
+.project-sand-script .ss-help { font-size: 13px; line-height: 1.7; color: #7d6c56; margin: 17px 0 0; max-width: 740px; }
+.project-sand-script .ss-status { font-size: 13px; line-height: 1.7; color: #6f4b45; margin: 10px 0 0; min-height: 24px; }
+.project-sand-script .ss-materials { border-top: 1px solid var(--ss-line); padding-top: 18px; }
+.project-sand-script .ss-materials h2 { margin: 17px 0 22px; font: italic 27px/1.1 Georgia, 'Times New Roman', serif; letter-spacing: -0.03em; }
+.project-sand-script .ss-pigments { display: grid; gap: 4px; }
+.project-sand-script .ss-pigments button { border-color: transparent; padding: 6px 9px; display: flex; align-items: center; gap: 12px; text-align: left; }
+.project-sand-script .ss-pigments button[aria-pressed="true"] { border-color: #aa8b6f; background: #e7d9c3; }
+.project-sand-script .ss-swatch { width: 36px; height: 23px; display: inline-block; background: var(--sand); border-radius: 1px; box-shadow: inset 0 0 0 1px #0000000c; }
+.project-sand-script .ss-picked { margin-left: auto; visibility: hidden; font-size: 20px; }
+.project-sand-script [aria-pressed="true"] .ss-picked { visibility: visible; }
+.project-sand-script .ss-field { margin: 21px 0 0; }
+.project-sand-script .ss-field label { display: flex; gap: 12px; justify-content: space-between; font-size: 13px; }
+.project-sand-script .ss-field output { font-size: 12px; color: #806c53; font-variant-numeric: tabular-nums; }
+.project-sand-script input[type="range"] { display: block; width: 100%; min-height: 36px; accent-color: #86514b; margin: 1px 0; cursor: pointer; }
+.project-sand-script .ss-range-labels { display: flex; justify-content: space-between; color: #806c53; font-size: 12px; }
+.project-sand-script .ss-stencil { margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--ss-line); }
+.project-sand-script .ss-stencil label { display: block; font-size: 13px; margin-bottom: 9px; }
+.project-sand-script .ss-stencil select { width: 100%; background: #f7efdf; cursor: pointer; }
+.project-sand-script .ss-stencil p { font-size: 12px; line-height: 1.6; color: #806e59; margin: 10px 0 15px; }
+.project-sand-script .ss-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.project-sand-script .ss-actions button { padding: 10px 5px; font-size: 12px; }
+.project-sand-script .ss-actions [data-print] { grid-column: 1 / -1; background: #dfc9aa; border-color: #dfc9aa; font-size: 14px; }
+.project-sand-script .ss-actions [data-reset] { grid-column: 1 / -1; }
+.project-sand-script .ss-undo-note { font-size: 12px; line-height: 1.65; color: #826d55; margin: 14px 0 0; }
+.project-sand-script .ss-footer { display: grid; grid-template-columns: 200px minmax(0, 630px) 1fr; gap: 24px; border-top: 1px solid var(--ss-line); margin-top: 25px; padding-top: 20px; font-size: 12px; line-height: 1.7; color: #826d55; }
+.project-sand-script .ss-footer p { margin: 0; }
+.project-sand-script .ss-footer > :last-child { text-align: right; font-style: italic; }
+@media (max-width: 1000px) {
+  .project-sand-script .ss-page { padding: 24px; }
+  .project-sand-script .ss-workbench { grid-template-columns: minmax(0, 1fr) 226px; gap: 23px; }
+  .project-sand-script .ss-header > p { margin-right: 50px; }
+  .project-sand-script .ss-tools button { gap: 6px; padding: 10px 9px; }
+  .project-sand-script .ss-tools kbd { display: none; }
+  .project-sand-script .ss-footer { grid-template-columns: 185px 1fr; }
+  .project-sand-script .ss-footer > :last-child { display: none; }
+}
+@media (max-width: 700px) {
+  .project-sand-script .ss-page { padding: 22px 16px 28px; }
+  .project-sand-script .ss-header { margin-bottom: 20px; }
+  .project-sand-script .ss-header > p { display: none; }
+  .project-sand-script h1 { font-size: 43px; }
+  .project-sand-script .ss-eyebrow { font-size: 12px; letter-spacing: 0.06em; }
+  .project-sand-script .ss-workbench { grid-template-columns: 1fr; gap: 26px; }
+  .project-sand-script .ss-tools { gap: 5px; justify-content: space-between; }
+  .project-sand-script .ss-tools button { font-size: 13px; padding: 10px; }
+  .project-sand-script .ss-tray { height: 365px; }
+  .project-sand-script .ss-transport { gap: 7px; }
+  .project-sand-script .ss-transport button { font-size: 12px; padding: 10px; }
+  .project-sand-script [data-play] { min-width: 108px; }
+  .project-sand-script .ss-count { max-width: 85px; font-size: 12px; }
+  .project-sand-script .ss-count output { font-size: 19px; }
+  .project-sand-script .ss-pigments { grid-template-columns: 1fr 1fr; }
+  .project-sand-script .ss-pigments button { font-size: 12px; gap: 9px; }
+  .project-sand-script .ss-pigments button:last-child { grid-column: 1 / -1; }
+  .project-sand-script .ss-footer { grid-template-columns: 1fr; gap: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .project-sand-script *, .project-sand-script *::before, .project-sand-script *::after { scroll-behavior: auto; }
+}

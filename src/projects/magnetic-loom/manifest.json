@@ -1,0 +1,14 @@
+{
+  "id": "magnetic-loom",
+  "order": 45,
+  "title": "Magnetic Loom",
+  "subtitle": "Arrange two magnets and weave a field in iron.",
+  "description": "A light-paper magnetic field study with 4,500 metallic filings. Drag, turn, and reverse two magnets, shake the bed, and watch an illustrative softened-pole field settle into fine streams.",
+  "category": "art",
+  "format": "page",
+  "medium": "Interactive magnetic filing bed",
+  "tags": ["Particle study", "Magnetism", "Generative art"],
+  "color": "#f1efe5",
+  "ink": "#303d33",
+  "instruction": "Drag either magnet. Turn or flip it to reshape the field, then shake the bed."
+}

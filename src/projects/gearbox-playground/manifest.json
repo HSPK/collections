@@ -1,0 +1,14 @@
+{
+  "id": "gearbox-playground",
+  "order": 58,
+  "title": "Gearbox Playground",
+  "subtitle": "Hold one part still. Discover a world of planetary ratios.",
+  "description": "A drafting-paper planetary-gear lab with phase-correct sun, ring, planets, and carrier. Compare reduction, overdrive, and reverse; ground and drive different members; inspect exact Willis ratios with a deterministic timeline and three validated tooth families.",
+  "category": "learn",
+  "format": "page",
+  "medium": "Interactive planetary-gear kinematics notebook",
+  "tags": ["Engineering lab", "Mechanisms", "Kinematics", "Interactive learning"],
+  "color": "#f7f3e8",
+  "ink": "#234ba0",
+  "instruction": "Start with a held ring and driven sun. Try Overdrive or Reverse, then pause and scrub to follow the planet pins."
+}

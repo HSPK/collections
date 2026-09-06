@@ -1,0 +1,14 @@
+{
+  "id": "worlds-within",
+  "order": 33,
+  "title": "Worlds Within",
+  "subtitle": "Every picture is another place.",
+  "description": "Zoom through a desk's postcard city, a building's reading room, and a book's island sea. Four original illustrated worlds nest inside one another with focal-point-preserving zoom, pan, and touch pinch.",
+  "category": "explore",
+  "format": "page",
+  "medium": "Recursive vector atlas and geometric zoom",
+  "tags": ["New interaction", "Illustration", "Recursive", "Exploration"],
+  "color": "#e5b47e",
+  "ink": "#283e58",
+  "instruction": "Scroll or pinch over the picture to zoom. Drag to pan, or tap the framed postcard to enter its world."
+}

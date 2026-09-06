@@ -1,0 +1,107 @@
+.project-perspective-paradox {
+  --paradox-ink: #2f3e37;
+  --paradox-red: #a53f27;
+  --paradox-line: #c8cbbf;
+  color: var(--paradox-ink);
+  background: #f5f3ec;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+}
+.project-perspective-paradox * { box-sizing: border-box; }
+.project-perspective-paradox .paradox-masthead {
+  min-height: 114px;
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  padding: 20px clamp(20px, 4vw, 64px);
+}
+.project-perspective-paradox .paradox-brand { display: flex; align-items: center; gap: 9px; }
+.project-perspective-paradox .paradox-brand svg { width: 40px; height: 40px; }
+.project-perspective-paradox .paradox-brand span { font-size: 12px; line-height: 1.25; letter-spacing: .1em; font-weight: 700; }
+.project-perspective-paradox h1 { font-size: clamp(25px, 2.6vw, 38px); font-weight: 500; letter-spacing: -.045em; margin: 0; }
+.project-perspective-paradox h1 span { display: block; font-size: 13px; margin-top: 6px; letter-spacing: .07em; text-transform: uppercase; }
+.project-perspective-paradox .paradox-edition { margin: 0 36px 0 auto; text-align: right; font-size: 14px; }
+.project-perspective-paradox .paradox-edition b { font-size: 12px; letter-spacing: .05em; font-weight: 500; }
+.project-perspective-paradox .paradox-workbench { margin: 0 24px; border: 1px solid var(--paradox-line); }
+.project-perspective-paradox .paradox-drawing-head { display: flex; justify-content: space-between; gap: 20px; padding: 11px 22px; border-bottom: 1px solid var(--paradox-line); font-size: 13px; }
+.project-perspective-paradox .paradox-drawing-head i { display: inline-block; width: 7px; height: 7px; margin: 0 9px 1px 0; background: var(--paradox-red); border-radius: 50%; }
+.project-perspective-paradox .paradox-drawing-scale { font: 12px/1.7 ui-monospace, monospace; letter-spacing: .045em; }
+.project-perspective-paradox .paradox-scene { position: relative; height: clamp(470px, 66vh, 710px); overflow: hidden; background: #e8e4dc; isolation: isolate; }
+.project-perspective-paradox .paradox-scene canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.project-perspective-paradox .paradox-scene canvas:focus-visible { outline: 3px solid var(--paradox-red); outline-offset: -4px; }
+.project-perspective-paradox .paradox-scene-note { position: absolute; left: clamp(20px, 3vw, 46px); top: 28px; z-index: 1; pointer-events: none; }
+.project-perspective-paradox .paradox-scene-note > span { font: 12px/1.4 ui-monospace, monospace; border-bottom: 1px solid; padding-bottom: 7px; }
+.project-perspective-paradox .paradox-scene-note p { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(22px, 2.8vw, 39px); line-height: 1.17; letter-spacing: -.035em; margin: 19px 0 0; }
+.project-perspective-paradox .paradox-alignment { position: absolute; top: 25px; right: 26px; z-index: 1; min-width: 165px; padding-left: 14px; border-left: 1px solid #8e998a; pointer-events: none; }
+.project-perspective-paradox .paradox-alignment > span { display: block; font-size: 12px; }
+.project-perspective-paradox .paradox-alignment strong { display: block; font-size: 30px; font-weight: 400; font-variant-numeric: tabular-nums; line-height: 1.45; }
+.project-perspective-paradox .paradox-alignment small { font-size: 13px; }
+.project-perspective-paradox [data-aligned="true"] .paradox-alignment strong { color: var(--paradox-red); }
+.project-perspective-paradox .paradox-view-label { position: absolute; bottom: 16px; left: 22px; right: 22px; display: flex; justify-content: space-between; gap: 12px; font: 12px/1.5 ui-monospace, monospace; pointer-events: none; }
+.project-perspective-paradox .paradox-viewbar { display: grid; grid-template-columns: 1.15fr 1fr 1fr; border-top: 1px solid var(--paradox-line); }
+.project-perspective-paradox button { border: 1px solid var(--paradox-line); background: transparent; color: inherit; cursor: pointer; min-height: 46px; padding: 10px 14px; font-size: 14px; line-height: 1.4; }
+.project-perspective-paradox button:focus-visible, .project-perspective-paradox input:focus-visible { outline: 2px solid var(--paradox-red); outline-offset: 4px; }
+.project-perspective-paradox button:hover { background: #e5e8dc; }
+.project-perspective-paradox .paradox-viewbar button { display: flex; align-items: center; gap: 14px; border: 0; padding: 15px 22px; text-align: left; font-size: 15px; }
+.project-perspective-paradox .paradox-viewbar button + button { border-left: 1px solid var(--paradox-line); }
+.project-perspective-paradox .paradox-viewbar button > span { font: 12px/1.5 ui-monospace, monospace; opacity: .8; }
+.project-perspective-paradox .paradox-viewbar button > b { font-size: 24px; margin-left: auto; font-weight: 400; }
+.project-perspective-paradox .paradox-viewbar button[aria-pressed="true"] { color: #fff6e9; background: var(--paradox-ink); }
+.project-perspective-paradox .paradox-instruments { display: grid; grid-template-columns: 1.15fr 1fr 1fr 1fr; gap: 28px; padding: 28px clamp(24px, 4vw, 64px) 20px; }
+.project-perspective-paradox .paradox-transport { display: flex; gap: 8px; flex-wrap: wrap; align-content: start; }
+.project-perspective-paradox [data-paradox-play] { border-color: var(--paradox-red); color: var(--paradox-red); display: flex; align-items: center; gap: 8px; }
+.project-perspective-paradox [data-paradox-play] span { width: 15px; font-size: 18px; }
+.project-perspective-paradox .paradox-transport p, .project-perspective-paradox .paradox-guides p { margin: 9px 0 0; font-size: 12px; line-height: 1.6; }
+.project-perspective-paradox .paradox-range { display: block; min-width: 0; }
+.project-perspective-paradox .paradox-range > span { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; font-size: 14px; }
+.project-perspective-paradox .paradox-range output { font: 13px/1.5 ui-monospace, monospace; color: var(--paradox-red); }
+.project-perspective-paradox .paradox-range input { display: block; width: 100%; height: 38px; margin: 0; cursor: pointer; accent-color: var(--paradox-red); }
+.project-perspective-paradox .paradox-range small { font-size: 12px; display: block; }
+.project-perspective-paradox .paradox-guides button { width: 100%; display: flex; gap: 12px; align-items: center; }
+.project-perspective-paradox .paradox-guides button > span { font-size: 22px; line-height: 1; }
+.project-perspective-paradox .paradox-guides button[aria-pressed="true"] { background: #dce1d2; border-color: #71816c; }
+.project-perspective-paradox .paradox-status { font-size: 13px; padding: 10px clamp(24px, 4vw, 64px) 24px; min-height: 54px; color: #57634f; }
+.project-perspective-paradox .paradox-notebook { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 36px; padding: 42px clamp(24px, 4vw, 64px) 48px; border-top: 1px solid var(--paradox-line); }
+.project-perspective-paradox .paradox-notebook-title > p:first-child { font: 12px/1.5 ui-monospace, monospace; letter-spacing: .05em; margin: 0 0 18px; }
+.project-perspective-paradox h2 { font-family: Georgia, 'Times New Roman', serif; font-size: 30px; font-weight: 400; letter-spacing: -.03em; margin: 0 0 16px; }
+.project-perspective-paradox .paradox-notebook-title > p:last-child { font-size: 12px; line-height: 1.7; }
+.project-perspective-paradox .paradox-notebook article > span { font: 12px/1.5 ui-monospace, monospace; color: var(--paradox-red); }
+.project-perspective-paradox h3 { font-size: 17px; margin: 18px 0 10px; font-weight: 500; }
+.project-perspective-paradox .paradox-notebook article p { margin: 0; font-size: 15px; line-height: 1.7; }
+.project-perspective-paradox .paradox-footer { display: flex; justify-content: space-between; gap: 20px; padding: 17px clamp(24px, 4vw, 64px); border-top: 1px solid var(--paradox-line); font: 12px/1.6 ui-monospace, monospace; }
+@media (max-width: 1000px) {
+  .project-perspective-paradox .paradox-edition { display: none; }
+  .project-perspective-paradox .paradox-masthead { gap: 25px; }
+  .project-perspective-paradox .paradox-instruments { grid-template-columns: 1fr 1fr; gap: 24px 32px; }
+  .project-perspective-paradox .paradox-notebook { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+  .project-perspective-paradox .paradox-masthead { min-height: 102px; padding: 16px 60px 16px 17px; gap: 12px; }
+  .project-perspective-paradox .paradox-brand { gap: 0; }
+  .project-perspective-paradox .paradox-brand svg { width: 30px; height: 36px; }
+  .project-perspective-paradox .paradox-brand span { display: none; }
+  .project-perspective-paradox h1 { font-size: 24px; }
+  .project-perspective-paradox h1 span { font-size: 12px; margin-top: 7px; }
+  .project-perspective-paradox .paradox-workbench { margin: 0 10px; }
+  .project-perspective-paradox .paradox-drawing-head { padding: 10px 14px; font-size: 12px; }
+  .project-perspective-paradox .paradox-drawing-scale { display: none; }
+  .project-perspective-paradox .paradox-scene { height: 445px; }
+  .project-perspective-paradox .paradox-scene-note { top: 17px; left: 17px; }
+  .project-perspective-paradox .paradox-scene-note p { font-size: 23px; margin-top: 12px; }
+  .project-perspective-paradox .paradox-alignment { min-width: 128px; right: 13px; top: 17px; padding-left: 10px; max-width: 135px; }
+  .project-perspective-paradox .paradox-alignment strong { font-size: 26px; }
+  .project-perspective-paradox .paradox-view-label { left: 15px; bottom: 14px; }
+  .project-perspective-paradox .paradox-view-label span:last-child { display: none; }
+  .project-perspective-paradox .paradox-viewbar { grid-template-columns: 1fr 1fr; }
+  .project-perspective-paradox .paradox-viewbar button { padding: 13px; gap: 9px; font-size: 14px; }
+  .project-perspective-paradox .paradox-viewbar button:first-child { grid-column: 1 / -1; }
+  .project-perspective-paradox .paradox-viewbar button:nth-child(2) { border-left: 0; border-top: 1px solid var(--paradox-line); }
+  .project-perspective-paradox .paradox-viewbar button:nth-child(3) { border-top: 1px solid var(--paradox-line); }
+  .project-perspective-paradox .paradox-instruments { grid-template-columns: 1fr; padding: 24px; gap: 22px; }
+  .project-perspective-paradox .paradox-range input { height: 44px; }
+  .project-perspective-paradox .paradox-notebook { grid-template-columns: 1fr; gap: 28px; padding: 30px 24px; }
+  .project-perspective-paradox .paradox-notebook article { border-top: 1px solid var(--paradox-line); padding-top: 18px; }
+  .project-perspective-paradox h3 { margin-top: 10px; }
+  .project-perspective-paradox .paradox-footer { flex-direction: column; gap: 8px; }
+}

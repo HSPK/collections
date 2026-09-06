@@ -1,9 +1,13 @@
 # odd/index
 
-**A content-first collection of independent websites.** Tools to make with,
-games to play, stories to read, and worlds that do not quite exist.
+**Small websites. Big "what if?"** A growing playground of AI-made tools,
+games, stories, 3D worlds, educational labs, and ideas that do not fit a box.
 
-[Explore the collection](https://hspk.github.io/collections/)
+[**Explore the live collection**](https://hspk.github.io/collections/) ·
+[**Add your AI-made website**](CONTRIBUTING.md) ·
+[Suggest an idea](https://github.com/HSPK/collections/issues/new?template=project-idea.yml)
+
+[![GitHub Pages deployment](https://github.com/HSPK/collections/actions/workflows/deploy.yml/badge.svg)](https://github.com/HSPK/collections/actions/workflows/deploy.yml)
 
 ![The Odd Index project browser](public/cover.jpg)
 
@@ -20,7 +24,46 @@ describes how this collection was created, not a hosted inference service.
 There are no AI API keys, accounts, analytics, or backend functions. Some
 projects keep preferences or work locally on the visitor's device.
 
+## Made something with AI? Give it a home.
+
+Your weird little tool, interactive explanation, playable idea, or
+beautiful experiment belongs here. **AI-generated and AI-assisted PRs are
+welcome.** Bring a finished experience, not a perfect pitch.
+
+```sh
+npm ci
+npm run new:project -- my-idea --title "My Idea" --category create
+npm run dev
+```
+
+The starter creates an independent page, a valid manifest, a local cover,
+extension notes, and a focused browser spec without touching the index.
+Replace the starter with your idea and
+[open a focused pull request](CONTRIBUTING.md). Maintainers review and merge;
+the site publishes automatically after the main-branch quality gate.
+
 ## The websites
+
+### Six new creative and educational series
+
+| Series | Five independent websites |
+|--------|---------------------------|
+| Novel interactions | [Shadow Play](https://hspk.github.io/collections/projects/shadow-play/), [Glyph Garden](https://hspk.github.io/collections/projects/glyph-garden/), [Worlds Within](https://hspk.github.io/collections/projects/worlds-within/), [Time Brush](https://hspk.github.io/collections/projects/time-brush/), [Breath Garden](https://hspk.github.io/collections/projects/breath-garden/) |
+| 3D scenes | [Tidal Observatory](https://hspk.github.io/collections/projects/tidal-observatory/), [Neon Rain](https://hspk.github.io/collections/projects/neon-rain/), [Paper Planet](https://hspk.github.io/collections/projects/paper-planet/), [Crystal Cavern](https://hspk.github.io/collections/projects/crystal-cavern/), [Perspective Paradox](https://hspk.github.io/collections/projects/perspective-paradox/) |
+| Particle studies | [Star Nursery](https://hspk.github.io/collections/projects/star-nursery/), [Ink in Water](https://hspk.github.io/collections/projects/ink-water/), [Firefly Choir](https://hspk.github.io/collections/projects/firefly-choir/), [Sand Script](https://hspk.github.io/collections/projects/sand-script/), [Magnetic Loom](https://hspk.github.io/collections/projects/magnetic-loom/) |
+| Animation demonstrations | [Epicycle Studio](https://hspk.github.io/collections/projects/epicycle-studio/), [Chain Reaction](https://hspk.github.io/collections/projects/chain-reaction/), [Motion Foundry](https://hspk.github.io/collections/projects/motion-foundry/), [Camera Assembly](https://hspk.github.io/collections/projects/camera-assembly/), [Season Clock](https://hspk.github.io/collections/projects/season-clock/) |
+| AI Education | [Vector Playground](https://hspk.github.io/collections/projects/vector-playground/), [Gradient Lab](https://hspk.github.io/collections/projects/gradient-lab/), [Attention Studio](https://hspk.github.io/collections/projects/attention-studio/), [Decoding Lab](https://hspk.github.io/collections/projects/decoding-lab/), [Patchwork Vision](https://hspk.github.io/collections/projects/patchwork-vision/) |
+| Engineering principles | [Four-Stroke Studio](https://hspk.github.io/collections/projects/engine-room/), [Motor Field Lab](https://hspk.github.io/collections/projects/motor-field-lab/), [Gearbox Playground](https://hspk.github.io/collections/projects/gearbox-playground/), [Linkage Atlas](https://hspk.github.io/collections/projects/linkage-atlas/), [Cam Workshop](https://hspk.github.io/collections/projects/cam-workshop/) |
+
+The interaction studies explore shadows as controls, local gesture grammar,
+recursive zoom, painting local time, and optional breath/sound input. The
+three other series use genuinely different scenes, particle mechanisms,
+and inspectable animation timelines rather than palette-swapped effects.
+The AI learning path connects linear algebra and optimization to attention,
+decoding, and image/text alignment. The mechanical labs expose actual
+kinematic relationships and clearly identify their idealized assumptions.
+
+### Tools, games, stories, worlds, and the original artwork studios
 
 | Project | Kind | Inside |
 |---------|------|--------|
@@ -115,7 +158,9 @@ adds its website and library entry. Invalid IDs, categories, duplicate
 orders, or missing entrypoints fail explicitly.
 
 See [the project authoring guide](src/projects/README.md) for the manifest
-schema and a minimal entrypoint.
+schema and a minimal entrypoint, or use `npm run new:project` to generate
+the safe starting structure. [CONTRIBUTING.md](CONTRIBUTING.md) explains
+how to take an AI-made idea through a community PR.
 
 `ProjectInstance` requires only `destroy`; playback and reset are optional.
 Reading websites do not inherit irrelevant animation controls. Shared
@@ -125,7 +170,7 @@ audio automation. The original ten renderers remain in `src/experiments/`,
 but each now has a project-owned studio entrypoint and theme in its own
 directory. `defineArtSite` in `src/core/art-site.ts` composes the artwork,
 local controls, notes, and lifecycle without involving the index layout.
-All thirty manifests use `format: "page"`.
+All project manifests use `format: "page"`.
 
 ## Browsing and accessibility
 
@@ -149,6 +194,9 @@ All thirty manifests use `format: "page"`.
   clicking outside and does not reserve any page-header space.
 - Sound always requires explicit opt-in. Audio graphs, rendering loops,
   observers, and listeners are released when leaving a project.
+- Optional microphone interactions also require explicit consent, offer a
+  keyboard/pointer alternative, process signals locally without recording,
+  and release media tracks when disabled or when leaving the site.
 - Fictional archives, newspapers, forecasts, and radio stations are
   identified as fiction. Scientific comparisons distinguish approximate
   illustrations from measured reference data.

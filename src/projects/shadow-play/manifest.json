@@ -1,0 +1,14 @@
+{
+  "id": "shadow-play",
+  "order": 31,
+  "title": "Shadow Play",
+  "subtitle": "Find what the paper leaves behind.",
+  "description": "A warm-white light table with three original raised-paper constructions. Move a point light, project real shadows, and align a ferry, a wren, and a shape made of untouched light.",
+  "category": "explore",
+  "format": "page",
+  "medium": "Point-light geometry and raised-paper silhouettes",
+  "tags": ["New interaction", "Light", "Geometry", "Discovery"],
+  "color": "#f4f0e6",
+  "ink": "#272a29",
+  "instruction": "Drag the amber lamp around the table. Bring the shadows into their dotted silhouettes, or reveal the lamp guide for a clue."
+}

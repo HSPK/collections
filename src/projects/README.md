@@ -8,6 +8,16 @@ shared header or reserved strip above the site.
 
 ## Directory contract
 
+Start a complete, no-overwrite scaffold from the repository root:
+
+```sh
+npm run new:project -- my-project --title "My Project" --category create
+```
+
+It assigns an unused order, creates a local starter cover and focused spec,
+and registers the page without an index edit. Replace the starter before
+submitting a PR; see [CONTRIBUTING.md](../../CONTRIBUTING.md) for the review path.
+
 ```text
 my-project/
   manifest.json   Discovery metadata; register this last
@@ -24,7 +34,7 @@ validated in both the browser registry and static-site build.
 ```json
 {
   "id": "my-project",
-  "order": 31,
+  "order": 61,
   "title": "My Project",
   "subtitle": "A short, specific invitation.",
   "description": "What this website actually contains and does.",
@@ -71,6 +81,17 @@ Use `core/page.ts` for escaped text, downloads, clipboard access, and
 explicitly reported storage failures. Use `core/urls.ts` for collection
 assets so links work from nested GitHub Pages directories. Web Audio
 projects should reuse `holdGainAtTime` from `core/audio.ts`.
+
+For Three.js work, `core/spatial.ts` exposes the existing responsive,
+pausable `spatialExperiment` lifecycle and optional `orbitView` controls.
+It does not create a pedestal or studio scenery unless you explicitly use
+`studio`. Build your own environment in `stage.scene`, register additional
+resources with `stage.own`/`stage.onDestroy`, and cap pixel ratio for dense
+effects. A scene can use this lifecycle with its own website layout.
+
+Optional microphone interactions must start only after an explicit user
+action, process input locally without recording or uploading, offer a
+pointer/keyboard alternative, and stop every media track on exit.
 
 Keep essential UI text at least 12px, body text about 15-18px, and touch
 targets generous. Provide substantive content and functioning controls.

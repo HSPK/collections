@@ -1,0 +1,14 @@
+{
+  "id": "star-nursery",
+  "order": 41,
+  "title": "Star Nursery",
+  "subtitle": "Gather a cloud. Make room for light.",
+  "description": "An imaginary stellar nursery built from layered three-dimensional dust. Explore a folded molecular cloud, twin reservoirs, and a hollow shell; gather material around stellar seeds or let it disperse into the dark.",
+  "category": "art",
+  "format": "page",
+  "medium": "Volumetric particle observatory",
+  "tags": ["Particle study", "Generative art", "Three-dimensional", "Astronomy-inspired"],
+  "color": "#111623",
+  "ink": "#e5d4b7",
+  "instruction": "Choose a structure, shape its formation and wind, then drag or use arrow keys to look through the dust."
+}

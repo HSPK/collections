@@ -1,0 +1,14 @@
+{
+  "id": "season-clock",
+  "order": 50,
+  "title": "Season Clock",
+  "subtitle": "Turn a quiet year, one leaf at a time.",
+  "description": "Explore three original illustrated landscapes through an imagined year of snowmelt, growth, blossom, summer, and falling leaves. Scrub a reversible seasonal timeline, change the pace, and save an exact SVG still. Every leaf, breeze, and snowflake follows the selected time.",
+  "category": "explore",
+  "format": "page",
+  "medium": "Illustrated seasonal almanac",
+  "tags": ["Animation demo", "Seasons", "Original"],
+  "color": "#e5eddc",
+  "ink": "#284634",
+  "instruction": "Drag the year or visit a season. Play to watch it unfold; save an SVG still to keep the moment."
+}

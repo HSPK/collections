@@ -1,0 +1,14 @@
+{
+  "id": "motion-foundry",
+  "order": 48,
+  "title": "Motion Foundry",
+  "subtitle": "Same move. Six ways to give it character.",
+  "description": "Compare six animation principles in paired plain and expressive scenes. Tune timing, anticipation, squash and stretch, arcs, overshoot, and follow-through with reversible scrubbing and visible motion guides.",
+  "category": "learn",
+  "format": "page",
+  "medium": "Interactive animation-principles workbench",
+  "tags": ["Animation demo", "Motion design", "Learning", "Interactive"],
+  "color": "#c5ace8",
+  "ink": "#19161f",
+  "instruction": "Choose a principle, compare the two treatments, and scrub the shared timeline. Change amplitude or easing, then replay to see what each choice does."
+}

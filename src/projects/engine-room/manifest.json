@@ -1,0 +1,14 @@
+{
+  "id": "engine-room",
+  "order": 56,
+  "title": "Four-Stroke Studio",
+  "subtitle": "Two turns of a crank. One connected cycle.",
+  "description": "An original interactive engine cutaway with exact slider-crank geometry, a 720-degree four-stroke timeline, schematic valve timing, and a rod-length workbench.",
+  "category": "learn",
+  "format": "page",
+  "medium": "Interactive SVG cutaway",
+  "tags": ["Engineering lab", "Engines", "Kinematics"],
+  "color": "#18333f",
+  "ink": "#f5f1e7",
+  "instruction": "Scrub all 720 degrees, inspect a stroke, then change the rod length without changing the piston stroke."
+}

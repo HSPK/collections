@@ -1,0 +1,225 @@
+.project-gearbox-playground {
+  --gb-paper: #f7f3e8;
+  --gb-ink: #263b44;
+  --gb-blue: #234ba0;
+  --gb-orange: #bd481f;
+  --gb-green: #315c4f;
+  --gb-line: #cdcfc4;
+  min-height: 100vh;
+  padding: 30px 30px 48px;
+  color: var(--gb-ink);
+  background: var(--gb-paper);
+  font: 16px/1.55 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.project-gearbox-playground *,
+.project-gearbox-playground *::before,
+.project-gearbox-playground *::after { box-sizing: border-box; }
+.project-gearbox-playground .gb-shell { max-width: 1280px; margin: 0 auto; }
+.project-gearbox-playground h1,
+.project-gearbox-playground h2,
+.project-gearbox-playground h3,
+.project-gearbox-playground p { margin: 0; }
+.project-gearbox-playground button,
+.project-gearbox-playground select,
+.project-gearbox-playground input { font: inherit; }
+.project-gearbox-playground button,
+.project-gearbox-playground select {
+  min-height: 46px;
+  border: 1px solid var(--gb-line);
+  border-radius: 4px;
+  color: var(--gb-ink);
+  background: #fffdf6;
+}
+.project-gearbox-playground button { cursor: pointer; padding: 9px 12px; font-size: 14px; font-weight: 650; }
+.project-gearbox-playground button:hover:not(:disabled) { background: #e7ecdf; border-color: var(--gb-green); }
+.project-gearbox-playground button:disabled { cursor: not-allowed; opacity: 0.45; }
+.project-gearbox-playground :focus-visible { outline: 3px solid var(--gb-orange); outline-offset: 4px; }
+.project-gearbox-playground select { width: 100%; min-width: 0; padding: 9px 30px 9px 10px; font-size: 15px; }
+.project-gearbox-playground input[type="range"] { display: block; width: 100%; min-width: 0; min-height: 44px; margin: 0; accent-color: var(--gb-blue); cursor: pointer; }
+.project-gearbox-playground input[type="checkbox"] { width: 20px; height: 20px; margin: 0; accent-color: var(--gb-blue); }
+.project-gearbox-playground label { font-size: 14px; font-weight: 650; }
+.project-gearbox-playground [hidden] { display: none !important; }
+.project-gearbox-playground sub { font-size: 0.8em; }
+.project-gearbox-playground .gb-header { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 26px; }
+.project-gearbox-playground .gb-eyebrow { display: flex; align-items: center; gap: 10px; color: var(--gb-blue); font: 12px/1.4 ui-monospace, SFMono-Regular, Consolas, monospace; text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 8px; }
+.project-gearbox-playground .gb-eyebrow svg { width: 32px; height: 32px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.4; }
+.project-gearbox-playground h1 { font: 500 clamp(38px, 4.6vw, 62px)/1.03 Georgia, "Times New Roman", serif; letter-spacing: -0.045em; }
+.project-gearbox-playground .gb-deck { font-size: 15px; line-height: 1.6; color: #516269; padding-bottom: 3px; }
+.project-gearbox-playground .gb-workbench { display: grid; grid-template-columns: minmax(0, 1fr) 355px; border: 1px solid var(--gb-line); border-radius: 8px; background: #fbf9f1; overflow: clip; }
+.project-gearbox-playground .gb-drawing-panel,
+.project-gearbox-playground .gb-controls { min-width: 0; }
+.project-gearbox-playground .gb-panel-heading { min-height: 53px; padding: 14px 22px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--gb-line); }
+.project-gearbox-playground .gb-panel-heading h2 { font-size: 14px; font-weight: 650; }
+.project-gearbox-playground .gb-panel-heading h2 > span { margin-right: 9px; color: #677575; font: 12px ui-monospace, SFMono-Regular, Consolas, monospace; }
+.project-gearbox-playground .gb-motion { color: var(--gb-green); font: 12px ui-monospace, SFMono-Regular, Consolas, monospace; display: flex; align-items: center; gap: 7px; white-space: nowrap; }
+.project-gearbox-playground .gb-motion::before { content: ""; width: 6px; height: 6px; background: var(--gb-green); border-radius: 50%; }
+.project-gearbox-playground[data-motion="paused"] .gb-motion::before { background: var(--gb-orange); }
+.project-gearbox-playground .gb-stage { padding: 6px 14px 0; background-image: linear-gradient(#234ba00b 1px, transparent 1px), linear-gradient(90deg, #234ba00b 1px, transparent 1px); background-size: 26px 26px; }
+.project-gearbox-playground .gb-stage svg { display: block; width: 100%; height: auto; max-height: 558px; }
+.project-gearbox-playground .gb-stage svg * { vector-effect: non-scaling-stroke; }
+.project-gearbox-playground .gb-datum { fill: none; stroke: #a8b8bb; stroke-width: 0.7; stroke-dasharray: 7 5 1 5; }
+.project-gearbox-playground .gb-ticks { fill: none; stroke: #72879a; stroke-width: 0.8; }
+.project-gearbox-playground .gb-tooth-face { stroke-width: 1.25; stroke-linejoin: round; }
+.project-gearbox-playground .gb-ring .gb-tooth-face { fill: #dce5f4; stroke: var(--gb-blue); }
+.project-gearbox-playground .gb-sun .gb-tooth-face { fill: #f4d4b0; stroke: var(--gb-orange); }
+.project-gearbox-playground .gb-planet .gb-tooth-face { fill: #fbf9f1; stroke: var(--gb-blue); }
+.project-gearbox-playground .gb-face-circle { fill: none; stroke: currentColor; opacity: 0.45; stroke-width: 0.8; }
+.project-gearbox-playground .gb-sun { color: var(--gb-orange); }
+.project-gearbox-playground .gb-ring,
+.project-gearbox-playground .gb-planet { color: var(--gb-blue); }
+.project-gearbox-playground .gb-face-spoke { fill: none; stroke: currentColor; opacity: 0.5; stroke-width: 1; }
+.project-gearbox-playground .gb-index-mark { fill: var(--gb-orange); stroke: #fff9ec; stroke-width: 1; }
+.project-gearbox-playground .gb-fastener { fill: #f7f3e8; stroke: var(--gb-blue); stroke-width: 1; }
+.project-gearbox-playground .gb-ring-index { stroke: var(--gb-blue); stroke-width: 3; }
+.project-gearbox-playground .gb-arm-halo { fill: none; stroke: #fbf9f1; stroke-width: 9; stroke-linecap: round; opacity: 0.92; }
+.project-gearbox-playground .gb-arm { fill: none; stroke: var(--gb-green); stroke-width: 4; stroke-linecap: round; }
+.project-gearbox-playground .gb-pin-outer { fill: var(--gb-green); stroke: #fffaf0; stroke-width: 1; }
+.project-gearbox-playground .gb-pin-inner { fill: #f2eddb; stroke: var(--gb-green); stroke-width: 1; }
+.project-gearbox-playground .gb-hub-cross { stroke: var(--gb-green); stroke-width: 1; }
+.project-gearbox-playground .gb-pitch-circle { fill: none; stroke: #976823; stroke-width: 1; stroke-dasharray: 5 4; opacity: 0.85; }
+.project-gearbox-playground .gb-orbit-circle { fill: none; stroke: var(--gb-green); stroke-width: 1; stroke-dasharray: 2 5; opacity: 0.7; }
+.project-gearbox-playground .gb-ground-hatch { fill: none; stroke: var(--gb-blue); stroke-width: 1.4; }
+.project-gearbox-playground .gb-drawing-caption { min-height: 40px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; padding: 8px 22px; font: 12px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; color: #52656c; border-bottom: 1px solid var(--gb-line); }
+.project-gearbox-playground[data-valid="false"] .gb-drawing-caption { color: #8e321a; background: #ffebdb; }
+.project-gearbox-playground .gb-legend { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding: 16px 22px; border-bottom: 1px solid var(--gb-line); }
+.project-gearbox-playground .gb-legend > div { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.project-gearbox-playground .gb-legend strong { display: block; font-size: 13px; font-weight: 650; }
+.project-gearbox-playground .gb-legend span span { display: block; font-size: 12px; color: #53666b; }
+.project-gearbox-playground .gb-swatch { display: inline-block; width: 9px; height: 9px; flex: 0 0 auto; border-radius: 50%; }
+.project-gearbox-playground .gb-sun-color { background: #d46b2e; }
+.project-gearbox-playground .gb-ring-color { background: #527bca; }
+.project-gearbox-playground .gb-planet-color { background: #f8f4e8; border: 1px solid var(--gb-blue); }
+.project-gearbox-playground .gb-carrier-color { background: #4f8776; }
+.project-gearbox-playground .gb-transport { padding: 17px 22px 12px; }
+.project-gearbox-playground .gb-timeline-heading,
+.project-gearbox-playground .gb-label-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.project-gearbox-playground .gb-timeline-heading output,
+.project-gearbox-playground .gb-label-row output { font: 13px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; font-variant-numeric: tabular-nums; }
+.project-gearbox-playground .gb-transport-buttons { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1.3fr; gap: 8px; margin: 3px 0 10px; }
+.project-gearbox-playground .gb-primary { color: #fffdf4; background: var(--gb-blue); border-color: var(--gb-blue); }
+.project-gearbox-playground .gb-primary:hover:not(:disabled) { color: white; background: #173775; border-color: #173775; }
+.project-gearbox-playground .gb-small { color: #52646a; font-size: 12px; line-height: 1.6; }
+.project-gearbox-playground .gb-drawing-options { display: flex; flex-wrap: wrap; gap: 0 14px; align-items: center; margin-top: 8px; }
+.project-gearbox-playground .gb-check { display: flex; min-height: 44px; gap: 10px; align-items: center; cursor: pointer; font-size: 13px; }
+.project-gearbox-playground .gb-controls { border-left: 1px solid var(--gb-line); display: flex; flex-direction: column; background: #f2f1e7; }
+.project-gearbox-playground .gb-control-body { padding: 18px 20px 20px; }
+.project-gearbox-playground .gb-experiments { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+.project-gearbox-playground .gb-experiments button { font-size: 12px; padding: 9px 5px; }
+.project-gearbox-playground .gb-experiments button[aria-pressed="true"] { color: #fffaf0; background: var(--gb-green); border-color: var(--gb-green); }
+.project-gearbox-playground .gb-experiment-note { min-height: 83px; margin: 12px 0 16px; font-size: 14px; line-height: 1.6; color: #475f62; }
+.project-gearbox-playground .gb-field { margin-top: 13px; min-width: 0; }
+.project-gearbox-playground .gb-field > label { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.project-gearbox-playground .gb-field > label span { color: #53686b; font-size: 12px; font-weight: 400; }
+.project-gearbox-playground .gb-paired { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.project-gearbox-playground .gb-speed-field { margin-top: 17px; }
+.project-gearbox-playground .gb-error { margin-top: 14px; padding: 12px; font-size: 14px; border-left: 3px solid #a33b1b; color: #7c2a14; background: #ffe6d5; }
+.project-gearbox-playground [aria-invalid="true"] { border-color: #a33b1b; }
+.project-gearbox-playground .gb-result { color: #f8f7e9; background: var(--gb-blue); padding: 20px 22px; margin-top: auto; }
+.project-gearbox-playground .gb-result-label { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.project-gearbox-playground .gb-result-label h3 { font-size: 12px; font-weight: 450; color: #d6e2fb; }
+.project-gearbox-playground .gb-result-label h3 span { display: block; font-size: 18px; line-height: 1.3; color: #fff8df; font-weight: 650; }
+.project-gearbox-playground .gb-result-label > span { font-size: 12px; color: #e3ebff; border: 1px solid #90a6ce; border-radius: 3px; padding: 4px 7px; }
+.project-gearbox-playground .gb-output-speed { display: flex; align-items: baseline; gap: 9px; margin: 12px 0 0; font-variant-numeric: tabular-nums; }
+.project-gearbox-playground .gb-output-speed > span:first-child { font: 500 45px/1.15 Georgia, "Times New Roman", serif; letter-spacing: -0.025em; }
+.project-gearbox-playground .gb-output-speed > span:last-child { font-size: 13px; color: #dbe6fb; }
+.project-gearbox-playground .gb-ratio { font-size: 19px; font-weight: 650; margin-top: 4px; }
+.project-gearbox-playground .gb-output-direction { font-size: 12px; line-height: 1.7; color: #e2ebfa; margin: 7px 0 3px; }
+.project-gearbox-playground .gb-ratio-value { font: 12px/1.6 ui-monospace, SFMono-Regular, Consolas, monospace; color: #dae5fa; }
+.project-gearbox-playground .gb-ratio-value sub { font-size: 12px; }
+.project-gearbox-playground .gb-rate-list { margin-top: 16px; border-top: 1px solid #7793c4; }
+.project-gearbox-playground .gb-rate-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 5px 12px; padding: 9px 0 6px; border-bottom: 1px solid #6282b8; }
+.project-gearbox-playground .gb-rate-row > span:first-child { display: flex; gap: 7px; align-items: center; font-size: 13px; }
+.project-gearbox-playground .gb-rate-row small { color: #d5e3fc; font-size: 12px; }
+.project-gearbox-playground .gb-rate-row > strong { font: 13px/1.6 ui-monospace, SFMono-Regular, Consolas, monospace; font-variant-numeric: tabular-nums; }
+.project-gearbox-playground .gb-rate-track { position: relative; height: 5px; background: #5378b4; margin: 6px 0; border-radius: 2px; }
+.project-gearbox-playground .gb-rate-track::before { content: ""; position: absolute; top: -3px; bottom: -3px; left: 50%; width: 1px; background: #ecf3ff; }
+.project-gearbox-playground .gb-rate-track i { position: absolute; height: 5px; background: #f4d3a9; border-radius: 2px; }
+.project-gearbox-playground .gb-rate-direction { font-size: 12px; color: #dce7fb; }
+.project-gearbox-playground .gb-local-status { font-size: 12px; color: #4b6366; min-height: 65px; padding: 12px 20px; border-top: 1px solid var(--gb-line); }
+.project-gearbox-playground .gb-equation-panel { display: grid; grid-template-columns: 245px minmax(0, 1fr); gap: 28px; padding: 30px 0; border-bottom: 1px solid var(--gb-line); }
+.project-gearbox-playground .gb-kicker { font: 12px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; text-transform: uppercase; letter-spacing: 0.06em; color: #556c72; }
+.project-gearbox-playground .gb-equation-intro h2 { font: 500 29px/1.15 Georgia, "Times New Roman", serif; margin-top: 9px; letter-spacing: -0.015em; }
+.project-gearbox-playground .gb-equation-body { align-self: center; min-width: 0; }
+.project-gearbox-playground .gb-willis { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 8px; font: 24px/1.7 Georgia, "Times New Roman", serif; }
+.project-gearbox-playground .gb-sun-text { color: var(--gb-orange); }
+.project-gearbox-playground .gb-ring-text { color: var(--gb-blue); }
+.project-gearbox-playground .gb-substitution { font: 14px/1.8 ui-monospace, SFMono-Regular, Consolas, monospace; margin: 6px 0; overflow-wrap: anywhere; }
+.project-gearbox-playground .gb-geometry-notes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; padding: 28px 0 18px; }
+.project-gearbox-playground .gb-geometry-notes h3 { font: 500 24px/1.4 Georgia, "Times New Roman", serif; color: var(--gb-blue); margin: 9px 0; }
+.project-gearbox-playground .gb-geometry-notes h3 > span:last-child { font-size: 16px; }
+.project-gearbox-playground .gb-geometry-notes article > p:not(.gb-kicker) { font-size: 14px; line-height: 1.7; color: #4b6369; }
+.project-gearbox-playground .gb-geometry-notes .gb-spin-equation { color: var(--gb-green); margin-bottom: 6px; }
+.project-gearbox-playground .gb-model-note { border-left: 3px solid var(--gb-orange); padding: 10px 14px; margin-bottom: 28px; font-size: 14px; color: #4d6265; background: #eeeadd; }
+.project-gearbox-playground .gb-notes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px; border-top: 1px solid var(--gb-line); padding-top: 28px; }
+.project-gearbox-playground .gb-note-number { color: var(--gb-orange); font: 12px ui-monospace, SFMono-Regular, Consolas, monospace; }
+.project-gearbox-playground .gb-notes h2 { font: 500 24px/1.3 Georgia, "Times New Roman", serif; margin: 10px 0; }
+.project-gearbox-playground .gb-notes p { font-size: 15px; line-height: 1.75; color: #4f646a; }
+.project-gearbox-playground .gb-footer { display: flex; justify-content: space-between; align-items: start; gap: 40px; border-top: 1px solid var(--gb-line); padding-top: 24px; margin-top: 36px; color: #53696d; }
+.project-gearbox-playground .gb-footer p { max-width: 800px; font-size: 12px; line-height: 1.7; }
+.project-gearbox-playground .gb-footer > span { flex: 0 0 auto; font: 12px/1.7 ui-monospace, SFMono-Regular, Consolas, monospace; text-align: right; }
+
+@media (min-width: 1500px) {
+  .project-gearbox-playground { padding-top: 40px; }
+}
+
+@media (max-width: 1050px) {
+  .project-gearbox-playground { padding: 24px 22px 40px; }
+  .project-gearbox-playground .gb-header { align-items: start; }
+  .project-gearbox-playground .gb-deck { max-width: 260px; }
+  .project-gearbox-playground .gb-workbench { grid-template-columns: minmax(0, 1fr) 330px; }
+  .project-gearbox-playground .gb-legend { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .project-gearbox-playground .gb-transport-buttons { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .project-gearbox-playground .gb-equation-panel { grid-template-columns: 200px minmax(0, 1fr); }
+  .project-gearbox-playground .gb-willis { font-size: 22px; }
+}
+
+@media (max-width: 780px) {
+  .project-gearbox-playground .gb-header { display: block; }
+  .project-gearbox-playground .gb-deck { max-width: none; margin-top: 13px; }
+  .project-gearbox-playground .gb-deck br { display: none; }
+  .project-gearbox-playground .gb-workbench { grid-template-columns: minmax(0, 1fr); }
+  .project-gearbox-playground .gb-controls { border-left: 0; border-top: 1px solid var(--gb-line); }
+  .project-gearbox-playground .gb-experiment-note { min-height: 0; }
+  .project-gearbox-playground .gb-experiments button { font-size: 14px; }
+  .project-gearbox-playground .gb-transport-buttons { grid-template-columns: 1.2fr 1fr 1fr 1.3fr; }
+  .project-gearbox-playground .gb-stage svg { max-height: 560px; }
+  .project-gearbox-playground .gb-legend { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .project-gearbox-playground .gb-result { margin: 0; }
+  .project-gearbox-playground .gb-rate-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .project-gearbox-playground .gb-rate-row { display: flex; flex-direction: column; }
+  .project-gearbox-playground .gb-equation-panel { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .project-gearbox-playground .gb-equation-intro h2 br { display: none; }
+  .project-gearbox-playground .gb-geometry-notes,
+  .project-gearbox-playground .gb-notes { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .project-gearbox-playground .gb-footer { display: block; }
+  .project-gearbox-playground .gb-footer > span { display: block; text-align: left; margin-top: 18px; }
+}
+
+@media (max-width: 440px) {
+  .project-gearbox-playground { padding: 20px 16px 36px; }
+  .project-gearbox-playground .gb-header { margin-bottom: 19px; }
+  .project-gearbox-playground .gb-eyebrow { letter-spacing: 0.03em; font-size: 12px; }
+  .project-gearbox-playground h1 { max-width: 310px; font-size: 40px; }
+  .project-gearbox-playground .gb-deck { font-size: 14px; line-height: 1.6; margin-top: 10px; }
+  .project-gearbox-playground .gb-panel-heading { padding: 13px 13px; gap: 8px; min-height: 49px; }
+  .project-gearbox-playground .gb-panel-heading h2 { font-size: 13px; }
+  .project-gearbox-playground .gb-panel-heading h2 > span { margin-right: 5px; }
+  .project-gearbox-playground .gb-stage { padding: 7px 3px 0; background-size: 22px 22px; }
+  .project-gearbox-playground .gb-drawing-caption { padding: 8px 13px; }
+  .project-gearbox-playground .gb-legend { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; padding: 15px 14px; }
+  .project-gearbox-playground .gb-transport { padding: 15px 13px 12px; }
+  .project-gearbox-playground .gb-transport-buttons { grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+  .project-gearbox-playground .gb-transport-buttons button { padding: 9px 6px; font-size: 13px; }
+  .project-gearbox-playground .gb-transport-buttons [data-reset] { grid-column: 1 / -1; }
+  .project-gearbox-playground .gb-control-body { padding: 16px 14px 20px; }
+  .project-gearbox-playground .gb-paired { gap: 10px; }
+  .project-gearbox-playground .gb-paired label { font-size: 13px; }
+  .project-gearbox-playground .gb-experiments button { font-size: 12px; }
+  .project-gearbox-playground .gb-result { padding: 20px 17px; }
+  .project-gearbox-playground .gb-rate-list { display: block; }
+  .project-gearbox-playground .gb-rate-row { display: grid; }
+  .project-gearbox-playground .gb-willis { font-size: 20px; gap: 0 6px; }
+  .project-gearbox-playground .gb-equation-panel { padding: 26px 0; }
+  .project-gearbox-playground .gb-equation-intro h2 { font-size: 28px; }
+}

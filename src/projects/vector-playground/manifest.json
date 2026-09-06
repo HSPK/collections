@@ -1,0 +1,14 @@
+{
+  "id": "vector-playground",
+  "order": 51,
+  "title": "Vector Playground",
+  "subtitle": "Move the basis. Give the whole plane a new shape.",
+  "description": "A graph-paper lab for real 2×2 matrix transformations, signed area, eigen-directions, dot products, and perpendicular projection. Drag the vectors, edit every coordinate, and connect the geometry to embeddings and linear layers.",
+  "category": "learn",
+  "format": "page",
+  "medium": "Interactive linear algebra workbench",
+  "tags": ["AI education", "Linear algebra", "Geometry", "Vectors"],
+  "color": "#f5f1e6",
+  "ink": "#193e3a",
+  "instruction": "Drag either basis tip or edit the matrix. Switch to Dot & projection to compare vectors and turn their projection into a matrix."
+}

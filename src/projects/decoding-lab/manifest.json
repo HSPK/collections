@@ -1,0 +1,14 @@
+{
+  "id": "decoding-lab",
+  "order": 54,
+  "title": "Decoding Lab",
+  "subtitle": "A little press for the next token.",
+  "description": "Fit a tiny, inspectable count model on original text, then see temperature, top-k, top-p, and seeded sampling turn logits into a rewindable paper trail.",
+  "category": "learn",
+  "format": "page",
+  "medium": "Local count-model and probability workbench",
+  "tags": ["AI education", "Probability", "Language", "Interactive"],
+  "color": "#f4efe3",
+  "ink": "#29291f",
+  "instruction": "Print one token, inspect its probability receipt, then backtrack to replay the exact draw."
+}

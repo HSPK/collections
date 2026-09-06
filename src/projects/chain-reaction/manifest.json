@@ -1,0 +1,14 @@
+{
+  "id": "chain-reaction",
+  "order": 47,
+  "title": "Chain Reaction",
+  "subtitle": "One marble, six dominoes, and an entirely unnecessary bloom.",
+  "description": "Explore an original SVG causal machine: a rolling marble tips six dominoes, a lever releases a counterweighted cam wheel, and a mechanical flower opens. Play, pause, replay, scrub either way, change speed, or inspect five connected stages on an illustrative hand-authored timeline.",
+  "category": "play",
+  "format": "page",
+  "medium": "A tactile SVG causal-machine animation",
+  "tags": ["Animation demo", "Cause and effect", "SVG", "Interactive"],
+  "color": "#d4e7e9",
+  "ink": "#294b50",
+  "instruction": "Follow the chain with Play, or choose a stage to pause and inspect. Scrub backwards to rebuild any moment."
+}

@@ -1,0 +1,14 @@
+{
+  "id": "paper-planet",
+  "order": 38,
+  "title": "Paper Planet",
+  "subtitle": "A small world, folded with room to wander.",
+  "description": "Turn an inhabited cut-paper globe and keep a field journal of six imaginary landmarks. Discover an orchard, patchwork fields, a seaside village, a lighthouse, cream-paper peaks and a terracotta observatory; change the daylight or set a gentle breeze in motion.",
+  "category": "art",
+  "format": "page",
+  "medium": "An illustrated cut-paper field atlas",
+  "tags": ["3D scene", "Imaginary world", "Paper craft", "Field atlas"],
+  "color": "#f4efe3",
+  "ink": "#294638",
+  "instruction": "Drag the globe or choose a journal landmark. Try dusk, then play a passing breeze."
+}

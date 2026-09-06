@@ -1,0 +1,46 @@
+name: Project idea
+description: Suggest a useful, delightful, or unusual AI-made website.
+title: "[Idea] "
+body:
+  - type: markdown
+    attributes:
+      value: "Small finished ideas are welcome. Tell us what a visitor would actually do or discover."
+  - type: input
+    id: name
+    attributes:
+      label: Working title
+      placeholder: A pocket observatory for impossible constellations
+    validations:
+      required: true
+  - type: textarea
+    id: experience
+    attributes:
+      label: The experience
+      description: What makes it worth opening? Describe content and behavior, not just technologies.
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Closest project type
+      options:
+        - Tools & makers
+        - Games & puzzles
+        - Stories & archives
+        - Learning
+        - Worlds & explorations
+        - Art & motion
+        - Something else
+  - type: textarea
+    id: approach
+    attributes:
+      label: Possible implementation
+      description: A static/local approach, references, sketches, or relevant constraints.
+  - type: dropdown
+    id: contribute
+    attributes:
+      label: Would you like to build it?
+      options:
+        - Yes, I would like to open a PR
+        - I would like help getting started
+        - Just sharing an idea

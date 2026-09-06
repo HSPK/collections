@@ -1,0 +1,14 @@
+{
+  "id": "attention-studio",
+  "order": 53,
+  "title": "Attention Studio",
+  "subtitle": "A small head. Every number in view.",
+  "description": "Edit original toy embeddings and trace a single attention head through projections, scaled scores, causal masking, stable softmax, and weighted values.",
+  "category": "learn",
+  "format": "page",
+  "medium": "Interactive attention notebook",
+  "tags": ["AI education", "Attention", "Linear algebra"],
+  "color": "#e6dcf4",
+  "ink": "#241d38",
+  "instruction": "Edit a token coordinate, select a heatmap cell, and follow its numbers through the six pipeline stages."
+}

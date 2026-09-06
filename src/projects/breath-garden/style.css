@@ -1,0 +1,127 @@
+.project-breath-garden {
+  --bg-ink: #3c5968;
+  --bg-blue: #466e83;
+  --bg-line: #d9e1df;
+  min-height: 100svh;
+  background: #fbfcf7;
+  color: var(--bg-ink);
+  font: 16px/1.55 "Trebuchet MS", Arial, sans-serif;
+}
+.project-breath-garden * { box-sizing: border-box; }
+.project-breath-garden .bg-site { margin: 0 auto; max-width: 1400px; padding: 27px 36px 23px; }
+.project-breath-garden .bg-header { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 24px; }
+.project-breath-garden .bg-eyebrow { font-size: 12px; font-weight: 700; color: #5c7179; letter-spacing: .085em; text-transform: uppercase; margin: 0 0 7px; }
+.project-breath-garden h1 { font: normal clamp(39px, 4.7vw, 58px)/1.05 Georgia, "Times New Roman", serif; letter-spacing: -.045em; margin: 0; color: #395b6d; }
+.project-breath-garden h1 em { font-weight: 400; color: #b97169; }
+.project-breath-garden .bg-header > p { font-size: 15px; line-height: 1.45; margin: 0 45px 3px 0; color: #66818b; }
+.project-breath-garden button, .project-breath-garden input { font: inherit; }
+.project-breath-garden button { min-height: 44px; min-width: 44px; padding: 9px 16px; border: 1px solid #bdcdd1; border-radius: 6px; background: transparent; color: #3d6278; cursor: pointer; }
+.project-breath-garden button:hover:not(:disabled) { background: #eaf0ec; }
+.project-breath-garden button:disabled { color: #677d84; opacity: .57; cursor: default; }
+.project-breath-garden button:focus-visible, .project-breath-garden input:focus-visible, .project-breath-garden canvas:focus-visible, .project-breath-garden summary:focus-visible { outline: 3px solid #b77568; outline-offset: 3px; }
+.project-breath-garden .bg-workbench { background: #f5f8f4; border: 1px solid #cfdddf; border-radius: 9px; overflow: hidden; }
+.project-breath-garden .bg-workbench-top { display: flex; justify-content: space-between; align-items: center; gap: 17px; padding: 13px 20px; border-bottom: 1px solid #e1e8e4; }
+.project-breath-garden .bg-workbench-top .bg-eyebrow { color: #647b82; margin-bottom: 1px; }
+.project-breath-garden .bg-season { font-size: 15px; margin: 0; }
+.project-breath-garden .bg-workbench-top .bg-breeze { display: flex; align-items: center; gap: 14px; text-align: left; background: #456f85; color: #fffdf0; border-color: #456f85; min-width: 245px; min-height: 59px; padding: 8px 18px; touch-action: none; }
+.project-breath-garden .bg-workbench-top .bg-breeze:hover { background: #385f78; }
+.project-breath-garden .bg-workbench-top .bg-breeze[aria-pressed="true"] { background: #b97067; border-color: #b97067; }
+.project-breath-garden .bg-breeze svg { width: 32px; height: 28px; flex: none; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; }
+.project-breath-garden .bg-breeze strong { display: block; font-size: 15px; font-weight: 700; }
+.project-breath-garden .bg-breeze small { display: block; font-size: 12px; font-weight: 400; opacity: .9; }
+.project-breath-garden .bg-stage { width: 100%; height: min(48vw, 526px); min-height: 340px; position: relative; }
+.project-breath-garden .bg-stage canvas { width: 100%; height: 100%; display: block; position: absolute; touch-action: none; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.project-breath-garden .bg-garden-bar { display: flex; justify-content: space-between; align-items: center; gap: 15px; padding: 14px 20px; background: #f8f9f1; border-top: 1px solid #e0e7df; }
+.project-breath-garden .bg-opened { display: flex; align-items: center; gap: 12px; }
+.project-breath-garden .bg-flower-mark { display: grid; place-items: center; width: 33px; height: 33px; border-radius: 50%; background: #ead1c5; font: 28px/1 Georgia, serif; color: #a7655f; transform: rotate(20deg); }
+.project-breath-garden .bg-opened output { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.project-breath-garden .bg-opened p { font-size: 12px; color: #60777e; margin: 0; }
+.project-breath-garden .bg-garden-actions { display: flex; gap: 7px; }
+.project-breath-garden .bg-garden-actions button { font-size: 13px; padding: 8px 13px; }
+.project-breath-garden .bg-wind-controls { display: grid; grid-template-columns: 1.15fr .9fr .7fr; align-items: center; gap: 42px; padding: 19px 2px 8px; }
+.project-breath-garden .bg-strength { min-width: 0; }
+.project-breath-garden .bg-strength > div { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.project-breath-garden .bg-strength label { font-size: 13px; font-weight: 700; }
+.project-breath-garden .bg-strength output { font-size: 12px; font-variant-numeric: tabular-nums; color: #627982; }
+.project-breath-garden .bg-strength input { width: 100%; min-width: 0; height: 44px; margin: 0; accent-color: #7b9fad; }
+.project-breath-garden .bg-direction { display: flex; justify-content: space-between; align-items: center; gap: 14px; }
+.project-breath-garden .bg-direction > span { font-size: 13px; font-weight: 700; }
+.project-breath-garden .bg-direction > div { display: flex; gap: 6px; }
+.project-breath-garden .bg-direction button { font-size: 22px; line-height: 1; padding: 5px; width: 45px; }
+.project-breath-garden .bg-direction button[aria-pressed="true"] { background: #e0ebea; border-color: #91acb3; }
+.project-breath-garden .bg-wind-reading > span { display: block; font-size: 12px; color: #63777e; }
+.project-breath-garden .bg-wind-reading output { display: block; font-size: 14px; font-weight: 700; }
+.project-breath-garden meter { display: block; width: 100%; height: 5px; margin-top: 8px; border: none; background: #e7ede7; }
+.project-breath-garden meter::-webkit-meter-bar { background: #e7ede7; border: 0; border-radius: 0; height: 4px; }
+.project-breath-garden meter::-webkit-meter-optimum-value { background: #8baeb9; }
+.project-breath-garden meter::-moz-meter-bar { background: #8baeb9; }
+.project-breath-garden .bg-wind-help { font-size: 13px; color: #5b717a; margin: 6px 0; }
+.project-breath-garden .bg-local-feedback { font-size: 13px; color: #667977; margin: 0 0 21px; min-height: 21px; }
+.project-breath-garden .bg-microphone { display: grid; grid-template-columns: 1.35fr 1fr; gap: 55px; border: 1px solid #d8e1dc; border-radius: 8px; background: #f0f4ef; padding: 27px 29px; }
+.project-breath-garden .bg-microphone h2 { font: normal 29px/1.16 Georgia, "Times New Roman", serif; margin: 0 0 13px; letter-spacing: -.025em; }
+.project-breath-garden .bg-microphone-copy > p:not(.bg-eyebrow) { margin: 12px 0; font-size: 15px; color: #536f7a; }
+.project-breath-garden .bg-privacy { display: flex; align-items: start; gap: 10px; }
+.project-breath-garden .bg-privacy svg { width: 18px; height: 21px; flex: none; margin-top: 2px; fill: none; stroke: #778f91; stroke-width: 1.6; }
+.project-breath-garden .bg-microphone-copy .bg-privacy { font-size: 13px; line-height: 1.6; color: #637c80; max-width: 440px; }
+.project-breath-garden .bg-microphone-controls { border-left: 1px solid #d9e2db; padding-left: 28px; }
+.project-breath-garden .bg-mic-state { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.project-breath-garden .bg-mic-state strong { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+.project-breath-garden .bg-mic-dot { display: block; width: 8px; height: 8px; border-radius: 50%; background: #a7b5b3; }
+.project-breath-garden[data-mic-state="live"] .bg-mic-dot { background: #417d74; }
+.project-breath-garden[data-mic-state="requesting"] .bg-mic-dot { background: #bb9554; }
+.project-breath-garden[data-mic-state="denied"] .bg-mic-dot, .project-breath-garden[data-mic-state="error"] .bg-mic-dot { background: #b46d62; }
+.project-breath-garden .bg-microphone-controls > button[data-mic] { background: #fbfcf6; font-size: 14px; font-weight: 700; border-color: #a9c0c4; }
+.project-breath-garden .bg-microphone-controls > p { font-size: 13px; line-height: 1.5; color: #526f7a; margin: 12px 0 8px; }
+.project-breath-garden .bg-microphone-controls .bg-recalibrate { border-color: transparent; padding: 7px 0; border-radius: 2px; font-size: 12px; text-decoration: underline; text-underline-offset: 3px; }
+.project-breath-garden .bg-microphone-controls .bg-shutdown-note { margin-top: 6px; color: #627a79; font-size: 12px; }
+.project-breath-garden .bg-paper-notes { display: grid; grid-template-columns: 1.05fr 1fr 1fr; gap: 38px; padding: 35px 2px 14px; }
+.project-breath-garden .bg-paper-notes h2 { font: normal 27px/1.18 Georgia, "Times New Roman", serif; margin: 0; letter-spacing: -.025em; }
+.project-breath-garden .bg-paper-notes h3 { font-size: 14px; font-weight: 700; margin: 0 0 10px; }
+.project-breath-garden .bg-paper-notes p:not(.bg-eyebrow) { color: #58737d; font-size: 15px; margin: 0; }
+.project-breath-garden .bg-specimens { margin: 5px 0 18px; max-width: 760px; }
+.project-breath-garden .bg-specimens summary { cursor: pointer; padding: 10px 0; min-height: 44px; font-size: 13px; font-weight: 700; }
+.project-breath-garden .bg-specimens p { font-size: 14px; color: #798a8e; margin: 0 0 12px; }
+.project-breath-garden .bg-footer { display: flex; justify-content: space-between; gap: 15px; border-top: 1px solid #dfe6df; padding-top: 17px; font-size: 12px; color: #829391; }
+@media (max-width: 900px) {
+  .project-breath-garden .bg-site { padding: 23px; }
+  .project-breath-garden .bg-wind-controls { gap: 24px; grid-template-columns: 1fr 1fr; }
+  .project-breath-garden .bg-wind-reading { display: grid; grid-template-columns: auto 1fr 130px; align-items: center; gap: 12px; grid-column: 1 / -1; }
+  .project-breath-garden .bg-wind-reading meter { margin: 0; }
+  .project-breath-garden .bg-microphone { gap: 28px; padding: 24px; }
+  .project-breath-garden .bg-microphone-controls { padding-left: 23px; }
+  .project-breath-garden .bg-paper-notes { gap: 23px; }
+}
+@media (max-width: 600px) {
+  .project-breath-garden .bg-site { padding: 20px 16px; }
+  .project-breath-garden .bg-header { margin-bottom: 19px; gap: 10px; }
+  .project-breath-garden h1 { font-size: 37px; }
+  .project-breath-garden .bg-header .bg-eyebrow { letter-spacing: .025em; }
+  .project-breath-garden .bg-header > p { display: none; }
+  .project-breath-garden .bg-workbench-top { gap: 10px; padding: 12px; }
+  .project-breath-garden .bg-workbench-top .bg-eyebrow { font-size: 12px; letter-spacing: .03em; }
+  .project-breath-garden .bg-season { font-size: 12px; max-width: 104px; line-height: 1.4; }
+  .project-breath-garden .bg-workbench-top .bg-breeze { min-width: 0; gap: 8px; padding: 9px 11px; flex-shrink: 0; }
+  .project-breath-garden .bg-breeze svg { width: 24px; }
+  .project-breath-garden .bg-breeze strong { font-size: 14px; }
+  .project-breath-garden .bg-breeze small { max-width: 132px; font-size: 12px; line-height: 1.3; }
+  .project-breath-garden .bg-stage { height: auto; min-height: 0; aspect-ratio: 1.07; }
+  .project-breath-garden .bg-garden-bar { gap: 8px; padding: 11px; }
+  .project-breath-garden .bg-opened { gap: 7px; }
+  .project-breath-garden .bg-flower-mark { width: 25px; height: 25px; font-size: 24px; }
+  .project-breath-garden .bg-opened output { font-size: 12px; }
+  .project-breath-garden .bg-garden-actions { gap: 5px; }
+  .project-breath-garden .bg-garden-actions button { font-size: 12px; padding: 7px 9px; }
+  .project-breath-garden .bg-wind-controls { gap: 13px 23px; padding-top: 17px; }
+  .project-breath-garden .bg-direction { flex-direction: column; align-items: start; gap: 4px; }
+  .project-breath-garden .bg-wind-reading { grid-template-columns: auto 1fr 69px; gap: 8px; }
+  .project-breath-garden .bg-wind-reading output { font-size: 13px; }
+  .project-breath-garden .bg-microphone { grid-template-columns: minmax(0, 1fr); padding: 21px; gap: 20px; }
+  .project-breath-garden .bg-microphone h2 { font-size: 27px; }
+  .project-breath-garden .bg-microphone-controls { padding: 21px 0 0; border-left: 0; border-top: 1px solid #d9e2db; }
+  .project-breath-garden .bg-paper-notes { grid-template-columns: minmax(0, 1fr); gap: 23px; padding-top: 29px; }
+  .project-breath-garden .bg-paper-notes h2 br { display: none; }
+  .project-breath-garden .bg-footer { flex-direction: column; gap: 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .project-breath-garden *, .project-breath-garden *::before, .project-breath-garden *::after { scroll-behavior: auto; transition: none; }
+}

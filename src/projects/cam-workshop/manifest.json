@@ -1,0 +1,14 @@
+{
+  "id": "cam-workshop",
+  "order": 60,
+  "title": "Cam Workshop",
+  "subtitle": "One turn, four phases, three ways to move.",
+  "description": "A hands-on radial cam instrument: edit rise, dwell, and return timing, compare exact harmonic, cycloidal, and 3–4–5 motion laws, and follow a knife edge along the real rotating profile.",
+  "category": "learn",
+  "format": "page",
+  "medium": "Interactive cam and follower instrument",
+  "tags": ["Engineering lab", "Mechanisms", "Motion laws"],
+  "color": "#eedfd8",
+  "ink": "#412b3c",
+  "instruction": "Pause a turn, scrub the cam angle, and compare how each motion law changes the profile and its derivatives."
+}

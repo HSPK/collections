@@ -1,0 +1,243 @@
+.project-camera-assembly {
+  --ca-plum: #291f30;
+  --ca-paper: #f2ece0;
+  --ca-ink: #322839;
+  --ca-saffron: #e8b44f;
+  --ca-muted: #756974;
+  --ca-line: #d8cfc5;
+  --app-ink: var(--ca-ink);
+  background: var(--ca-paper);
+  padding: 27px clamp(16px, 3.5vw, 58px) 32px;
+  font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
+  outline: none;
+}
+
+.project-camera-assembly *,
+.project-camera-assembly *::before,
+.project-camera-assembly *::after { box-sizing: border-box; }
+.project-camera-assembly :is(h1, h2, h3, p) { margin: 0; }
+.project-camera-assembly button,
+.project-camera-assembly select,
+.project-camera-assembly input { -webkit-tap-highlight-color: transparent; }
+.project-camera-assembly button { cursor: pointer; }
+.project-camera-assembly button:disabled { cursor: default; opacity: 0.45; }
+.project-camera-assembly :is(button, input, select):focus-visible,
+.project-camera-assembly canvas:focus-visible { outline: 3px solid #318e89; outline-offset: 3px; }
+
+.project-camera-assembly .ca-header {
+  max-width: 1510px;
+  margin: 0 auto 23px;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+}
+.project-camera-assembly .ca-eyebrow {
+  font: 12px/1.4 ui-monospace, "SFMono-Regular", Consolas, monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.project-camera-assembly .ca-identity .ca-eyebrow { display: flex; align-items: center; gap: 9px; margin-bottom: 7px; }
+.project-camera-assembly .ca-aperture { font-size: 19px; line-height: 1; color: #826236; }
+.project-camera-assembly .ca-slash { color: #9b8d93; margin: 0 2px; }
+.project-camera-assembly h1 {
+  font: 400 clamp(29px, 3.2vw, 43px)/1.08 Georgia, "Times New Roman", serif;
+  letter-spacing: -0.045em;
+}
+.project-camera-assembly h1 > span { color: #b5802c; }
+.project-camera-assembly .ca-intro { font-size: 15px; padding: 0 6px 2px 0; line-height: 1.65; }
+.project-camera-assembly .ca-intro > span { color: var(--ca-muted); font-size: 13px; }
+.project-camera-assembly .ca-exhibit {
+  max-width: 1510px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 304px;
+  border: 1px solid #cfc3b8;
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: 0 12px 36px #3220390a;
+}
+.project-camera-assembly .ca-viewer { background: var(--ca-plum); color: var(--ca-paper); min-width: 0; }
+.project-camera-assembly .ca-viewport { position: relative; height: clamp(430px, 45vw, 605px); overflow: hidden; }
+.project-camera-assembly .ca-scene { position: absolute; inset: 0; }
+.project-camera-assembly .ca-scene canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.project-camera-assembly .ca-scene-heading { position: absolute; top: 25px; left: 27px; pointer-events: none; }
+.project-camera-assembly .ca-object-code { font: 13px/1.5 ui-monospace, Consolas, monospace; letter-spacing: 0.18em; }
+.project-camera-assembly .ca-object-code > span { color: #b7a8b6; }
+.project-camera-assembly .ca-phase-title { color: #b9aebb; margin-top: 4px; font-size: 13px; }
+.project-camera-assembly .ca-scene-stamp { position: absolute; top: 25px; right: 24px; display: flex; align-items: center; gap: 10px; color: #bcadbd; pointer-events: none; }
+.project-camera-assembly .ca-scene-stamp > span { display: grid; place-items: center; width: 32px; height: 39px; border: 1px solid #877388; border-radius: 15px 15px 4px 4px; font: 23px Georgia, serif; }
+.project-camera-assembly .ca-scene-stamp small { font: 10px/1.5 ui-monospace, Consolas, monospace; letter-spacing: 0.08em; }
+.project-camera-assembly .ca-scene-foot {
+  position: absolute;
+  left: 27px;
+  right: 25px;
+  bottom: 17px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  pointer-events: none;
+  color: #c1b4c3;
+  font-size: 12px;
+}
+.project-camera-assembly .ca-scene-foot p > span:first-child { display: inline-block; margin-right: 6px; font-size: 19px; line-height: 12px; }
+.project-camera-assembly .ca-view-name { font-family: ui-monospace, Consolas, monospace; }
+.project-camera-assembly .ca-views { display: flex; align-items: center; gap: 6px; padding: 4px 24px 13px; border-bottom: 1px solid #514255; }
+.project-camera-assembly .ca-small-label { font-size: 12px; color: #b9aabb; margin-right: 7px; }
+.project-camera-assembly .ca-views button {
+  min-height: 42px;
+  padding: 7px 13px;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  background: transparent;
+  color: #cbbecc;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.project-camera-assembly .ca-views button:hover { background: #ffffff09; color: #fff5e6; }
+.project-camera-assembly .ca-views button[aria-pressed="true"] { background: #47364b; color: #fff3df; border-color: #6a536d; }
+.project-camera-assembly .ca-timeline { padding: 18px 25px 20px; background: #302536; }
+.project-camera-assembly .ca-transport { display: flex; align-items: center; gap: 12px; margin-bottom: 17px; }
+.project-camera-assembly .ca-transport button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; border: 0; border-radius: 3px; padding: 10px 15px; font-size: 14px; line-height: 1.3; }
+.project-camera-assembly .ca-transport svg { width: 17px; height: 17px; flex: 0 0 17px; }
+.project-camera-assembly .ca-play { background: var(--ca-saffron); color: #322535; min-width: 102px; font-weight: 600; }
+.project-camera-assembly .ca-play:hover { background: #f5c366; }
+.project-camera-assembly .ca-replay { background: #45364c; color: #eadddf; }
+.project-camera-assembly .ca-replay:hover { background: #54415b; }
+.project-camera-assembly .ca-speed { margin-left: auto; display: flex; align-items: center; gap: 7px; font-size: 12px; color: #c1b3c5; }
+.project-camera-assembly .ca-speed select { min-width: 69px; min-height: 44px; border: 1px solid #756078; border-radius: 3px; padding: 6px; background: #302536; color: #f3e8dc; font-size: 14px; color-scheme: dark; cursor: pointer; }
+.project-camera-assembly .ca-time { margin-left: 6px; font: 13px/1.4 ui-monospace, Consolas, monospace; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.project-camera-assembly .ca-time > span { color: #b7a6bd; }
+.project-camera-assembly .ca-scrub-label { display: flex; justify-content: space-between; color: #bcacbf; font-size: 12px; line-height: 1.4; }
+.project-camera-assembly .ca-scrub-label > span:nth-child(2) { color: #efbf68; font-family: ui-monospace, Consolas, monospace; }
+.project-camera-assembly .ca-scrub {
+  --ca-progress: 0%;
+  width: 100%;
+  display: block;
+  margin: 0;
+  height: 44px;
+  padding: 0;
+  cursor: ew-resize;
+  accent-color: var(--ca-saffron);
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.project-camera-assembly .ca-scrub::-webkit-slider-runnable-track { height: 4px; border-radius: 5px; background: linear-gradient(to right, #e8b44f var(--ca-progress), #6c5771 var(--ca-progress)); }
+.project-camera-assembly .ca-scrub::-webkit-slider-thumb { -webkit-appearance: none; width: 17px; height: 17px; border-radius: 50%; border: 3px solid #302536; outline: 1px solid #e8b44f; background: #e8b44f; margin-top: -6.5px; }
+.project-camera-assembly .ca-scrub::-moz-range-track { height: 4px; border-radius: 5px; background: #6c5771; }
+.project-camera-assembly .ca-scrub::-moz-range-progress { height: 4px; background: #e8b44f; }
+.project-camera-assembly .ca-scrub::-moz-range-thumb { width: 13px; height: 13px; border-radius: 50%; border: 2px solid #302536; outline: 1px solid #e8b44f; background: #e8b44f; }
+.project-camera-assembly .ca-chapters { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); margin: 0 -3px; gap: 4px; }
+.project-camera-assembly .ca-chapters button { display: flex; align-items: center; justify-content: center; gap: 7px; min-height: 44px; border: 1px solid #5e4965; border-radius: 3px; color: #d5c7d7; background: transparent; font-size: 12px; padding: 6px 3px; }
+.project-camera-assembly .ca-chapters button span { color: #af96b6; font: 12px/1 ui-monospace, Consolas, monospace; }
+.project-camera-assembly .ca-chapters button:hover { border-color: #d2b1a7; }
+.project-camera-assembly .ca-chapters button[aria-current="step"] { border-color: #c89f61; color: #f3d49a; background: #49393c; }
+.project-camera-assembly .ca-chapters button[aria-current="step"] span { color: #e5b971; }
+.project-camera-assembly .ca-stage-note { margin-top: 13px; font-size: 12px; color: #c4b1c7; min-height: 19px; }
+
+.project-camera-assembly .ca-index { min-width: 0; padding: 26px 22px 21px; background: #f2ece0; display: flex; flex-direction: column; }
+.project-camera-assembly .ca-index-heading .ca-eyebrow { color: #887779; font-size: 12px; letter-spacing: 0.06em; }
+.project-camera-assembly h2 { margin: 12px 0 10px; font: 400 31px/1.05 Georgia, "Times New Roman", serif; letter-spacing: -0.035em; }
+.project-camera-assembly .ca-index-heading > p:last-child { font-size: 13px; color: #766572; margin-bottom: 20px; }
+.project-camera-assembly .ca-parts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.project-camera-assembly .ca-parts button { border: 1px solid #d9cdc1; min-height: 67px; padding: 7px 3px; border-radius: 3px; background: #f8f3e9; color: #493b4b; font-size: 13px; line-height: 1.3; }
+.project-camera-assembly .ca-parts button span { display: block; margin-bottom: 5px; color: #977c5d; font: 12px/1.3 ui-monospace, Consolas, monospace; }
+.project-camera-assembly .ca-parts button:hover { background: #e8ddce; border-color: #b5a291; }
+.project-camera-assembly .ca-parts button[aria-pressed="true"] { background: #3c2b43; color: #fff0dc; border-color: #3c2b43; }
+.project-camera-assembly .ca-parts button[aria-pressed="true"] span { color: #eebd6a; }
+.project-camera-assembly .ca-part-detail { margin-top: 23px; padding: 19px 0 11px; border-top: 1px solid var(--ca-line); min-height: 238px; }
+.project-camera-assembly .ca-material { font: 12px/1.6 ui-monospace, Consolas, monospace; color: #80664e; }
+.project-camera-assembly h3 { font: 400 22px/1.22 Georgia, "Times New Roman", serif; letter-spacing: -0.025em; margin: 9px 0 11px; }
+.project-camera-assembly .ca-part-detail > p:not(.ca-material) { font-size: 15px; color: #665563; line-height: 1.65; }
+.project-camera-assembly .ca-clear { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 9px 0; margin-top: 2px; background: transparent; border: 0; color: #60505e; font-size: 12px; }
+.project-camera-assembly .ca-clear:not(:disabled):hover { color: #1f6d69; }
+.project-camera-assembly .ca-materials { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 18px 0; border-top: 1px solid var(--ca-line); font-size: 12px; color: #6c5869; }
+.project-camera-assembly .ca-materials > span { display: flex; align-items: center; gap: 8px; }
+.project-camera-assembly .ca-materials i { display: block; width: 11px; height: 11px; border: 1px solid #63475722; border-radius: 50%; }
+.project-camera-assembly .ca-swatch-enamel { background: #e6ae47; box-shadow: inset 1px 2px 2px #ffffff80; }
+.project-camera-assembly .ca-swatch-metal { background: linear-gradient(125deg, #888783, #e4e5df, #a19b9a); }
+.project-camera-assembly .ca-swatch-glass { background: #499b97; box-shadow: inset 2px 1px 3px #e3fff9; }
+.project-camera-assembly .ca-swatch-paper { background: #e7dcc5; }
+.project-camera-assembly .ca-status { padding-top: 14px; border-top: 1px solid var(--ca-line); font-size: 12px; line-height: 1.65; color: #7b6877; margin-top: auto; }
+.project-camera-assembly .ca-footer { max-width: 1510px; margin: 20px auto 0; display: flex; justify-content: space-between; gap: 32px; color: #887782; font-size: 12px; line-height: 1.65; }
+.project-camera-assembly .ca-footer > p:first-child { max-width: 690px; }
+.project-camera-assembly .ca-footer > p:last-child { max-width: 340px; text-align: right; }
+.project-camera-assembly .ca-footer span { color: #514052; }
+
+@media (min-width: 1700px) {
+  .project-camera-assembly .ca-exhibit { grid-template-columns: minmax(0, 1fr) 335px; }
+  .project-camera-assembly .ca-index { padding: 29px; }
+}
+@media (max-width: 1050px) {
+  .project-camera-assembly .ca-exhibit { grid-template-columns: minmax(0, 1fr) 278px; }
+  .project-camera-assembly .ca-index { padding: 22px 17px 18px; }
+  .project-camera-assembly .ca-viewport { height: 480px; }
+  .project-camera-assembly .ca-time { display: none; }
+  .project-camera-assembly .ca-views { padding-inline: 18px; gap: 2px; }
+  .project-camera-assembly .ca-views button { padding-inline: 10px; }
+  .project-camera-assembly .ca-timeline { padding-inline: 18px; }
+  .project-camera-assembly .ca-chapters button { flex-direction: column; gap: 5px; }
+  .project-camera-assembly .ca-help-wide { display: none; }
+}
+@media (max-width: 800px) {
+  .project-camera-assembly { padding: 21px 20px 28px; }
+  .project-camera-assembly .ca-header { gap: 14px; }
+  .project-camera-assembly .ca-intro { max-width: 270px; font-size: 13px; }
+  .project-camera-assembly .ca-intro > span { font-size: 12px; }
+  .project-camera-assembly .ca-exhibit { grid-template-columns: minmax(0, 1fr); }
+  .project-camera-assembly .ca-viewport { height: 495px; }
+  .project-camera-assembly .ca-time { display: block; }
+  .project-camera-assembly .ca-chapters button { flex-direction: row; gap: 7px; }
+  .project-camera-assembly .ca-index { display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; padding: 24px; }
+  .project-camera-assembly .ca-index-heading { grid-column: 1; }
+  .project-camera-assembly h2 br { display: none; }
+  .project-camera-assembly .ca-parts { grid-column: 1; }
+  .project-camera-assembly .ca-part-detail { grid-column: 2; grid-row: 1 / span 2; margin-top: 0; min-height: 0; padding-top: 0; border-top: 0; }
+  .project-camera-assembly .ca-materials { grid-column: 1; margin-top: 21px; }
+  .project-camera-assembly .ca-status { grid-column: 2; margin-top: 21px; }
+  .project-camera-assembly .ca-footer { gap: 20px; }
+}
+@media (max-width: 540px) {
+  .project-camera-assembly { padding: 18px 14px 28px; }
+  .project-camera-assembly .ca-header { display: block; margin-bottom: 17px; }
+  .project-camera-assembly h1 { font-size: 33px; }
+  .project-camera-assembly .ca-identity .ca-eyebrow { font-size: 12px; margin-bottom: 8px; }
+  .project-camera-assembly .ca-intro { max-width: none; margin-top: 10px; line-height: 1.5; padding: 0; font-size: 13px; }
+  .project-camera-assembly .ca-viewport { height: 423px; }
+  .project-camera-assembly .ca-scene-heading { top: 19px; left: 18px; }
+  .project-camera-assembly .ca-object-code { font-size: 12px; }
+  .project-camera-assembly .ca-scene-stamp { top: 20px; right: 17px; }
+  .project-camera-assembly .ca-scene-stamp small { display: none; }
+  .project-camera-assembly .ca-scene-stamp > span { width: 27px; height: 34px; font-size: 20px; }
+  .project-camera-assembly .ca-scene-foot { left: 17px; right: 17px; bottom: 16px; gap: 7px; }
+  .project-camera-assembly .ca-view-name { font-size: 12px; }
+  .project-camera-assembly .ca-views { padding: 2px 12px 12px; gap: 3px; justify-content: space-between; }
+  .project-camera-assembly .ca-views .ca-small-label { display: none; }
+  .project-camera-assembly .ca-views button { font-size: 12px; padding: 7px 10px; min-height: 44px; }
+  .project-camera-assembly .ca-timeline { padding: 16px 15px 17px; }
+  .project-camera-assembly .ca-transport { gap: 8px; margin-bottom: 17px; }
+  .project-camera-assembly .ca-transport button { padding: 10px 11px; }
+  .project-camera-assembly .ca-play { min-width: 86px; }
+  .project-camera-assembly .ca-time { display: none; }
+  .project-camera-assembly .ca-speed { gap: 6px; }
+  .project-camera-assembly .ca-speed select { min-width: 62px; font-size: 16px; }
+  .project-camera-assembly .ca-chapters { gap: 5px; }
+  .project-camera-assembly .ca-chapters button { flex-direction: column; gap: 5px; min-height: 51px; font-size: 12px; }
+  .project-camera-assembly .ca-stage-note { min-height: 36px; line-height: 1.55; }
+  .project-camera-assembly .ca-index { display: flex; padding: 25px 21px 23px; gap: 0; }
+  .project-camera-assembly h2 { font-size: 30px; margin-top: 9px; }
+  .project-camera-assembly .ca-index-heading > p:last-child { margin-bottom: 16px; }
+  .project-camera-assembly .ca-parts button { min-height: 66px; font-size: 14px; }
+  .project-camera-assembly .ca-part-detail { margin-top: 21px; border-top: 1px solid var(--ca-line); padding: 19px 0 0; }
+  .project-camera-assembly .ca-part-detail > p:not(.ca-material) { font-size: 15px; }
+  .project-camera-assembly .ca-materials { margin-top: 15px; }
+  .project-camera-assembly .ca-status { margin-top: 0; padding-top: 13px; }
+  .project-camera-assembly .ca-footer { display: block; margin-top: 17px; }
+  .project-camera-assembly .ca-footer > p:last-child { text-align: left; margin-top: 9px; max-width: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .project-camera-assembly * { scroll-behavior: auto; }
+}

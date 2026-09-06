@@ -1,0 +1,14 @@
+{
+  "id": "patchwork-vision",
+  "order": 55,
+  "title": "Patchwork Vision",
+  "subtitle": "Change a patch. Watch a picture become a vector.",
+  "description": "Paint original synthetic images, inspect pixel-derived color and shape tokens, and trace honest image-text cosine scores through uniform or attention pooling.",
+  "category": "learn",
+  "format": "page",
+  "medium": "A hands-on fixed-feature vision-language bench",
+  "tags": ["AI education", "Vision-language models", "Vectors", "Attention"],
+  "color": "#f6f1e5",
+  "ink": "#1c3936",
+  "instruction": "Select a patch, change its color or shape, then compare the real similarities for a supported text descriptor."
+}

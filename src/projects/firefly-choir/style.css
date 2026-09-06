@@ -1,0 +1,338 @@
+.project-firefly-choir {
+  --fc-paper: #e8ebdc;
+  --fc-ink: #1a302a;
+  --fc-muted: #526257;
+  --fc-lime: #d9e89c;
+  --fc-night: #142720;
+  box-sizing: border-box;
+  min-height: 100svh;
+  width: 100%;
+  padding: 25px clamp(18px, 3vw, 48px) 30px;
+  background: var(--fc-paper);
+  color: var(--fc-ink);
+  font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.project-firefly-choir *,
+.project-firefly-choir *::before,
+.project-firefly-choir *::after { box-sizing: border-box; }
+.project-firefly-choir button,
+.project-firefly-choir input { font: inherit; }
+.project-firefly-choir button { cursor: pointer; }
+.project-firefly-choir button:focus-visible,
+.project-firefly-choir input:focus-visible {
+  outline: 2px solid var(--fc-lime);
+  outline-offset: 4px;
+}
+.project-firefly-choir .fc-header,
+.project-firefly-choir .fc-workbench,
+.project-firefly-choir .fc-notes,
+.project-firefly-choir .fc-colophon { width: 100%; max-width: 1540px; margin-inline: auto; }
+.project-firefly-choir .fc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 24px;
+  padding: 0 0 22px;
+}
+.project-firefly-choir .fc-kicker,
+.project-firefly-choir .fc-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.project-firefly-choir .fc-kicker { color: var(--fc-muted); }
+.project-firefly-choir .fc-kicker > span:not(.fc-number) { opacity: .45; }
+.project-firefly-choir .fc-number {
+  padding-right: 10px;
+  border-right: 1px solid #9da995;
+  color: var(--fc-ink);
+  font-variant-numeric: tabular-nums;
+}
+.project-firefly-choir h1 {
+  display: flex;
+  align-items: baseline;
+  gap: .22em;
+  margin: 7px 0 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(39px, 4.3vw, 62px);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -.045em;
+}
+.project-firefly-choir h1 em { font-weight: 400; }
+.project-firefly-choir .fc-title-spark { align-self: center; margin-left: 8px; color: #70855a; font-size: .39em; }
+.project-firefly-choir .fc-intro {
+  margin: 0 0 4px;
+  padding-right: 2px;
+  color: var(--fc-muted);
+  font-size: 15px;
+  line-height: 1.65;
+}
+.project-firefly-choir .fc-workbench {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 294px;
+  overflow: hidden;
+  border: 1px solid #1e362b;
+  border-radius: 8px;
+  background: var(--fc-night);
+  color: #e5ecd6;
+}
+.project-firefly-choir .fc-garden {
+  position: relative;
+  isolation: isolate;
+  min-width: 0;
+  min-height: 628px;
+  overflow: hidden;
+  background: #0c2227;
+  touch-action: pan-y;
+  cursor: crosshair;
+}
+.project-firefly-choir .fc-garden:focus-visible { outline: 2px solid var(--fc-lime); outline-offset: -5px; }
+.project-firefly-choir .fc-canvas-host { position: absolute; inset: 0; z-index: -1; }
+.project-firefly-choir .fc-canvas-host canvas { display: block; width: 100%; height: 100%; }
+.project-firefly-choir .fc-scene-heading {
+  position: absolute;
+  inset: 25px 27px auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  pointer-events: none;
+  color: #aec4b2;
+  font-size: 12px;
+  letter-spacing: .045em;
+}
+.project-firefly-choir .fc-scene-heading > span:first-child { display: flex; align-items: center; gap: 8px; }
+.project-firefly-choir .fc-live-dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: #d9e89c; }
+.project-firefly-choir[data-motion="paused"] .fc-live-dot { background: #819b8a; }
+.project-firefly-choir .fc-scene-footer {
+  position: absolute;
+  inset: auto 27px 24px;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  pointer-events: none;
+}
+.project-firefly-choir .fc-scene-footer p {
+  margin: 0 0 5px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(23px, 2.2vw, 32px);
+  font-style: italic;
+  letter-spacing: -.025em;
+  line-height: 1.15;
+}
+.project-firefly-choir .fc-scene-footer div > span { color: #a2b6a2; font-size: 12px; }
+.project-firefly-choir .fc-torch-hint {
+  padding-bottom: 3px;
+  color: #c1d4ae;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.project-firefly-choir .fc-torch-hint > span { margin-left: 10px; font-size: 18px; }
+.project-firefly-choir .fc-desk {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  padding: 23px 23px 21px;
+  border-left: 1px solid #334638;
+  background: var(--fc-night);
+}
+.project-firefly-choir .fc-eyebrow { color: #b0c2a1; font-size: 12px; letter-spacing: .08em; }
+.project-firefly-choir .fc-desk h2 {
+  margin: 5px 0 0;
+  font: 400 28px/1.15 Georgia, "Times New Roman", serif;
+  letter-spacing: -.025em;
+}
+.project-firefly-choir .fc-transport { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.project-firefly-choir .fc-transport button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 9px 10px;
+  border: 1px solid #4c6048;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+}
+.project-firefly-choir .fc-play { background: var(--fc-lime); color: #233320; }
+.project-firefly-choir .fc-play:hover { background: #e6f0b8; }
+.project-firefly-choir .fc-play svg { width: 16px; height: 16px; }
+.project-firefly-choir .fc-scatter { background: transparent; color: #d7e1c5; }
+.project-firefly-choir .fc-scatter:hover { background: #23382a; }
+.project-firefly-choir .fc-scatter > span { font-size: 22px; line-height: 1; }
+.project-firefly-choir .fc-settings {
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+  margin: 3px 0 0;
+  padding: 0;
+  border: 0;
+}
+.project-firefly-choir .fc-setting { min-width: 0; }
+.project-firefly-choir .fc-setting-label { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.project-firefly-choir .fc-setting-label label { color: #e0e7d3; font-size: 13px; }
+.project-firefly-choir .fc-setting-label output { color: #d8e9a7; font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.project-firefly-choir .fc-setting input[type="range"] {
+  display: block;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
+  touch-action: pan-y;
+}
+.project-firefly-choir .fc-setting input[type="range"]::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 3px;
+  background: linear-gradient(to right, #c8d994 0 var(--fc-range-fill, 50%), #3f5340 var(--fc-range-fill, 50%) 100%);
+}
+.project-firefly-choir .fc-setting input[type="range"]::-moz-range-track { height: 3px; border-radius: 3px; background: #3f5340; }
+.project-firefly-choir .fc-setting input[type="range"]::-moz-range-progress { height: 3px; background: #c8d994; }
+.project-firefly-choir .fc-setting input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -5.5px;
+  border: 3px solid #dce7b5;
+  border-radius: 50%;
+  background: #344b30;
+}
+.project-firefly-choir .fc-setting input[type="range"]::-moz-range-thumb { width: 9px; height: 9px; border: 3px solid #dce7b5; border-radius: 50%; background: #344b30; }
+.project-firefly-choir .fc-range-ends { display: flex; justify-content: space-between; margin-top: -7px; color: #a1b59a; font-size: 12px; }
+.project-firefly-choir .fc-coherence {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 15px 0;
+  border-block: 1px solid #3b4e3b;
+}
+.project-firefly-choir .fc-coherence-ring { flex: 0 0 49px; width: 49px; height: 49px; }
+.project-firefly-choir .fc-coherence-ring circle { fill: none; stroke-width: 1.8; }
+.project-firefly-choir .fc-ring-track { stroke: #455840; }
+.project-firefly-choir .fc-ring-value { stroke: #d8e6a2; stroke-linecap: round; transform: rotate(-90deg); transform-origin: 32px 32px; }
+.project-firefly-choir .fc-coherence-ring path { stroke: #bfd394; stroke-width: 1; }
+.project-firefly-choir .fc-readout { flex: 1; }
+.project-firefly-choir .fc-readout > span { color: #c4d1b7; font-size: 12px; white-space: nowrap; }
+.project-firefly-choir .fc-readout > div { display: flex; align-items: baseline; gap: 3px; line-height: 1.1; }
+.project-firefly-choir .fc-readout output { color: #e5edcc; font: 400 31px/1.1 Georgia, "Times New Roman", serif; font-variant-numeric: tabular-nums; }
+.project-firefly-choir .fc-readout > div > span { color: #b6c59e; font-size: 13px; }
+.project-firefly-choir .fc-readout-note { color: #a8ba9e; font-size: 12px; line-height: 1.5; }
+.project-firefly-choir .fc-torch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 13px;
+  border: 1px solid #66764e;
+  border-radius: 4px;
+  background: #213527;
+  color: #e2eaca;
+  text-align: left;
+  font-size: 13px;
+}
+.project-firefly-choir .fc-torch:hover { background: #2c422d; }
+.project-firefly-choir .fc-torch[aria-pressed="true"] { border-color: #d5e497; }
+.project-firefly-choir .fc-torch svg { flex-shrink: 0; width: 19px; height: 19px; }
+.project-firefly-choir .fc-torch-indicator { width: 6px; height: 6px; margin-left: auto; border: 1px solid #94a978; border-radius: 50%; }
+.project-firefly-choir .fc-torch[aria-pressed="true"] .fc-torch-indicator { background: #d8e997; border-color: #d8e997; }
+.project-firefly-choir .fc-status { min-height: 39px; margin: -5px 0 0; color: #c0d0af; font-size: 12px; line-height: 1.55; }
+.project-firefly-choir .fc-keyboard { margin: -9px 0 0; color: #a9bc9e; font-size: 12px; line-height: 1.6; }
+.project-firefly-choir kbd { font: inherit; color: #dbe4c5; }
+.project-firefly-choir .fc-notes { padding-top: 25px; }
+.project-firefly-choir .fc-notes-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 18px; margin-bottom: 18px; }
+.project-firefly-choir .fc-notes-heading h2 { margin: 0; font: italic 400 25px/1.2 Georgia, "Times New Roman", serif; }
+.project-firefly-choir .fc-notes-heading > span { color: var(--fc-muted); font-size: 12px; }
+.project-firefly-choir .fc-note-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px; }
+.project-firefly-choir .fc-note { display: flex; align-items: baseline; gap: 15px; padding-top: 16px; border-top: 1px solid #b9c1aa; }
+.project-firefly-choir .fc-note-number { color: #667854; font-size: 12px; font-variant-numeric: tabular-nums; }
+.project-firefly-choir .fc-note h3 { margin: 0 0 7px; font: 400 19px/1.3 Georgia, "Times New Roman", serif; letter-spacing: -.025em; }
+.project-firefly-choir .fc-note p { max-width: 43em; margin: 0; color: #536352; font-size: 13px; line-height: 1.7; }
+.project-firefly-choir .fc-colophon { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-top: 25px; padding-top: 18px; border-top: 1px solid #b9c1aa; }
+.project-firefly-choir .fc-colophon p { max-width: 920px; margin: 0; color: #596650; font-size: 12px; line-height: 1.7; }
+.project-firefly-choir .fc-colophon strong { color: #31432e; font-weight: 600; }
+.project-firefly-choir .fc-colophon button { flex-shrink: 0; min-height: 44px; padding: 8px 12px; border: 1px solid #a4b090; border-radius: 4px; background: transparent; color: #33472e; font-size: 13px; }
+.project-firefly-choir .fc-colophon button:hover { background: #dae1ca; }
+.project-firefly-choir .fc-colophon button:focus-visible { outline-color: #435c33; }
+.project-firefly-choir .fc-colophon button > span { margin-left: 10px; font-size: 19px; }
+.project-firefly-choir .fc-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+@media (min-width: 1600px) {
+  .project-firefly-choir .fc-garden { min-height: 690px; }
+}
+@media (max-width: 1000px) {
+  .project-firefly-choir .fc-workbench { grid-template-columns: minmax(0, 1fr) 274px; }
+  .project-firefly-choir .fc-desk { padding-inline: 18px; }
+  .project-firefly-choir .fc-scene-heading { inset: 22px 22px auto; }
+  .project-firefly-choir .fc-scene-footer { inset: auto 22px 23px; flex-wrap: wrap; }
+  .project-firefly-choir .fc-note-grid { gap: 21px; }
+  .project-firefly-choir .fc-note { gap: 10px; }
+}
+@media (max-width: 760px) {
+  .project-firefly-choir { padding-top: 20px; }
+  .project-firefly-choir .fc-header { align-items: start; flex-direction: column; gap: 10px; padding-bottom: 18px; }
+  .project-firefly-choir h1 { font-size: 45px; }
+  .project-firefly-choir .fc-intro { max-width: 430px; margin: 0; font-size: 14px; line-height: 1.5; }
+  .project-firefly-choir .fc-desktop-break { display: none; }
+  .project-firefly-choir .fc-workbench { grid-template-columns: minmax(0, 1fr); }
+  .project-firefly-choir .fc-garden { min-height: 460px; }
+  .project-firefly-choir .fc-desk { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px 25px; border-left: 0; border-top: 1px solid #334638; padding: 22px; }
+  .project-firefly-choir .fc-desk-heading { align-self: center; }
+  .project-firefly-choir .fc-transport { align-self: center; }
+  .project-firefly-choir .fc-settings { grid-column: 1 / -1; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+  .project-firefly-choir .fc-setting-label { flex-wrap: wrap; gap: 1px 6px; }
+  .project-firefly-choir .fc-setting-label output { font-size: 12px; }
+  .project-firefly-choir .fc-coherence { grid-row: 4; grid-column: 1 / -1; }
+  .project-firefly-choir .fc-torch { align-self: start; }
+  .project-firefly-choir .fc-status { margin: 0; min-height: 0; }
+  .project-firefly-choir .fc-keyboard { grid-column: 1 / -1; margin: -4px 0 0; }
+  .project-firefly-choir .fc-note-grid { grid-template-columns: 1fr; gap: 17px; }
+  .project-firefly-choir .fc-note { gap: 16px; padding-top: 14px; }
+  .project-firefly-choir .fc-note p { font-size: 14px; }
+  .project-firefly-choir .fc-colophon { align-items: start; }
+}
+@media (max-width: 480px) {
+  .project-firefly-choir { padding-inline: 16px; }
+  .project-firefly-choir .fc-kicker { gap: 8px; font-size: 12px; letter-spacing: .065em; }
+  .project-firefly-choir h1 { font-size: 42px; }
+  .project-firefly-choir .fc-title-spark { margin-left: 4px; }
+  .project-firefly-choir .fc-garden { min-height: 410px; }
+  .project-firefly-choir .fc-scene-heading { inset: 19px 17px auto; align-items: start; gap: 9px; font-size: 12px; }
+  .project-firefly-choir .fc-scene-heading > span:last-child { max-width: 87px; text-align: right; }
+  .project-firefly-choir .fc-scene-footer { inset: auto 19px 20px; gap: 9px; }
+  .project-firefly-choir .fc-scene-footer p { font-size: 27px; }
+  .project-firefly-choir .fc-scene-footer div > span { display: none; }
+  .project-firefly-choir .fc-torch-hint { width: 100%; }
+  .project-firefly-choir .fc-torch-hint > span { margin-left: 5px; }
+  .project-firefly-choir .fc-desk { display: flex; gap: 16px; padding: 21px; }
+  .project-firefly-choir .fc-desk-heading { align-self: auto; }
+  .project-firefly-choir .fc-transport { align-self: stretch; }
+  .project-firefly-choir .fc-settings { grid-template-columns: 1fr; gap: 8px; }
+  .project-firefly-choir .fc-setting-label { flex-wrap: nowrap; }
+  .project-firefly-choir .fc-setting-label label,
+  .project-firefly-choir .fc-setting-label output { font-size: 14px; }
+  .project-firefly-choir .fc-coherence { padding-block: 16px; }
+  .project-firefly-choir .fc-readout-note { margin-left: auto; }
+  .project-firefly-choir .fc-status { font-size: 13px; }
+  .project-firefly-choir .fc-keyboard { margin: -5px 0 0; font-size: 12px; }
+  .project-firefly-choir .fc-notes-heading { align-items: start; gap: 15px; }
+  .project-firefly-choir .fc-notes-heading > span { max-width: 125px; text-align: right; }
+  .project-firefly-choir .fc-colophon { flex-direction: column; gap: 13px; }
+}

@@ -1,0 +1,14 @@
+{
+  "id": "sand-script",
+  "order": 44,
+  "title": "Sand Script",
+  "subtitle": "Let gravity finish the sentence.",
+  "description": "Pour five earthy pigments into a cellular sand tray. Build walls, erase channels, and rearrange authored vessels, hourglasses, and terraces; every grain settles cell by cell and every edit has an undo.",
+  "category": "create",
+  "format": "page",
+  "medium": "Granular drawing cabinet",
+  "tags": ["Particle study", "Falling sand", "Cellular", "Drawing"],
+  "color": "#f0e7d7",
+  "ink": "#633a3c",
+  "instruction": "Choose sand, wall, or erase and drag in the tray. Use Space and arrows to draw by keyboard; Undo restores the previous moment."
+}

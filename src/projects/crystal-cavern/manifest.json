@@ -1,0 +1,14 @@
+{
+  "id": "crystal-cavern",
+  "order": 39,
+  "title": "Crystal Cavern",
+  "subtitle": "A quiet expedition through invented geology.",
+  "description": "Enter a vaulted underground chamber of faceted rock, luminous crystal groves and shallow water. Follow the stepping stones, choose an observation point, and tune a slow mineral-light cycle. The cavern and its specimens are entirely fictional.",
+  "category": "art",
+  "format": "page",
+  "medium": "Procedural cavern · mineral light study",
+  "tags": ["3D scene", "Invented geology", "Light", "Exploration"],
+  "color": "#102a2c",
+  "ink": "#e2e7d7",
+  "instruction": "Choose a viewpoint, drag or use arrow keys to explore, then read the mineral light."
+}
