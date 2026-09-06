@@ -1,0 +1,14 @@
+{
+  "id": "lumen",
+  "order": 62,
+  "title": "Lumen",
+  "subtitle": "An instrument for seeing why.",
+  "description": "Draft spectral experiments with editable emitters, prisms, curved lenses, mirrors and detectors. Trace refraction, measure real ray power, and keep the experiment.",
+  "category": "create",
+  "format": "page",
+  "medium": "Spectral optical workbench",
+  "tags": ["Flagship", "Optics", "Ray tracing", "Spectroscopy", "Physics", "SVG"],
+  "color": "#eeeee3",
+  "ink": "#343d34",
+  "instruction": "Move and rotate the optics. Measure the light that actually reaches your detector, then save the experiment."
+}

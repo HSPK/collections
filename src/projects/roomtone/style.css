@@ -1,0 +1,304 @@
+.project-roomtone {
+  --rt-paper: #f3f1e8;
+  --rt-white: #faf9f2;
+  --rt-ink: #243e36;
+  --rt-muted: #5d6e62;
+  --rt-line: #ccd1c2;
+  --rt-copper: #aa4f2d;
+  --rt-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --app-ink: var(--rt-ink);
+  background: var(--rt-paper);
+  color: var(--rt-ink);
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.project-roomtone * { box-sizing: border-box; }
+.project-roomtone h1, .project-roomtone h2, .project-roomtone h3, .project-roomtone p, .project-roomtone figure { margin: 0; }
+.project-roomtone button, .project-roomtone input, .project-roomtone select, .project-roomtone summary { font-size: 14px; }
+.project-roomtone button, .project-roomtone select { min-height: 44px; }
+.project-roomtone button { border-radius: 2px; }
+.project-roomtone button:hover { background: #e3e6d9; }
+.project-roomtone button:focus-visible, .project-roomtone input:focus-visible,
+.project-roomtone select:focus-visible, .project-roomtone summary:focus-visible,
+.project-roomtone a:focus-visible, .project-roomtone [tabindex]:focus-visible { outline: 3px solid #b7653b; outline-offset: 3px; }
+.project-roomtone input, .project-roomtone select { color: var(--rt-ink); accent-color: var(--rt-copper); }
+.project-roomtone input[type="number"], .project-roomtone select { border: 1px solid #bfc7b6; background: var(--rt-white); border-radius: 2px; width: 100%; min-width: 0; }
+.project-roomtone select { padding: 8px 22px 8px 10px; cursor: pointer; }
+.project-roomtone input[type="number"] { font-family: var(--rt-mono); font-size: 16px; height: 44px; padding: 8px 23px 8px 9px; }
+.project-roomtone input[aria-invalid="true"] { border-color: #b44927; background: #fff0e8; }
+.project-roomtone h2 { font: 400 28px/1.15 Georgia, "Times New Roman", serif; letter-spacing: -0.7px; }
+.project-roomtone h3 { font-size: 16px; font-weight: 600; }
+.project-roomtone .roomtone-shell { max-width: 1660px; margin: 0 auto; padding: 22px 36px 40px; }
+.project-roomtone .roomtone-masthead { display: flex; align-items: center; justify-content: space-between; gap: 25px; padding: 0 2px 23px; }
+.project-roomtone .roomtone-brand { display: flex; align-items: center; gap: 15px; }
+.project-roomtone .roomtone-brand svg { width: 49px; height: 49px; }
+.project-roomtone h1 { font: 400 43px/.95 Georgia, "Times New Roman", serif; letter-spacing: -2px; }
+.project-roomtone h1 > span { color: var(--rt-copper); }
+.project-roomtone .roomtone-brand p { font-size: 15px; margin-top: 9px; letter-spacing: 0.1px; color: var(--rt-muted); }
+.project-roomtone .roomtone-masthead-right { display: flex; align-items: center; gap: 44px; font-size: 14px; }
+.project-roomtone .roomtone-edition { font: 14px/1.55 var(--rt-mono); letter-spacing: 1px; }
+.project-roomtone .roomtone-edition > span { display: block; color: var(--rt-muted); letter-spacing: 0; }
+.project-roomtone .roomtone-masthead-right a { min-height: 44px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid var(--rt-line); }
+.project-roomtone .roomtone-workbench { border: 1px solid #adbba8; background: var(--rt-white); box-shadow: 0 10px 35px #30452b08; }
+.project-roomtone .roomtone-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 14px 24px; background: #e4e8da; border-bottom: 1px solid #b5c1ad; }
+.project-roomtone .roomtone-eyebrow { font: 14px/1.5 var(--rt-mono); letter-spacing: 0.9px; text-transform: uppercase; color: var(--rt-muted); }
+.project-roomtone .roomtone-preset-label { display: flex; align-items: center; gap: 20px; min-width: 0; }
+.project-roomtone .roomtone-preset-label select { width: 272px; font-size: 16px; border: none; border-bottom: 1px solid #94a18b; background: transparent; padding-left: 0; border-radius: 0; }
+.project-roomtone .roomtone-toolbar-actions { display: flex; gap: 9px; align-items: center; }
+.project-roomtone .roomtone-toolbar-actions button { padding: 8px 14px; white-space: nowrap; }
+.project-roomtone .roomtone-toolbar-actions button > span { margin: 0 4px; font-size: 19px; }
+.project-roomtone .roomtone-toolbar-actions .roomtone-export { border: 1px solid #809179; background: #f7f6ec; }
+.project-roomtone .roomtone-mobile-panes { display: none; }
+.project-roomtone .roomtone-bench-grid { display: grid; grid-template-columns: minmax(0, 1fr) 352px; }
+.project-roomtone .roomtone-main { min-width: 0; }
+.project-roomtone .roomtone-section-top { display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+.project-roomtone .roomtone-section-top .roomtone-eyebrow { margin-bottom: 5px; }
+.project-roomtone .roomtone-space { background: #e9ece0; }
+.project-roomtone .roomtone-space > .roomtone-section-top { padding: 23px 28px 6px; }
+.project-roomtone .roomtone-space h2 { font-size: 31px; }
+.project-roomtone .roomtone-segment { display: flex; flex-shrink: 0; border: 1px solid #a9b7a0; padding: 3px; gap: 2px; }
+.project-roomtone .roomtone-segment button { min-height: 36px; padding: 6px 12px; }
+.project-roomtone .roomtone-segment button[aria-pressed="true"] { background: var(--rt-ink); color: #f9f6e9; }
+.project-roomtone .roomtone-model-wrap { position: relative; }
+.project-roomtone .roomtone-model-notes { position: absolute; z-index: 1; top: 8px; left: 29px; font: 14px/1.6 var(--rt-mono); color: #52654f; pointer-events: none; }
+.project-roomtone .roomtone-model-notes > span { display: block; }
+.project-roomtone .roomtone-scene { height: 416px; position: relative; background-image: radial-gradient(ellipse at 50% 62%, #d7ddc8 0, #e9ece000 66%); }
+.project-roomtone .roomtone-canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+.project-roomtone .roomtone-scene-caption { position: absolute; bottom: 8px; left: 28px; right: 28px; display: flex; justify-content: space-between; gap: 10px; color: #52654f; font-size: 14px; pointer-events: none; }
+.project-roomtone .roomtone-scene-caption > span:first-child { color: #874023; }
+.project-roomtone .roomtone-signal-dot, .project-roomtone .roomtone-reference-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--rt-copper); display: inline-block; vertical-align: 2px; margin-right: 7px; }
+.project-roomtone .roomtone-reference-dot { background: #647d99; }
+.project-roomtone .roomtone-camera-toolbar { padding: 3px 24px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #d2d9c7; font-size: 14px; color: var(--rt-muted); }
+.project-roomtone .roomtone-camera-toolbar > div { display: flex; gap: 2px; }
+.project-roomtone .roomtone-camera-toolbar button { padding: 5px 10px; min-width: 40px; font-size: 18px; }
+.project-roomtone .roomtone-camera-toolbar button:last-child { font-size: 14px; }
+.project-roomtone .roomtone-readouts { display: grid; grid-template-columns: 1fr 1fr 1.2fr; border-top: 1px solid #bfcab3; border-bottom: 1px solid #bfcab3; background: #e1e6d6; }
+.project-roomtone .roomtone-readouts > div { padding: 16px 25px; }
+.project-roomtone .roomtone-readouts > div + div { border-left: 1px solid #bfccb5; }
+.project-roomtone .roomtone-readouts > div > span { display: block; font-size: 14px; }
+.project-roomtone .roomtone-readouts strong { display: flex; align-items: baseline; gap: 8px; font: 400 37px/1.4 Georgia, serif; font-variant-numeric: tabular-nums; letter-spacing: -1px; }
+.project-roomtone .roomtone-readouts small { font: 16px "Helvetica Neue", Arial, sans-serif; letter-spacing: 0; }
+.project-roomtone .roomtone-readouts em { font: 14px "Helvetica Neue", Arial, sans-serif; color: #655336; background: #d8d8bd; padding: 2px 5px; margin-left: 4px; }
+.project-roomtone .roomtone-analysis { padding: 25px 28px 27px; }
+.project-roomtone .roomtone-band-label { font-size: 14px; flex: 0 0 110px; }
+.project-roomtone .roomtone-band-label select { margin-top: 3px; }
+.project-roomtone .roomtone-plots { display: grid; grid-template-columns: 1fr 1fr; gap: 23px; margin-top: 26px; }
+.project-roomtone .roomtone-plots figure { min-width: 0; }
+.project-roomtone .roomtone-plots figcaption { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; margin-bottom: 6px; flex-wrap: wrap; }
+.project-roomtone .roomtone-plots figcaption strong { font-weight: 500; }
+.project-roomtone .roomtone-plots figcaption span { color: var(--rt-muted); }
+.project-roomtone .roomtone-plot { width: 100%; height: auto; overflow: visible; }
+.project-roomtone .roomtone-plot text { fill: #536450; font: 16px var(--rt-mono); }
+.project-roomtone .roomtone-measurement-note { padding: 14px 0 17px; font-size: 14px; color: var(--rt-muted); line-height: 1.6; }
+.project-roomtone .roomtone-reflection-inspector { border-top: 1px solid var(--rt-line); padding-top: 18px; }
+.project-roomtone .roomtone-reflection-heading { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 9px; font-size: 14px; }
+.project-roomtone .roomtone-reflection-heading > span { color: var(--rt-muted); font: 14px var(--rt-mono); }
+.project-roomtone .roomtone-path-picker { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; gap: 6px; }
+.project-roomtone .roomtone-path-picker button { border: 1px solid var(--rt-line); font-size: 21px; }
+.project-roomtone .roomtone-path-picker select { font-family: var(--rt-mono); }
+.project-roomtone .roomtone-path-data { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 22px; margin-top: 13px; font-size: 14px; }
+.project-roomtone .roomtone-path-data strong { font: 400 25px Georgia, serif; color: var(--rt-copper); }
+.project-roomtone .roomtone-path-route { padding: 9px 0; font-size: 15px; color: #934226; }
+.project-roomtone .roomtone-fineprint { font-size: 14px; line-height: 1.65; color: var(--rt-muted); }
+.project-roomtone .roomtone-inspector { border-left: 1px solid #b8c3ad; background: #f3f2e9; padding: 24px 20px; min-width: 0; }
+.project-roomtone .roomtone-inspector h2 { font-size: 26px; }
+.project-roomtone .roomtone-draft-cross { font: 34px/1 var(--rt-mono); color: #748669; }
+.project-roomtone .roomtone-dimensions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; margin-top: 21px; }
+.project-roomtone .roomtone-number { display: block; min-width: 0; }
+.project-roomtone .roomtone-number > span:first-child { display: block; font-size: 14px; margin-bottom: 6px; }
+.project-roomtone .roomtone-input-unit { display: block; position: relative; }
+.project-roomtone .roomtone-input-unit > span { position: absolute; right: 8px; top: 11px; pointer-events: none; font-size: 14px; color: var(--rt-muted); }
+.project-roomtone input[type="number"] { appearance: textfield; -moz-appearance: textfield; }
+.project-roomtone input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.project-roomtone .roomtone-input-feedback { color: #973f22; font-size: 14px; margin-top: 12px; }
+.project-roomtone .roomtone-plan-heading { display: flex; justify-content: space-between; align-items: center; margin: 23px 0 13px; font-size: 14px; }
+.project-roomtone .roomtone-plan-heading > span { color: var(--rt-muted); }
+.project-roomtone .roomtone-floorplan { width: 100%; height: auto; display: block; touch-action: none; overflow: visible; }
+.project-roomtone .roomtone-floorplan text { font: 20px var(--rt-mono); fill: #4a604f; }
+.project-roomtone .roomtone-floorplan [data-position] { cursor: grab; outline: none; }
+.project-roomtone .roomtone-floorplan [data-position] text { fill: #fff9ee; font: 600 18px Arial, sans-serif; pointer-events: none; }
+.project-roomtone .roomtone-floorplan [data-position]:focus-visible > circle:nth-child(2) { stroke: #e1a76c; stroke-width: 5; }
+.project-roomtone .roomtone-position-row { display: grid; grid-template-columns: 21px repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 13px; align-items: end; }
+.project-roomtone .roomtone-position-row .roomtone-number > span:first-child { font-size: 14px; min-height: 42px; display: flex; align-items: flex-end; }
+.project-roomtone .roomtone-position-row .roomtone-input-unit > span { display: none; }
+.project-roomtone .roomtone-position-row input { padding-right: 4px; padding-left: 8px; font-size: 15px; }
+.project-roomtone .roomtone-position-tag { font: 14px var(--rt-mono); color: #a04d2e; align-self: end; line-height: 44px; }
+.project-roomtone .roomtone-listener-tag { color: #305646; }
+.project-roomtone .roomtone-inspector > .roomtone-fineprint { margin-top: 13px; }
+.project-roomtone .roomtone-material-heading { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin: 24px 0 7px; border-top: 1px solid var(--rt-line); padding-top: 21px; flex-wrap: wrap; }
+.project-roomtone .roomtone-material-heading > span { font-size: 14px; color: var(--rt-muted); }
+.project-roomtone .roomtone-material-row { display: grid; grid-template-columns: minmax(0, 1fr) 45px; column-gap: 8px; align-items: center; padding: 8px 0; }
+.project-roomtone .roomtone-material-label { grid-column: 1 / -1; font-size: 14px; margin-bottom: 4px; display: flex; gap: 9px; align-items: center; }
+.project-roomtone .roomtone-material-label i { width: 10px; height: 10px; display: inline-block; border: 1px solid #526d491f; }
+.project-roomtone .roomtone-material-row select { min-height: 39px; background: transparent; }
+.project-roomtone .roomtone-material-row output { font: 14px var(--rt-mono); text-align: right; color: var(--rt-muted); }
+.project-roomtone .roomtone-budget { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--rt-line); }
+.project-roomtone .roomtone-budget label { display: flex; align-items: center; gap: 15px; justify-content: space-between; font-size: 14px; }
+.project-roomtone .roomtone-budget select { width: 135px; }
+.project-roomtone .roomtone-budget p { font: 14px/1.65 var(--rt-mono); color: var(--rt-muted); margin-top: 11px; }
+.project-roomtone .roomtone-estimates { padding: 21px 0 0; margin-top: 22px; border-top: 1px solid var(--rt-line); }
+.project-roomtone .roomtone-estimates > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px; margin-top: 10px; }
+.project-roomtone .roomtone-estimates strong { font: 20px Georgia, serif; }
+.project-roomtone .roomtone-estimates > p:last-child { font-size: 14px; color: var(--rt-muted); margin-top: 12px; }
+.project-roomtone .roomtone-audition { background: #24473e; color: #f3f0df; padding: 25px 28px; }
+.project-roomtone .roomtone-audition .roomtone-eyebrow { color: #c1cbb5; }
+.project-roomtone .roomtone-audition h2 { font-size: 30px; }
+.project-roomtone .roomtone-audition > p { margin-top: 12px; }
+.project-roomtone .roomtone-audio-light { font: 14px var(--rt-mono); padding-left: 16px; position: relative; }
+.project-roomtone .roomtone-audio-light::before { content: ""; width: 6px; height: 6px; border: 1px solid #cfdfbf; border-radius: 50%; position: absolute; left: 0; top: 4px; }
+.project-roomtone[data-audio-state="playing"] .roomtone-audio-light::before { background: #e9a574; border-color: #e9a574; }
+.project-roomtone .roomtone-audio-selects { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 21px; }
+.project-roomtone .roomtone-audio-selects label { font-size: 14px; }
+.project-roomtone .roomtone-audio-selects select { background: #35564a; border-color: #6f8876; color: #fbf5e5; margin-top: 6px; font-size: 15px; }
+.project-roomtone .roomtone-audio-selects option { background: #26483e; }
+.project-roomtone .roomtone-audio-mix { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+.project-roomtone .roomtone-audio-mix label { font-size: 14px; }
+.project-roomtone .roomtone-audio-mix output { float: right; font-family: var(--rt-mono); }
+.project-roomtone .roomtone-audio-mix input { width: 100%; display: block; margin: 8px 0 0; height: 25px; accent-color: #e6ad80; }
+.project-roomtone .roomtone-audio-actions { display: flex; align-items: center; gap: 10px; margin-top: 18px; }
+.project-roomtone .roomtone-audio-actions button { padding: 10px 19px; border: 1px solid #84957e; }
+.project-roomtone .roomtone-audio-actions button:hover { background: #496453; }
+.project-roomtone .roomtone-audio-actions .roomtone-play { background: #e7b084; border-color: #e7b084; color: #243e32; font-size: 16px; }
+.project-roomtone .roomtone-play > span { margin-right: 8px; font-size: 14px; }
+.project-roomtone .roomtone-audio-actions > span { margin-left: auto; font-size: 14px; color: #c6d1b9; max-width: 180px; }
+.project-roomtone .roomtone-audio-status { font-size: 14px; color: #d9dfc9; }
+.project-roomtone .roomtone-audio-error { background: #f4d6bc; color: #632b13; padding: 12px; font-size: 14px; }
+.project-roomtone .roomtone-comparison { padding: 25px 28px 30px; }
+.project-roomtone .roomtone-comparison h2 { font-size: 25px; }
+.project-roomtone .roomtone-comparison [data-comparison] { margin-top: 18px; color: var(--rt-muted); }
+.project-roomtone .roomtone-comparison button { padding: 8px 10px; border: 1px solid var(--rt-line); }
+.project-roomtone .roomtone-compare-legend { display: flex; flex-wrap: wrap; gap: 8px 25px; font-size: 14px; }
+.project-roomtone .roomtone-comparison table { width: 100%; border-collapse: collapse; color: var(--rt-ink); font-size: 14px; margin: 13px 0; }
+.project-roomtone .roomtone-comparison caption { text-align: left; color: var(--rt-muted); font-size: 14px; padding-bottom: 9px; }
+.project-roomtone .roomtone-comparison th, .project-roomtone .roomtone-comparison td { padding: 9px 0; border-bottom: 1px solid var(--rt-line); text-align: right; font-weight: 400; }
+.project-roomtone .roomtone-comparison th:first-child { text-align: left; }
+.project-roomtone .roomtone-comparison td { font-family: var(--rt-mono); }
+.project-roomtone .roomtone-comparison [data-comparison-delta] { font-size: 14px; }
+.project-roomtone .roomtone-status { border-top: 1px solid var(--rt-line); padding: 13px 24px; font-size: 14px; background: #e9ecdf; color: #42573d; }
+.project-roomtone .roomtone-notes { display: grid; grid-template-columns: 1fr 1.5fr; gap: 50px; padding: 42px 2px 35px; }
+.project-roomtone .roomtone-notes h2 { font-size: 33px; margin-top: 9px; }
+.project-roomtone .roomtone-notes p { color: var(--rt-muted); line-height: 1.75; }
+.project-roomtone .roomtone-notes p + p { margin-top: 12px; }
+.project-roomtone .roomtone-notes details { margin-top: 15px; }
+.project-roomtone .roomtone-notes summary { min-height: 44px; cursor: pointer; padding: 10px 0; border-block: 1px solid var(--rt-line); }
+.project-roomtone .roomtone-notes details p { font-size: 14px; padding-top: 8px; }
+.project-roomtone .roomtone-footer { padding: 20px 2px 0; border-top: 1px solid var(--rt-line); font: 14px var(--rt-mono); display: flex; justify-content: space-between; gap: 20px; color: var(--rt-muted); }
+.project-roomtone .roomtone-webgl-message { position: absolute; inset: 30% 15% auto; font-size: 17px; }
+@media (min-width: 1500px) {
+  .project-roomtone .roomtone-bench-grid { grid-template-columns: minmax(0, 1fr) 385px; }
+  .project-roomtone .roomtone-scene { height: 470px; }
+}
+@media (max-width: 1150px) {
+  .project-roomtone .roomtone-shell { padding: 20px; }
+  .project-roomtone .roomtone-bench-grid { grid-template-columns: minmax(0, 1fr) 320px; }
+  .project-roomtone .roomtone-toolbar { padding-inline: 17px; gap: 10px; }
+  .project-roomtone .roomtone-preset-label { gap: 10px; }
+  .project-roomtone .roomtone-preset-label .roomtone-eyebrow { display: none; }
+  .project-roomtone .roomtone-section-top { gap: 9px; }
+  .project-roomtone .roomtone-space > .roomtone-section-top { padding-inline: 20px; flex-wrap: wrap; }
+  .project-roomtone .roomtone-space h2 { font-size: 28px; }
+  .project-roomtone .roomtone-segment button { padding-inline: 8px; }
+  .project-roomtone .roomtone-scene { height: 365px; }
+  .project-roomtone .roomtone-scene-caption > span:last-child { display: none; }
+  .project-roomtone .roomtone-inspector { padding-inline: 16px; }
+  .project-roomtone .roomtone-readouts > div { padding: 13px 15px; }
+  .project-roomtone .roomtone-readouts strong { font-size: 30px; }
+  .project-roomtone .roomtone-readouts em { display: block; width: fit-content; margin: 3px 0 0; }
+  .project-roomtone .roomtone-analysis, .project-roomtone .roomtone-audition, .project-roomtone .roomtone-comparison { padding-inline: 20px; }
+  .project-roomtone .roomtone-plots { grid-template-columns: 1fr; gap: 20px; }
+  .project-roomtone .roomtone-plot { max-height: 220px; }
+  .project-roomtone .roomtone-audio-actions { flex-wrap: wrap; }
+  .project-roomtone .roomtone-audio-actions > span { max-width: none; margin-left: 0; flex: 1 1 100%; }
+}
+@media (max-width: 800px) {
+  .project-roomtone .roomtone-shell { padding: 17px 14px 25px; }
+  .project-roomtone .roomtone-masthead { padding-bottom: 21px; }
+  .project-roomtone .roomtone-masthead-right { gap: 12px; }
+  .project-roomtone .roomtone-edition { display: none; }
+  .project-roomtone .roomtone-bench-grid { display: block; }
+  .project-roomtone .roomtone-inspector { border-left: 0; padding: 24px; }
+  .project-roomtone .roomtone-toolbar { padding: 9px 14px; flex-wrap: wrap; }
+  .project-roomtone .roomtone-preset-label { flex: 1 1 100%; }
+  .project-roomtone .roomtone-preset-label select { width: 100%; }
+  .project-roomtone .roomtone-toolbar-actions { width: 100%; gap: 4px; justify-content: space-between; }
+  .project-roomtone .roomtone-toolbar-actions button { padding-inline: 9px; }
+  .project-roomtone .roomtone-mobile-panes { display: grid; grid-template-columns: .8fr 1fr 1.6fr; border-bottom: 1px solid var(--rt-line); background: #f6f5ed; }
+  .project-roomtone .roomtone-mobile-panes button { padding: 10px 5px; border-radius: 0; line-height: 1.35; }
+  .project-roomtone .roomtone-mobile-panes button[aria-pressed="true"] { box-shadow: inset 0 -3px var(--rt-copper); background: #e9ebdf; font-weight: 600; }
+  .project-roomtone[data-mobile-pane="space"] .roomtone-inspector,
+  .project-roomtone[data-mobile-pane="space"] .roomtone-listen-pane,
+  .project-roomtone[data-mobile-pane="edit"] .roomtone-main,
+  .project-roomtone[data-mobile-pane="listen"] .roomtone-space,
+  .project-roomtone[data-mobile-pane="listen"] .roomtone-inspector { display: none; }
+  .project-roomtone .roomtone-space > .roomtone-section-top { padding: 20px 18px 9px; align-items: flex-start; }
+  .project-roomtone .roomtone-space h2 { font-size: 30px; }
+  .project-roomtone .roomtone-scene { height: 400px; }
+  .project-roomtone .roomtone-model-notes { left: 20px; }
+  .project-roomtone .roomtone-readouts > div { padding-inline: 20px; }
+  .project-roomtone .roomtone-readouts em { display: inline-block; margin-left: 3px; }
+  .project-roomtone .roomtone-inspector [data-floorplan] { max-width: 420px; margin: auto; }
+  .project-roomtone .roomtone-position-row { grid-template-columns: 30px repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .project-roomtone .roomtone-position-row .roomtone-number > span:first-child { min-height: 24px; }
+  .project-roomtone .roomtone-material-row { grid-template-columns: 105px minmax(0, 1fr) 43px; }
+  .project-roomtone .roomtone-material-label { grid-column: auto; }
+  .project-roomtone .roomtone-notes { grid-template-columns: 1fr; gap: 21px; padding: 30px 5px; }
+  .project-roomtone .roomtone-notes h2 { font-size: 29px; }
+  .project-roomtone .roomtone-footer { flex-direction: column; gap: 10px; line-height: 1.5; }
+}
+@media (max-width: 480px) {
+  .project-roomtone .roomtone-shell { padding: 18px 10px 26px; }
+  .project-roomtone .roomtone-masthead { padding: 0 4px 20px; gap: 12px; }
+  .project-roomtone .roomtone-brand { gap: 8px; }
+  .project-roomtone .roomtone-brand svg { width: 37px; height: 37px; }
+  .project-roomtone h1 { font-size: 35px; }
+  .project-roomtone .roomtone-brand p { font-size: 14px; }
+  .project-roomtone .roomtone-masthead-right a { font-size: 14px; gap: 2px; text-align: right; max-width: 52px; line-height: 1.3; }
+  .project-roomtone .roomtone-masthead-right a > span { display: none; }
+  .project-roomtone .roomtone-toolbar { padding-inline: 10px; }
+  .project-roomtone .roomtone-toolbar-actions button { font-size: 14px; padding-inline: 7px; }
+  .project-roomtone .roomtone-toolbar-actions button > span { margin-inline: 0; font-size: 16px; }
+  .project-roomtone .roomtone-eyebrow { font-size: 14px; letter-spacing: 0.25px; }
+  .project-roomtone .roomtone-space > .roomtone-section-top { display: block; }
+  .project-roomtone .roomtone-segment { width: fit-content; margin-top: 14px; }
+  .project-roomtone .roomtone-segment button { padding-inline: 12px; }
+  .project-roomtone .roomtone-scene { height: 285px; }
+  .project-roomtone .roomtone-model-notes { font-size: 14px; position: static; padding: 0 20px; }
+  .project-roomtone .roomtone-scene-caption { left: 20px; bottom: 2px; }
+  .project-roomtone .roomtone-camera-toolbar { padding: 4px 10px; display: block; }
+  .project-roomtone .roomtone-camera-toolbar > span { display: none; }
+  .project-roomtone .roomtone-camera-toolbar > div { justify-content: space-between; }
+  .project-roomtone .roomtone-readouts { grid-template-columns: 1fr 1fr; }
+  .project-roomtone .roomtone-readouts > div { padding: 13px 17px; }
+  .project-roomtone .roomtone-readouts > div:last-child { grid-column: 1 / -1; border-left: 0; border-top: 1px solid #bfccb5; display: flex; align-items: center; justify-content: space-between; gap: 9px; }
+  .project-roomtone .roomtone-readouts > div:last-child > span { max-width: 130px; }
+  .project-roomtone .roomtone-readouts em { margin: 3px 0 0; }
+  .project-roomtone .roomtone-readouts strong { font-size: 33px; }
+  .project-roomtone .roomtone-inspector { padding: 21px 15px; }
+  .project-roomtone .roomtone-inspector h2 { font-size: 28px; }
+  .project-roomtone .roomtone-position-row { grid-template-columns: 17px repeat(3, minmax(0, 1fr)); gap: 5px; }
+  .project-roomtone .roomtone-position-row .roomtone-number > span:first-child { min-height: 42px; }
+  .project-roomtone .roomtone-material-row { grid-template-columns: minmax(0, 1fr) 43px; }
+  .project-roomtone .roomtone-material-label { grid-column: 1 / -1; }
+  .project-roomtone .roomtone-analysis, .project-roomtone .roomtone-audition, .project-roomtone .roomtone-comparison { padding: 23px 16px; }
+  .project-roomtone .roomtone-analysis > .roomtone-section-top { align-items: flex-start; flex-wrap: wrap; }
+  .project-roomtone .roomtone-analysis h2 { font-size: 25px; }
+  .project-roomtone .roomtone-band-label { display: flex; align-items: center; gap: 12px; flex-basis: 100%; margin-top: 7px; }
+  .project-roomtone .roomtone-band-label select { padding-left: 7px; width: 110px; margin-top: 0; }
+  .project-roomtone .roomtone-reflection-heading { flex-wrap: wrap; gap: 3px; }
+  .project-roomtone .roomtone-path-picker { grid-template-columns: 38px minmax(0, 1fr) 38px; gap: 4px; }
+  .project-roomtone .roomtone-path-picker select { font-size: 14px; padding-left: 6px; }
+  .project-roomtone .roomtone-path-data { gap: 8px 14px; }
+  .project-roomtone .roomtone-audition > .roomtone-section-top { align-items: flex-start; flex-wrap: wrap; gap: 14px; }
+  .project-roomtone .roomtone-audition h2 { font-size: 28px; }
+  .project-roomtone .roomtone-audio-selects, .project-roomtone .roomtone-audio-mix { gap: 13px; }
+  .project-roomtone .roomtone-audio-selects select { font-size: 14px; padding-left: 7px; }
+  .project-roomtone .roomtone-comparison .roomtone-section-top { flex-wrap: wrap; }
+  .project-roomtone .roomtone-status { padding: 12px 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* A duration-only global override otherwise transitions every layout property. */
+  .project-roomtone, .project-roomtone *, .project-roomtone *::before, .project-roomtone *::after {
+    transition: none !important;
+  }
+}

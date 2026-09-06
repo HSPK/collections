@@ -1,0 +1,14 @@
+{
+  "id": "apsis",
+  "order": 61,
+  "title": "Apsis",
+  "subtitle": "An orbital flight desk.",
+  "description": "Plan real orbital transfers around a procedural Earth. Inspect trajectories, shape impulses, and fly three two-body missions.",
+  "category": "explore",
+  "format": "page",
+  "medium": "Orbital mechanics sandbox",
+  "tags": ["Flagship", "3D", "Orbital mechanics", "Trajectory planning", "Simulation"],
+  "color": "#10212c",
+  "ink": "#e1e9e9",
+  "instruction": "Build a transfer, inspect the projected flight, then execute each maneuver to reach the target orbit."
+}

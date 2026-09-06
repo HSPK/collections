@@ -29,4 +29,23 @@ test.describe('Project covers', () => {
       });
     });
   }
+
+  test('Capture collection', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 756 });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('./');
+    await expect(page.locator('.project-card')).toHaveCount(projects.length);
+    await page.locator('[data-project-grid]').evaluate(async (list) => {
+      list.scrollTop = 0;
+      const viewport = list.getBoundingClientRect();
+      for (const card of list.querySelectorAll('.project-card')) {
+        const bounds = card.getBoundingClientRect();
+        if (bounds.bottom <= viewport.top || bounds.top >= viewport.bottom) continue;
+        const image = card.querySelector('img');
+        if (!image) throw new Error('A visible project card is missing its preview.');
+        await image.decode();
+      }
+    });
+    await page.screenshot({ path: 'public/cover.jpg', type: 'jpeg', quality: 90, animations: 'disabled' });
+  });
 });

@@ -44,7 +44,27 @@ the site publishes automatically after the main-branch quality gate.
 
 ## The websites
 
-### Six new creative and educational series
+### Five flagship projects
+
+Five deeper dives, built around systems you can inspect and change rather
+than effects you can only watch. Search **Flagship** in the library to find
+them together; each is still its own independent website.
+
+| Project | Inside |
+|---------|--------|
+| [Apsis](https://hspk.github.io/collections/projects/apsis/) | An orbital flight desk with executable transfer plans, moving-frame burns, trajectory inspection, and live delta-v accounting. |
+| [Lumen](https://hspk.github.io/collections/projects/lumen/) | Six editable optical element types, spectral Snell/Fresnel ray tracing, real detector readings, an experiment notebook, and SVG/JSON export. |
+| [Relay](https://hspk.github.io/collections/projects/relay/) | A working eight-bit computer with a 28-operation instruction set, assembler, reverse debugger, five programs, and a memory-mapped display. |
+| [Palinode](https://hspk.github.io/collections/projects/palinode/) | Four eras, 28 authored artifacts, and three endings driven by rewritable causal history, with pinned-future comparison and a keepable folio. |
+| [Roomtone](https://hspk.github.io/collections/projects/roomtone/) | An editable 3D acoustic studio with image-source reflections, frequency-dependent impulse responses, opt-in convolution audio, and WAV export. |
+
+These are local, browser-based systems, not remote AI services. Their
+project notes explain the algorithms, scientific approximations, and
+extension points. The scientific workbenches are exploratory models, not
+flight-planning or acoustic-certification software; Palinode is original
+fiction.
+
+### Six creative and educational series
 
 | Series | Five independent websites |
 |--------|---------------------------|
@@ -232,8 +252,9 @@ npm run test:update-previews
 ```
 
 This opt-in command captures the actual registered websites into
-`public/previews/`. It does not replace custom non-JPEG preview assets.
-Commit changed previews with the corresponding site code.
+`public/previews/` and refreshes `public/cover.jpg` from the content-first
+library. It does not replace custom non-JPEG preview assets. Commit changed
+previews with the corresponding site code.
 
 Use `SITE_URL=https://hspk.github.io/collections/ npm test` to point the
 browser suite at the published collection. Canvas2D motion comparisons use

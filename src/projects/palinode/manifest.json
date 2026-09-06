@@ -1,0 +1,14 @@
+{
+  "id": "palinode",
+  "order": 64,
+  "title": "Palinode",
+  "subtitle": "A city that remembers differently.",
+  "description": "Revise four eras of an illustrated city to recover a missing civic measure. Read 28 authored records, compare pinned futures, and trace explicit causes to three honest endings.",
+  "category": "play",
+  "format": "page",
+  "medium": "An illustrated temporal folio and causal narrative puzzle",
+  "tags": ["Flagship", "Time", "Narrative", "Causality", "Interactive fiction", "Maps"],
+  "color": "#e9e1cf",
+  "ink": "#303f36",
+  "instruction": "Pin the future, revise a civic decision in the past, and recover an ending the city can honestly remember."
+}

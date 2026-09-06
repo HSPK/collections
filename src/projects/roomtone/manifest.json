@@ -1,0 +1,14 @@
+{
+  "id": "roomtone",
+  "order": 65,
+  "title": "Roomtone",
+  "subtitle": "Architecture you can hear.",
+  "description": "Shape a room, trace its reflections, and hear your design through a real acoustic impulse response.",
+  "category": "create",
+  "format": "page",
+  "medium": "Architectural acoustics workbench",
+  "tags": ["Flagship", "3D", "Acoustics", "Architecture", "Audio", "Simulation"],
+  "color": "#e4e8da",
+  "ink": "#243e36",
+  "instruction": "Edit room geometry and surfaces, drag the source and listener, inspect a reflection, pin a reference, and press Play for opt-in convolution audio."
+}

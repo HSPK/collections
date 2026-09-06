@@ -1,0 +1,14 @@
+{
+  "id": "relay",
+  "order": 63,
+  "title": "Relay",
+  "subtitle": "A computer, exposed.",
+  "description": "A complete eight-bit computer workbench: write and assemble real 16-bit instruction words, follow live data transfers, debug with breakpoints and reverse execution, and turn 32 bytes of video RAM into a 16-by-16 display.",
+  "category": "learn",
+  "format": "page",
+  "medium": "Interactive computer architecture workbench",
+  "tags": ["Flagship", "Computer architecture", "Assembly", "Debugger", "Memory-mapped display"],
+  "color": "#292d29",
+  "ink": "#f1efe6",
+  "instruction": "Step to fetch the first instruction. Edit the source, assemble your changes, and follow real registers, memory, and pixels. Run is always opt-in."
+}
