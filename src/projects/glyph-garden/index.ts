@@ -4,6 +4,7 @@ import { createLoop } from '../../core/loop';
 import { clamp } from '../../core/math';
 import { createProjectPage, escapeMarkup, query } from '../../core/page';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
+import { createWorkspaceDialog, createWorkspaceTabs } from '../../core/workspace';
 import { createGardenPainter } from './art';
 import type { InkStroke } from './art';
 import {
@@ -41,13 +42,14 @@ const glyphSvg = (id: GestureId, compact = false) => {
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'glyph-garden');
   const { root, signal } = page;
+  root.dataset.workspace = 'true';
   root.innerHTML = `
     <div class="gg-shell">
       <header class="gg-masthead">
         <div class="gg-identity">
           <span class="gg-brand-sprout">${sprout}</span>
           <div>
-            <p class="gg-eyebrow">A small language for growing things</p>
+            <p class="gg-eyebrow">A small growing language</p>
             <h1>Glyph <em>Garden</em></h1>
           </div>
         </div>
@@ -61,18 +63,18 @@ export function mount(context: ProjectContext): ProjectInstance {
           <div class="gg-stage-top">
             <div>
               <h2 id="gg-garden-title">The listening garden</h2>
-              <p>Draw right here. Lift your finger to let it grow.</p>
+              <p>Draw a mark. Lift to grow.</p>
             </div>
             <button type="button" class="gg-motion" data-pause>
               <span data-motion-symbol aria-hidden="true">Ⅱ</span><span data-motion-label>Pause motion</span>
             </button>
           </div>
           <figure class="gg-figure">
-            <figcaption class="gg-draw-key" id="gg-drawing-help">
+            <div class="gg-draw-key" id="gg-drawing-help">
               <span>${glyphSvg('flower', true)} Circle → flower</span>
               <span>${glyphSvg('tree', true)} Chevron → tree</span>
               <span>${glyphSvg('wind', true)} Zigzag → wind</span>
-            </figcaption>
+            </div>
             <div class="gg-canvas-wrap" data-garden></div>
           </figure>
           <div class="gg-patch-picker" role="group" aria-label="Choose a planting patch">
@@ -82,17 +84,27 @@ export function mount(context: ProjectContext): ProjectInstance {
               <span class="gg-patch-number">${index + 1}</span><span>${escapeMarkup(bed.name)}</span>
             </button>`).join('')}
           </div>
+        </section>
+
+        <aside class="gg-dock" aria-label="Garden commands and field guide">
+          <div data-garden-tabs></div>
+          <div class="gg-dock-body">
+          <div class="gg-grow" data-grow-panel>
+          <div class="gg-commands" role="group" aria-label="Grow with buttons">
+            ${GESTURES.map((glyph) => `<button type="button" data-command="${glyph.id}" style="--gg-glyph-ink:${glyph.color}"><span>${escapeMarkup(glyph.action)}</span>${arrow}</button>`).join('')}
+          </div>
           <div class="gg-garden-bottom">
-            <p class="gg-census" aria-live="off">
-              <span><strong data-plant-count>9</strong> bed plants</span>
-              <span data-breeze>Gentle breeze</span>
-              <span data-capacity>3 / 10 in this patch</span>
-            </p>
             <div class="gg-history" role="group" aria-label="Garden history">
               <button type="button" data-undo disabled aria-keyshortcuts="Control+Z Meta+Z"><span aria-hidden="true">↶</span> Undo</button>
               <button type="button" data-reset disabled>Reset garden</button>
             </div>
           </div>
+          <div class="gg-grow-readout" tabindex="0" aria-label="Garden feedback and census">
+            <p class="gg-census" aria-live="off">
+              <span><strong data-plant-count>9</strong> bed plants</span>
+              <span data-breeze>Gentle breeze</span>
+              <span data-capacity>3 / 10 in this patch</span>
+            </p>
           <div class="gg-feedback" data-feedback data-tone="waiting" role="status" aria-live="polite" aria-atomic="true">
             <span class="gg-feedback-flower" aria-hidden="true">✳</span>
             <div class="gg-feedback-copy">
@@ -101,9 +113,11 @@ export function mount(context: ProjectContext): ProjectInstance {
               <span class="gg-score" data-score>No mark yet · three shapes to discover</span>
             </div>
           </div>
-        </section>
+          </div>
+          </div>
 
-        <aside class="gg-guide" aria-labelledby="gg-guide-title">
+        <div data-guide-panel tabindex="0">
+        <section class="gg-guide" aria-labelledby="gg-guide-title">
           <div class="gg-guide-heading">
             <p class="gg-eyebrow">Your pocket field guide</p>
             <h2 id="gg-guide-title">Three little <em>spells</em></h2>
@@ -120,11 +134,11 @@ export function mount(context: ProjectContext): ProjectInstance {
               </div>
               <p class="gg-spell-instruction">${escapeMarkup(glyph.instruction)}</p>
               <p class="gg-spell-description">${escapeMarkup(glyph.description)}</p>
-              <button type="button" data-command="${glyph.id}"><span>${escapeMarkup(glyph.action)}</span>${arrow}</button>
             </article>`).join('')}
           </div>
           <p class="gg-guide-note"><span aria-hidden="true">●</span> The gold dot suggests a starting point.</p>
-          <details class="gg-mechanics">
+          <button type="button" data-mechanics>Behind the little magic</button>
+          <details class="gg-mechanics" open>
             <summary>Behind the little magic <span aria-hidden="true">+</span></summary>
             <div>
               <p><strong>Geometry, not guesswork.</strong> Your browser compares 64 evenly spaced
@@ -145,13 +159,30 @@ export function mount(context: ProjectContext): ProjectInstance {
           <div class="gg-local-note"><span aria-hidden="true">✧</span>
             <p>Grown on your device.<br><span>Stays for this visit. Refresh to begin anew.</span></p>
           </div>
+        </section>
+        </div>
+        </div>
         </aside>
       </div>
       <footer class="gg-footer">
-        <p>Original imaginary plants. Real little gestures.</p>
+        <button type="button" data-mechanics>Garden notes</button>
         <p data-motion-note>Let the garden move, or let it rest.</p>
       </footer>
     </div>`;
+
+  query(root, '.gg-guide-heading').after(query(root, '.gg-draw-key'));
+  const gardenTabs = createWorkspaceTabs(page, {
+    id: 'garden-dock', label: 'Garden tools', host: query(root, '[data-garden-tabs]'),
+    panes: [
+      { id: 'grow', label: 'Grow', panel: query(root, '[data-grow-panel]') },
+      { id: 'guide', label: 'Field guide', panel: query(root, '[data-guide-panel]') },
+    ],
+  });
+  createWorkspaceDialog(page, {
+    id: 'garden-notes', title: 'Garden notes',
+    content: [query(root, '.gg-mechanics'), query(root, '.gg-local-note')],
+    triggers: [...root.querySelectorAll<HTMLElement>('[data-mechanics]')],
+  });
 
   const surface = canvas2D(query(root, '[data-garden]'), 'Living illustrated garden');
   page.onCleanup(surface.dispose);
@@ -160,7 +191,7 @@ export function mount(context: ProjectContext): ProjectInstance {
   canvas.tabIndex = 0;
   canvas.setAttribute('aria-describedby', 'gg-drawing-help');
   canvas.setAttribute('aria-keyshortcuts', 'F T W ArrowLeft ArrowRight 1 2 3 Escape');
-  canvas.textContent = 'Draw one circle, chevron, or zigzag. All actions are also available as buttons in the field guide.';
+  canvas.textContent = 'Draw one circle, chevron, or zigzag. All actions are also available as buttons in the Grow pane.';
   const paint = createGardenPainter(surface.context);
   const recognizer = createRecognizer(GESTURE_TEMPLATES);
   const feedback = query<HTMLElement>(root, '[data-feedback]');
@@ -194,6 +225,7 @@ export function mount(context: ProjectContext): ProjectInstance {
   page.onCleanup(loop.destroy);
 
   function setFeedback(heading: string, text: string, tone = 'waiting', score = 'Button command · no shape matching used') {
+    gardenTabs.select('grow');
     title.textContent = heading;
     detail.textContent = text;
     scoreLabel.textContent = score;
@@ -411,6 +443,7 @@ export function mount(context: ProjectContext): ProjectInstance {
     if (event.matches) setPaused(true);
   }, { signal });
   root.addEventListener('keydown', (event) => {
+    if (event.target instanceof Element && event.target.closest('dialog')) return;
     if (event.key === 'Escape') {
       if (drawing) event.preventDefault();
       cancelDrawing('Escape put the pencil down. Nothing was changed.');

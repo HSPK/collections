@@ -8,13 +8,25 @@ or external robot model.
 ## Start a complete task
 
 Open `/projects/morrow/`. The initial study is **Transfer a coupon** and its source
-pose is already solved. Choose **Plan motion**, then **Run motion**. At the goal,
-choose **Grip coupon**. Select **Receiver**, plan again, run, and **Release at
-receiver**. Completion depends on the actual released part's position and
+pose is already solved. Choose **Plan motion**, open **Motion**, then **Run
+motion**. At the goal, return to **Inspector** and choose **Grip coupon**.
+Select **Receiver**, plan again, run in Motion, then return to Inspector and
+**Release at receiver**. Completion depends on the actual released part's position and
 orientation, not on a timer, button sequence, or target label.
 
-On narrow screens, **Workcell / Inspector / Motion** are separate useful views.
-The inspector has Pose, Joints and Program tabs at every size.
+**Workcell / Inspector / Motion** select the native dock at every size. The
+workspace occupies the real viewport without document scrolling. The workcell
+stays live beside the dock on desktop and above it on phones; long inspector or
+motion content scrolls internally. Inspector is initially selected, with Pose,
+Joints and Program tabs and a pinned solve/plan/grip action row. Workcell opens
+study notes, camera/target interaction modes, frames, keyboard help and live
+numeric readings.
+Motion opens transport, inspection scrubber and six joint traces.
+
+**Files / guide** opens undo/redo, local project save/load, path export and model
+notes in a native dialog. Escape or Close restores trigger focus. Both dock and
+inspector tabs support arrows, Home and End. Switching panes never solves,
+executes, invalidates a trajectory or changes the reset origin.
 
 - **Inspection study:** an oblique position and orientation target.
 - **Partition study:** both endpoints are clear but their direct joint sweep
@@ -167,6 +179,9 @@ animation loops, OrbitControls, the resize observer, all geometry/materials,
 the shadow target, and the WebGL context. No worker URL or external asset path
 exists, so there is no root-relative worker/asset dependency under a
 `/collections/` deployment.
+ResizeObserver follows the allocated live-preview dimensions, skips hidden
+zero-sized measurements and bounds the projection size away from zero; pointer
+projection also rejects zero-sized canvas bounds. Resizing is presentation-only.
 
 History stores at most 24 deep-copied edit snapshots. Files are explicit local
 downloads/uploads, not hidden persistence. `morrow-project` version 1 imports
@@ -188,12 +203,16 @@ frames, interpolation semantics and scene state, with an explicit
 - `[data-morrow-solve]`, `[data-morrow-plan]`, `[data-morrow-run]`,
   `[data-morrow-step]`, `[data-morrow-reverse]`, `[data-morrow-scrub]`,
   `[data-morrow-live]`, `[data-morrow-grip]`, `[data-morrow-release]`
-- `[data-morrow-view="cell|inspector|motion"]`: narrow-screen views
+- `[data-morrow-view="cell|inspector|motion"]`: dock views at every screen size;
+  existing `aria-pressed` hooks remain alongside semantic tab state
 - `[data-morrow-tab="pose|joints|program"]`: inspector tabs
 - `[data-morrow-status]`, `[data-morrow-plan-state]`,
   `[data-morrow-motion-state]`, `[data-morrow-clearance]`
 - Root `data-executing`, `data-inspection`, `data-task-complete` reflect actual
   execution/inspection/placement state.
+- Root `data-workspace="true"`; `[data-morrow-files]` opens the local files/guide
+  dialog. Extend existing scrollable inspector/motion content instead of adding
+  unbounded root rows; preserve the live stage's `min-height: 0` allocation.
 
 The scoped existing Playwright runner covers numerical fixtures, finite
 difference Jacobians, quaternion limits, IK failures, collision envelopes,
@@ -201,9 +220,14 @@ payload offsets, deterministic safe planning, every retained trajectory edge,
 speed limits, bounded imports/history, cancellation, real desktop pick/place,
 mobile input/resize/single-pointer ownership, and repeated mount/abort disposal.
 
-```sh
-SITE_URL=http://127.0.0.1:4173 npx playwright test tests/projects/morrow.spec.ts
-```
+Use the existing Playwright runner with owned selectors
+`tests/projects/morrow.spec.ts` and `tests/projects/morrow-receiver.spec.ts`.
+Coordinate concurrent browser runs through the session's shared browser lock.
+
+Viewport regressions cover 1440×900, 1280×720, 375×812, 320×640 and 768×480,
+including every dock, real joint edits without live motion, undo, plan/step/reset,
+trace data, saved project validation, guide access and zero document overflow.
+Each size produces an inspectable screenshot in the runner output directory.
 
 Only software-WebGL browser cases use a 90-second budget. Pure cases retain the
 host's ordinary budget. Screenshots are produced by the desktop/mobile cases;

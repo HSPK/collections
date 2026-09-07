@@ -1,6 +1,7 @@
 import './style.css';
 import { createLoop } from '../../core/loop';
 import { createProjectPage, escapeMarkup, query } from '../../core/page';
+import { createWorkspaceDialog, createWorkspaceTabs } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { DEFAULT_SPEED, DURATION, EXPERIMENTS, GEARSETS, MEMBER_LABELS, NOTES, STEP, SYMBOLS } from './data';
 import { frameAt, MEMBERS, solveGearbox } from './engine';
@@ -29,6 +30,7 @@ const brandMark = `<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" c
 
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'gearbox-playground');
+  page.root.dataset.workspace = 'true';
   page.root.setAttribute('aria-labelledby', 'gb-title');
   page.root.innerHTML = `
     <div class="gb-shell">
@@ -39,6 +41,11 @@ export function mount(context: ProjectContext): ProjectInstance {
         </div>
         <p class="gb-deck">One sun. Three planets. A world of ratios.<br> Hold one part still. See what moves.</p>
       </header>
+      <nav class="gb-workspace-tools" aria-label="Workbench panels">
+        <button type="button" data-controls-open>Parameters</button>
+        <button type="button" data-experiments-open>Experiments</button>
+        <button type="button" data-notebook-open>Notebook</button>
+      </nav>
 
       <div class="gb-workbench" data-project-preview>
         <section class="gb-drawing-panel" aria-labelledby="gb-drawing-title">
@@ -157,6 +164,72 @@ export function mount(context: ProjectContext): ProjectInstance {
 
   try {
     const root = page.root;
+    const controls = query<HTMLElement>(root, '.gb-controls');
+    const controlBody = query<HTMLElement>(root, '.gb-control-body');
+    const experiments = document.createElement('section');
+    experiments.setAttribute('aria-label', 'Experiment presets');
+    experiments.append(query(root, '.gb-experiments'), query(root, '.gb-experiment-note'));
+    createWorkspaceDialog(page, {
+      id: 'gb-experiments', title: 'Gearbox experiments', content: [experiments],
+      triggers: [query(root, '[data-experiments-open]')],
+    });
+    controlBody.append(query(root, '.gb-drawing-options'));
+    const notebookIntro = document.createElement('div');
+    notebookIntro.className = 'gb-notebook-intro';
+    notebookIntro.append(query(root, '.gb-deck'));
+    notebookIntro.append(...root.querySelectorAll('.gb-transport > .gb-small'));
+    createWorkspaceDialog(page, {
+      id: 'gb-notebook', title: 'Gearbox notebook & equations',
+      content: [
+        notebookIntro, query(root, '.gb-equation-panel'), query(root, '.gb-geometry-notes'),
+        query(root, '.gb-model-note'), query(root, '.gb-notes'), query(root, '.gb-footer'),
+      ],
+      triggers: [query(root, '[data-notebook-open]')],
+    });
+    const tabsHost = document.createElement('div');
+    const dockBody = document.createElement('div');
+    dockBody.className = 'gb-dock-body';
+    const parameters = document.createElement('div');
+    parameters.append(query(controls, '.gb-panel-heading'), controlBody);
+    const readout = document.createElement('div');
+    readout.append(query(root, '.gb-result'), query(root, '.gb-legend'));
+    dockBody.append(parameters, readout);
+    query(root, '.gb-shell').append(query(root, '.gb-local-status'));
+    controls.append(tabsHost, dockBody);
+    const tabs = createWorkspaceTabs(page, {
+      id: 'gb-instruments', label: 'Gearbox instruments', host: tabsHost,
+      panes: [
+        { id: 'parameters', label: 'Parameters', panel: parameters },
+        { id: 'readout', label: 'Readout', panel: readout },
+      ],
+    });
+    const controlsDialog = createWorkspaceDialog(page, {
+      id: 'gb-parameters', title: 'Gearbox parameters & readout', content: [controls],
+      className: 'gb-controls-dialog',
+    });
+    const controlsTrigger = query<HTMLButtonElement>(root, '[data-controls-open]');
+    const compact = window.matchMedia('(max-width: 700px), (max-height: 540px)');
+    function placeControls() {
+      const focused = controls.contains(document.activeElement);
+      controlsDialog.close();
+      if (compact.matches) {
+        query(controlsDialog.dialog, '.workspace-dialog-content').append(controls);
+        controlsTrigger.setAttribute('aria-haspopup', 'dialog');
+        controlsTrigger.setAttribute('aria-controls', controlsDialog.dialog.id);
+      } else {
+        query(root, '.gb-workbench').append(controls);
+        controlsTrigger.removeAttribute('aria-haspopup');
+        controlsTrigger.removeAttribute('aria-controls');
+      }
+      if (focused) controlsTrigger.focus({ preventScroll: true });
+    }
+    controlsTrigger.addEventListener('click', () => {
+      tabs.select('parameters');
+      if (compact.matches) controlsDialog.open();
+      else query<HTMLButtonElement>(tabsHost, 'button').focus({ preventScroll: true });
+    }, { signal: page.signal });
+    compact.addEventListener('change', placeControls, { signal: page.signal });
+    placeControls();
     const scene = createScene(query(root, '[data-scene-host]'));
     page.onCleanup(scene.destroy);
     const gearsetInput = query<HTMLSelectElement>(root, '#gb-gearset');

@@ -69,7 +69,7 @@ export function createStructureScene(
   const pointer = new THREE.Vector2();
   const markers = new Map<string, HTMLElement>();
   const loop = createLoop(() => {
-    if (lost || disposed || !model || !analysis || !options) return;
+    if (lost || disposed || !model || !analysis || !options || host.clientWidth < 1 || host.clientHeight < 1) return;
     renderer.render(scene, camera);
     positionLabels();
     rendered++;
@@ -150,7 +150,7 @@ export function createStructureScene(
   }
   function resize(): void {
     const { width, height } = host.getBoundingClientRect();
-    if (!width || !height) return;
+    if (disposed || width < 1 || height < 1) return;
     renderer.setSize(width, height, false);
     const aspect = width / height;
     const span = halfSpan / Math.min(1, aspect) / zoom;
@@ -170,7 +170,9 @@ export function createStructureScene(
       const v = new THREE.Vector3(...node.position).applyMatrix4(camera.matrixWorldInverse);
       x = Math.max(x, Math.abs(v.x)); y = Math.max(y, Math.abs(v.y));
     }
-    const aspect = host.clientWidth / Math.max(1, host.clientHeight);
+    const aspect = host.clientWidth > 0 && host.clientHeight > 0
+      ? host.clientWidth / host.clientHeight
+      : (camera.right - camera.left) / (camera.top - camera.bottom);
     halfSpan = Math.max(x / Math.max(1, aspect), y * Math.min(1, aspect), extent * 0.2) * 1.26 + extent * 0.05;
     resize();
   }

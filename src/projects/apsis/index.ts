@@ -13,6 +13,7 @@ import type { Flight, Plan } from './flight';
 import { MISSIONS, missionGoal, targetState } from './missions';
 import { createOrbitalScene } from './scene';
 import { chartMarkup, clock, deskMarkup, duration, number, timelineMarkup } from './ui';
+import { arrangeWorkspace } from './workspace';
 
 let nextId = 0;
 
@@ -21,6 +22,7 @@ export function mount(context: ProjectContext): ProjectInstance {
   const id = `apsis-${++nextId}`;
   page.root.setAttribute('aria-labelledby', `${id}-title`);
   page.root.innerHTML = deskMarkup(id);
+  const workspace = arrangeWorkspace(page, id);
   const get = <T extends Element>(selector: string) => query<T>(page.root, selector);
   const text = (selector: string, value: string) => { get<HTMLElement>(selector).textContent = value; };
   const on = (selector: string, action: () => void) =>
@@ -288,9 +290,7 @@ export function mount(context: ProjectContext): ProjectInstance {
       return installPlan(flight, plan);
     }, 'Solution queued. Scrub the coral trajectory, then execute each burn or run the clock.');
     if (flight.maneuvers.some((maneuver) => maneuver.status === 'queued')) {
-      const director = get<HTMLElement>('.apsis-director');
-      const timeline = get<HTMLElement>('.apsis-timeline');
-      director.scrollTop += timeline.getBoundingClientRect().top - director.getBoundingClientRect().top;
+      workspace.select('burns');
     }
   });
   on('[data-apsis-undo]', () => {
@@ -309,12 +309,6 @@ export function mount(context: ProjectContext): ProjectInstance {
   on('[data-apsis-export]', () => {
     downloadText(`apsis-${mission.id}-flight.json`, exportFlight(flight, mission), 'application/json');
     announce('Flight log exported with full-precision state, units, budget, and maneuver history.');
-  });
-  on('[data-apsis-notes]', () => {
-    const notes = get<HTMLDetailsElement>('[data-apsis-model-notes]');
-    notes.open = true;
-    notes.scrollIntoView({ block: 'start' });
-    notes.querySelector('summary')?.focus({ preventScroll: true });
   });
   const reflectView = (view: string) => page.root.querySelectorAll<HTMLButtonElement>('[data-apsis-view]')
     .forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.apsisView === view)));
@@ -337,7 +331,9 @@ export function mount(context: ProjectContext): ProjectInstance {
   page.root.querySelectorAll<HTMLButtonElement>('[data-apsis-load]').forEach((button) => {
     button.addEventListener('click', () => {
       loadMission(button.dataset.apsisLoad ?? '');
-      get<HTMLElement>('.apsis-program-bar').scrollIntoView({ block: 'start' });
+      workspace.closeNotes();
+      workspace.select('plan');
+      missionSelect.focus({ preventScroll: true });
     }, { signal: page.signal });
   });
   missionSelect.addEventListener('change', () => loadMission(missionSelect.value), { signal: page.signal });
@@ -366,6 +362,7 @@ export function mount(context: ProjectContext): ProjectInstance {
       clearEditor();
       refresh();
       announce('Impulse saved to the timeline. The projected trajectory and reserved budget now include it.');
+      workspace.select('burns');
     } catch (error) {
       if (!(error instanceof OrbitError)) throw error;
       errorElement.textContent = error.message;
@@ -391,7 +388,7 @@ export function mount(context: ProjectContext): ProjectInstance {
       text('[data-apsis-queue]', 'Save impulse');
       get<HTMLElement>('[data-apsis-cancel-edit]').hidden = false;
       updateDraft();
-      get<HTMLElement>('.apsis-burn-editor').scrollIntoView({ block: 'center' });
+      workspace.select('manual');
       inputs.delay.focus({ preventScroll: true });
       announce('Editing a queued impulse. Save applies the change; cancel leaves the flight plan untouched.');
     }

@@ -20,6 +20,125 @@
   -webkit-font-smoothing: antialiased;
   color-scheme: dark;
 }
+
+/* The viewport belongs to the instrument; only named panes and dialogs scroll. */
+.project-apsis[data-workspace] { height: 100dvh; min-height: 0; --workspace-paper: var(--apsis-panel); }
+.project-apsis[data-workspace] .apsis-desk { height: 100%; min-height: 0; max-width: none; padding: 0 18px; display: grid; grid-template-rows: 64px 56px minmax(0, 1fr) 44px; }
+.project-apsis[data-workspace] .apsis-masthead { min-height: 0; padding: 8px 0; gap: 12px; }
+.project-apsis[data-workspace] h1 { font-size: 40px; letter-spacing: -2px; }
+.project-apsis[data-workspace] .apsis-mark { width: 34px; height: 34px; }
+.project-apsis[data-workspace] .apsis-brand-caption { font-size: 11px; padding-left: 14px; margin-left: 0; }
+.project-apsis[data-workspace] .apsis-edition { display: none; }
+.project-apsis[data-workspace] .apsis-program-bar { padding: 5px 0; gap: 14px; }
+.project-apsis[data-workspace] .apsis-program-select label { font-size: 14px; letter-spacing: 0; }
+.project-apsis[data-workspace] .apsis-program-select select { min-height: 44px; }
+.project-apsis[data-workspace] .apsis-workbench { height: auto; min-height: 0; grid-template-columns: minmax(0, 1fr) 370px; grid-template-rows: minmax(0, 1fr); }
+.project-apsis[data-workspace] .apsis-flight-bay { min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; }
+.project-apsis[data-workspace] .apsis-scene { min-height: 0; height: auto; margin: 0; }
+.project-apsis[data-workspace] .apsis-transport { margin: 0; padding: 12px; gap: 10px; flex-wrap: wrap; }
+.project-apsis[data-workspace] .apsis-clock { flex: 1; min-width: 150px; width: auto; }
+.project-apsis[data-workspace] .apsis-clock output { font-size: 21px; }
+.project-apsis[data-workspace] .apsis-clock > span { font-size: 11px; letter-spacing: 0; }
+.project-apsis[data-workspace] .apsis-warp { width: 90px; }
+.project-apsis[data-workspace] .apsis-warp label { font-size: 14px; top: -10px; left: 4px; }
+.project-apsis[data-workspace] .apsis-director { margin: 0; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: 48px minmax(0, 1fr) auto; overflow: visible; }
+.project-apsis[data-workspace] .workspace-tabs { padding: 4px; gap: 2px; }
+.project-apsis[data-workspace] .workspace-tabs > button { min-height: 40px; padding: 8px 6px; }
+.project-apsis[data-workspace] .apsis-workspace-panels { display: grid; min-height: 0; min-width: 0; }
+.project-apsis[data-workspace] .apsis-workspace-panel { grid-area: 1 / 1; min-height: 0; min-width: 0; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; padding: 16px; }
+.project-apsis[data-workspace] .apsis-workspace-panel > section { padding: 0; border: 0; }
+.project-apsis[data-workspace] .apsis-workspace-actions { padding: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; border-top: 1px solid var(--apsis-line); }
+.project-apsis[data-workspace] .apsis-workspace-actions button { min-height: 48px; font-size: 14px; padding: 7px 9px; text-align: left; gap: 5px; }
+.project-apsis[data-workspace] .apsis-planner { background: transparent; }
+.project-apsis[data-workspace] .apsis-plan-numbers { margin: 12px 0; gap: 8px; }
+.project-apsis[data-workspace] .apsis-plan-numbers span { font-size: 14px; letter-spacing: 0; }
+.project-apsis[data-workspace] .apsis-plan-numbers strong { font-size: 18px; }
+.project-apsis[data-workspace] .apsis-targets { margin-top: 16px; gap: 8px; }
+.project-apsis[data-workspace] .apsis-goal { margin-top: 14px; }
+.project-apsis[data-workspace] .apsis-burn-list { margin: 12px 0; }
+.project-apsis[data-workspace] .apsis-chart { margin-top: 12px; }
+.project-apsis[data-workspace] .apsis-chart svg { min-height: 0; }
+.project-apsis[data-workspace] .apsis-telemetry { display: block; margin-top: 24px; }
+.project-apsis[data-workspace] .apsis-inspect-heading { flex-wrap: wrap; margin-top: 10px; gap: 6px; }
+.project-apsis[data-workspace] .apsis-burn-fields { grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.project-apsis[data-workspace] .apsis-burn-fields input { font-size: 16px; padding: 9px; }
+.project-apsis[data-workspace] .apsis-status-strip { min-height: 0; padding: 5px 0; overflow: auto; overscroll-behavior: contain; align-items: center; gap: 8px; }
+.project-apsis[data-workspace] .apsis-status-strip > span:last-child:not(:first-child) { display: block; font-size: 10px; white-space: normal; flex-shrink: 0; max-width: 130px; }
+.project-apsis[data-workspace] .workspace-dialog :is(.apsis-time-note, .apsis-scene-caption) { margin: 18px 0; padding: 12px; }
+.project-apsis[data-workspace] .workspace-dialog .apsis-checklist { padding: 20px 0; border: 0; }
+.project-apsis[data-workspace] .workspace-dialog .apsis-checklist ol { display: block; }
+.project-apsis[data-workspace] .workspace-dialog .apsis-library { padding: 24px 0; }
+.project-apsis[data-workspace] .workspace-dialog .apsis-mission-library { grid-template-columns: 1fr; }
+.project-apsis[data-workspace] .workspace-dialog .apsis-mission-option { border: 1px solid var(--apsis-line); }
+.project-apsis[data-workspace] .workspace-dialog .apsis-log-entry { grid-template-columns: 1fr; gap: 5px; }
+.project-apsis[data-workspace] .workspace-dialog .apsis-log-entry > span { grid-column: 1; }
+.project-apsis[data-workspace] .apsis-workspace-actions { padding-right: 64px; }
+.project-apsis[data-workspace] .apsis-status-strip { padding-right: 64px; }
+@media (max-width: 1000px) {
+  .project-apsis[data-workspace] .apsis-workbench { grid-template-columns: minmax(0, 1fr) 320px; }
+  .project-apsis[data-workspace] .apsis-brand-caption { display: none; }
+  .project-apsis[data-workspace] .apsis-scene-tools { left: 8px; right: 8px; gap: 4px; }
+  .project-apsis[data-workspace] .apsis-scene-tools button { padding-inline: 8px; }
+  .project-apsis[data-workspace] .apsis-transport { gap: 10px 6px; }
+  .project-apsis[data-workspace] .apsis-history { margin-left: auto; }
+}
+@media (max-width: 620px) {
+  .project-apsis[data-workspace] .apsis-desk { padding: 0 6px; grid-template-rows: 52px 50px minmax(0, 1fr) 40px; }
+  .project-apsis[data-workspace] .apsis-brand { gap: 4px; }
+  .project-apsis[data-workspace] h1 { font-size: 31px; }
+  .project-apsis[data-workspace] .apsis-mark { width: 23px; height: 28px; }
+  .project-apsis[data-workspace] .apsis-masthead-right { gap: 3px; }
+  .project-apsis[data-workspace] .apsis-masthead-right button { display: inline-flex; padding: 8px; font-size: 14px; }
+  .project-apsis[data-workspace] .apsis-masthead-right button[data-apsis-notes] { display: inline-flex; }
+  .project-apsis[data-workspace] .apsis-masthead-right button span { display: none; }
+  .project-apsis[data-workspace] .apsis-program-select { gap: 6px; }
+  .project-apsis[data-workspace] .apsis-program-select label { font-size: 14px; max-width: 60px; }
+  .project-apsis[data-workspace] .apsis-program-select select { width: 100%; font-size: 14px; padding: 5px; }
+  .project-apsis[data-workspace] .apsis-workbench { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(230px, .95fr) minmax(220px, 1fr); }
+  .project-apsis[data-workspace] .apsis-transport { padding: 6px 4px; display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+  .project-apsis[data-workspace] .apsis-clock { min-width: 0; }
+  .project-apsis[data-workspace] .apsis-clock > span { font-size: 10px; }
+  .project-apsis[data-workspace] .apsis-clock output { font-size: 18px; }
+  .project-apsis[data-workspace] .apsis-playback { margin: 0; gap: 4px; }
+  .project-apsis[data-workspace] .apsis-playback button { min-width: 0; padding: 8px 10px; }
+  .project-apsis[data-workspace] .apsis-run span + span { margin-left: 5px; }
+  .project-apsis[data-workspace] .apsis-history { margin: 0; justify-content: end; }
+  .project-apsis[data-workspace] .apsis-history button { min-width: 62px; padding: 8px; }
+  .project-apsis[data-workspace] .apsis-warp { width: 112px; }
+  .project-apsis[data-workspace] .apsis-warp label { top: -8px; font-size: 14px; }
+  .project-apsis[data-workspace] .apsis-warp select { min-height: 44px; padding: 6px; }
+  .project-apsis[data-workspace] .apsis-director { border-left: 0; grid-template-rows: 48px minmax(0, 1fr) auto; }
+  .project-apsis[data-workspace] .workspace-tabs { padding: 2px; }
+  .project-apsis[data-workspace] .workspace-tabs > button { min-height: 44px; }
+  .project-apsis[data-workspace] .apsis-workspace-panel { padding: 10px; }
+  .project-apsis[data-workspace] .apsis-workspace-actions { padding: 4px 64px 4px 4px; }
+  .project-apsis[data-workspace] .apsis-scene-heading, .project-apsis[data-workspace] .apsis-camera-hint { display: none; }
+  .project-apsis[data-workspace] .apsis-altitude { top: 7px; left: 8px; }
+  .project-apsis[data-workspace] .apsis-altitude > div { margin: 0; gap: 4px; }
+  .project-apsis[data-workspace] .apsis-altitude > div output { font-size: 24px; }
+  .project-apsis[data-workspace] .apsis-altitude > span { font-size: 10px; }
+  .project-apsis[data-workspace] .apsis-altitude p { font-size: 12px; }
+  .project-apsis[data-workspace] .apsis-flight-state { top: 8px; right: 8px; font-size: 10px; }
+  .project-apsis[data-workspace] .apsis-scene-tools { bottom: 4px; left: 4px; right: 4px; }
+  .project-apsis[data-workspace] .apsis-scene-tools button { min-height: 44px; padding: 7px; }
+  .project-apsis[data-workspace] .apsis-zoom-buttons button { min-width: 44px; }
+  .project-apsis[data-workspace] .apsis-scale { bottom: 53px; left: auto; right: 8px; gap: 2px; align-items: end; }
+  .project-apsis[data-workspace] .apsis-scale > span:not(.apsis-scale-rule) { display: none; }
+  .project-apsis[data-workspace] .apsis-scale strong { font-size: 13px; }
+  .project-apsis[data-workspace] .apsis-scale-rule { margin-bottom: 0; }
+  .project-apsis[data-workspace] .apsis-status-strip > span:last-child:not(:first-child) { max-width: 75px; font-size: 9px; }
+  .project-apsis[data-workspace] .workspace-dialog .apsis-notes-grid { grid-template-columns: 1fr; }
+}
+@media (min-width: 621px) and (max-height: 560px) {
+  .project-apsis[data-workspace] .apsis-desk { grid-template-rows: 52px 50px minmax(0, 1fr) 36px; padding-inline: 8px; }
+  .project-apsis[data-workspace] .apsis-scene-heading, .project-apsis[data-workspace] .apsis-camera-hint { display: none; }
+  .project-apsis[data-workspace] .apsis-altitude { top: 8px; left: 10px; }
+  .project-apsis[data-workspace] .apsis-altitude > div output { font-size: 25px; }
+  .project-apsis[data-workspace] .apsis-flight-state { top: 10px; right: 10px; }
+  .project-apsis[data-workspace] .apsis-scene-tools { bottom: 8px; }
+  .project-apsis[data-workspace] .apsis-scale { bottom: 62px; left: auto; right: 10px; }
+  .project-apsis[data-workspace] .apsis-scale > span:not(.apsis-scale-rule) { display: none; }
+}
 .project-apsis * { box-sizing: border-box; }
 .project-apsis [hidden] { display: none !important; }
 .project-apsis :is(h1, h2, h3, p, dl, dd, ol) { margin: 0; }

@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { ADDRESSES, LEVELS } from '../../src/projects/parcel/data';
 import {
   bagCount,
@@ -192,20 +193,25 @@ test.describe('parcel engine', () => {
   });
 });
 
-test('parcel page: every laptop map shares the first view with its driving controls', async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 800 });
+async function openDesk(page: Page) {
+  // Other sites share this Vite server; their reloads must not clear the route.
+  await page.routeWebSocket(url => url.searchParams.has('token'), () => {});
   await page.goto('./projects/parcel/');
+}
+
+test('parcel page: every laptop map shares the first view with its driving controls', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await openDesk(page);
   const site = page.locator('.project-parcel');
   const preview = site.locator('[data-project-preview]');
   await expect(preview).toHaveCount(1);
   for (let index = 0; index < LEVELS.length; index += 1) {
     await site.locator('[data-level]').selectOption(String(index));
-    await page.evaluate(() => window.scrollTo(0, 0));
     for (const selector of ['[data-map]', '.parcel-dpad', '.parcel-actions', '.parcel-dashboard']) {
       const bounds = await preview.locator(selector).boundingBox();
       if (!bounds) throw new Error(`Missing laptop gameplay region: ${selector}`);
       expect(bounds.y).toBeGreaterThan(40);
-      expect(bounds.y + bounds.height, `Route ${index + 1}: ${selector} fits without scrolling`).toBeLessThanOrEqual(760);
+      expect(bounds.y + bounds.height, `Route ${index + 1}: ${selector} fits without scrolling`).toBeLessThanOrEqual(720);
     }
   }
   await preview.locator('[data-direction="right"]').click();
@@ -215,7 +221,7 @@ test('parcel page: every laptop map shares the first view with its driving contr
 });
 
 test('parcel page: every solved route earns a real stamp; undo and replay remove it', async ({ page }) => {
-  await page.goto('./projects/parcel/');
+  await openDesk(page);
   const site = page.locator('.project-parcel');
   const keys: Record<Direction, string> = {
     up: 'ArrowUp', right: 'ArrowRight', down: 'ArrowDown', left: 'ArrowLeft',
@@ -232,6 +238,7 @@ test('parcel page: every solved route earns a real stamp; undo and replay remove
     await expect(site.locator('[data-delivered]')).toHaveText(`${definition.parcels.length} / ${definition.parcels.length}`);
     await expect(site.locator('[data-progress]')).toHaveText(`${index + 1} of 5`);
     await expect(site.locator('[data-result]')).toBeVisible();
+    await site.getByRole('button', { name: 'Close Round result', exact: true }).click();
   }
   await expect(site.locator('[data-result-title]')).toHaveText('All five, first class!');
   await site.locator('[data-undo]').click();
@@ -246,7 +253,7 @@ test('parcel page: every solved route earns a real stamp; undo and replay remove
 
 test('parcel page: phone controls fit, hints do not autoplay, and form keys do not move the van', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
-  await page.goto('./projects/parcel/');
+  await openDesk(page);
   const site = page.locator('.project-parcel');
   const selector = site.locator('[data-level]');
   await selector.focus();
@@ -265,6 +272,7 @@ test('parcel page: phone controls fit, hints do not autoplay, and form keys do n
   await expect(site.locator('[data-feedback]')).toContainText('Verified hint:');
   await expect(site.locator('[data-moves]')).toHaveText('0 / 38');
   await expect(site.locator('[data-direction][data-suggested="true"]')).toHaveCount(1);
+  await site.getByRole('button', { name: 'Close Dispatch feedback', exact: true }).click();
   await site.locator('[data-direction="right"]').focus();
   await page.keyboard.press('ArrowRight');
   await expect(site.locator('[data-moves]')).toHaveText('0 / 38');
@@ -272,4 +280,100 @@ test('parcel page: phone controls fit, hints do not autoplay, and form keys do n
   await expect(site.locator('[data-moves]')).toHaveText('1 / 38');
   await site.locator('[data-undo]').click();
   await expect(site.locator('[data-moves]')).toHaveText('0 / 38');
+  await page.setViewportSize({ width: 320, height: 640 });
+  await site.locator('[data-map]').click();
+  await expect(site.locator('[data-map]')).toBeFocused();
+  await page.keyboard.press('ArrowRight');
+  await expect(site.locator('[data-moves]')).toHaveText('1 / 38');
+  await expect(site.locator('#parcel-map-desc')).toContainText('row 1, column 2');
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.keyboard.press('z');
+  await expect(site.locator('[data-moves]')).toHaveText('0 / 38');
 });
+
+for (const viewport of [
+  { width: 1440, height: 900 }, { width: 1280, height: 720 },
+  { width: 375, height: 812 }, { width: 320, height: 640 }, { width: 768, height: 480 },
+]) {
+  test(`parcel workspace: ${viewport.width}×${viewport.height} routes, dispatch, finish and reset`, async ({ page }, testInfo) => {
+    await page.setViewportSize(viewport);
+    await openDesk(page);
+    const site = page.locator('.project-parcel');
+    const board = site.locator('[data-map]');
+    const assertDesk = async () => {
+      expect(await page.evaluate(() => ({
+        width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight,
+        x: window.scrollX, y: window.scrollY,
+      }))).toEqual({ width: viewport.width, height: viewport.height, x: 0, y: 0 });
+      for (const control of [board, ...await site.locator('[data-direction], [data-action="restart"], [data-hint-button], [data-details]').all()]) {
+        if (!await control.isVisible()) continue;
+        const box = await control.boundingBox();
+        expect(box!.y).toBeGreaterThanOrEqual(0);
+        expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
+        expect(await control.evaluate(element => parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(14);
+        expect(await control.evaluate(element => {
+          const box = element.getBoundingClientRect();
+          return element.contains(document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2));
+        })).toBe(true);
+      }
+    };
+    await expect(site).toHaveAttribute('data-workspace', 'true');
+    await site.locator('[data-level]').selectOption('4');
+    await page.screenshot({ path: testInfo.outputPath(`parcel-${viewport.width}x${viewport.height}.png`) });
+    await assertDesk();
+    expect(await board.evaluate(element => [...element.querySelectorAll('text')].every(text => {
+      const transform = text.getScreenCTM();
+      return transform && parseFloat(getComputedStyle(text).fontSize) * Math.hypot(transform.a, transform.b) >= 13.99;
+    }))).toBe(true);
+    await site.getByRole('button', { name: 'Enlarge route map', exact: true }).click();
+    await expect(site.getByRole('dialog', { name: 'Route map in detail', exact: true })).toBeVisible();
+    await expect(site.locator('#parcel-map-detail-art-desc')).toContainText('7 rows and 7 columns');
+    await page.keyboard.press('Escape');
+    await expect(site.getByRole('button', { name: 'Enlarge route map', exact: true })).toBeFocused();
+    await site.locator('[data-direction="right"]').click();
+    await site.getByRole('button', { name: 'Mailbag & manifest', exact: true }).click();
+    await expect(site.getByRole('dialog', { name: 'Dispatch and mailbag', exact: true })).toBeVisible();
+    await expect(site.locator('[data-deliveries] li')).toHaveCount(4);
+    await page.keyboard.press('Escape');
+    await site.getByRole('button', { name: 'Routes', exact: true }).click();
+    await site.locator('[data-route="0"]').click();
+    await site.locator('[data-level]').selectOption('4');
+    await expect(site.locator('[data-moves]')).toHaveText('1 / 38');
+    await site.locator('[data-level]').selectOption('0');
+    await site.getByRole('button', { name: 'Field guide', exact: true }).click();
+    await expect(site.getByRole('heading', { name: 'A first-class plan.' })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await board.focus();
+    await board.press('ArrowUp');
+    await expect(site.getByRole('dialog', { name: 'Dispatch feedback' })).toBeVisible();
+    await expect(site.locator('[data-feedback]')).toContainText('No move spent');
+    await page.keyboard.press('Escape');
+    const keys: Record<Direction, string> = { up: 'ArrowUp', right: 'ArrowRight', down: 'ArrowDown', left: 'ArrowLeft' };
+    for (const direction of solve(compileLevel(LEVELS[0])).moves) await board.press(keys[direction]);
+    const result = site.getByRole('dialog', { name: 'Round result', exact: true });
+    await expect(result).toBeVisible();
+    await expect(site).toHaveAttribute('data-phase', 'complete');
+    const heading = await site.locator('[data-result-title]').boundingBox();
+    expect(heading!.y).toBeGreaterThanOrEqual(0);
+    expect(heading!.y + heading!.height).toBeLessThanOrEqual(viewport.height);
+    await page.screenshot({ path: testInfo.outputPath(`parcel-finish-${viewport.width}x${viewport.height}.png`) });
+    await result.getByRole('button', { name: 'Undo last move', exact: true }).click();
+    await expect(result).toBeHidden();
+    await expect(site).toHaveAttribute('data-phase', 'playing');
+    await expect(board).toBeFocused();
+    await site.getByRole('button', { name: 'Restart', exact: true }).click();
+    await expect(site.locator('[data-moves]')).toHaveText('0 / 12');
+    await assertDesk();
+    await board.focus();
+    for (let turn = 0; turn < 6; turn += 1) {
+      await board.press('ArrowRight');
+      await board.press('ArrowLeft');
+    }
+    await expect(site).toHaveAttribute('data-phase', 'exhausted');
+    await expect(result).toBeVisible();
+    await expect(result.getByRole('heading', { name: 'The meter says zero.' })).toBeVisible();
+    await result.getByRole('button', { name: 'Undo last move', exact: true }).click();
+    await expect(site).toHaveAttribute('data-phase', 'playing');
+    await expect(site.locator('[data-remaining]')).toHaveText('1');
+  });
+}

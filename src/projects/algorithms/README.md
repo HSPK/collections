@@ -2,13 +2,16 @@
 
 An independent learning website at `/projects/algorithms/`. The page owns its
 navigation, reading sections, array editor, sorting stage, and transport. It
-mounts with `createProjectPage(context, 'algorithms')`, stays auto-height, and
+mounts with `createProjectPage(context, 'algorithms')`, fits one dynamic viewport, and
 does not require the collection's animation toolbar.
 
-The compact introduction leads straight to the sorting stage, marked with
-`data-project-preview`. Previous/Play/Next live in its header; method and array
-controls sit beside it on desktop rather than pushing it down the page. The
-extended programme is a disclosure after the tool, with all method notes kept.
+The `data-workspace="true"` root keeps the sorting stage, Previous/Play/Next,
+Restart, current array, operation counts and trace slider together. Array,
+Trace, Script and Totals tabs hold the original editor, step explanations,
+pseudocode and complete-run scorecard beside the stage, or below it on phones.
+These bounded panes scroll without moving the live result away. Field notes
+and Counting rules are native dialogs retaining the programme, stability
+witness, all method notes and counting contract. Escape restores trigger focus.
 
 ## Files
 
@@ -116,9 +119,13 @@ not the extra memory used to store the teaching trace.
   registered with `page.onCleanup`; destroying or aborting the page cancels
   its animation frame and visibility listener. No timers, observers, storage,
   external services, fonts, or image downloads are used.
-- Slot arrays use up to eight columns on desktop, six at smaller widths, and
-  four at 375px. Code wraps too; all twelve supported values remain present
-  and readable without squeezing their labels.
+- Slot arrays use up to eight columns on desktop and four in compact layouts.
+  The slot list scrolls locally when needed; the complete current-array text
+  and transport stay visible. All twelve supported values remain present with
+  readable value/identity labels. Compact cards show Act/Ord/Wait, with the full
+  state in each card's accessible label and title; their bars retain the same
+  signed zero-line scale. Native tab changes do not seek the trace or
+  alter playback. Stage shortcuts are restricted to the focused stage itself.
 
 ## Focused verification
 
@@ -133,11 +140,14 @@ exact known totals; every operation's effect and prefix counters; deep freezing;
 caller nonmutation; pseudocode references; stability; input validation; and
 exhaustive short arrays over `[-1, 0, 1]`.
 
-Browser tests intercept a test-only HTML document and mount just this project
-from its Vite module. They do not import the shared site shell, navigate the
-collection, take screenshots, or require an integrated build. They exercise
+The original browser tests intercept a test-only HTML document and mount just
+this project from its Vite module. They exercise
 controls, draft preservation, validation, reduced-motion defaults, 375px
 interaction, playback completion, and abort cleanup with tracked animation
-frames. `SITE_URL` can point them at an existing Vite server. To run only engine
+frames. `tests/workspaces/worlds-audio.spec.ts` adds actual-route screenshots,
+no-document-scroll, responsive round trips, twelve-value editor/trace panes,
+native-dialog and floating-menu workflows at 1440x900, 1280x720, 375x812,
+320x640 and 768x480. Every browser run must use the coordinator's exclusive
+renderer lock. `SITE_URL` can point at the existing Vite server. To run only engine
 tests without starting the configured server, set `SITE_URL` and add
 `--grep "trace engine"`; these tests do not make network requests.

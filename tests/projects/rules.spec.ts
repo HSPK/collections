@@ -255,6 +255,7 @@ test.describe('Garden of Rules isolated browser', () => {
     await expect(page.locator('[data-population]')).toHaveText('3');
     await page.getByRole('button', { name: 'Undo', exact: true }).click();
     await expect(page.locator('[data-population]')).toHaveText('4');
+    await page.getByRole('tab', { name: 'Edit', exact: true }).click();
     await page.getByRole('button', { name: 'Plant', exact: true }).click();
     await page.getByRole('spinbutton', { name: 'Row', exact: true }).fill('2');
     await page.getByRole('spinbutton', { name: 'Column', exact: true }).fill('2');
@@ -269,6 +270,7 @@ test.describe('Garden of Rules isolated browser', () => {
 
   test('custom rules report errors without changing state and Seeds really removes survivors', async ({ page }) => {
     await mountRules(page);
+    await page.getByRole('tab', { name: 'Rules', exact: true }).click();
     await page.getByText('Write a custom B/S rule', { exact: true }).click();
     const custom = page.locator('[data-custom-input]');
     await custom.fill('B9/S23');
@@ -281,6 +283,7 @@ test.describe('Garden of Rules isolated browser', () => {
     await page.getByRole('button', { name: 'Apply rule', exact: true }).click();
     await expect(page.locator('[data-rule]')).toHaveValue('custom');
     await expect(page.locator('[data-rule-description]')).toContainText('exactly 0 living neighbors');
+    await page.getByRole('tab', { name: 'Plant', exact: true }).click();
     await page.locator('[data-preset]').selectOption('seeds-square');
     await page.getByRole('button', { name: 'Load pattern + its rule', exact: true }).click();
     await expect(page.locator('[data-rule]')).toHaveValue('seeds');
@@ -289,6 +292,7 @@ test.describe('Garden of Rules isolated browser', () => {
     await expect(page.locator('[data-population]')).toHaveText('8');
     await expect(page.locator('[data-births]')).toHaveText('8');
     await expect(page.locator('[data-deaths]')).toHaveText('4');
+    await page.getByRole('tab', { name: 'Rules', exact: true }).click();
     await page.locator('[data-boundary]').selectOption('wrap');
     await expect(page.locator('[data-generation]')).toHaveText('0');
     await expect(page.locator('[data-population]')).toHaveText('8');
@@ -309,6 +313,7 @@ test.describe('Garden of Rules isolated browser', () => {
     await expect(page.locator('[data-population]')).toHaveText('4');
     await page.getByRole('button', { name: 'Undo', exact: true }).click();
     await expect(page.locator('[data-population]')).toHaveText('0');
+    await page.getByRole('tab', { name: 'Edit', exact: true }).click();
     await page.getByLabel('Pan view instead of painting').check();
     await board.click({ position: { x: bounds.width / 2, y: bounds.height / 2 } });
     await expect(page.locator('[data-population]')).toHaveText('0');
@@ -321,6 +326,7 @@ test.describe('Garden of Rules isolated browser', () => {
     await board.focus();
     await board.press('Control+Home');
     await board.press(' ');
+    await page.getByRole('tab', { name: 'Keep', exact: true }).click();
     await page.getByRole('button', { name: 'Set as start', exact: true }).click();
     await page.getByRole('button', { name: 'Step', exact: true }).click();
     await expect(page.locator('[data-population]')).toHaveText('0');
@@ -342,6 +348,7 @@ test.describe('Garden of Rules isolated browser', () => {
     await page.setViewportSize({ width: 375, height: 812 });
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await mountRules(page);
+    await page.getByRole('tab', { name: 'Edit', exact: true }).click();
     await expect(page.getByLabel('Generations per second')).toHaveValue('1');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.getByLabel('Board zoom').selectOption('300');
@@ -351,7 +358,7 @@ test.describe('Garden of Rules isolated browser', () => {
     const smallest = await page.locator('button, label, .rules-help, .rules-eyebrow, dt').evaluateAll((elements) =>
       Math.min(...elements.filter((element) => element.getBoundingClientRect().height).map((element) => parseFloat(getComputedStyle(element).fontSize))),
     );
-    expect(smallest).toBeGreaterThanOrEqual(12);
+    expect(smallest).toBeGreaterThanOrEqual(14);
   });
 
   test('route exit releases playback and event listeners', async ({ page }) => {

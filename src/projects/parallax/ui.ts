@@ -1,4 +1,5 @@
 import { createProjectPage, downloadText, query } from '../../core/page';
+import { createWorkspaceDialog, createWorkspaceTabs } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { closestOnLine, epipolarLine, essential, fundamental, sampsonDistance } from './camera';
 import { renderImageOverlay } from './images';
@@ -27,6 +28,7 @@ const frame = (side: 'a' | 'b') => `
 export function mountParallax(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'parallax');
   const { root, signal } = page;
+  root.dataset.workspace = 'true';
   const history = createHistory();
   let results: Reconstruction[] = [];
   let fit: RobustFit | null = null;
@@ -125,12 +127,47 @@ export function mountParallax(context: ProjectContext): ProjectInstance {
     <p class="px-status" role="status" aria-live="polite" data-status>Ready. Select a landmark in either image.</p>
   `;
   const q = <T extends Element>(selector: string) => query<T>(root, selector);
+  const notebookButton = document.createElement('button');
+  notebookButton.textContent = 'Notebook';
+  notebookButton.className = 'px-notebook-button';
+  q('.px-header').append(notebookButton);
+  createWorkspaceDialog(page, {
+    id: 'px-notebook', title: 'Field notebook', triggers: [notebookButton],
+    content: [q('.px-intro'), q('.px-edition'), q('.px-study-caption'), q('.px-notebook'), q('.px-model-notes'), q('.px-footer')],
+  });
+  const dock = document.createElement('div');
+  dock.className = 'px-dock';
+  const panels = document.createElement('div');
+  panels.className = 'px-dock-panels';
+  const spaceTools = document.createElement('section');
+  spaceTools.id = 'px-pane-space-tools';
+  spaceTools.append(q('.px-space-tools'));
+  const calibration = q<HTMLElement>('.px-calibration');
+  const paneDefinitions = [
+    { id: 'a', label: 'View A', panel: q<HTMLElement>('[data-pane="a"]') },
+    { id: 'b', label: 'View B', panel: q<HTMLElement>('[data-pane="b"]') },
+    { id: 'space', label: 'Space', panel: spaceTools },
+    { id: 'rig', label: 'Rig', panel: calibration },
+    { id: 'inspect', label: 'Inspect', panel: q<HTMLElement>('.px-inspector') },
+  ];
+  panels.append(...paneDefinitions.map(pane => pane.panel));
+  dock.append(q('.px-mobile-tabs'), panels, q('.px-capture-tools'));
+  q('.px-pair').remove();
+  q('.px-studio').append(dock);
+  const workspaceTabs = createWorkspaceTabs(page, {
+    id: 'px-studio', label: 'Studio panes', host: q('.px-mobile-tabs'), panes: paneDefinitions,
+    initial: 'a', preserveLayout: true, onSelect: id => { root.dataset.activePane = id; },
+  });
+  root.querySelectorAll<HTMLButtonElement>('[data-workspace-tab]').forEach(button => {
+    button.dataset.tab = button.dataset.workspaceTab;
+  });
   root.addEventListener('input', () => { inputRevision++; }, { signal });
   function announce(message: string) { q<HTMLElement>('[data-status]').textContent = message; }
   const overlays: [SVGSVGElement, SVGSVGElement] = [q('[data-image-overlay="a"]'), q('[data-image-overlay="b"]')];
   const imageSize = new ResizeObserver(() => {
     overlays.forEach((svg) => {
-      if (svg.clientWidth > 0) svg.style.setProperty('--px-label-size', `${Math.max(27, 14 * 960 / svg.clientWidth)}px`);
+      const width = Math.min(svg.clientWidth, svg.clientHeight * 1.5);
+      if (width > 0) svg.style.setProperty('--px-label-size', `${Math.max(27, 14 * 960 / width)}px`);
     });
   });
   overlays.forEach((svg) => imageSize.observe(svg));
@@ -243,27 +280,6 @@ export function mountParallax(context: ProjectContext): ProjectInstance {
     commit(history, parsed.value); fit = null; render();
     announce('Experiment loaded. Calibration, captured pixels and edits restored exactly.');
   }
-  const paneTabs = [...root.querySelectorAll<HTMLButtonElement>('[data-tab]')];
-  function activatePane(button: HTMLButtonElement, focus = false) {
-    root.dataset.activePane = button.dataset.tab;
-    for (const tab of paneTabs) {
-      const selected = tab === button;
-      tab.setAttribute('aria-selected', String(selected));
-      tab.tabIndex = selected ? 0 : -1;
-    }
-    button.parentElement?.scrollIntoView({ block: 'start', behavior: 'instant' });
-    if (focus) button.focus({ preventScroll: true });
-  }
-  q<HTMLElement>('.px-mobile-tabs').addEventListener('keydown', (event) => {
-    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key) || !(event.target instanceof Element)) return;
-    const button = event.target.closest<HTMLButtonElement>('[data-tab]');
-    const index = button ? paneTabs.indexOf(button) : -1;
-    if (index < 0) return;
-    event.preventDefault();
-    const next = event.key === 'Home' ? 0 : event.key === 'End' ? paneTabs.length - 1 :
-      (index + (event.key === 'ArrowRight' ? 1 : paneTabs.length - 1)) % paneTabs.length;
-    activatePane(paneTabs[next], true);
-  }, { signal });
   q<HTMLSelectElement>('[data-study]').addEventListener('change', (event) => {
     const value = (event.target as HTMLSelectElement).value as StudyId;
     commit(history, createExperiment(value)); fit = null; render(); space.resetView();
@@ -321,7 +337,7 @@ export function mountParallax(context: ProjectContext): ProjectInstance {
       return;
     }
     if (button.dataset.tab) {
-      activatePane(button);
+      workspaceTabs.select(button.dataset.tab);
       return;
     }
     if (button.dataset.orbitMode) {

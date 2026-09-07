@@ -111,9 +111,16 @@ test.describe('Neon Rain / Vesper Ward', () => {
     expect(bounds.y).toBeLessThan(200);
     expect(bounds.width).toBeLessThanOrEqual(375);
     expect(bounds.height).toBeGreaterThan(300);
-    for (const control of await site.locator('button, input[type="range"]').all()) {
+    for (const control of await site.locator('.nr-shell button, .nr-shell input[type="range"]').all()) {
       expect((await control.boundingBox())!.height).toBeGreaterThanOrEqual(44);
     }
+    await page.getByRole('button', { name: 'Directory', exact: true }).click();
+    const directory = page.getByRole('dialog', { name: 'Directory & field notes' });
+    await expect(directory).toBeVisible();
+    expect((await directory.getByRole('button', { name: 'Close Directory & field notes' }).boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    await page.keyboard.press('Escape');
+    await expect(directory).not.toBeVisible();
+    await expect(page.getByRole('button', { name: 'Directory', exact: true })).toBeFocused();
     const canvas = site.locator('canvas');
     expect(await canvas.evaluate((element) => element instanceof HTMLCanvasElement && Boolean(element.getContext('webgl2')))).toBe(true);
     await returnToCollection(page);
@@ -122,5 +129,42 @@ test.describe('Neon Rain / Vesper Ward', () => {
     expect(await page.evaluate(() => JSON.parse(sessionStorage.getItem('neon-rain-canvas-disposal') ?? 'null')))
       .toEqual({ connected: false, contextLost: true });
     expect(errors).toEqual([]);
+  });
+
+  test('the street and directory use viewport space without document scrolling', async ({ page }, testInfo) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('./projects/neon-rain/');
+    const site = page.locator('.project-neon-rain');
+    await expect(site).toHaveAttribute('data-ready', 'true');
+    await expect(site).toHaveAttribute('data-workspace', 'true');
+    for (const [width, height] of [[1440, 900], [1280, 720], [375, 812], [320, 640], [768, 480]]) {
+      await page.setViewportSize({ width, height });
+      await expect.poll(() => site.evaluate(element => Math.round(element.getBoundingClientRect().height))).toBe(height);
+      expect(await page.evaluate(() => ({
+        width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight,
+      }))).toEqual({ width, height });
+      for (const control of await site.locator('.nr-shell button, .nr-shell input[type="range"]').all()) {
+        const box = (await control.boundingBox())!;
+        expect(box.y).toBeGreaterThanOrEqual(0);
+        expect(box.y + box.height).toBeLessThanOrEqual(height);
+        expect(await control.evaluate(element => parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(14);
+      }
+      const canvas = site.locator('canvas');
+      await expect.poll(() => canvas.evaluate((element: HTMLCanvasElement) => Math.abs(element.width / element.height - element.clientWidth / element.clientHeight))).toBeLessThan(0.02);
+      await page.screenshot({ path: testInfo.outputPath(`neon-rain-${width}x${height}.png`) });
+      await page.getByRole('button', { name: 'Directory', exact: true }).click();
+      await expect(page.getByRole('dialog', { name: 'Directory & field notes' })).toBeVisible();
+      if (!await page.locator('.nr-footer details').evaluate(element => (element as HTMLDetailsElement).open)) {
+        await page.getByText('Field notes', { exact: true }).click();
+      }
+      await expect(page.getByText('Vesper Ward is fiction, not a forecast or a map.', { exact: false })).toBeVisible();
+      const phase = await site.getAttribute('data-rain-phase');
+      await page.getByRole('dialog', { name: 'Directory & field notes' }).focus();
+      await page.keyboard.press('Space');
+      await expect(site).toHaveAttribute('data-motion', 'paused');
+      await expect(site).toHaveAttribute('data-rain-phase', phase!);
+      await page.keyboard.press('Escape');
+      expect(await page.evaluate(() => scrollY)).toBe(0);
+    }
   });
 });

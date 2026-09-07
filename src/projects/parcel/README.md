@@ -10,7 +10,7 @@ assets, requests, audio, animation loop, storage, or dependencies.
 - `index.ts` mounts through `createProjectPage(context, 'parcel')`. It owns the
   page, SVG map, delivery manifest, controls, honest progress, and result panels.
 - `style.css` is scoped to `.project-parcel`. The physical road board and airmail
-  dispatch slip adapt to narrow screens. Touch buttons are 48 × 48px.
+  dispatch slip adapt to narrow screens. Direction touch targets are at least 44 × 44px.
 - `data.ts` contains editable `ADDRESSES` and `LEVELS`.
 - `engine.ts` contains the schema, validating map compiler, pure transitions,
   immutable undo history, derived counters, and breadth-first solver.
@@ -18,12 +18,22 @@ assets, requests, audio, animation loop, storage, or dependencies.
 - `tests/projects/parcel.spec.ts` covers the pure engine, every authored route,
   capacity, pickups, matching addresses, arrows, budget, hints, and full undo.
 
-Desktop layouts put the compact route selector alongside the masthead and the
-dashboard, direction pad, and undo/reset/hint controls alongside a map capped
-at 376px. Route briefings remain in the adjacent dispatch column. Phones stack
-the budget, map, and unchanged generous touch controls.
+The remaining viewport is a real flex/grid workspace, not a long page hidden
+behind body overflow. The map shrinks to available width and height while the
+dashboard, direction pad, and undo/reset/hint controls remain on the desk.
+Map + opens a larger read-only inspection map when the driving preview is
+compact. SVG labels retain a 14px screen-space minimum across route changes
+and resizing; the map artwork itself is fitted, never the entire website.
+Mailbag & manifest opens the briefing and current dispatch slip. Field guide
+contains the full introduction, map legend, keyboard instructions, route note,
+and visit-only progress explanation. Routes opens the five stamped shortcuts;
+the native route selector remains visible. These native dialogs support Escape,
+contained keyboard focus, and a labeled Close button.
 `data-project-preview` marks `.parcel-map-sheet`, including the actual map,
-controls, feedback, and result, without the long dispatch field guide.
+controls, and compact turn status, without the long dispatch field guide.
+Full turn details are always one tap away. Invalid moves and verified hints
+open feedback immediately; completion and budget exhaustion open the result
+dialog immediately, with undo, replay, and next-route actions.
 
 ## Level schema
 
@@ -92,16 +102,20 @@ search cap is reached (default 100,000 configurations). A hint presents only
 the first verified move and never drives the van. Search failure is reported
 honestly instead of inventing a direction.
 
-Run the existing focused tests without starting another development server:
+Run the existing focused tests; set `SITE_URL` to reuse a development server:
 
 ```sh
-SITE_URL=http://127.0.0.1:4173 npm test -- tests/projects/parcel.spec.ts --grep engine
+npm test -- tests/projects/parcel.spec.ts --reporter=dot
 ```
 
 The five authored shortest routes currently take 9/12, 11/14, 19/22, 27/32,
 and 36/38 moves respectively. Tests solve and replay every route, verify bag
 limits throughout, and require complete deliveries within the allowance.
 Run them after changing any map or rule; never ship an unverified route.
+Browser workflows also cover 1440×900, 1280×720, 375×812, 320×640, and
+768×480, verifying unobscured controls, dispatch, route context, errors,
+completion, focus-restoring undo, and reset. Screenshots are saved in each
+test's existing Playwright output directory.
 
 ## Controls, accessibility, and lifecycle
 

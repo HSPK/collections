@@ -1,5 +1,6 @@
 import './style.css';
 import { createProjectPage, escapeMarkup, query } from '../../core/page';
+import { createWorkspaceDialog } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { LEVELS } from './data';
 import {
@@ -102,7 +103,7 @@ function vanArt(direction: Direction): string {
     </g>`;
 }
 
-function drawMap(level: Level, state: GameState): string {
+function drawMap(level: Level, state: GameState, id = 'parcel-map'): string {
   const width = MAP_INSET + level.width * TILE_SIZE + 8;
   const height = MAP_INSET + level.height * TILE_SIZE + 8;
   const at = coordinates(level, state.position);
@@ -120,9 +121,9 @@ function drawMap(level: Level, state: GameState): string {
     return `Row ${row + 1}, left to right: ${cells.join(', ')}.`;
   }).join(' ');
   const parts = [
-    `<svg viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="parcel-map-title parcel-map-desc">
-      <title id="parcel-map-title">${escapeMarkup(level.definition.title)} street map</title>
-      <desc id="parcel-map-desc">${level.height} rows and ${level.width} columns. Your mail van is at row ${at.row}, column ${at.column}. Cubes are pickups; matching lettered shops are destinations. Unlettered green blocks or water cannot be crossed. Street arrows restrict the direction of exit. ${escapeMarkup(streetDescription)}</desc>`,
+    `<svg viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="${id}-title ${id}-desc">
+      <title id="${id}-title">${escapeMarkup(level.definition.title)} street map</title>
+      <desc id="${id}-desc">${level.height} rows and ${level.width} columns. Your mail van is at row ${at.row}, column ${at.column}. Cubes are pickups; matching lettered shops are destinations. Unlettered green blocks or water cannot be crossed. Street arrows restrict the direction of exit. ${escapeMarkup(streetDescription)}</desc>`,
   ];
   for (let x = 0; x < level.width; x += 1) {
     parts.push(`<text class="parcel-coordinate" x="${MAP_INSET + x * TILE_SIZE + 36}" y="24" text-anchor="middle" font-size="26">${x + 1}</text>`);
@@ -200,6 +201,7 @@ function moveMessage(level: Level, result: MoveResult): string {
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'parcel');
   const { root, signal, report, onCleanup } = page;
+  root.dataset.workspace = 'true';
   const levels = LEVELS.map(compileLevel);
   const sessions = new Map(levels.map((level) => [level.definition.id, createSession(level)]));
   let selected = 0;
@@ -207,10 +209,11 @@ export function mount(context: ProjectContext): ProjectInstance {
 
   root.innerHTML = `
     <div class="parcel-site">
+      <div class="parcel-workspace-heading"><h1>Parcel <em>Panic!</em></h1><button type="button" class="parcel-button" data-guide>Field guide</button></div>
       <header class="parcel-masthead">
         <div class="parcel-brand">
           <p class="parcel-eyebrow">${ENVELOPE} THE LITTLE POST OFFICE <span>NO. 022</span></p>
-          <h1>Parcel <em>Panic<span>!</span></em></h1>
+          <h2>Parcel <em>Panic<span>!</span></em></h2>
           <p class="parcel-lede">Small streets. Big deliveries. Plot a clever route and get every parcel home.</p>
         </div>
         <div class="parcel-postmark" aria-hidden="true">
@@ -225,6 +228,7 @@ export function mount(context: ProjectContext): ProjectInstance {
             ${levels.map((level, index) => `<option value="${index}">${String(index + 1).padStart(2, '0')} · ${escapeMarkup(level.definition.title)}</option>`).join('')}
           </select>
         </label>
+        <button type="button" class="parcel-button" data-routes>Routes</button>
         <div class="parcel-progress">
           <p><strong data-progress>0 of 5</strong> stamped <span>this visit</span></p>
           <div class="parcel-route-stamps" aria-label="Route progress">
@@ -239,6 +243,7 @@ export function mount(context: ProjectContext): ProjectInstance {
         <section class="parcel-map-sheet" data-project-preview aria-labelledby="parcel-route-title">
           <header class="parcel-map-heading">
             <div><p class="parcel-eyebrow" data-district></p><h2 id="parcel-route-title" data-title></h2></div>
+            <button type="button" class="parcel-button" data-enlarge aria-label="Enlarge route map">Map +</button>
             <span class="parcel-round-number" data-round aria-hidden="true"></span>
           </header>
           <div class="parcel-play-area">
@@ -282,6 +287,7 @@ export function mount(context: ProjectContext): ProjectInstance {
                 <button type="button" class="parcel-button" data-action="restart">${RESET}<span>Restart</span></button>
                 <button type="button" class="parcel-button" data-action="hint" data-hint-button>${HINT}<span>Route hint</span></button>
               </div>
+              <button type="button" class="parcel-button" data-details>Mailbag & manifest</button>
             </div>
             <p class="parcel-feedback" data-feedback role="status" aria-live="polite" aria-atomic="true"></p>
           </div>
@@ -290,6 +296,7 @@ export function mount(context: ProjectContext): ProjectInstance {
             <div class="parcel-result-mark" data-result-mark aria-hidden="true">${CHECK}</div>
             <div><p class="parcel-eyebrow" data-result-label></p><h3 id="parcel-result-title" data-result-title></h3><p data-result-copy></p>
               <div class="parcel-result-actions">
+                <button type="button" class="parcel-button" data-action="undo">Undo last move</button>
                 <button type="button" class="parcel-button parcel-button-primary" data-action="next" data-next>Next route ${directionIcon('right')}</button>
                 <button type="button" class="parcel-button" data-action="restart">Replay this route</button>
               </div>
@@ -333,6 +340,58 @@ export function mount(context: ProjectContext): ProjectInstance {
   const nextButton = query<HTMLButtonElement>(root, '[data-next]');
   const directionButtons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-direction]'));
   const routeButtons = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-route]'));
+  const mapDetail = document.createElement('div');
+  mapDetail.className = 'parcel-map parcel-map-detail';
+  createWorkspaceDialog(page, {
+    id: 'parcel-map-detail', title: 'Route map in detail', content: [mapDetail],
+    triggers: [query(root, '[data-enlarge]')],
+  });
+  const dispatchDialog = createWorkspaceDialog(page, {
+    id: 'parcel-dispatch', title: 'Dispatch and mailbag',
+    content: [query(root, '.parcel-briefing'), query(root, '.parcel-dispatch')],
+    triggers: [query(root, '[data-details]')],
+  });
+  const routesDialog = createWorkspaceDialog(page, {
+    id: 'parcel-routes', title: 'Route stamps this visit', content: [query(root, '.parcel-progress')],
+    triggers: [query(root, '[data-routes]')],
+  });
+  createWorkspaceDialog(page, {
+    id: 'parcel-guide', title: 'The field guide',
+    content: [query(root, '.parcel-masthead'), query(root, '.parcel-map-legend'), query(root, '.parcel-driving-copy'),
+      query(root, '.parcel-field-guide'), query(root, '.parcel-margin-note'), query(root, '.parcel-footer')],
+    triggers: [query(root, '[data-guide]')],
+  });
+  query(root, '.parcel-desk').remove();
+  const status = document.createElement('p');
+  status.className = 'parcel-status';
+  status.setAttribute('role', 'status');
+  const statusRow = document.createElement('div');
+  statusRow.className = 'parcel-status-row';
+  const feedbackButton = document.createElement('button');
+  feedbackButton.type = 'button';
+  feedbackButton.className = 'parcel-button';
+  feedbackButton.textContent = 'Turn details';
+  statusRow.append(status, feedbackButton);
+  query(root, '.parcel-map-sheet').append(statusRow);
+  const feedbackDialog = createWorkspaceDialog(page, {
+    id: 'parcel-feedback', title: 'Dispatch feedback', content: [feedback], triggers: [feedbackButton],
+  });
+  const resultDialog = createWorkspaceDialog(page, {
+    id: 'parcel-result-dialog', title: 'Round result', content: [resultPanel],
+  });
+  resultDialog.dialog.addEventListener('close', () => map.focus({ preventScroll: true }), { signal });
+  function sizeMapLabels() {
+    for (const text of root.querySelectorAll<SVGTextElement>('.parcel-map text')) {
+      const transform = text.getScreenCTM();
+      if (!transform) continue;
+      const scale = Math.hypot(transform.a, transform.b);
+      if (scale > 0) text.style.fontSize = `${Math.max(Number(text.getAttribute('font-size')), 14 / scale)}px`;
+    }
+  }
+  const mapResize = new ResizeObserver(sizeMapLabels);
+  mapResize.observe(map);
+  mapResize.observe(mapDetail);
+  onCleanup(() => mapResize.disconnect());
   const session = (): GameSession => sessions.get(levels[selected].definition.id)!;
   const completeCount = () => levels.filter((level) =>
     getPhase(level, sessions.get(level.definition.id)!.current) === 'complete').length;
@@ -349,6 +408,12 @@ export function mount(context: ProjectContext): ProjectInstance {
   const say = (message: string, tone = 'neutral') => {
     feedback.textContent = message;
     feedback.dataset.tone = tone;
+    const summary = message.split('. ')[0];
+    status.textContent = summary.length > 44 ? `${summary.slice(0, 41)}…` : summary;
+    status.dataset.tone = tone;
+    if (tone === 'warning' || tone === 'hint') {
+      if (!resultDialog.dialog.open) feedbackDialog.open();
+    }
   };
 
   function render(): void {
@@ -372,11 +437,13 @@ export function mount(context: ProjectContext): ProjectInstance {
     setText('[data-remaining]', String(remaining));
     query<HTMLElement>(root, '.parcel-remaining').dataset.low = String(remaining <= 4 && phase !== 'complete');
     setText('[data-position]', `YOU · row ${at.row}, column ${at.column}`);
-    setText('[data-board-load]', `Bag: ${load} / ${level.definition.capacity} · 1 square = 1 move`);
+    setText('[data-board-load]', `Bag: ${load} / ${level.definition.capacity}`);
     setText('[data-bag-count]', `${load} / ${level.definition.capacity} slots`);
     setText('[data-capacity]', `Capacity: ${level.definition.capacity} parcel${level.definition.capacity === 1 ? '' : 's'}. Full bag? You can still cross a parcel, but it stays put. Return with a free slot.`);
     setText('[data-progress]', `${completed} of ${levels.length}`);
     map.innerHTML = drawMap(level, current);
+    mapDetail.innerHTML = drawMap(level, current, 'parcel-map-detail-art');
+    sizeMapLabels();
     map.setAttribute('aria-label', `${level.definition.title} route map. Van at row ${at.row}, column ${at.column}. ${remaining} moves left. Focus here to use arrow keys.`);
     query<HTMLElement>(root, '[data-arrow-key]').hidden = !level.tiles.some((tile) => tile.exit);
     query<HTMLButtonElement>(root, '[data-undo]').disabled = history.length === 0;
@@ -428,6 +495,10 @@ export function mount(context: ProjectContext): ProjectInstance {
       nextButton.hidden = !won || nextRoute() === -1;
       const next = nextRoute();
       if (won && next !== -1) nextButton.innerHTML = `Next: ${escapeMarkup(levels[next].definition.title)} ${directionIcon('right')}`;
+      feedbackDialog.close();
+      resultDialog.open();
+    } else {
+      resultDialog.close();
     }
   }
 
@@ -444,6 +515,9 @@ export function mount(context: ProjectContext): ProjectInstance {
   function chooseLevel(index: number, focusMap: boolean): void {
     if (!Number.isInteger(index) || index < 0 || index >= levels.length) return;
     selected = index;
+    routesDialog.close();
+    dispatchDialog.close();
+    feedbackDialog.close();
     hintDirection = null;
     render();
     const level = levels[selected];
@@ -453,11 +527,12 @@ export function mount(context: ProjectContext): ProjectInstance {
       : phase === 'exhausted' ? 'This route is out of moves. Undo or restart to plan a fresh approach.'
         : current.steps ? `Round resumed exactly where you left it. ${remainingMoves(level, current)} moves left.`
           : `${level.definition.capacity} bag slot${level.definition.capacity === 1 ? '' : 's'}, ${level.definition.moveBudget} moves. Plan a little, then make your first delivery.`);
-    if (focusMap) map.focus({ preventScroll: true });
+    if (focusMap && !resultDialog.dialog.open) map.focus({ preventScroll: true });
   }
 
   function action(name: string): void {
     const level = levels[selected];
+    if (name === 'undo' || name === 'restart') feedbackDialog.close();
     if (name === 'next') {
       const next = nextRoute();
       if (next !== -1) chooseLevel(next, true);
@@ -505,7 +580,7 @@ export function mount(context: ProjectContext): ProjectInstance {
     if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
     const target = event.target;
     if (!(target instanceof Element) ||
-        target.closest('button, select, input, textarea, a, [contenteditable]:not([contenteditable="false"]), [role="textbox"]')) return;
+        target.closest('dialog, button, select, input, textarea, a, [contenteditable]:not([contenteditable="false"]), [role="textbox"]')) return;
     const keys: Record<string, Direction> = { ArrowUp: 'up', ArrowRight: 'right', ArrowDown: 'down', ArrowLeft: 'left' };
     const direction = keys[event.key];
     if (!direction && event.key.toLowerCase() !== 'z') return;

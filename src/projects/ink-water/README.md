@@ -41,6 +41,25 @@ Enter or Space releases a ribbon. P controls playback. The button version of
 every important action is available to touch and keyboard users. A print is an
 actual local PNG of the canvas without the pipette cursor.
 
+## One-screen studio
+
+The `data-workspace="true"` root fills `100dvh` without hiding document overflow.
+A flexible vessel stays beside the mixing desk on desktop and above its compact
+two-row pigment/viscosity controls on phones. Playback, Pour a ribbon, Clear the
+water, tracer count, pigment selection, and Viscosity remain with the actual
+painting. A local right inset on the mobile viscosity strip protects the slider
+from the collection menu without reserving a full-width blank footer.
+Controls and explanatory text use at least 14px type.
+
+**Studio notes ↗** opens the native `#iw-guide` dialog, labeled **Studio notes
+and prints**. Restore this study, Keep a print, live descriptive feedback, complete
+keyboard instructions, viscosity explanation, and the field guide remain there.
+Long notes scroll inside the dialog, not between the canvas and mixing controls.
+Escape or **Close Studio notes and prints** restores focus to the trigger.
+Opening/closing the dialog leaves the canvas mounted at the same dimensions.
+The existing `canvasresize` redraw and normalized pointer coordinates continue to
+track viewport changes without modifying fluid state or resetting playback.
+
 Pause stops every autonomous field/tracer update. Input can still edit the
 paused composition. Reduced motion starts paused and follows preference changes.
 `createProjectPage`, `canvas2D`, and `createLoop` own abortable listeners, resize
@@ -49,4 +68,8 @@ PNG callbacks ignore a disposed page. No remote resources or storage are used.
 
 Focused coverage: `tests/series/ink-water.spec.ts` checks pressure reduction,
 advected pigment, numerical bounds, real pause/clear/pour/print, and narrow-screen
-keyboard/reduced-motion behavior.
+keyboard/reduced-motion behavior. Five additional workflows check 1440×900,
+1280×720, 375×812, 320×640, and 768×480 layouts for no document scrolling,
+visible controls, actual pigment injection and canvas changes, pointer input,
+native-dialog notes/focus, restoration, and successful local PNG downloads.
+Screenshots use Playwright's per-test `test.info().outputPath()`.

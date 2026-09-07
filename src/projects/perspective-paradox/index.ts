@@ -1,11 +1,13 @@
 import './style.css';
 import { createProjectPage, query } from '../../core/page';
+import { createWorkspaceDialog, createWorkspaceTabs } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { defaultSun, fieldNotes, viewpoints, type Viewpoint } from './data';
 import { createParadoxEngine, type ParadoxEngine } from './engine';
 
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'perspective-paradox');
+  page.root.dataset.workspace = 'true';
   page.root.setAttribute('aria-labelledby', 'paradox-title');
   page.root.innerHTML = `
     <header class="paradox-masthead">
@@ -15,6 +17,7 @@ export function mount(context: ProjectContext): ProjectInstance {
       </div>
       <h1 id="paradox-title">Perspective Paradox<span>Convergence court</span></h1>
       <p class="paradox-edition">An invented architecture<br><b>NO. 040 / ONE POINT OF VIEW</b></p>
+      <button type="button" class="paradox-notes-toggle" data-paradox-notes>Field notes</button>
     </header>
     <section class="paradox-workbench" data-project-preview aria-label="Architectural perspective workbench">
       <div class="paradox-drawing-head">
@@ -54,6 +57,38 @@ export function mount(context: ProjectContext): ProjectInstance {
     </section>
     <footer class="paradox-footer"><span>Physical gaps: <output data-physical-gaps>measuring</output></span><span>Local geometry / real-time projection</span></footer>
     <div data-paradox-runtime hidden></div>`;
+
+  const instruments = query<HTMLElement>(page.root, '.paradox-instruments');
+  const tabs = document.createElement('div');
+  const views = document.createElement('div');
+  const settings = document.createElement('div');
+  views.className = 'paradox-views-pane';
+  settings.className = 'paradox-settings-pane';
+  views.append(
+    query<HTMLElement>(page.root, '.paradox-viewbar'),
+    query<HTMLElement>(page.root, '.paradox-transport'),
+  );
+  settings.append(
+    ...page.root.querySelectorAll<HTMLElement>('.paradox-range'),
+    query<HTMLElement>(page.root, '.paradox-guides'),
+  );
+  instruments.append(tabs, views, settings);
+  createWorkspaceTabs(page, {
+    id: 'paradox-instruments', label: 'Drawing board tools', host: tabs,
+    panes: [
+      { id: 'views', label: 'Viewpoints', panel: views },
+      { id: 'instruments', label: 'Instruments', panel: settings },
+    ],
+  });
+  createWorkspaceDialog(page, {
+    id: 'paradox-notes-dialog', title: 'Construction field notes',
+    triggers: [query<HTMLElement>(page.root, '[data-paradox-notes]')],
+    content: [
+      query<HTMLElement>(page.root, '#paradox-camera-help'),
+      query<HTMLElement>(page.root, '.paradox-notebook'),
+      query<HTMLElement>(page.root, '.paradox-footer'),
+    ],
+  });
 
   const scene = query<HTMLElement>(page.root, '[data-paradox-scene]');
   const play = query<HTMLButtonElement>(page.root, '[data-paradox-play]');

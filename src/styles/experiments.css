@@ -53,3 +53,7 @@ input[type="range"]::-moz-range-thumb { width: 12px; height: 12px; border: 0; bo
   .project-error { padding: 35px 20px; }
   .project-error h1 { font-size: 28px; }
 }
+
+@media print {
+  .collection-menu, .project-feedback { display: none !important; }
+}

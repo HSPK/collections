@@ -92,6 +92,7 @@ test('the canvas responds to geometry controls and camera while pause freezes al
   await formation.press('End');
   await expect(formation).toHaveValue('100');
   expect(await canvas.screenshot()).not.toEqual(still);
+  await page.getByRole('button', { name: 'Structures and notes', exact: true }).click();
   await page.getByRole('button', { name: /Twin seeds Two clouds/ }).click();
   await expect(root).toHaveAttribute('data-preset', 'binary');
   const twin = await canvas.screenshot();
@@ -115,7 +116,9 @@ test('the canvas responds to geometry controls and camera while pause freezes al
   await expect(page.getByRole('button', { name: 'Pause animation' })).toBeVisible();
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await expect(page.getByRole('button', { name: 'Play animation' })).toBeVisible();
+  await page.getByRole('button', { name: 'Structures and notes', exact: true }).click();
   await page.getByRole('button', { name: /Return to the first cloud/ }).click();
+  await page.getByRole('button', { name: 'Close Structures and notes', exact: true }).click();
   await expect(root).toHaveAttribute('data-preset', 'cradle');
   await expect(formation).toHaveValue('34');
   await expect(root).toHaveAttribute('data-motion', 'paused');
@@ -139,9 +142,10 @@ test.describe('small-screen observatory', () => {
     });
     expect(renderRatio).toBeGreaterThan(1);
     expect(renderRatio).toBeLessThanOrEqual(1.25);
-    const targets = await root.locator('button, input[type="range"]').evaluateAll((elements) =>
+    const targets = await root.locator('button:visible, input[type="range"]:visible').evaluateAll((elements) =>
       elements.map((element) => element.getBoundingClientRect().height));
     expect(targets.every((height) => height >= 40)).toBe(true);
+    await page.getByRole('button', { name: 'Structures and notes', exact: true }).tap();
     await page.getByRole('button', { name: /Open shell A hollow/ }).tap();
     await expect(root).toHaveAttribute('data-preset', 'shell');
     const wind = page.getByLabel('Stellar wind', { exact: true });
@@ -154,7 +158,9 @@ test.describe('small-screen observatory', () => {
     await expect(root).toHaveAttribute('data-motion', 'playing');
     await canvas.press('Space');
     await expect(root).toHaveAttribute('data-motion', 'paused');
+    await page.getByRole('button', { name: 'Structures and notes', exact: true }).tap();
     await expect(page.getByText('Illustrative, not an astrophysics model.', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Close Structures and notes', exact: true }).tap();
 
     const cleanup = await page.evaluate(async () => {
       const source = '/src/projects/star-nursery/index.ts';
@@ -169,6 +175,7 @@ test.describe('small-screen observatory', () => {
         reducedMotion: true,
         report: () => {},
       });
+
       const created = host.querySelectorAll('canvas').length;
       controller.abort();
       instance.destroy();
@@ -181,3 +188,61 @@ test.describe('small-screen observatory', () => {
     expect(await root.locator('canvas').count()).toBe(1);
   });
 });
+
+for (const viewport of [
+  { width: 1440, height: 900 }, { width: 1280, height: 720 },
+  { width: 375, height: 812 }, { width: 320, height: 640 },
+  { width: 768, height: 480 },
+]) {
+  test(`one-screen sky, live shaping and accessible guide at ${viewport.width}x${viewport.height}`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('./projects/star-nursery/');
+    const root = page.locator('.project-star-nursery');
+    await expect(root).toHaveAttribute('data-workspace', 'true');
+    await expect(page.locator('#main-content > [data-stage]')).toHaveAttribute('data-ready', 'true');
+    const fits = () => page.evaluate(() => ({
+      width: document.documentElement.scrollWidth <= innerWidth,
+      height: document.documentElement.scrollHeight <= innerHeight,
+      controls: [...document.querySelectorAll<HTMLElement>('.sn-workspace button, .sn-workspace input')].every(element => {
+        const bounds = element.getBoundingClientRect();
+        const uncovered = document.querySelector('dialog[open]') || [4, bounds.width / 2, bounds.width - 4].every(x =>
+          [4, bounds.height / 2, bounds.height - 4].every(y =>
+            element.contains(document.elementFromPoint(bounds.left + x, bounds.top + y))));
+        return !!uncovered && bounds.top >= 0 && bounds.bottom <= innerHeight && bounds.left >= 0 && bounds.right <= innerWidth;
+      }),
+    }));
+    await expect.poll(fits).toEqual({ width: true, height: true, controls: true });
+    const canvas = root.locator('canvas');
+    const before = await canvas.screenshot();
+    await page.getByLabel('Formation', { exact: true }).press('End');
+    await expect(page.locator('[data-sn-formation-output]')).toHaveText('100%');
+    await expect.poll(async () => (await canvas.screenshot()).equals(before)).toBe(false);
+    const formed = await canvas.screenshot();
+    await page.getByLabel('Stellar wind', { exact: true }).press('End');
+    await expect.poll(async () => (await canvas.screenshot()).equals(formed)).toBe(false);
+    await page.getByRole('button', { name: 'Structures and notes', exact: true }).click();
+    const dialog = page.getByRole('dialog', { name: 'Structures and notes', exact: true });
+    await expect(dialog).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Close Structures and notes' })).toBeFocused();
+    await page.getByRole('button', { name: /Open shell A hollow/ }).click();
+    await expect(dialog).not.toBeVisible();
+    await expect(root).toHaveAttribute('data-preset', 'shell');
+    await expect(page.getByLabel('Formation', { exact: true })).toHaveValue(String(Math.round(PRESETS[2]!.formation * 100)));
+    await page.getByRole('button', { name: 'Structures and notes', exact: true }).click();
+    const explanation = page.getByText('Illustrative, not an astrophysics model.', { exact: true });
+    await explanation.scrollIntoViewIfNeeded();
+    await expect(explanation).toBeInViewport();
+    await expect.poll(fits).toEqual({ width: true, height: true, controls: true });
+    if (viewport.width === 375) await page.screenshot({ path: test.info().outputPath('star-nursery-guide.png') });
+    await page.keyboard.press('Escape');
+    await expect(dialog).not.toBeVisible();
+    await expect(page.getByRole('button', { name: 'Structures and notes', exact: true })).toBeFocused();
+    await canvas.focus();
+    const camera = await canvas.screenshot();
+    await canvas.press('ArrowRight');
+    await expect.poll(async () => (await canvas.screenshot()).equals(camera)).toBe(false);
+    await expect.poll(fits).toEqual({ width: true, height: true, controls: true });
+    await page.screenshot({ path: test.info().outputPath(`star-nursery-${viewport.width}x${viewport.height}.png`) });
+  });
+}

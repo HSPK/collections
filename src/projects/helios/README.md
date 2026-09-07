@@ -1,19 +1,25 @@
 # HELIOS
 
 A self-contained, lazy-loaded solar-system atlas and Earth observing instrument.
-No runtime network assets, sensors, audio, or automatic camera movement. The
+No third-party runtime requests, sensors, audio, or automatic camera movement. The
 initial study is the computed local peak of the 8 April 2024 eclipse at Nazas,
-Mexico (25.288 N, 104.015 W, 1,250 m). All playback starts paused.
+Mexico (25.288 N, 104.015 W, 1,250 m). Every arrival/restored record starts in
+Manual, with a stationary camera. The stage, clock, general UTC timeline, and
+primary controls share a fixed viewport; there is no document-scroll journey.
+The bottom timeline reserves a local 72 px right-hand safe area for the existing
+collection menu. Its pointer interval and historical marker share the reduced
+usable width; no document clipping, blank footer, or shared-header workaround is
+used. Browser coverage checks actual hit targets and both right-hand drag corners.
 
 ## Workflows
 
-- **Sky / totality:** arrive at Nazas's computed peak. Select C1/C2/Peak/C3/C4,
+- **Sky / totality:** arrive at Nazas's computed peak. Open **Eclipse** and select C1/C2/Peak/C3/C4,
   scrub the contact interval, or step by a second/minute/hour/day. Move to Dallas,
   New York, or Sydney without changing UTC. A preset title never determines the
   instantaneous classification. The observation book includes independently
   searched Dallas total, Albuquerque annular, New York partial, and a Sydney
   same-instant nighttime contrast.
-- **Moon:** select *Observe an evening Moon* for Cape Town on 17 April 2024 at
+- **Moon:** open the **Moon** instrument and select *Observe an evening Moon* for Cape Town on 17 April 2024 at
   18:00 UTC. Switch to London at the same instant. The illuminated hemisphere,
   local-up limb angle, and actual altitude follow the observer. New/first/full/
   last-quarter navigation searches a bounded 35-day interval.
@@ -26,12 +32,92 @@ Mexico (25.288 N, 104.015 W, 1,250 m). All playback starts paused.
   readouts, conventions, and any available event contacts. Share links contain
   only versioned state. Imports ignore saved derived values and recompute them.
   Reset always uses a private copy of the initial computed Nazas observation.
+  Click the UTC readout or step-size/settings button for exact date entry,
+  playback rate, step size, Undo, and Reset.
 
-On mobile, **System / Planet / Sky / Observe** are practical panes, not shrunken
-desktop columns. Observe exposes the relevant current view's controls. The map
-supports one pointer at a time and arrow-key movement; numeric coordinates are
-always available. Canvas arrows orbit/pan; + / - zoom. Native dialogs provide
-focus trapping, Escape, and focus return.
+The desktop desk has **Place / Eclipse / Moon / History** tabs. On smaller or
+short-landscape viewports, the same instruments open in project-native dialogs;
+actions return directly to the still-dimensioned stage. Short event, Moon, and
+history panels fit without internal scrolling. Only long observer/optics forms,
+records, and notes scroll internally. Primary site/body/track/camera controls,
+zoom, Now/Live, transport, and the time axis never require document scrolling.
+Canvas arrows orbit/pan; + / - zoom. Dialogs provide keyboard semantics,
+Escape, and focus return.
+
+### Now, Live, and the general UTC axis
+
+**Now** samples `Date.now()` once and holds that UTC instant. **Live** is explicit
+opt-in synchronization: every sample reads the current device clock directly,
+never a sum of frame deltas. The visible mode distinguishes Manual, Live/device
+UTC, and manual-rate Playback. Device-clock correctness is the user's system's
+responsibility; no external time service or tracking is used.
+
+Observer, body, camera, optical-FOV, and axis-span edits retain Live. Manual date
+entry, general/contact timeline dragging, stepping, playback, phase/event
+navigation, Undo, Reset, and successful import leave Live. Live samples at a
+bounded 250 ms cadence; playback samples its device-time/rate anchor at 125 ms.
+Hidden tabs cancel timers and rendering. Live resynchronizes immediately on
+return; playback is held, without hidden-time catch-up. Reduced motion never
+starts synchronization or camera motion automatically.
+Returning to a held observation also restores any pending current-date contact
+lookup canceled while hidden, without advancing the held UTC instant.
+
+The general UTC axis supports 6 hours, 2 days, 30 days, one Julian year, and ten
+Julian years, bounded to 1900–2100. Drag/tap chooses an absolute instant. Arrows
+move 1/1000 of the window, Shift+arrows 1/100, PageUp/Down one tenth, Home/End to
+the endpoints. A single pointer owns the gesture; layout changes cancel it.
+Pointer calculation is throttled to 80 ms and flushed on release. Contact
+searches settle after a 160 ms release debounce rather than chasing every
+intermediate date. The displayed clock and rendered sky use the same snapshot.
+Keyboard and historical-marker seeks discard any older captured drag and queued
+movement, so its later pointer release cannot replace the newer selection.
+
+The axis marks current device time during Live when in range and the **computed** initial
+Nazas peak (that marker changes UTC but keeps the current observer). **History**
+provides full observer/date studies whose local peaks are computed on selection.
+Only initial Nazas geometry is precomputed for arrival; no historical title
+forces a classification.
+In Manual, Now remains an explicit action rather than a stationary marker
+misrepresenting a device clock that has continued to advance.
+
+### Version-1 compatibility and clock ownership
+
+The existing JSON/share state format is intentionally unchanged: records describe
+one UTC instant, not an instruction to resume a clock. Exports add informational
+`clock.capturedMode`/`restoreMode` metadata; these are never trusted as source
+state. All old version-1 files/links still restore in Manual. Axis window and map
+pan/zoom are transient instrument settings, not ephemeris inputs.
+
+Keep captures a coherent frozen record and share URL, even if Live continues
+behind the dialog. Derived geometry and contact metadata are recomputed on
+restore. Export rejects contacts from another site/day. Automatic clock ticks
+use `StudyHistory.advanceTime` without taking a new user-intent ownership token;
+slow valid files can therefore complete during Live. Explicit edits, reset,
+newer imports, and disposal still invalidate older asynchronous ownership.
+Same-document `#helios=` navigation is handled explicitly, so opening a share
+link in an already-running Live observatory restores its saved instant in
+Manual without relying on a browser reload. A newer time source cancels queued
+drag samples/capture before taking ownership; stale pointer work cannot overwrite
+a restored file, link, Now, or Live command.
+
+### Offline cartography
+
+The picker and Earth texture share unmodified **Natural Earth v5.1.2 1:50 million
+land** GeoJSON: 1,421 polygons / 60,669 positions, 1,636,166 bytes. It is public
+domain and bundled at `public/helios/ne_50m_land.geojson`, with source, terms and
+checksum in [`public/helios/attribution.txt`](../../../public/helios/attribution.txt).
+The data are generalized cartography, not surveyed coastlines or a terrain model.
+No new packages, map tiles, remote runtime endpoints, or geolocation permission.
+
+Map projection is equirectangular/plate carree, north up and east right, with
+longitude wrapped at the date line. Tap picks through the current zoom/pan
+transform; drag pans without moving the observer. + / - zoom, World/0 reset.
+Arrow keys move the observer 1 degree, Shift+arrows 0.1 degree. Numeric
+latitude/longitude/elevation remain available; map picks explicitly use 0 m.
+The texture uses `(lon+180)/360`, `(90-lat)/180` in canvas coordinates and the
+existing vertically flipped THREE texture convention. Map views cannot pan
+past the poles. GeoJSON is bounded and validated, including rings/holes,
+topology, finite ranges, same-origin loading, and aborts.
 
 ## Scientific conventions
 
@@ -133,7 +219,12 @@ spheres, not solid ground.
 ## Rendering and resource ownership
 
 - `math.ts`, `time.ts`: finite vector/disk math and strict UTC parsing.
-- `data.ts`, `atlas.ts`: body/site/study data and original schematic geography.
+- `data.ts`: body/site/study data.
+- `geography.ts`, `map.ts`, `atlas.ts`: validated shared Natural Earth geometry,
+  transformed map picking, and the bounded 2048 x 1024 Earth texture.
+- `clock.ts`: Node-testable Manual/Live/Playback source, independent of RAF.
+- `timeline.ts`, `time-axis.ts`: bounded UTC windows, exact pointer/keyboard
+  mapping, anchors, throttling, and gesture/resource ownership.
 - `astronomy.ts`: thin typed engine adapter; testable in Node without a DOM.
 - `eclipse.ts`, `eclipse.worker.ts`, `search.ts`: current/next searches, typed
   worker boundary, cancellation/deadline, and bounded 24-entry cache.
@@ -151,15 +242,16 @@ calculations. Lighting always comes from physical vectors, never the displaced
 display Sun. Orbit traces are sampled ephemerides over one approximate orbital
 period, cached by month; they are traces, not a circular Keplerian substitute.
 
-Earth texture and map share the same original continent polygons and longitude/
-latitude convention. Their outlines, lunar albedo, cloud bands, stars, ambient
-fill, ring art, and the restrained totality corona are illustrative artwork.
+Earth texture and map share Natural Earth's generalized coastlines and the same
+longitude/latitude convention. Lunar albedo, cloud bands, stars, ambient
+fill, ring art, and the restrained totality corona remain illustrative artwork.
 Sky optics preserve true angles with rectilinear projection, but their color,
 attenuation, and slight lunar fill are not an exposure model. Corona is enabled
 only for actual geometric totality with the entire Sun above the horizon.
 
-Resting views render on demand. Playback recomputes a shared observation snapshot
-at a bounded cadence; hidden pages pause and never accumulate wall-clock time.
+Resting views render on demand. Clock sampling and RAF drawing are separate;
+no continuous resting/Live RAF loop is needed. Viewport changes resize the canvas
+and angular ruler; opening instruments never removes or zero-sizes the stage.
 If a next-event search interrupts pending current-date contacts, an intervening
 edit invalidates that future jump and restores the current observation's contact
 search. Canceled work cannot leave the timeline permanently marked as solving.
@@ -186,15 +278,23 @@ under `/collections/projects/helios/`.
 - [USNO eclipse convention notes](https://aa.usno.navy.mil/data/Eclipse2024#notes)
 - [IAU WGCCRE 2015 rotational elements](https://astropedia.astrogeology.usgs.gov/download/Docs/WGCCRE/WGCCRE2015reprint.pdf)
 - [Espenak-Meeus Delta T polynomials](https://eclipse.gsfc.nasa.gov/SEhelp/deltatpoly2004.html)
+- [Natural Earth public-domain terms](https://www.naturalearthdata.com/about/terms-of-use/)
+- [Pinned Natural Earth v5.1.2 land data](https://github.com/nvkelso/natural-earth-vector/blob/v5.1.2/geojson/ne_50m_land.geojson)
 
 ## Owned checks and extension points
 
 Run only `tests/projects/helios*.spec.ts` against the existing shared development
 server. The deterministic models cover frames, planets, UTC, parallax, phases,
 disk overlap, contacts and event dates, below-horizon behavior, state ownership,
-export integrity, and reset isolation. Browser workflows cover rendered totality,
+export integrity, reset isolation, Date.now sources, axis bounds, detailed map
+topology and transformed picking. Browser workflows cover rendered totality,
 changed observer/time, Moon light, every planetary viewpoint, JSON/share restore,
-mobile panes, and lifecycle. Screenshots are kept as test artifacts.
+clock jumps, hidden-tab resync, Live-to-Manual transitions, delayed import
+ownership, date-line map picking, and lifecycle. No-document-scroll workflows
+run at 1440x900, 1280x720, 375x812, 320x640, and 844x390, including immediate
+responsive resizing and short instrument panels. The preserved regressions
+include Sydney 2014's below-horizon peak/visible C1 and Albuquerque 2012's
+next-day local peak. Screenshots and failure traces are test artifacts.
 
 Useful selectors: `.project-helios[data-ready=true]`, `[data-h-host] canvas`,
 `[data-h-view=system|planet|sky]`, `#h-body`, `[data-h-camera=orbit|ride]`,
@@ -202,6 +302,15 @@ Useful selectors: `.project-helios[data-ready=true]`, `[data-h-host] canvas`,
 `[data-h-action=set-time]`, `[data-h-track=Sun|Moon|horizon]`, `#h-fov`,
 `[data-h-contact=Peak]`, `#h-event-scrub`, `[data-h-study=nazas|dallas|annular|partial|night]`,
 `[data-h-action=moon-study]`, `[data-h-action=keep]`, `#h-record`, `#h-file`.
+
+New workspace selectors: `.h-time-readout`, `[data-h-action=now|live]`,
+`[data-h-time-axis]`, `#h-timespan`, `[data-h-axis-history]`,
+`.h-instrument-launchers [data-h-open=observer|eclipse|moon|journeys]`,
+`[data-h-panel]`, `[data-h-action=close-dock]`, `#h-track-select`,
+`#h-camera-select`, `[data-h-map-canvas]`, `[data-h-action=map-in|map-out|map-reset]`.
+The root exposes `data-clock-mode` and the exact `data-time`. Actual completed
+scene draws increment the canvas's `data-render-count`; it does not imply a
+synthetic ready state.
 
 Extensions should keep Earth observations and display transforms separate. If
 adding a new apparent body, verify its light-time/aberration and frame conventions.

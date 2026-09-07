@@ -35,3 +35,23 @@ capture, and listeners are disposed with the page. Discoveries last only for the
 current mount. Reset lamp preserves the visit's discoveries.
 
 Focused coverage lives in `tests/series/shadow-play.spec.ts`.
+
+## Viewport workspace
+
+The project root is a `data-workspace="true"` viewport-height flex layout. The
+light table receives the remaining space rather than retaining a fixed minimum
+canvas height. Its original uniform table fit is also the pointer inverse, so
+resizing does not change the lamp's millimetre coordinates or alignment rules.
+
+The **Lamp** dock contains all three sliders, the lamp guide, and reset.
+**Studies** contains the three arrangements, discovery feedback, tracing, and
+rays. Only the dock scrolls; changing tabs never hides or resizes the canvas.
+Discovery messages are also announced outside the inactive panes. **Table notes**
+opens a native, internally scrolling dialog with the geometry explanation.
+The footer leaves room for the collection menu. Shared workspace helpers own
+keyboard tab navigation, inactive-panel focus, and dialog cleanup.
+
+The focused suite retains the geometry and touch tests and checks 1440×900,
+1280×720, 375×812, 320×640, and 768×480: fixed document dimensions, usable primary
+controls, stable canvas bounds across tabs, resized pointer mapping, and dialog
+Escape/focus restoration. It writes viewport screenshots to its test output.

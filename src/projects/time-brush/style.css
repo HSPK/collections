@@ -235,3 +235,118 @@
 @media (prefers-reduced-motion: reduce) {
   .project-time-brush button { transition: none; }
 }
+
+.project-time-brush[data-workspace] { height: 100dvh; min-height: 0; }
+.project-time-brush .tb-shell {
+  height: 100%; min-height: 0; padding: 14px 24px;
+  display: grid; grid-template-rows: auto minmax(0, 1fr);
+}
+.project-time-brush .tb-masthead { padding-bottom: 12px; }
+.project-time-brush .tb-overline { margin-bottom: 6px; }
+.project-time-brush h1 { font-size: clamp(38px, 4.1vw, 58px); }
+.project-time-brush .tb-title-row > p { max-width: 460px; font-size: 14px; line-height: 1.4; }
+.project-time-brush .tb-workbench {
+  min-height: 0; overflow: visible;
+  grid-template-columns: minmax(0, 1fr) 304px;
+  /* Live feedback plus the shell's 14px padding clears the 64px menu corner. */
+  grid-template-rows: auto minmax(0, 1fr) 50px;
+}
+.project-time-brush .tb-modebar { padding: 8px 12px; gap: 16px; }
+.project-time-brush .tb-mode { min-height: 54px; padding: 5px 8px; gap: 8px; }
+.project-time-brush .tb-screen { min-height: 0; }
+.project-time-brush .tb-screen-bar,
+.project-time-brush .tb-stage-caption,
+.project-time-brush .tb-scene-actions { flex-shrink: 0; }
+.project-time-brush .tb-stage { height: auto; min-height: 0; flex: 1 1 0; }
+.project-time-brush .tb-stage-caption { padding: 5px 12px; }
+.project-time-brush .tb-scene-actions button { min-height: 44px; }
+.project-time-brush .tb-console {
+  min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 45px minmax(0, 1fr);
+  border-top: 0; border-left: 1px solid #a7b5d17a;
+}
+.project-time-brush .workspace-tabs { padding: 0 6px; border-bottom: 1px solid #aeb9c2; }
+.project-time-brush[data-workspace] .workspace-tabs > button { min-height: 44px; padding: 7px; }
+.project-time-brush .tb-dock-pane {
+  min-height: 0; min-width: 0; overflow: auto; overscroll-behavior: contain;
+  scrollbar-width: thin; scrollbar-gutter: stable;
+}
+.project-time-brush .tb-brush-panel,
+.project-time-brush .tb-watch-panel { padding: 14px; border: 0; }
+.project-time-brush .tb-watch-panel > label { margin-top: 8px; }
+.project-time-brush .tb-aim-readout { padding-block: 10px; }
+.project-time-brush .tb-discoveries { margin: 0; padding: 14px; }
+.project-time-brush .tb-section-heading { margin-bottom: 12px; }
+.project-time-brush .tb-section-heading h2 { color: #203369; font-size: 24px; }
+.project-time-brush .tb-section-heading > span { display: none; }
+.project-time-brush .tb-discovery-grid { grid-template-columns: minmax(0, 1fr); }
+.project-time-brush .tb-discovery { padding: 14px; }
+.project-time-brush .tb-reference { padding: 14px; border-top: 1px solid #aeb9c2; }
+.project-time-brush .tb-brush-description { margin: 10px 0; }
+.project-time-brush .tb-footer {
+  margin: 0; padding: 14px; grid-template-columns: minmax(0, 1fr); gap: 12px;
+  color: #52607c; border-color: #aeb9c2;
+}
+.project-time-brush .tb-footer strong,
+.project-time-brush .tb-footer summary { color: #203369; }
+.project-time-brush .tb-feedback {
+  min-height: 0; padding: 5px 68px 5px 12px; overflow: auto;
+  overscroll-behavior: contain; font-size: 14px; line-height: 1.3;
+}
+.project-time-brush :is(
+  .tb-overline, .tb-mode-label, .tb-mode small, .tb-mode strong, .tb-mode-note,
+  .tb-run-state, .tb-clock-total, .tb-play, .tb-stage-caption, .tb-scene-actions button,
+  .tb-brush-chip, .tb-size-label, .tb-size-label output, .tb-small,
+  .tb-aim-readout span, .tb-aim-readout > output, .tb-keyboard-note, kbd,
+  .tb-clock-readings span, .tb-watch-state, .tb-aim-object, .tb-discovery-number
+) { font-size: 14px; }
+
+@media (max-width: 650px) {
+  .project-time-brush .tb-shell { padding: 8px 10px 14px; }
+  .project-time-brush .tb-masthead { padding-bottom: 8px; }
+  .project-time-brush .tb-overline { margin-bottom: 4px; }
+  .project-time-brush .tb-brand { font-size: 14px; letter-spacing: -.025em; gap: 4px; }
+  .project-time-brush .tb-brand svg { width: 16px; height: 16px; }
+  .project-time-brush h1 { font-size: 38px; }
+  .project-time-brush .tb-title-row > p { display: none; }
+  .project-time-brush .tb-workbench {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 60px minmax(0, 1fr) 198px 50px;
+  }
+  .project-time-brush .tb-modebar { padding: 4px 6px; }
+  .project-time-brush .tb-mode { min-height: 50px; gap: 3px; padding: 4px 2px; }
+  .project-time-brush .tb-mode-symbol { display: none; }
+  .project-time-brush .tb-screen-bar { min-height: 44px; gap: 8px; padding-left: 8px; }
+  .project-time-brush .tb-clock-total { display: none; }
+  .project-time-brush .tb-play { min-width: 90px; }
+  .project-time-brush .tb-stage-caption { padding: 3px 8px; gap: 4px; }
+  .project-time-brush .tb-stage-caption > span { display: none; }
+  .project-time-brush .tb-scene-actions button { min-height: 44px; padding: 3px; flex-direction: row; gap: 3px; }
+  .project-time-brush .tb-scene-actions svg { display: none; }
+  .project-time-brush .tb-console { border-left: 0; border-top: 1px solid #aeb9c2; }
+  .project-time-brush .tb-brush-panel {
+    padding: 7px 10px; display: grid;
+    grid-template-columns: 115px minmax(0, 1fr); gap: 4px 8px;
+  }
+  .project-time-brush .tb-size-label { flex-wrap: wrap; gap: 0 8px; }
+  .project-time-brush .tb-stamp { min-height: 44px; padding: 7px; }
+  .project-time-brush .tb-stamp,
+  .project-time-brush .tb-nudges { grid-column: 1 / -1; }
+  .project-time-brush .tb-nudges { margin-top: 0; }
+  .project-time-brush .tb-feedback { padding: 2px 62px 2px 8px; }
+}
+@media (max-width: 360px) {
+  .project-time-brush .tb-overline { display: none; }
+}
+@media (min-width: 651px) and (max-height: 560px) {
+  .project-time-brush .tb-shell { padding: 8px 14px 14px; }
+  .project-time-brush .tb-masthead { padding-bottom: 8px; }
+  .project-time-brush .tb-overline { display: none; }
+  .project-time-brush .tb-title-row > p { max-width: 320px; }
+  .project-time-brush h1 { font-size: 38px; }
+  .project-time-brush .tb-workbench { grid-template-columns: minmax(0, 1fr) 260px; }
+  .project-time-brush .tb-mode-label { display: none; }
+  .project-time-brush .tb-screen-bar { gap: 10px; padding-left: 10px; }
+  .project-time-brush .tb-clock-total { display: none; }
+  .project-time-brush .tb-scene-actions svg { display: none; }
+}

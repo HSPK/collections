@@ -83,3 +83,70 @@
 @media (prefers-reduced-motion: reduce) {
   .project-ink-water *, .project-ink-water *::before, .project-ink-water *::after { scroll-behavior: auto; }
 }
+
+.project-ink-water[data-workspace] {
+  --workspace-paper: #f5f4f0;
+  height: 100dvh;
+  min-height: 0;
+}
+.project-ink-water[data-workspace] .iw-page {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 16px;
+  height: 100%;
+  padding: 18px clamp(12px, 2.5vw, 40px);
+}
+.project-ink-water[data-workspace] .iw-header { margin: 0; padding-right: 48px; gap: 12px; }
+.project-ink-water[data-workspace] h1 { font-size: clamp(30px, 3.2vw, 46px); }
+.project-ink-water[data-workspace] .iw-header button { white-space: nowrap; }
+.project-ink-water[data-workspace] .iw-workbench {
+  min-height: 0;
+  align-items: stretch;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 24px;
+}
+.project-ink-water[data-workspace] .iw-exhibit { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-height: 0; }
+.project-ink-water[data-workspace] .iw-tank { min-height: 0; height: auto; }
+.project-ink-water[data-workspace] .iw-tank canvas { position: absolute; inset: 0; }
+.project-ink-water[data-workspace] .iw-exhibit-heading { flex-wrap: wrap; padding-block: 8px; letter-spacing: .02em; }
+.project-ink-water[data-workspace] .iw-tracers { display: inline; font-size: 14px; }
+.project-ink-water[data-workspace] .iw-transport { padding-top: 10px; }
+.project-ink-water[data-workspace] .iw-transport [data-clear] { margin-left: auto; }
+.project-ink-water[data-workspace] .iw-desk { display: flex; flex-direction: column; justify-content: center; padding: 14px 0; }
+.project-ink-water[data-workspace] .iw-inks button { font-size: 14px; }
+.project-ink-water[data-workspace] .iw-viscosity { padding: 20px 0 0; margin-top: 20px; }
+.project-ink-water[data-workspace] :is(.iw-range-labels, .iw-hint, .iw-status, .iw-viscosity p, .iw-model-note p, .iw-footer) { font-size: 14px; }
+.project-ink-water[data-workspace] .workspace-dialog .iw-intro { display: block; max-width: none; margin: 0 0 16px; }
+.project-ink-water[data-workspace] .workspace-dialog-content h2 { font: italic 30px/1.2 Georgia, serif; }
+.project-ink-water[data-workspace] .workspace-dialog .iw-footer { grid-template-columns: 1fr; gap: 10px; }
+.project-ink-water[data-workspace] .workspace-dialog .iw-footer > :last-child { display: block; text-align: left; }
+@media (max-width: 600px) {
+  .project-ink-water[data-workspace] .iw-page { padding: 10px 10px max(10px, env(safe-area-inset-bottom)); gap: 10px; }
+  .project-ink-water[data-workspace] .iw-header { gap: 6px; padding-right: 0; }
+  .project-ink-water[data-workspace] .iw-identity { gap: 7px; }
+  .project-ink-water[data-workspace] .iw-mark { width: 15px; height: 24px; flex-shrink: 0; }
+  .project-ink-water[data-workspace] .iw-eyebrow { font-size: 12px; letter-spacing: 0; }
+  .project-ink-water[data-workspace] h1 { font-size: 29px; }
+  .project-ink-water[data-workspace] .iw-header button { padding: 7px; white-space: normal; line-height: 1.2; }
+  .project-ink-water[data-workspace] .iw-workbench { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; gap: 10px; }
+  .project-ink-water[data-workspace] .iw-exhibit-heading { gap: 4px; font-size: 12px; }
+  .project-ink-water[data-workspace] .iw-tracers { font-size: 14px; }
+  .project-ink-water[data-workspace] .iw-transport { display: grid; grid-template-columns: .7fr 1.2fr 1fr; gap: 6px; }
+  .project-ink-water[data-workspace] .iw-transport button { min-width: 0; margin: 0; padding: 6px; line-height: 1.2; }
+  .project-ink-water[data-workspace] .iw-transport [data-pour] { gap: 4px; }
+  .project-ink-water[data-workspace] .iw-desk { padding: 8px 0 0; }
+  .project-ink-water[data-workspace] .iw-inks legend { margin-bottom: 5px; }
+  .project-ink-water[data-workspace] .iw-inks button { padding: 6px 3px; gap: 6px; }
+  .project-ink-water[data-workspace] .iw-swatch { width: 20px; height: 20px; flex-shrink: 0; }
+  .project-ink-water[data-workspace] .iw-viscosity { padding: 0 56px 0 0; border: 0; margin-top: 8px; }
+  .project-ink-water[data-workspace] input[type="range"] { margin: 0; }
+}
+@media (max-width: 350px) {
+  .project-ink-water[data-workspace] .iw-mark { display: none; }
+  .project-ink-water[data-workspace] h1 { font-size: 26px; white-space: nowrap; }
+}
+@media (max-height: 540px) and (min-width: 601px) {
+  .project-ink-water[data-workspace] .iw-page { padding-block: 10px max(10px, env(safe-area-inset-bottom)); gap: 10px; }
+  .project-ink-water[data-workspace] h1 { font-size: 30px; }
+  .project-ink-water[data-workspace] .iw-workbench { grid-template-columns: minmax(0, 1fr) 230px; gap: 16px; }
+}

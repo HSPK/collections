@@ -99,6 +99,117 @@ test.describe('Palette Kitchen color engine', () => {
 });
 
 test.describe('Palette Kitchen site', () => {
+  for (const viewport of [
+    { width: 1440, height: 900 }, { width: 1280, height: 720 },
+    { width: 375, height: 812 }, { width: 320, height: 640 }, { width: 768, height: 480 },
+  ]) {
+    test(`single-screen mixing, tasting and keeping at ${viewport.width}×${viewport.height}`, async ({ page }, testInfo) => {
+      await page.setViewportSize(viewport);
+      await page.goto('./projects/palette/');
+      const inFrame = async (selector: string) => {
+        const element = page.locator(selector);
+        await expect(element).toBeVisible();
+        const bounds = (await element.boundingBox())!;
+        expect(bounds.x).toBeGreaterThanOrEqual(0);
+        expect(bounds.y).toBeGreaterThanOrEqual(0);
+        expect(bounds.x + bounds.width).toBeLessThanOrEqual(viewport.width + 1);
+        expect(bounds.y + bounds.height).toBeLessThanOrEqual(viewport.height + 1);
+        expect(await element.evaluate((node) => {
+          const bounds = node.getBoundingClientRect();
+          const target = document.elementFromPoint(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+          return target === node || node.contains(target);
+        })).toBe(true);
+      };
+      const fits = async () => {
+        expect(await page.evaluate(() => ({
+          x: scrollX, y: scrollY,
+          extraWidth: document.documentElement.scrollWidth - innerWidth,
+          extraHeight: document.documentElement.scrollHeight - innerHeight,
+        }))).toEqual({ x: 0, y: 0, extraWidth: 0, extraHeight: 0 });
+        await inFrame('[data-status]');
+      };
+      await expect(page.locator('.project-palette')).toHaveAttribute('data-workspace', 'true');
+      await inFrame('.pk-spectrum');
+      await inFrame('[data-base]');
+      await inFrame('[data-warmth]');
+      await fits();
+      await page.screenshot({ path: testInfo.outputPath(`palette-${viewport.width}-mix.png`) });
+      await page.locator('[data-base]').fill('#wrong');
+      await page.getByRole('button', { name: 'Mix color', exact: true }).click();
+      await expect(page.getByRole('dialog', { name: 'Check this recipe', exact: true })).toBeVisible();
+      await expect(page.locator('[data-base-error]')).toBeVisible();
+      await page.getByRole('button', { name: 'Close Check this recipe', exact: true }).click();
+      await fits();
+      await page.locator('[data-base]').fill('#123');
+      await page.getByRole('button', { name: 'Mix color', exact: true }).click();
+      await page.locator('[data-role="accent"]').click();
+      await inFrame('[data-pigment]');
+      await page.locator('[data-pigment]').fill('#010203');
+      await page.getByRole('button', { name: 'Apply', exact: true }).click();
+      await page.getByRole('button', { name: 'Recipes', exact: true }).click();
+      await page.getByRole('button', { name: /Recipe 02 Cobalt crockery/ }).click();
+      await expect(page.getByRole('tab', { name: 'Pigment', exact: true })).toHaveAttribute('aria-selected', 'true');
+      await expect(page.locator('[data-pigment]')).toHaveValue('#010203');
+      await fits();
+      await page.getByRole('tab', { name: 'Taste', exact: true }).click();
+      await inFrame('[data-pair-ratio]');
+      await inFrame('[data-copy-pair]');
+      await page.screenshot({ path: testInfo.outputPath(`palette-${viewport.width}-taste.png`) });
+      await page.locator('[data-foreground]').selectOption('base');
+      await page.locator('[data-background]').selectOption('base');
+      await expect(page.locator('[data-pair-ratio]')).toHaveText('1.00:1');
+      await fits();
+      await page.getByRole('tab', { name: 'Keep', exact: true }).click();
+      await inFrame('[data-download-svg]');
+      await inFrame('[data-save-form] button');
+      await inFrame('.pk-pantry > button');
+      await page.screenshot({ path: testInfo.outputPath(`palette-${viewport.width}-keep.png`) });
+      await page.locator('[data-recipe-name]').fill('Screen-sized recipe');
+      await page.getByRole('button', { name: 'Save to pantry', exact: true }).click();
+      await page.getByRole('button', { name: 'Open pantry', exact: true }).click();
+      await expect(page.getByRole('button', { name: 'Load Screen-sized recipe', exact: true })).toBeVisible();
+      await page.getByRole('button', { name: 'Remove Screen-sized recipe from pantry', exact: true }).click();
+      await expect(page.locator('[data-shelf]')).toContainText('An empty shelf');
+      await page.getByRole('button', { name: 'Close Saved recipe pantry', exact: true }).click();
+      const download = page.waitForEvent('download');
+      await page.getByRole('button', { name: 'Download CSS', exact: true }).click();
+      expect((await download).suggestedFilename()).toBe('palette-kitchen.css');
+      await fits();
+    });
+  }
+
+  test('failed pantry writes remain visibly unsaved without changing the palette', async ({ page }) => {
+    await page.addInitScript(() => {
+      Storage.prototype.setItem = () => { throw new DOMException('Storage unavailable', 'QuotaExceededError'); };
+    });
+    await page.reload();
+    await page.getByRole('tab', { name: 'Keep', exact: true }).click();
+    await page.getByRole('button', { name: 'Save to pantry', exact: true }).click();
+    await expect(page.locator('[data-save-error]')).toBeVisible();
+    await expect(page.locator('[data-save-error]')).toContainText('not saved');
+    await expect(page.locator('[data-chip-hex="base"]')).toHaveText('#B74732');
+    await page.getByRole('button', { name: 'Close Check this recipe', exact: true }).click();
+    await page.getByRole('button', { name: 'Open pantry', exact: true }).click();
+    await expect(page.locator('[data-shelf]')).toContainText('An empty shelf');
+  });
+
+  test('tabs and native dialogs keep keyboard focus and selected pigment context', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 640 });
+    await page.getByRole('tab', { name: 'Mix', exact: true }).focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(page.getByRole('tab', { name: 'Pigment', exact: true })).toBeFocused();
+    await page.locator('[data-pigment]').fill('#wrong');
+    await page.getByRole('button', { name: 'Apply', exact: true }).click();
+    await expect(page.locator('[data-pigment-error]')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('[data-pigment]')).toBeFocused();
+    await page.getByRole('button', { name: 'Notes', exact: true }).click();
+    await expect(page.getByRole('dialog', { name: 'Kitchen notes', exact: true })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('button', { name: 'Notes', exact: true })).toBeFocused();
+    await expect(page.getByRole('tab', { name: 'Pigment', exact: true })).toHaveAttribute('aria-selected', 'true');
+  });
+
   test('maker content density: swatches lead the page and mark its preview', async ({ page }) => {
     for (const viewport of [{ width: 1322, height: 1160 }, { width: 375, height: 812 }]) {
       await page.setViewportSize(viewport);
@@ -114,6 +225,8 @@ test.describe('Palette Kitchen site', () => {
   });
 
   test.beforeEach(async ({ page }) => {
+    // Keep unrelated Vite updates from resetting this in-memory recipe mid-test.
+    await page.routeWebSocket(url => url.searchParams.has('token'), () => {});
     await page.goto('./projects/palette/');
     await expect(page.locator('.project-palette h1')).toContainText('Palette Kitchen');
   });
@@ -125,6 +238,7 @@ test.describe('Palette Kitchen site', () => {
     await page.getByRole('button', { name: 'Mix color', exact: true }).click();
     await expect(page.locator('[data-base-error]')).toContainText('Your palette has not changed');
     await expect(base).toHaveText(before!);
+    await page.getByRole('button', { name: 'Close Check this recipe', exact: true }).click();
     await page.locator('[data-base]').fill('#123');
     await page.getByRole('button', { name: 'Mix color', exact: true }).click();
     await expect(base).toHaveText('#112233');
@@ -135,29 +249,38 @@ test.describe('Palette Kitchen site', () => {
     await page.locator('[data-role="accent"]').click();
     await page.getByLabel('Edit this pigment', { exact: true }).fill('#010203');
     await page.getByRole('button', { name: 'Apply', exact: true }).click();
+    await page.getByRole('button', { name: 'Recipes', exact: true }).click();
     await page.getByRole('button', { name: /Recipe 02 Cobalt crockery/ }).click();
     await expect(page.locator('[data-chip-hex="accent"]')).toHaveText('#010203');
     await page.getByRole('button', { name: 'Unpin pigment', exact: true }).click();
     await expect(page.locator('[data-chip-hex="accent"]')).not.toHaveText('#010203');
-    await page.getByText('Open the full pairing table', { exact: false }).click();
+    await page.getByRole('tab', { name: 'Taste', exact: true }).click();
+    await page.getByRole('button', { name: 'Open the full pairing table', exact: true }).click();
     await page.locator('[data-pair-fg="base"][data-pair-bg="base"]').click();
     await expect(page.locator('[data-pair-ratio]')).toHaveText('1.00:1');
     await expect(page.locator('[data-pair-verdict]')).toContainText('AA does not pass');
   });
 
   test('keeps named pantry snapshots across page reloads and safely renders names', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Keep', exact: true }).click();
     await page.locator('[data-recipe-name]').fill('<b>My palette</b>');
     await page.getByRole('button', { name: 'Save to pantry', exact: true }).click();
     await expect(page.locator('[data-shelf]')).toContainText('<b>My palette</b>');
     await expect(page.locator('[data-shelf] b')).toHaveCount(0);
     await page.reload();
+    await page.getByRole('tab', { name: 'Keep', exact: true }).click();
+    await page.getByRole('button', { name: 'Open pantry', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Load <b>My palette</b>', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Close Saved recipe pantry', exact: true }).click();
+    await page.getByRole('button', { name: 'Recipes', exact: true }).click();
     await page.getByRole('button', { name: /Recipe 03 Plum preserve/ }).click();
+    await page.getByRole('button', { name: 'Open pantry', exact: true }).click();
     await page.getByRole('button', { name: 'Load <b>My palette</b>', exact: true }).click();
     await expect(page.locator('[data-chip-hex="base"]')).toHaveText('#B74732');
   });
 
   test('downloads real SVG and CSS files', async ({ page }) => {
+    await page.getByRole('tab', { name: 'Keep', exact: true }).click();
     const svgDownload = page.waitForEvent('download');
     await page.getByRole('button', { name: 'Keep SVG card', exact: true }).click();
     const svg = await svgDownload;

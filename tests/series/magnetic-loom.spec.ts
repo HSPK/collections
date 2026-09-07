@@ -3,6 +3,7 @@ import { BED, DEFAULT_MAGNETS } from '../../src/projects/magnetic-loom/data';
 import { LoomEngine, MAX_HOME_DRIFT, MAX_SPEED } from '../../src/projects/magnetic-loom/engine';
 import { MAX_FIELD, MAX_GRADIENT, polesFor, sampleField } from '../../src/projects/magnetic-loom/field';
 import type { Magnet } from '../../src/projects/magnetic-loom/field';
+import { expectWorkspaceViewport, visibleControlProblems } from '../helpers/workspace';
 
 test('Magnetic Loom: softened field is symmetric, polarity-sensitive, and filings stay bounded', () => {
   const magnet: Magnet = { id: 'A', x: 500, y: 380, angle: 0, polarity: 1 };
@@ -124,7 +125,9 @@ test('Magnetic Loom: drag, keyboard, rotation and flip change the field; pause t
   await page.keyboard.press('Space');
   await expect(root).toHaveAttribute('data-motion', 'playing');
   await page.getByRole('button', { name: 'Pause animation', exact: true }).click();
+  await page.getByRole('button', { name: 'Field notes and settings', exact: true }).click();
   await page.getByRole('button', { name: /Reset arrangement/ }).click();
+  await page.getByRole('button', { name: 'Close Field notes and settings', exact: true }).click();
   await expect(angle).toHaveValue('-28');
   await expect(handle).toHaveAttribute('data-polarity', '1');
   await expect(page.getByRole('button', { name: 'Play animation', exact: true })).toBeVisible();
@@ -157,7 +160,9 @@ test('Magnetic Loom: 375px reduced-motion entry is settled, usable and responsiv
   await expect(coordinates).not.toHaveText(previous!);
   await expect.poll(bitmap).not.toBe(still);
   await page.getByRole('button', { name: /Shake bed/ }).click();
+  await page.getByRole('button', { name: 'Field notes and settings', exact: true }).click();
   await expect(page.getByRole('status').filter({ hasText: 'The bed is shaken' })).toContainText('Press Play');
+  await page.getByRole('button', { name: 'Close Field notes and settings', exact: true }).click();
   await page.waitForTimeout(80);
   const scattered = await bitmap();
   await page.waitForTimeout(180);
@@ -167,12 +172,93 @@ test('Magnetic Loom: 375px reduced-motion entry is settled, usable and responsiv
   await expect.poll(bitmap).not.toBe(scattered);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await expect(root).toHaveAttribute('data-motion', 'paused');
-  const sizes = await root.locator('button, label').evaluateAll((elements) => elements.map((element) => ({
+  const sizes = await root.locator('button:visible, label:visible').evaluateAll((elements) => elements.map((element) => ({
     font: Number.parseFloat(getComputedStyle(element).fontSize),
     height: element.getBoundingClientRect().height,
     isButton: element.tagName === 'BUTTON',
   })));
-  expect(sizes.every((item) => item.font >= 12)).toBe(true);
+  expect(sizes.every((item) => item.font >= 14)).toBe(true);
   expect(sizes.filter((item) => item.isButton).every((item) => item.height >= 44)).toBe(true);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
+
+for (const [width, height] of [[1440, 900], [1280, 720], [375, 812], [320, 640], [768, 480]]) {
+  test(`magnetic workspace ${width}x${height}: live field edits and secondary notes fit the viewport`, async ({ page }) => {
+    await page.setViewportSize({ width, height });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('./projects/magnetic-loom/');
+    const root = page.locator('.project-magnetic-loom');
+    const canvas = root.locator('canvas');
+    const bitmap = () => canvas.evaluate(node => (node as HTMLCanvasElement).toDataURL());
+    await expect(root).toHaveAttribute('data-workspace', 'true');
+    await expect(root).toHaveAttribute('data-motion', 'paused');
+    await expectWorkspaceViewport(page, width, height);
+    expect(await visibleControlProblems(root)).toEqual([]);
+    const menu = (await page.getByRole('button', { name: 'Collection menu', exact: true }).boundingBox())!;
+    expect(await root.locator('button:visible, input:visible').evaluateAll((controls, corner) =>
+      controls.filter(control => {
+        const box = control.getBoundingClientRect();
+        return box.left < corner.x + corner.width && box.right > corner.x &&
+          box.top < corner.y + corner.height && box.bottom > corner.y;
+      }).map(control => control.getAttribute('aria-label') || control.id || control.textContent), menu)).toEqual([]);
+    for (const selector of ['[data-select-magnet="1"]', '#ml-angle', '[data-move="0,10"]', '[data-flip]', '[data-play]', '[data-shake]']) {
+      await expect(root.locator(selector)).toBeInViewport({ ratio: 1 });
+    }
+    await page.screenshot({ path: test.info().outputPath(`magnetic-${width}x${height}.png`) });
+    const initial = await bitmap();
+    const position = root.locator('[data-position]');
+    const oldPosition = await position.textContent();
+    await page.getByRole('button', { name: 'Move magnet right', exact: true }).click();
+    await expect(position).not.toHaveText(oldPosition!);
+    await expect.poll(bitmap).not.toBe(initial);
+    const angle = page.getByRole('slider', { name: 'Magnet angle', exact: true });
+    const beforeTurn = await bitmap();
+    await angle.focus();
+    await angle.press('Home');
+    await expect(angle).toHaveValue('-180');
+    await expect.poll(bitmap).not.toBe(beforeTurn);
+    await page.getByRole('button', { name: 'Flip pole', exact: true }).click();
+    await expect(root.locator('[data-magnet-handle="0"]')).toHaveAttribute('data-polarity', '-1');
+    const trigger = page.getByRole('button', { name: 'Field notes and settings', exact: true });
+    await trigger.click();
+    const dialog = page.getByRole('dialog', { name: 'Field notes and settings', exact: true });
+    await expect(dialog).toBeVisible();
+    const traces = await bitmap();
+    await page.getByLabel('Show field traces', { exact: true }).uncheck();
+    await expect.poll(bitmap).not.toBe(traces);
+    await page.getByRole('button', { name: 'Reset arrangement', exact: true }).click();
+    await expect(angle).toHaveValue('-28');
+    await expect(root.locator('[data-magnet-handle="0"]')).toHaveAttribute('data-polarity', '1');
+    await root.locator('.ml-colophon').scrollIntoViewIfNeeded();
+    await expectWorkspaceViewport(page, width, height);
+    if (width === 320) await page.screenshot({ path: test.info().outputPath('magnetic-notes-dialog.png') });
+    await page.keyboard.press('Escape');
+    await expect(dialog).not.toBeVisible();
+    await expect(trigger).toBeFocused();
+    const magnet = root.locator('[data-magnet-handle="0"]');
+    const bounds = (await magnet.boundingBox())!;
+    const beforeDrag = await position.textContent();
+    await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(bounds.x + bounds.width / 2 + 20, bounds.y + bounds.height / 2 - 12, { steps: 4 });
+    await page.mouse.up();
+    await expect(position).not.toHaveText(beforeDrag!);
+    await page.getByRole('button', { name: 'Play animation', exact: true }).click();
+    await page.getByRole('button', { name: 'Shake bed', exact: true }).click();
+    const shaken = await bitmap();
+    await expect.poll(bitmap).not.toBe(shaken);
+    await page.getByRole('button', { name: 'Pause animation', exact: true }).click();
+    await expectWorkspaceViewport(page, width, height);
+    expect(await visibleControlProblems(root)).toEqual([]);
+    const coordinates = await position.textContent();
+    const next = width === 375 ? { width: 1280, height: 720 } : { width: 375, height: 812 };
+    await page.setViewportSize(next);
+    await expect.poll(() => canvas.evaluate(node => {
+      const element = node as HTMLCanvasElement;
+      const rect = element.getBoundingClientRect(), dpr = Math.min(devicePixelRatio, 2);
+      return Math.max(Math.abs(element.width - rect.width * dpr), Math.abs(element.height - rect.height * dpr));
+    })).toBeLessThanOrEqual(1);
+    await expect(position).toHaveText(coordinates!);
+    await expectWorkspaceViewport(page, next.width, next.height);
+  });
+}

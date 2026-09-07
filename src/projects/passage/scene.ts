@@ -118,7 +118,7 @@ export function createBuildingScene(host: HTMLElement, signal: AbortSignal,
     controls.update(); fitProjection(); invalidate();
   }
   const stopSize = observeSize(host, (size) => {
-    width = size.width; height = size.height;
+    width = Math.max(1, size.width); height = Math.max(1, size.height);
     renderer.setSize(width, height, false);
     fitProjection(); invalidate();
   });
@@ -275,6 +275,7 @@ export function createBuildingScene(host: HTMLElement, signal: AbortSignal,
     const moved = Math.hypot(event.clientX - owner.x, event.clientY - owner.y); owner = null;
     if (options.interaction === 'camera' || moved > 8 || !layout) return;
     const rect = canvas.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return;
     const raycaster = new THREE.Raycaster();
     raycaster.setFromCamera(new THREE.Vector2((event.clientX - rect.left) / rect.width * 2 - 1, -(event.clientY - rect.top) / rect.height * 2 + 1), camera);
     const point = new THREE.Vector3();

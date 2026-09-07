@@ -16,7 +16,33 @@ user data.
 - `index.ts`: scoped lifecycle, controls, readouts, and a deterministic 20-second
   study clock. Setup/speed/direction changes rewind and pause. Scrubbing and
   0.1-second stepping also pause; reset restores Model A and remains paused.
+  Tabs and native dialogs reuse `src/core/workspace.ts`, moving the original
+  nodes rather than rebuilding controls when panels change.
 - `style.css`: every selector is scoped to `.project-gearbox-playground`.
+  The viewport-height root uses shrinkable grid tracks and a responsive SVG;
+  long instrument panes and dialogs scroll independently.
+
+## Workspace controls
+
+Compact transport and desktop inspector content reserve 64px plus the right
+safe-area inset for the floating collection menu. Preserve this local
+clearance when adding controls rather than inserting a blank footer.
+
+The planetary drawing and full timeline transport remain together. The desktop
+dock has **Parameters** (tooth family, member roles, input direction/speed, and
+pitch-circle toggle) and **Readout** (output, all signed member rates, and color
+key) tabs. Arrow keys, Home, and End select a tab without altering the model.
+At widths up to 700px or heights up to 540px, the **Parameters** button opens the
+same dock in a native dialog. Short landscape screens put drawing and transport
+side by side; mobile users can return to the simulation with Close or Escape.
+
+**Experiments** contains Reduction, Overdrive, Reverse, and their explanations.
+**Notebook** contains the Willis relation, current substitution, pitch and mesh
+checks, planet spin, tooth-family notes, field notes, and all model assumptions.
+Panels do not reset or pause playback; presets and setup changes retain their
+original clock semantics. Dialogs use `--workspace-paper` for the original
+paper theme and return focus to their opener. Keep named sections inside pane
+wrappers when extending the dock; own new events with `page.signal`.
 
 ## Adding a tooth family
 

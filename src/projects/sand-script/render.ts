@@ -50,9 +50,9 @@ export class SandRenderer {
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(this.sheet, bounds.x, bounds.y, bounds.width, bounds.height);
     ctx.fillStyle = '#6d6153';
-    ctx.font = '12px Georgia, serif';
+    ctx.font = '14px Georgia, serif';
     ctx.textBaseline = 'bottom';
-    ctx.fillText('SAND / a landscape in layers', bounds.x, height - 7);
+    ctx.fillText(bounds.width < 300 ? 'SAND / layers' : 'SAND / a landscape in layers', bounds.x, height - 7);
     ctx.textAlign = 'right';
     ctx.fillText(`${this.grid.width} : ${this.grid.height}`, bounds.x + bounds.width, height - 7);
     ctx.restore();

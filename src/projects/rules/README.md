@@ -1,13 +1,17 @@
 # Garden of Rules
 
-An independent, auto-height cellular-automata field guide at `/projects/rules/`.
+An independent, viewport-bounded cellular-automata field guide at `/projects/rules/`.
 The default is a composed, **paused** Life board, not an autoplaying illustration.
 The page includes its own navigation, editable grid, seed library, rule lessons,
 cell inspector, and local JSON download.
 
-The compact masthead leads directly to the grid. Step/Play sit above the cells;
-the longer opening prose and glider specimen live in Field notes. The working
-board column carries `data-project-preview`, not the introductory material.
+The `data-workspace="true"` root allocates one dynamic viewport. Step, Play,
+Undo, Reset and Clear remain beside the live cells and counts. Plant, Rules,
+Edit and Keep tabs bound the tools alongside the board (below it on phones).
+Long editor panes scroll locally. Seed library and Field notes are native
+dialogs containing the original specimens, explanations and further reading.
+Escape restores trigger focus; planting a library seed returns to Step.
+The working board column carries `data-project-preview`.
 
 ## Files and extension points
 
@@ -21,8 +25,8 @@ board column carries `data-project-preview`, not the introductory material.
   population counts, and the versioned JSON snapshot. No DOM, time or randomness.
 - `index.ts`: state/history and accessible UI. All listeners use the page signal;
   the playback loop is explicitly cleaned up. Board dimensions come from data.
-- `style.css`: all styles are scoped to `.project-rules`. The garden grows with
-  its content and has a different field-notebook layout at narrow widths.
+- `style.css`: project-scoped viewport allocation at desktop, phone and short
+  landscape sizes, with local scrolling for tools, reading and zoomed cells.
 - `manifest.json`: discovery metadata; register this file only after the page
   implementation exists.
 
@@ -56,6 +60,13 @@ arbitrary multistate or position-dependent automata.
   board. Pan view permits native touch scrolling without painting; turn it off
   to draw. Keyboard selection reveals its cell in a zoomed board. Editing is
   available without accurately tapping tiny cells.
+- A cleaned-up ResizeObserver fits both dimensions of the SVG before applying
+  zoom. Pointer painting uses that exact rendered rectangle. Keyboard reveal
+  scrolls only the board viewport, never the page; pane changes keep board
+  state, playback, rule history and the current reset point intact.
+- Routine actions announce in the board's own live status, rather than also
+  creating a collection toast over the tools. Validation remains explicit in
+  that status and in the custom-rule alert.
 - Reset restores starting cells but deliberately retains the current rule and
   boundary. Set as start changes that reset point. Undo restores up to 40 whole
   study snapshots, including rule, boundary, reset point and counts.
@@ -69,4 +80,7 @@ arbitrary multistate or position-dependent automata.
 isolated browser mount through the existing Playwright runner. It covers the
 Life blinker, toad, pulsar and glider, HighLife replication, Seeds, B0 rules,
 boundaries, immutable painting, counters, serialization and interactive editing.
+`tests/workspaces/worlds-audio.spec.ts` also covers viewport round trips at
+1440x900, 1280x720, 375x812, 320x640 and 768x480, real pointer/coordinate edits,
+zoom, seed dialogs, focus restoration and the floating collection menu.
 The parent collection owns integrated routing, base-path and visual coverage.

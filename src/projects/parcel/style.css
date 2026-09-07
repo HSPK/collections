@@ -15,6 +15,193 @@
   line-height: 1.55;
 }
 
+/* The road and controls share a real, shrinkable remaining-height workspace. */
+.project-parcel[data-workspace="true"] {
+  --workspace-paper: var(--parcel-paper);
+  box-sizing: border-box;
+  height: 100dvh;
+  min-height: 0;
+  padding: 14px 20px 76px;
+}
+.project-parcel[data-workspace] .parcel-site {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  gap: 10px;
+}
+.project-parcel .parcel-workspace-heading {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 2px solid var(--parcel-ink);
+  padding-bottom: 8px;
+}
+.project-parcel .parcel-workspace-heading h1 { margin: 0; font-size: 38px; }
+.project-parcel[data-workspace] .parcel-routebar {
+  flex-direction: row;
+  align-self: stretch;
+  align-items: end;
+  flex-shrink: 0;
+  padding: 8px 12px;
+  margin: 0;
+  gap: 10px;
+  border-top-width: 3px;
+}
+.project-parcel[data-workspace] .parcel-route-picker { flex: 1; max-width: none; gap: 3px; }
+.project-parcel[data-workspace] .parcel-route-picker > span { font-size: 14px; }
+.project-parcel[data-workspace] .parcel-workbench { display: flex; flex: 1; min-height: 0; align-items: stretch; }
+.project-parcel[data-workspace] .parcel-map-sheet {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: visible;
+  padding: 12px 16px;
+}
+.project-parcel[data-workspace] .parcel-map-heading { flex-shrink: 0; }
+.project-parcel[data-workspace] .parcel-map-heading > button { flex-shrink: 0; }
+.project-parcel[data-workspace] .parcel-map-heading h2 { font-size: 26px; }
+.project-parcel[data-workspace] .parcel-play-area {
+  display: grid;
+  flex: 1;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr) 272px;
+  grid-template-rows: minmax(0, 1fr);
+  align-items: stretch;
+  gap: 16px;
+  margin-top: 10px;
+}
+.project-parcel[data-workspace] .parcel-board-area {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  grid-row: auto;
+}
+.project-parcel[data-workspace] .parcel-map-surround {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  padding: 5px;
+}
+.project-parcel[data-workspace] .parcel-map {
+  height: 100%;
+  min-height: 0;
+  max-width: none;
+}
+.project-parcel[data-workspace] .parcel-map > svg { width: 100%; height: 100%; }
+.project-parcel[data-workspace] .parcel-map-bottom { flex-shrink: 0; margin-top: 5px; gap: 5px; }
+.project-parcel[data-workspace] .parcel-control-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  min-height: 0;
+}
+.project-parcel[data-workspace] .parcel-dashboard { flex-shrink: 0; margin: 0; }
+.project-parcel[data-workspace] .parcel-dashboard > div { padding: 7px; }
+.project-parcel[data-workspace] .parcel-dashboard span { font-size: 14px; }
+.project-parcel[data-workspace] .parcel-driving { display: flex; padding: 0; flex-shrink: 0; }
+.project-parcel[data-workspace] .parcel-dpad { flex: none; }
+.project-parcel[data-workspace] .parcel-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin: 0; }
+.project-parcel[data-workspace] .parcel-button { min-height: 44px; padding: 7px 10px; font-size: 14px; }
+.project-parcel[data-workspace] .parcel-actions > button { flex: 1; }
+.project-parcel .parcel-status-row {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 52px;
+  padding-top: 8px;
+}
+.project-parcel .parcel-status { font-size: 14px; line-height: 1.4; }
+.project-parcel .parcel-status-row > button { flex-shrink: 0; }
+.project-parcel[data-workspace] :is(.parcel-position, .parcel-map-scale, .parcel-coordinate, .parcel-eyebrow, .parcel-map-heading .parcel-eyebrow, .parcel-map-legend > span, .parcel-progress p, .parcel-progress p span, .parcel-bag-slot small, .parcel-deliveries span, .parcel-deliveries small, .parcel-slip-footer, .parcel-manifest-heading > span, .parcel-bag-heading > span, .parcel-route-tip > span, .parcel-footer p, .parcel-footer > span, .parcel-postmark > span, .parcel-postmark > strong) { font-size: 14px; }
+.project-parcel[data-workspace] .parcel-coordinate { font-size: 26px; }
+.project-parcel[data-workspace] :is(.parcel-actions .parcel-button, kbd) { font-size: 14px; }
+.project-parcel[data-workspace] .workspace-dialog .parcel-progress { display: flex; flex-direction: column; align-items: stretch; gap: 12px; }
+.project-parcel[data-workspace] .workspace-dialog .parcel-progress > p { max-width: none; text-align: left; }
+.project-parcel[data-workspace] .workspace-dialog .parcel-route-stamps { display: flex; justify-content: space-between; }
+.project-parcel[data-workspace] .workspace-dialog .parcel-route-stamps button { width: 44px; min-height: 44px; }
+.project-parcel[data-workspace] .workspace-dialog .parcel-result { margin: 0; }
+.project-parcel[data-workspace] .workspace-dialog .parcel-masthead h2 { font: 700 44px/1.1 Georgia, serif; letter-spacing: -.06em; }
+.project-parcel[data-workspace] .workspace-dialog .parcel-margin-note { display: block; }
+.project-parcel[data-workspace] .workspace-dialog .parcel-driving-copy { max-width: none; }
+.project-parcel[data-workspace] .workspace-dialog .parcel-feedback { margin: 0; min-height: 0; }
+.project-parcel[data-workspace] .workspace-dialog .parcel-map-detail { height: min(60dvh, 460px); }
+@media (max-width: 600px) {
+  .project-parcel[data-workspace="true"] { padding: 8px 8px 70px; }
+  .project-parcel[data-workspace] .parcel-site { gap: 6px; }
+  .project-parcel .parcel-workspace-heading { padding-bottom: 4px; }
+  .project-parcel .parcel-workspace-heading h1 { font-size: 29px; }
+  .project-parcel[data-workspace] .parcel-routebar { padding: 5px 7px; }
+  .project-parcel[data-workspace] .parcel-route-picker select { padding: 6px; font-size: 14px; }
+  .project-parcel[data-workspace] .parcel-map-sheet { padding: 7px; }
+  .project-parcel[data-workspace] .parcel-map-heading h2 { font-size: 22px; }
+  .project-parcel[data-workspace] .parcel-map-heading .parcel-eyebrow { margin: 0; font-size: 14px; line-height: 1.2; }
+  .project-parcel[data-workspace] .parcel-play-area {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 7px;
+    margin-top: 6px;
+  }
+  .project-parcel[data-workspace] .parcel-board-area { grid-row: 1; }
+  .project-parcel[data-workspace] .parcel-map-bottom { display: flex; flex-wrap: nowrap; }
+  .project-parcel[data-workspace] .parcel-position { letter-spacing: 0; }
+  .project-parcel[data-workspace] .parcel-control-panel {
+    display: grid;
+    grid-template-columns: 146px minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    gap: 5px 8px;
+  }
+  .project-parcel[data-workspace] .parcel-dashboard { grid-column: 1 / -1; grid-row: 1; }
+  .project-parcel[data-workspace] .parcel-dashboard > div { padding: 4px 5px; }
+  .project-parcel[data-workspace] .parcel-driving { grid-row: 2 / 4; grid-column: 1; justify-content: center; }
+  .project-parcel[data-workspace] .parcel-dpad { grid-template: repeat(3, 44px) / repeat(3, 44px); gap: 5px; }
+  .project-parcel[data-workspace] .parcel-dpad button { width: 44px; min-height: 44px; height: 44px; padding: 8px; }
+  .project-parcel[data-workspace] .parcel-actions { grid-row: 2; grid-column: 2; gap: 4px; align-items: stretch; }
+  .project-parcel[data-workspace] .parcel-actions > button { padding: 4px; gap: 3px; }
+  .project-parcel[data-workspace] .parcel-actions svg { display: none; }
+  .project-parcel[data-workspace] [data-details] { grid-column: 2; grid-row: 3; padding: 4px; }
+  .project-parcel .parcel-status-row { min-height: 48px; padding-top: 5px; gap: 5px; }
+  .project-parcel .parcel-status { font-size: 14px; }
+  .project-parcel[data-workspace] .parcel-status-row > button { padding: 5px; }
+  .project-parcel[data-workspace] .workspace-dialog .parcel-result { padding: 12px; }
+  .project-parcel[data-workspace] .workspace-dialog .parcel-result-mark { display: none; }
+}
+@media (max-height: 680px) and (max-width: 600px) {
+  .project-parcel[data-workspace] .parcel-route-picker > span { display: none; }
+  .project-parcel[data-workspace] .parcel-status-row { min-height: 44px; }
+  .project-parcel[data-workspace] .parcel-map-bottom { display: none; }
+  .project-parcel[data-workspace] .parcel-control-panel { grid-template-columns: minmax(0, 1fr) 92px; }
+  .project-parcel[data-workspace] .parcel-driving { grid-column: 1 / -1; grid-row: 2; }
+  .project-parcel[data-workspace] .parcel-dpad { grid-template: 44px / repeat(4, 44px); gap: 12px; }
+  .project-parcel[data-workspace] .parcel-dpad [data-direction] { grid-column: auto; grid-row: auto; }
+  .project-parcel[data-workspace] .parcel-dpad-center { display: none; }
+  .project-parcel[data-workspace] .parcel-actions { grid-column: 1; grid-row: 3; }
+  .project-parcel[data-workspace] [data-details] { grid-column: 2; grid-row: 3; }
+}
+@media (max-height: 540px) and (min-width: 601px) {
+  .project-parcel[data-workspace="true"] { padding-top: 6px; padding-bottom: 68px; }
+  .project-parcel[data-workspace] .parcel-site { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto minmax(0, 1fr); gap: 8px; }
+  .project-parcel[data-workspace] .parcel-workbench { grid-column: 1 / -1; }
+  .project-parcel[data-workspace] .parcel-routebar { padding: 4px; }
+  .project-parcel[data-workspace] .parcel-route-picker > span { display: none; }
+  .project-parcel[data-workspace] .parcel-play-area { grid-template-columns: minmax(0, 1fr) 310px; gap: 10px; }
+  .project-parcel[data-workspace] .parcel-control-panel { display: grid; grid-template-columns: 158px 1fr; gap: 4px 10px; }
+  .project-parcel[data-workspace] .parcel-dashboard { grid-column: 1 / -1; }
+  .project-parcel[data-workspace] .parcel-dashboard > div { padding: 4px 6px; }
+  .project-parcel[data-workspace] .parcel-driving { grid-column: 1; grid-row: 2 / 4; }
+  .project-parcel[data-workspace] .parcel-dpad { grid-template: repeat(3, 44px) / repeat(3, 44px); gap: 4px; }
+  .project-parcel[data-workspace] .parcel-dpad button { width: 44px; height: 44px; min-height: 44px; padding: 8px; }
+  .project-parcel[data-workspace] .parcel-actions { grid-column: 2; grid-row: 2; }
+  .project-parcel[data-workspace] .parcel-actions svg { display: none; }
+  .project-parcel[data-workspace] [data-details] { grid-column: 2; grid-row: 3; }
+}
+
 .project-parcel *,
 .project-parcel *::before,
 .project-parcel *::after {

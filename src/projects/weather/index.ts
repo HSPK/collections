@@ -1,5 +1,6 @@
 import './style.css';
 import { createProjectPage, escapeMarkup, query, readLocalData, writeLocalData } from '../../core/page';
+import { createWorkspaceDialog } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { destinations, expedition, getDestination, isWatchId, sharedUnits, watches } from './data';
 import type { Destination, WatchId } from './data';
@@ -175,6 +176,7 @@ function renderUnitKey(destinationId: string, watchId: WatchId): string {
 
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'weather');
+  page.root.dataset.workspace = 'true';
   const initialRoute = parseRoute(window.location.hash);
   let state: AtlasRoute = initialRoute ?? { ...defaultRoute };
   let storageMessage = 'Checked items are kept on this device when browser storage is available. No account or sync.';
@@ -206,10 +208,10 @@ export function mount(context: ProjectContext): ProjectInstance {
         </div>
       </header>
       <nav class="weather-section-nav" aria-label="Atlas sections">
-        <a href="" data-weather-section="index" data-weather-route>Station index <span aria-hidden="true">↙</span></a>
-        <a href="" data-weather-section="notes" data-weather-route>Field notes <span aria-hidden="true">↘</span></a>
-        <a href="" data-weather-section="packing" data-weather-route>Packing list <span aria-hidden="true">↘</span></a>
-        <a href="" data-weather-section="units" data-weather-route>Unit key <span aria-hidden="true">↘</span></a>
+        <a href="" data-weather-section="index" data-weather-route>Stations</a>
+        <a href="" data-weather-section="notes" data-weather-route>Notebook</a>
+        <a href="" data-weather-section="packing" data-weather-route>Packing</a>
+        <a href="" data-weather-section="units" data-weather-route>Units</a>
       </nav>
       <p class="weather-announcement" role="status" aria-live="polite" aria-atomic="true" data-weather-announcement></p>
       <div class="weather-atlas-layout" data-project-preview>
@@ -238,6 +240,11 @@ export function mount(context: ProjectContext): ProjectInstance {
           <header class="weather-station-header">
             <div class="weather-station-location"><p class="weather-eyebrow" data-weather-region></p><span class="weather-grid-reference" data-weather-grid></span></div>
             <h2 id="weather-place-name"></h2>
+            <label class="weather-station-select">Station
+              <select data-weather-station-select aria-label="Choose a station">
+                ${destinations.map(destination => `<option value="${destination.id}">${escape(destination.name)}</option>`).join('')}
+              </select>
+            </label>
             <p class="weather-station-tagline" data-weather-tagline></p>
           </header>
           <section aria-label="Fictional expedition forecast">
@@ -285,6 +292,24 @@ export function mount(context: ProjectContext): ProjectInstance {
       </footer>
     </div>`;
 
+  const element = (selector: string) => query<HTMLElement>(page.root, selector);
+  const stationContext = document.createElement('div');
+  stationContext.className = 'weather-station-context';
+  stationContext.append(element('.weather-station-location'), element('.weather-station-tagline'), element('.weather-fixed-time'));
+  const forecastDetails = document.createElement('div');
+  forecastDetails.className = 'weather-forecast-details';
+  const dialogs = new Map([
+    ['index', createWorkspaceDialog(page, { id: 'weather-index-dialog', title: 'Station index', content: [element('#weather-index')] })],
+    ['notes', createWorkspaceDialog(page, { id: 'weather-notes-dialog', title: 'Forecast & field notebook', content: [stationContext, forecastDetails, element('#weather-notes')] })],
+    ['packing', createWorkspaceDialog(page, { id: 'weather-packing-dialog', title: 'Packing list', content: [element('#weather-packing')] })],
+    ['units', createWorkspaceDialog(page, { id: 'weather-units-dialog', title: 'Unit key & atlas notes', content: [element('#weather-units'), element('.weather-introduction'), element('.weather-brand .weather-eyebrow'), element('.weather-footer')] })],
+  ]);
+  for (const link of page.root.querySelectorAll<HTMLElement>('.weather-section-nav [data-weather-section]')) {
+    link.setAttribute('aria-haspopup', 'dialog');
+    link.setAttribute('aria-controls', `weather-${link.dataset.weatherSection}-dialog`);
+  }
+  const stationSelect = query<HTMLSelectElement>(page.root, '[data-weather-station-select]');
+
   const announce = (message: string) => {
     query<HTMLElement>(page.root, '[data-weather-announcement]').textContent = message;
   };
@@ -318,9 +343,17 @@ export function mount(context: ProjectContext): ProjectInstance {
     query<HTMLElement>(page.root, '[data-weather-region]').textContent = `${destination.number} / ${destination.region}`;
     query<HTMLElement>(page.root, '[data-weather-grid]').textContent = `Atlas grid ${destination.grid}`;
     query<HTMLElement>(page.root, '#weather-place-name').textContent = destination.name;
+    stationSelect.value = destination.id;
     query<HTMLElement>(page.root, '[data-weather-tagline]').textContent = destination.tagline;
     query<HTMLElement>(page.root, '[data-weather-map]').innerHTML = renderAtlasMap(destination.id);
     query<HTMLElement>(page.root, '[data-weather-observation]').innerHTML = renderObservation(destination, state.watchId);
+    const landscapeKey = document.createElement('figure');
+    landscapeKey.className = 'weather-landscape-reference';
+    landscapeKey.append(element('.weather-landscape figcaption'));
+    forecastDetails.replaceChildren(
+      element('.weather-condition .weather-eyebrow'), landscapeKey, element('.weather-instruments'), element('.weather-unit-reminder'),
+      element('.weather-forecast-summary'), element('.weather-route-advice'),
+    );
     query<HTMLElement>(page.root, '[data-weather-field-notes]').innerHTML = renderFieldNotes(destination, state.watchId);
     query<HTMLElement>(page.root, '[data-weather-packing-list]').innerHTML = renderPackingList(destination, state.watchId, packing.packed[destination.id] ?? []);
     query<HTMLElement>(page.root, '[data-weather-packing-advice]').innerHTML = `<p class="weather-eyebrow">${watch.time} / ${escape(watch.name)} kit note</p>
@@ -342,11 +375,15 @@ export function mount(context: ProjectContext): ProjectInstance {
   }
 
   function focusSection(section: SectionId): void {
+    const dialog = dialogs.get(section);
+    for (const other of dialogs.values()) {
+      if (other !== dialog) other.close();
+    }
+    if (dialog) dialog.open();
     const target = query<HTMLElement>(page.root, `#weather-${section}`);
     // A queued hashchange must not steal focus from a control the reader already reached.
     if (target.contains(document.activeElement)) return;
     target.focus({ preventScroll: true });
-    target.scrollIntoView({ behavior: 'auto', block: 'start' });
   }
 
   function applyRoute(next: AtlasRoute): void {
@@ -363,7 +400,7 @@ export function mount(context: ProjectContext): ProjectInstance {
       updateNavigation();
     }
     if (state.section) focusSection(state.section);
-    else if (destinationChanged) focusSection('station');
+    else focusSection('station');
   }
 
   function savePacking(): void {
@@ -376,6 +413,10 @@ export function mount(context: ProjectContext): ProjectInstance {
 
   page.root.addEventListener('change', (event) => {
     const input = event.target;
+    if (input === stationSelect) {
+      window.location.hash = routeHash(stationSelect.value, state.watchId, 'station');
+      return;
+    }
     if (!(input instanceof HTMLInputElement)) return;
     if (input.name === 'weather-watch' && isWatchId(input.value)) {
       window.location.hash = routeHash(state.destinationId, input.value);

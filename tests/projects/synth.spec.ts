@@ -39,6 +39,19 @@ declare global {
 const route = './projects/synth/';
 const padName = (track: string, step: number) => `${track}, step ${step}, beat ${Math.ceil(step / 4)}`;
 
+async function synthPane(page: Page, name: 'Machine' | 'Notebook' | 'Guide'): Promise<void> {
+  await page.getByRole('tab', { name, exact: true }).click();
+}
+
+async function soundSettings(page: Page): Promise<void> {
+  await synthPane(page, 'Machine');
+  await page.getByRole('button', { name: 'Sound settings', exact: true }).click();
+}
+
+async function closeSettings(page: Page): Promise<void> {
+  await page.getByRole('button', { name: 'Close Sound settings', exact: true }).click();
+}
+
 async function observeAudio(
   page: Page,
   options: { legacy?: boolean; delayFirstResume?: boolean; rejectFirstResume?: boolean } = {},
@@ -234,9 +247,12 @@ test('Pocket Synth edits and switches patterns without ever requesting audio', a
   await expect(pad).toHaveAttribute('aria-pressed', 'false');
   await pad.press('ArrowDown');
   await expect(page.getByRole('button', { name: padName('Snare', 2), exact: true })).toBeFocused();
+  await synthPane(page, 'Notebook');
   await page.getByLabel('Pattern name', { exact: true }).fill('Space is just text');
   await page.getByLabel('Pattern name', { exact: true }).press('Space');
+  await soundSettings(page);
   await page.locator('#synth-starter').selectOption('soft-circuitry');
+  await closeSettings(page);
   await expect(page.getByLabel('TEMPO / BPM', { exact: true })).toHaveValue('76');
   await expect(page.locator('[data-pattern-name]')).toHaveText('Soft circuitry');
   await page.getByRole('button', { name: 'Mute Hat', exact: true }).click();
@@ -248,18 +264,28 @@ test('Pocket Synth edits and switches patterns without ever requesting audio', a
 test('Pocket Synth saves, loads, exports actual JSON, and safely imports files and text', async ({ page }) => {
   await observeAudio(page);
   await page.goto(route);
+  await synthPane(page, 'Notebook');
   await page.getByLabel('Pattern name', { exact: true }).fill('Late desk');
+  await synthPane(page, 'Machine');
   await page.getByRole('button', { name: padName('Kick', 2), exact: true }).click();
   await page.getByLabel('TEMPO / BPM', { exact: true }).fill('137');
   await page.getByLabel('TEMPO / BPM', { exact: true }).press('Tab');
+  await soundSettings(page);
   await page.locator('#synth-root').selectOption('45');
+  await closeSettings(page);
+  await synthPane(page, 'Notebook');
   await page.getByRole('button', { name: 'Save locally', exact: true }).click();
+  await soundSettings(page);
   await page.locator('#synth-starter').selectOption('night-bus');
+  await closeSettings(page);
+  await synthPane(page, 'Notebook');
   await page.getByRole('button', { name: 'Load saved', exact: true }).click();
   await expect(page.locator('[data-pattern-name]')).toHaveText('Late desk');
   await expect(page.locator('#synth-tempo')).toHaveValue('137');
   await expect(page.locator('#synth-root')).toHaveValue('45');
+  await synthPane(page, 'Machine');
   await expect(page.getByRole('button', { name: padName('Kick', 2), exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await synthPane(page, 'Notebook');
   const downloadPromise = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export .json', exact: false }).click();
   const download = await downloadPromise;
@@ -324,8 +350,10 @@ for (const legacy of [false, true]) {
       expect(source.start - source.calledAt).toBeLessThanOrEqual(SCHEDULE_AHEAD_SECONDS + 0.01);
     }
     expect(timing.retiredWhilePlaying).toBe(true);
+    await soundSettings(page);
     await page.getByLabel('MASTER VOLUME', { exact: false }).focus();
     await page.keyboard.press('ArrowLeft');
+    await closeSettings(page);
     await expect.poll(() => page.evaluate(() => {
       const audit = window.__pocketSynthAudit;
       const context = audit.contexts.at(-1)!;
@@ -424,9 +452,11 @@ test('Pocket Synth keeps controls usable after denied audio and unavailable stor
   await page.evaluate(() => {
     Storage.prototype.setItem = () => { throw new DOMException('Test storage denial', 'QuotaExceededError'); };
   });
+  await synthPane(page, 'Notebook');
   await page.getByRole('button', { name: 'Save locally', exact: true }).click();
   await expect(page.locator('[data-notice]')).toContainText('could not save');
   await expect(page.getByRole('button', { name: 'Export .json', exact: false })).toBeEnabled();
+  await synthPane(page, 'Machine');
   await expect(page.getByRole('button', { name: padName('Kick', 2), exact: true })).toHaveAttribute('aria-pressed', 'true');
 });
 
@@ -470,6 +500,88 @@ test('Pocket Synth contains its 44px pads on a 375px screen and scrolls keyboard
   await expect(first).toBeFocused();
   await page.keyboard.press('Tab');
   expect(await page.locator('.synth-pad:focus').count()).toBe(0);
+  await synthPane(page, 'Notebook');
   await page.locator('.synth-import summary').click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
+for (const viewport of [
+  { width: 1440, height: 900 }, { width: 1280, height: 720 },
+  { width: 375, height: 812 }, { width: 320, height: 640 }, { width: 768, height: 480 },
+]) {
+  test(`Pocket Synth bounded workspace ${viewport.width}x${viewport.height}`, async ({ page }, testInfo) => {
+    await page.setViewportSize(viewport);
+    await page.goto(route);
+    await expect(page.locator('.project-synth')).toHaveAttribute('data-workspace', 'true');
+    const noDocumentScroll = async () => {
+      expect(await page.evaluate(() => ({
+        width: document.documentElement.scrollWidth,
+        height: document.documentElement.scrollHeight,
+        x: window.scrollX, y: window.scrollY,
+      }))).toEqual({ ...viewport, x: 0, y: 0 });
+    };
+    await noDocumentScroll();
+    for (const selector of ['.synth-play', '.synth-stop', '#synth-tempo', '.synth-settings-open', '.synth-clear', '[data-track-index="4"][data-step="0"]']) {
+      const bounds = (await page.locator(selector).boundingBox())!;
+      expect(bounds.y, selector).toBeGreaterThanOrEqual(0);
+      expect(bounds.y + bounds.height, selector).toBeLessThanOrEqual(viewport.height);
+    }
+    await page.screenshot({ path: testInfo.outputPath(`synth-${viewport.width}x${viewport.height}.png`), fullPage: true });
+    const gridHeight = await page.locator('.synth-sequence-scroll').evaluate(element => ({
+      scroll: element.scrollHeight, client: element.clientHeight,
+    }));
+    expect(gridHeight.scroll, JSON.stringify(gridHeight)).toBeLessThanOrEqual(gridHeight.client + 1);
+    await synthPane(page, 'Notebook');
+    await page.locator('.synth-import summary').click();
+    await page.getByRole('button', { name: 'Show current JSON', exact: true }).click();
+    const json = await page.locator('#synth-json').inputValue();
+    expect(parsePatternJSON(json).ok).toBe(true);
+    await page.locator('#synth-json').press('End');
+    await expect(page.getByRole('tab', { name: 'Notebook', exact: true })).toHaveAttribute('aria-selected', 'true');
+    await noDocumentScroll();
+    await synthPane(page, 'Guide');
+    await expect(page.getByRole('heading', { name: 'Leave some air.', exact: true })).toBeVisible();
+    await page.getByRole('heading', { name: 'Leave some air.', exact: true }).scrollIntoViewIfNeeded();
+    await noDocumentScroll();
+    if (viewport.width === 320) await page.screenshot({ path: testInfo.outputPath('synth-guide-mobile.png'), fullPage: true });
+  });
+}
+
+test('Pocket Synth keeps one opted-in audio run through settings and notebook edits', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 320, height: 640 });
+  await observeAudio(page);
+  await page.goto(route);
+  await soundSettings(page);
+  await page.locator('#synth-root').selectOption('59');
+  await page.getByLabel('MASTER VOLUME', { exact: false }).focus();
+  await page.keyboard.press('End');
+  await expect(page.locator('[data-volume]')).toHaveText('100%');
+  expect(await page.evaluate(() => window.__pocketSynthAudit.contexts.length)).toBe(0);
+  await page.screenshot({ path: testInfo.outputPath('synth-settings-mobile.png'), fullPage: true });
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('button', { name: 'Sound settings', exact: true })).toBeFocused();
+  await page.getByRole('button', { name: 'Play pattern', exact: true }).click();
+  await soundSettings(page);
+  await page.locator('#synth-root').selectOption('48');
+  await closeSettings(page);
+  await synthPane(page, 'Notebook');
+  await page.getByLabel('Pattern name', { exact: true }).fill('Still playing');
+  await page.getByRole('button', { name: 'Save locally', exact: true }).click();
+  await synthPane(page, 'Guide');
+  await expect(page.locator('.synth-machine')).toHaveAttribute('data-transport', 'playing');
+  expect(await page.evaluate(() => ({
+    contexts: window.__pocketSynthAudit.contexts.length,
+    resumes: window.__pocketSynthAudit.resumes,
+    state: window.__pocketSynthAudit.contexts[0].state,
+  }))).toEqual({ contexts: 1, resumes: 1, state: 'running' });
+  expect(await page.evaluate(key => JSON.parse(localStorage.getItem(key)!).bassNote, STORAGE_KEY)).toBe(48);
+  await synthPane(page, 'Machine');
+  await page.getByRole('button', { name: 'Clear pads', exact: false }).click();
+  await expectSilentAndClosed(page);
+  await expect(page.locator('[data-silence]')).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(640);
+  const gridHeight = await page.locator('.synth-sequence-scroll').evaluate(element => ({
+    scroll: element.scrollHeight, client: element.clientHeight,
+  }));
+  expect(gridHeight.scroll, JSON.stringify(gridHeight)).toBeLessThanOrEqual(gridHeight.client + 1);
 });

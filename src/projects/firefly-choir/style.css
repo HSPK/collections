@@ -336,3 +336,92 @@
   .project-firefly-choir .fc-notes-heading > span { max-width: 125px; text-align: right; }
   .project-firefly-choir .fc-colophon { flex-direction: column; gap: 13px; }
 }
+
+.project-firefly-choir[data-workspace] {
+  --workspace-paper: #e8ebdc;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 16px;
+  height: 100dvh;
+  min-height: 0;
+  padding: 18px clamp(12px, 2.5vw, 40px);
+}
+.project-firefly-choir[data-workspace] .fc-header { flex-direction: row; align-items: center; gap: 12px; padding: 0 48px 0 0; }
+.project-firefly-choir[data-workspace] h1 { font-size: clamp(30px, 3.5vw, 48px); margin-top: 3px; }
+.project-firefly-choir[data-workspace] .fc-guide-button {
+  min-height: 44px;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid #899a74;
+  border-radius: 4px;
+  color: var(--fc-ink);
+  font-size: 14px;
+  white-space: nowrap;
+}
+.project-firefly-choir[data-workspace] .fc-guide-button:focus-visible { outline-color: #435c33; }
+.project-firefly-choir[data-workspace] .fc-workbench { min-height: 0; grid-template-columns: minmax(0, 1fr) 280px; }
+.project-firefly-choir[data-workspace] .fc-garden { min-height: 0; touch-action: none; }
+.project-firefly-choir[data-workspace] .fc-desk {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+}
+.project-firefly-choir[data-workspace] .fc-settings { grid-template-columns: minmax(0, 1fr); margin: 0; gap: 8px; }
+.project-firefly-choir[data-workspace] .fc-setting-label { flex-wrap: nowrap; }
+.project-firefly-choir[data-workspace] :is(.fc-setting-label label, .fc-setting-label output, .fc-torch, .fc-readout > span, .fc-readout-note, .fc-status, .fc-keyboard, .fc-note p, .fc-colophon p, .fc-colophon button) { font-size: 14px; }
+.project-firefly-choir[data-workspace] .fc-coherence {
+  position: absolute;
+  top: 58px;
+  left: 24px;
+  padding: 8px 10px;
+  gap: 8px;
+  border: 1px solid #7e99754d;
+  border-radius: 5px;
+  background: #112921c9;
+  pointer-events: none;
+}
+.project-firefly-choir[data-workspace] .fc-coherence-ring { flex-basis: 34px; width: 34px; height: 34px; }
+.project-firefly-choir[data-workspace] .fc-readout { display: flex; gap: 12px; align-items: center; }
+.project-firefly-choir[data-workspace] .fc-readout output { font-size: 24px; }
+.project-firefly-choir[data-workspace] .fc-readout-note { display: none; }
+.project-firefly-choir[data-workspace] .workspace-dialog :is(.fc-eyebrow, .fc-status, .fc-keyboard, kbd, .fc-range-ends) { color: var(--fc-muted); }
+.project-firefly-choir[data-workspace] .workspace-dialog .fc-desk-heading h2 { font: 28px/1.2 Georgia, serif; }
+.project-firefly-choir[data-workspace] .workspace-dialog .fc-status { margin-block: 16px; }
+.project-firefly-choir[data-workspace] .workspace-dialog .fc-keyboard { margin-block: 16px; }
+.project-firefly-choir[data-workspace] .workspace-dialog .fc-readout-note { display: block; color: var(--fc-muted); }
+.project-firefly-choir[data-workspace] .workspace-dialog .fc-note-grid { grid-template-columns: 1fr; gap: 20px; }
+.project-firefly-choir[data-workspace] .workspace-dialog .fc-colophon { flex-direction: column; align-items: start; }
+.project-firefly-choir[data-workspace] .workspace-dialog-heading button { min-height: 44px; }
+@media (max-width: 600px) {
+  .project-firefly-choir[data-workspace] { padding: 10px 10px max(10px, env(safe-area-inset-bottom)); gap: 10px; }
+  .project-firefly-choir[data-workspace] .fc-header { padding-right: 0; gap: 6px; }
+  .project-firefly-choir[data-workspace] .fc-kicker { font-size: 12px; gap: 5px; letter-spacing: 0; }
+  .project-firefly-choir[data-workspace] .fc-number { padding-right: 5px; }
+  .project-firefly-choir[data-workspace] h1 { font-size: 32px; }
+  .project-firefly-choir[data-workspace] .fc-guide-button { padding: 7px; line-height: 1.2; white-space: normal; }
+  .project-firefly-choir[data-workspace] .fc-workbench { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+  .project-firefly-choir[data-workspace] .fc-desk { gap: 8px; padding: 10px; }
+  .project-firefly-choir[data-workspace] .fc-settings { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .project-firefly-choir[data-workspace] .fc-setting-label { flex-direction: column; align-items: start; gap: 0; line-height: 1.3; }
+  .project-firefly-choir[data-workspace] .fc-setting-label label { min-height: 36.4px; }
+  .project-firefly-choir[data-workspace] .fc-torch { width: auto; align-self: stretch; justify-content: center; padding-block: 8px; margin-right: 52px; }
+  .project-firefly-choir[data-workspace] .fc-torch-indicator { margin-left: 0; }
+  .project-firefly-choir[data-workspace] .fc-scene-heading { inset: 14px 12px auto; }
+  .project-firefly-choir[data-workspace] .fc-coherence { top: 55px; left: 12px; padding: 6px 8px; }
+  .project-firefly-choir[data-workspace] .fc-scene-footer { inset: auto 14px 14px; }
+  .project-firefly-choir[data-workspace] .fc-scene-footer p { font-size: 24px; }
+}
+@media (max-width: 350px) {
+  .project-firefly-choir[data-workspace] h1 { font-size: 29px; }
+  .project-firefly-choir[data-workspace] .fc-title-spark { display: none; }
+}
+@media (max-height: 540px) and (min-width: 601px) {
+  .project-firefly-choir[data-workspace] { padding-block: 10px max(10px, env(safe-area-inset-bottom)); gap: 10px; }
+  .project-firefly-choir[data-workspace] h1 { font-size: 30px; }
+  .project-firefly-choir[data-workspace] .fc-workbench { grid-template-columns: minmax(0, 1fr) 260px; }
+  .project-firefly-choir[data-workspace] .fc-desk { padding: 12px; gap: 8px; }
+  .project-firefly-choir[data-workspace] .fc-settings { gap: 4px; }
+  .project-firefly-choir[data-workspace] .fc-torch { width: auto; margin-right: 52px; }
+}

@@ -229,6 +229,12 @@ export function createInterface(root: HTMLElement) {
     methodButtons: [...root.querySelectorAll<HTMLButtonElement>('[data-method]')],
     challengeButtons: [...root.querySelectorAll<HTMLButtonElement>('[data-challenge]')],
   };
+  const cards = elements.methodButtons.map(card => ({
+    card,
+    loss: query<HTMLElement>(card, '[data-card-loss]'),
+    position: query<HTMLElement>(card, '[data-card-position]'),
+    status: query<HTMLElement>(card, '[data-card-status]'),
+  }));
   const text = (selector: string, value: string) => { query<HTMLElement>(root, selector).textContent = value; };
 
   function syncSetup(surface: Surface, start: Point, learningRate: number) {
@@ -273,14 +279,14 @@ export function createInterface(root: HTMLElement) {
     text('[data-run-record]', `Run ${model.runNumber} / ${model.setupName} · shared start ${vector(model.start)} · α = ${Number(model.learningRate.toPrecision(6))}. Histories begin at t = 0.`);
     text('[data-challenge-note]', model.challengeNote);
 
-    for (const card of elements.methodButtons) {
+    for (const { card, loss, position, status } of cards) {
       const item = model.runs.find((entry) => entry.method === card.dataset.method)!;
       card.setAttribute('aria-pressed', String(item.method === model.selected));
       card.dataset.status = item.status;
-      query<HTMLElement>(card, '[data-card-loss]').textContent = `L ${formatNumber(item.loss)}`;
-      query<HTMLElement>(card, '[data-card-loss]').dataset.lossValue = String(item.loss);
-      query<HTMLElement>(card, '[data-card-position]').textContent = `(${Number(item.position.x.toPrecision(4))}, ${Number(item.position.y.toPrecision(4))})`;
-      query<HTMLElement>(card, '[data-card-status]').textContent =
+      loss.textContent = `L ${formatNumber(item.loss)}`;
+      loss.dataset.lossValue = String(item.loss);
+      position.textContent = `(${Number(item.position.x.toPrecision(4))}, ${Number(item.position.y.toPrecision(4))})`;
+      status.textContent =
         `t = ${item.iteration} · ${item.status === 'active' && item.iteration === 0 ? 'Ready' : statusNames[item.status]}`;
     }
 

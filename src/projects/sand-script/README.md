@@ -37,7 +37,23 @@ interior material; Reload stencil restores its original contents.
 Focus the tray: arrows move, Shift + arrows move five cells, Space draws and can
 be held while moving, Enter makes one stamp, B/W/E switch tools, P pauses, and
 Ctrl/Meta + Z undoes. The materials shelf and controls also work by keyboard and
-touch. All essential labels are at least 12px.
+touch. All essential control and canvas labels are at least 14px.
+
+## One-screen workspace
+
+The `data-workspace="true"` page fits the dynamic viewport without hiding root
+overflow. The tray, pour/wall/erase tools, playback, undo, grain count, brush
+width, pigment selector, and falling pace remain together. The compact landscape layout puts
+transport and parameters beside the tray; portrait layouts use a lower dock.
+The collection-menu corner is reserved, not placed over a slider.
+
+**Materials** (`[data-materials]`, accessible name **Materials and notes**)
+opens the native `#ss-materials-dialog`: all five pigments, structure selection,
+clear/empty/reload, local PNG export, keyboard help, and material notes.
+Only this secondary content scrolls. Close or Escape returns focus to Materials.
+Dialogs leave the canvas mounted and sized; viewport resize redraws the same
+grid using the same fitted bounds as pointer input, without advancing gravity.
+The toolbar pigment select and original pigment-shelf buttons stay synchronized.
 
 Up to 16 pre-edit snapshots are retained. One pointer or held-key stroke is one
 undo, including grains added during a held pour. Simulation steps do not pollute
@@ -53,4 +69,8 @@ disposed on exit. No remote assets, storage, or audio are used.
 
 Focused coverage: `tests/series/sand-script.spec.ts` exercises pigment conservation,
 sealed boundaries, brush/wall behavior, exact snapshot restore, undo/clear/export,
-and 375px keyboard/reduced-motion controls.
+and 375px keyboard/reduced-motion controls. Workspace workflows additionally
+cover 1440×900, 1280×720, 375×812, 320×640, and 768×480: exact document bounds,
+uncovered controls, real brush/pigment effects, structures and PNG export,
+dialog scrolling/focus return, and preserved grains through live resizing.
+Screenshots are written with Playwright's per-test `outputPath()`.

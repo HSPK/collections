@@ -1,6 +1,7 @@
 import './style.css';
 import { createLoop } from '../../core/loop';
 import { createProjectPage, query } from '../../core/page';
+import { createWorkspaceDialog, createWorkspaceTabs, mirrorWorkspaceStatus } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { geometryStudies, strokes } from './data';
 import { DEFAULT_ANGLE, DEFAULT_GEOMETRY, advanceCycle, seekAngle, stateAt } from './engine';
@@ -17,6 +18,7 @@ export function mount(context: ProjectContext): ProjectInstance {
   let loop: ReturnType<typeof createLoop> | undefined;
   let previousStroke = -1;
   page.root.setAttribute('aria-labelledby', 'er-title');
+  page.root.dataset.workspace = 'true';
 
   page.root.innerHTML = `
     <div class="er-shell">
@@ -27,6 +29,11 @@ export function mount(context: ProjectContext): ProjectInstance {
         </div>
         <p class="er-deck">Two turns of a crank.<br> One beautifully connected cycle.</p>
       </header>
+      <nav class="er-workspace-tools" aria-label="Workbench panels">
+        <button type="button" data-er-parameters>Parameters</button>
+        <button type="button" data-er-readout>Readout</button>
+        <button type="button" data-er-notebook>Notebook</button>
+      </nav>
 
       <section class="er-workbench" aria-label="Four-stroke engine workbench" data-project-preview>
         <div class="er-main">
@@ -118,8 +125,69 @@ export function mount(context: ProjectContext): ProjectInstance {
       <footer class="er-footer"><span>FOUR-STROKE STUDIO / EVERY PART CONNECTED</span><a href="#er-title">Back to the cutaway</a></footer>
     </div>`;
 
+  const get = <T extends Element>(selector: string) => query<T>(page.root, selector);
+  const inspector = get<HTMLElement>('.er-inspector');
+  const settings = get<HTMLElement>('.er-settings');
+  const readout = document.createElement('div');
+  readout.className = 'er-readout';
+  const tabsHost = document.createElement('div');
+  const panels = document.createElement('div');
+  panels.className = 'er-dock-panels';
+  const settingsPanel = document.createElement('div');
+  settingsPanel.append(settings);
+  get('.er-engine-card').insertBefore(get('.er-strokes'), get('.er-transport'));
+  readout.append(get('.er-now'), get('.er-parts'), get('.er-port-legend'), get('.er-measures'), get('.er-timeline'), get('.er-feedback'));
+  panels.append(settingsPanel, readout);
+  inspector.append(tabsHost, panels);
+  const tabs = createWorkspaceTabs(page, {
+    id: 'er-instruments', label: 'Engine instruments', host: tabsHost,
+    panes: [
+      { id: 'parameters', label: 'Parameters', panel: settingsPanel },
+      { id: 'readout', label: 'Readout', panel: readout },
+    ],
+  });
+  const notebook = get<HTMLElement>('.er-notebook');
+  const notes = document.createElement('div');
+  notes.className = 'er-operating-notes';
+  notes.append(get('.er-deck'), get('.er-help'), get('.er-cycle-scale'));
+  for (const note of settings.querySelectorAll('.er-note, .er-geometry-readout')) notes.append(note);
+  createWorkspaceDialog(page, {
+    id: 'er-notebook-dialog', title: 'Engine notebook',
+    content: [notes, notebook, get('.er-footer')], triggers: [get('[data-er-notebook]')],
+  });
+  const dock = createWorkspaceDialog(page, {
+    id: 'er-instruments-dialog', title: 'Engine instruments', content: [inspector],
+  });
+  const compact = window.matchMedia('(max-width: 700px), (max-height: 540px)');
+  const triggers = [get<HTMLButtonElement>('[data-er-parameters]'), get<HTMLButtonElement>('[data-er-readout]')];
+  function placeInspector() {
+    const focused = inspector.contains(document.activeElement);
+    dock.close();
+    (compact.matches ? query(dock.dialog, '.workspace-dialog-content') : get('.er-workbench')).append(inspector);
+    for (const trigger of triggers) {
+      trigger.setAttribute('aria-controls', compact.matches ? dock.dialog.id : panels.id);
+      if (compact.matches) trigger.setAttribute('aria-haspopup', 'dialog');
+      else trigger.removeAttribute('aria-haspopup');
+    }
+    if (focused) triggers[0].focus({ preventScroll: true });
+  }
+  panels.id = 'er-instrument-panels';
+  triggers.forEach((trigger, index) => trigger.addEventListener('click', () => {
+    tabs.select(index === 0 ? 'parameters' : 'readout');
+    if (compact.matches) dock.open();
+    else tabsHost.querySelector<HTMLButtonElement>('[aria-selected="true"]')!.focus({ preventScroll: true });
+  }, { signal: page.signal }));
+  compact.addEventListener('change', placeInspector, { signal: page.signal });
+  placeInspector();
+  mirrorWorkspaceStatus(page, get('[data-feedback]'));
+  get('.er-footer a').addEventListener('click', () => {
+    get<HTMLDialogElement>('#er-notebook-dialog').close();
+    get<SVGSVGElement>('.er-scene').focus();
+  }, { signal: page.signal });
+
   page.root.querySelectorAll('output').forEach((output) => output.setAttribute('aria-live', 'off'));
   const drawing = createDrawing(query<HTMLElement>(page.root, '[data-drawing]'));
+  page.onCleanup(drawing.destroy);
   const play = query<HTMLButtonElement>(page.root, '[data-play]');
   const scrubber = query<HTMLInputElement>(page.root, '#er-cycle');
   const ratio = query<HTMLInputElement>(page.root, '#er-ratio');

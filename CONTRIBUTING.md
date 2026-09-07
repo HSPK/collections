@@ -72,6 +72,10 @@ changes in an issue before coupling a small contribution to a new stack.
 - Keep essential UI readable: roughly 16-18px body copy and at least 14px
   controls and labels. A 320px screen should not acquire document-level horizontal
   scrolling.
+- Keep interaction-led sites in one viewport, with primary controls beside
+  their result. Use compact docks or explicit panes on phones and bounded
+  panels/dialogs for long notes or inspectors. Do not conceal offscreen controls
+  with overflow clipping. Reading-oriented sites can keep natural document flow.
 - Respect reduced motion and provide pause controls for ongoing motion.
   Audio, microphone, or other sensitive input must be explicitly enabled.
   Never record or upload microphone input without a separately reviewed

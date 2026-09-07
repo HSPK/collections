@@ -7,6 +7,7 @@ import { EMBEDDING_LIMIT, PRESETS, STAGES, TOKENS } from './data';
 import type { Preset } from './data';
 import { renderStudio, studioMarkup, syncEmbeddingInputs } from './ui';
 import type { StudioState } from './ui';
+import { createStudioWorkspace } from './workspace';
 
 function presetState(preset: Preset, challenge = false): StudioState {
   const embeddings = preset.embeddings.map((row) => [...row]);
@@ -28,6 +29,7 @@ export function mount(context: ProjectContext): ProjectInstance {
     invalidInputs.clear();
   });
   root.innerHTML = studioMarkup();
+  const inspector = createStudioWorkspace(page);
 
   function renderFeedback(): void {
     query(root, '[data-input-feedback]').textContent = invalidInputs.size
@@ -54,7 +56,7 @@ export function mount(context: ProjectContext): ProjectInstance {
     state.key = clamp(key, 0, TOKENS.length - 1);
     renderStudio(root, state);
     const masked = state.result.causal && state.key > state.query;
-    page.report(`Query ${TOKENS[state.query]}, key ${TOKENS[state.key]}: ${masked ? 'masked; weight exactly zero' : `${(state.result.weights[state.query][state.key] * 100).toFixed(2)} percent attention`}. The calculation and output below follow this query.`);
+    page.report(`Query ${TOKENS[state.query]}, key ${TOKENS[state.key]}: ${masked ? 'masked; weight exactly zero' : `${(state.result.weights[state.query][state.key] * 100).toFixed(2)} percent attention`}. The Calculation panel follows this query.`);
   }
 
   function editEmbedding(input: HTMLInputElement): void {
@@ -117,9 +119,9 @@ export function mount(context: ProjectContext): ProjectInstance {
       reset();
     } else if (button.dataset.action === 'challenge') {
       loadPreset(PRESETS[0], true);
+      inspector.select('embeddings');
       const input = query<HTMLInputElement>(root, '[data-embedding-row="1"][data-embedding-column="0"]');
-      input.focus({ preventScroll: true });
-      input.scrollIntoView({ block: 'center', behavior: 'auto' });
+      input.focus();
       page.report('Routing challenge loaded. Send at least 80 percent of ink’s attention to moss. Moss’s first coordinate is focused.');
     } else if (button.dataset.step !== undefined) {
       const stage = STAGES.find((candidate) => candidate.id === button.dataset.step);

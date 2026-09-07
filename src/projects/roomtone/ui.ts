@@ -123,7 +123,7 @@ export function renderReadouts(root: HTMLElement, design: AcousticDesign, band: 
   text('[data-volume]', estimate.volume.toFixed(1));
   text('[data-direct-delay]', (result.paths[0].delay * 1000).toFixed(1));
   text('[data-rt60]', estimate.eyring[band].toFixed(2));
-  text('[data-rt-band]', `${BANDS[band]} Hz estimate`);
+  text('[data-rt-band]', `${BANDS[band]} Hz est.`);
   text('[data-sabine]', `${estimate.sabine[band].toFixed(2)} s`);
   text('[data-eyring]', `${estimate.eyring[band].toFixed(2)} s`);
   text('[data-budget]', `${result.paths.length} paths / ${LIMITS.paths} max. ${result.work.toLocaleString()} / 20,000 geometric work units.`);

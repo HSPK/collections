@@ -2,6 +2,7 @@ import './style.css';
 import { canvas2D } from '../../core/canvas';
 import { createLoop } from '../../core/loop';
 import { createProjectPage, escapeMarkup, query } from '../../core/page';
+import { createWorkspaceDialog } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { DEFAULT_SETTINGS, GARDEN_NOTES } from './data';
 import { ChoirEngine, MAX_FIREFLIES, MIN_FIREFLIES } from './engine';
@@ -13,6 +14,7 @@ const torchIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 14-5 
 
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'firefly-choir');
+  page.root.dataset.workspace = 'true';
   page.root.setAttribute('aria-labelledby', 'fc-title');
 
   try {
@@ -23,6 +25,7 @@ export function mount(context: ProjectContext): ProjectInstance {
           <h1 id="fc-title">Firefly <em>Choir</em><span class="fc-title-spark" aria-hidden="true">✳</span></h1>
         </div>
         <p class="fc-intro">A small night garden. Many little clocks,<br class="fc-desktop-break"> learning to glow together.</p>
+        <button type="button" class="fc-guide-button" data-guide>Field notes ↗</button>
       </header>
 
       <div class="fc-workbench">
@@ -90,6 +93,22 @@ export function mount(context: ProjectContext): ProjectInstance {
         <button type="button" data-reset>Begin again <span aria-hidden="true">↺</span></button>
       </footer>`;
 
+    query(page.root, '[data-garden]').append(query(page.root, '.fc-coherence'));
+    createWorkspaceDialog(page, {
+      id: 'fc-guide',
+      title: 'Field notes',
+      triggers: [query(page.root, '[data-guide]')],
+      content: [
+        query(page.root, '.fc-intro'),
+        query(page.root, '.fc-desk-heading'),
+        query(page.root, '.fc-status'),
+        query(page.root, '.fc-keyboard'),
+        query(page.root, '.fc-range-ends'),
+        query(page.root, '.fc-readout-note'),
+        query(page.root, '.fc-notes'),
+        query(page.root, '.fc-colophon'),
+      ],
+    });
     const garden = query<HTMLElement>(page.root, '[data-garden]');
     const canvasHost = query<HTMLElement>(page.root, '[data-canvas-host]');
     const play = query<HTMLButtonElement>(page.root, '[data-play]');

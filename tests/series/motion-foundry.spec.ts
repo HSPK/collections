@@ -1,10 +1,22 @@
 import { expect, test } from '@playwright/test';
-import type { Locator } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import { relative } from 'node:path';
 import { LESSONS } from '../../src/projects/motion-foundry/data';
 import { DEFAULT_PARAMETERS, sampleMotion } from '../../src/projects/motion-foundry/model';
 
 const projectURL = './projects/motion-foundry/';
+
+async function openFoundry(page: Page) {
+  await page.routeWebSocket(/^ws:\/\/127\.0\.0\.1:4173\//, socket => {
+    const server = socket.connectToServer();
+    server.onMessage(message => {
+      if (typeof message === 'string' && /"type"\s*:\s*"(?:update|full-reload)"/.test(message)) return;
+      socket.send(message);
+    });
+  });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto(projectURL);
+}
 
 async function setRange(input: Locator, value: number) {
   await input.evaluate((element: HTMLInputElement, next) => {
@@ -86,8 +98,7 @@ test('each principle changes a substantive property and all model controls matte
 test('lessons, parameters, playback, replay, and reverse scrubbing work together', async ({ page }, testInfo) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto(projectURL);
+  await openFoundry(page);
   const root = page.locator('.project-motion-foundry');
   await expect(root).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Motion Foundry', exact: true })).toBeVisible();
@@ -96,6 +107,7 @@ test('lessons, parameters, playback, replay, and reverse scrubbing work together
     body: await page.screenshot({ fullPage: true, path: relative(process.cwd(), testInfo.outputPath('motion-foundry-desktop.png')) }),
     contentType: 'image/png',
   });
+  await root.getByRole('button', { name: 'Lessons', exact: true }).click();
   for (const lesson of LESSONS) {
     await root.locator(`[data-mf-lesson="${lesson.id}"]`).click();
     await expect(root).toHaveAttribute('data-lesson', lesson.id);
@@ -107,6 +119,7 @@ test('lessons, parameters, playback, replay, and reverse scrubbing work together
     expect(readings[0]).not.toBe(readings[1]);
   }
   await root.locator('[data-mf-lesson="arcs"]').click();
+  await root.getByRole('button', { name: 'Close Choose a motion lesson', exact: true }).click();
   const position = page.getByRole('slider', { name: 'Clip position', exact: true });
   const expressive = root.locator('[data-mf-scene="expressive"] [data-mf-puck]');
   const plain = root.locator('[data-mf-scene="plain"] [data-mf-puck]');
@@ -132,8 +145,10 @@ test('lessons, parameters, playback, replay, and reverse scrubbing work together
   await expect(root.locator('.mf-guide-layer').first()).toBeHidden();
   await page.getByRole('checkbox', { name: 'Show motion guides', exact: true }).check();
   await expect(root.locator('.mf-guide-layer').first()).toBeVisible();
+  await root.getByRole('button', { name: 'Principle & notes', exact: true }).click();
   await root.locator('summary').click();
   await expect(root.locator('[data-mf-model-note]')).toContainText('drawn parabola');
+  await root.getByRole('button', { name: 'Close Principle & notes', exact: true }).click();
   await page.getByRole('button', { name: 'Play animation', exact: true }).click();
   await expect(root).toHaveAttribute('data-motion', 'playing');
   await expect.poll(async () => Number(await position.inputValue())).toBeGreaterThan(230);
@@ -159,8 +174,7 @@ test('lessons, parameters, playback, replay, and reverse scrubbing work together
 
 test('mobile scenes stay legible and both motion-preference changes pause playback', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 375, height: 812 });
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto(projectURL);
+  await openFoundry(page);
   const root = page.locator('.project-motion-foundry');
   await expect(root).toHaveAttribute('data-motion', 'paused');
   await expect(root).toHaveAttribute('data-progress', '0.320000');
@@ -171,13 +185,18 @@ test('mobile scenes stay legible and both motion-preference changes pause playba
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   const workbench = (await root.locator('[data-project-preview]').boundingBox())!;
   expect(workbench.y).toBeLessThan(300);
-  expect((await root.locator('.mf-scene-svg').first().boundingBox())!.y).toBeLessThanOrEqual(300);
+  expect((await root.locator('.mf-scene-svg:visible').first().boundingBox())!.y).toBeLessThanOrEqual(300);
   const plain = (await root.locator('[data-mf-scene="plain"]').boundingBox())!;
   const expressive = (await root.locator('[data-mf-scene="expressive"]').boundingBox())!;
   expect(plain.width).toBeGreaterThan(300);
   expect(plain.height).toBeGreaterThan(240);
-  expect(expressive.y).toBeGreaterThanOrEqual(plain.y + plain.height);
-  for (const control of await root.locator('button, select, input[type="range"], .mf-guide-toggle').all()) {
+  expect(expressive.y).toBe(plain.y);
+  await expect(root.getByRole('tab', { name: 'Expressive', exact: true })).toHaveAttribute('aria-selected', 'true');
+  await expect(root.locator('[data-mf-scene="plain"]')).toBeHidden();
+  await root.getByRole('tab', { name: 'Plain', exact: true }).click();
+  await expect(root.locator('[data-mf-scene="plain"]')).toBeVisible();
+  await root.getByRole('tab', { name: 'Expressive', exact: true }).click();
+  for (const control of await root.locator('button:visible, select:visible, input[type="range"]:visible, .mf-guide-toggle:visible').all()) {
     expect((await control.boundingBox())!.height).toBeGreaterThanOrEqual(44);
   }
   const frame = await root.locator('[data-mf-scene="expressive"] [data-mf-puck]').getAttribute('transform');
@@ -202,8 +221,7 @@ test('mobile scenes stay legible and both motion-preference changes pause playba
 });
 
 test('aborting or destroying a mount cancels its frames and removes its listeners', async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto(projectURL);
+  await openFoundry(page);
   await expect(page.locator('.project-motion-foundry')).toHaveAttribute('data-motion', 'paused');
   await page.waitForTimeout(100);
   const result = await page.evaluate(async () => {
@@ -277,3 +295,83 @@ test('aborting or destroying a mount cancels its frames and removes its listener
   });
   expect(result).toEqual({ wasActive: true, remainingFrames: 0, framesAfterStop: 0, rootRemoved: true, noticesAfterStop: 0 });
 });
+
+for (const viewport of [
+  { width: 1440, height: 900 }, { width: 1280, height: 720 },
+  { width: 375, height: 812 }, { width: 320, height: 640 }, { width: 768, height: 480 },
+]) {
+  test(`motion workspace: ${viewport.width}x${viewport.height} keeps live tuning beside the study`, async ({ page }, testInfo) => {
+    await page.setViewportSize(viewport);
+    await openFoundry(page);
+    const root = page.locator('.project-motion-foundry');
+    await expect(root).toHaveAttribute('data-workspace', 'true');
+    const assertFits = async () => {
+      expect(await page.evaluate(() => ({
+        width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight,
+        x: window.scrollX, y: window.scrollY,
+      }))).toEqual({ width: viewport.width, height: viewport.height, x: 0, y: 0 });
+    };
+    await assertFits();
+    expect(await root.evaluate(element => getComputedStyle(element).overflowY)).not.toMatch(/hidden|clip/);
+    for (const selector of ['.mf-scene-svg:visible', '[data-mf-play]', '[data-mf-position]', '[data-mf-duration]', '[data-mf-amplitude]', '[data-mf-easing]']) {
+      const bounds = (await root.locator(selector).first().boundingBox())!;
+      expect(bounds.y).toBeGreaterThanOrEqual(0);
+      expect(bounds.y + bounds.height).toBeLessThanOrEqual(viewport.height);
+    }
+    for (const button of await root.locator('button:visible, select:visible').all()) {
+      expect(await button.evaluate(element => {
+        const bounds = element.getBoundingClientRect();
+        return element.contains(document.elementFromPoint(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2));
+      })).toBe(true);
+    }
+    const expressive = root.locator('[data-mf-scene="expressive"] [data-mf-puck]');
+    const plain = root.locator('[data-mf-scene="plain"] [data-mf-puck]');
+    const amplitude = root.getByRole('slider', { name: 'Expression amplitude', exact: true });
+    await amplitude.focus();
+    await amplitude.press('Home');
+    expect(await expressive.getAttribute('transform')).toBe(await plain.getAttribute('transform'));
+    await amplitude.press('End');
+    expect(await expressive.getAttribute('transform')).not.toBe(await plain.getAttribute('transform'));
+    const before = await expressive.getAttribute('transform');
+    await root.getByRole('combobox', { name: 'Travel easing', exact: true }).selectOption('out');
+    expect(await expressive.getAttribute('transform')).not.toBe(before);
+    if (viewport.width <= 740) {
+      await root.getByRole('tab', { name: 'Expressive', exact: true }).focus();
+      await page.keyboard.press('ArrowLeft');
+      await expect(root.locator('[data-mf-scene="plain"]')).toBeVisible();
+      await page.keyboard.press('ArrowRight');
+      await expect(root.locator('[data-mf-scene="expressive"]')).toBeVisible();
+    }
+    await root.getByRole('button', { name: 'Lessons', exact: true }).click();
+    await root.locator('[data-mf-lesson="arcs"]').click();
+    await expect(root).toHaveAttribute('data-lesson', 'arcs');
+    await page.keyboard.press('Escape');
+    await expect(root.getByRole('button', { name: 'Lessons', exact: true })).toBeFocused();
+    await root.getByRole('button', { name: 'Principle & notes', exact: true }).click();
+    await root.locator('summary').click();
+    await expect(root.locator('[data-mf-model-note]')).toBeVisible();
+    await expect(root.locator('[data-mf-model-note]')).toContainText('drawn parabola');
+    await assertFits();
+    await page.screenshot({ path: testInfo.outputPath('motion-workspace-notes.png') });
+    await page.keyboard.press('Escape');
+    await root.getByRole('button', { name: 'Reset settings', exact: true }).click();
+    await expect(root.locator('[data-mf-amplitude-output]')).toHaveText('75%');
+    await expect(root).toHaveAttribute('data-progress', '0.500000');
+    await assertFits();
+    await page.screenshot({ path: testInfo.outputPath('motion-workspace.png') });
+    if (viewport.width === 768) {
+      const pose = await expressive.getAttribute('transform');
+      await page.setViewportSize({ width: 375, height: 812 });
+      await expect(root.locator('[data-mf-scene="plain"]')).toBeHidden();
+      await root.getByRole('tab', { name: 'Plain', exact: true }).click();
+      await expect(root.locator('[data-mf-scene="plain"]')).toBeVisible();
+      await page.setViewportSize(viewport);
+      await expect(root.locator('[data-mf-scene="plain"]')).toBeVisible();
+      await expect(root.locator('[data-mf-scene="expressive"]')).toBeVisible();
+      await expect(root.locator('[data-mf-scene="plain"]')).toHaveAttribute('aria-hidden', 'false');
+      await expect(root.locator('.mf-scene-tabs')).toBeHidden();
+      expect(await expressive.getAttribute('transform')).toBe(pose);
+      await assertFits();
+    }
+  });
+}

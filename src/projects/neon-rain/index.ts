@@ -1,11 +1,13 @@
 import './style.css';
 import { createProjectPage, escapeMarkup, query } from '../../core/page';
+import { createWorkspaceDialog } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { DISTRICT, INITIAL_PHASE, INITIAL_RAIN, SHOPS, VIEWS } from './data';
 import { createStreetEngine, type StreetEngine, type StreetSnapshot } from './engine';
 
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'neon-rain');
+  page.root.dataset.workspace = 'true';
   page.root.setAttribute('aria-labelledby', 'neon-rain-title');
   page.root.innerHTML = `
     <div class="nr-shell">
@@ -18,6 +20,7 @@ export function mount(context: ProjectContext): ProjectInstance {
           <div><p class="nr-eyebrow">An after-dark street directory</p><h1 id="neon-rain-title">NEON RAIN<span aria-hidden="true">↘</span></h1></div>
         </div>
         <p class="nr-edition"><span>VOL. 037 / NIGHT STUDIES</span><strong>Take the long way home.</strong></p>
+        <button type="button" class="nr-directory-toggle" data-nr-directory>Directory</button>
       </header>
 
       <figure class="nr-screen">
@@ -79,6 +82,17 @@ export function mount(context: ProjectContext): ProjectInstance {
         <details><summary>Field notes</summary><p>Vesper Ward is fiction, not a forecast or a map. Every sign is drawn here, every building assembled locally. Broken, inverted sign textures make the wet-road reflections; there is no expensive live mirror or bloom pass. Rain is a seeded, repeating volume. Nothing streams in, and nothing is recorded.</p></details>
       </footer>
     </div>`;
+
+  createWorkspaceDialog(page, {
+    id: 'nr-directory-dialog', title: 'Directory & field notes',
+    triggers: [query<HTMLElement>(page.root, '[data-nr-directory]')],
+    content: [
+      query<HTMLElement>(page.root, '.nr-directory'),
+      ...page.root.querySelectorAll<HTMLElement>('.nr-setting-note'),
+      query<HTMLElement>(page.root, '.nr-under-console p:last-child'),
+      query<HTMLElement>(page.root, '.nr-footer'),
+    ],
+  });
 
   const canvasHost = query<HTMLElement>(page.root, '[data-neon-scene]');
   const consoleHost = query<HTMLElement>(page.root, '.nr-console');
@@ -173,6 +187,7 @@ export function mount(context: ProjectContext): ProjectInstance {
   }
   page.root.addEventListener('keydown', (event) => {
     if (event.defaultPrevented || event.code !== 'Space' || !(event.target instanceof HTMLElement)) return;
+    if (event.target.closest('dialog')) return;
     if (event.target.isContentEditable || /^(INPUT|BUTTON|SELECT|TEXTAREA|A|SUMMARY)$/.test(event.target.tagName)) return;
     event.preventDefault();
     setPaused(!paused);

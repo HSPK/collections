@@ -432,3 +432,132 @@
   .project-word-circuit .wc-counters dd small { font-size: 12px; }
   .project-word-circuit .wc-paper-tag { padding: 5px 6px; }
 }
+
+.project-word-circuit[data-workspace="true"] {
+  --workspace-paper: var(--wc-panel);
+  height: 100dvh;
+  min-height: 0;
+}
+.project-word-circuit .wc-shell { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 12px; padding: 14px 24px 70px; }
+.project-word-circuit .wc-header { flex: none; align-items: center; margin: 0; padding: 0 60px 10px 0; gap: 16px; }
+.project-word-circuit h1 { font-size: 36px; margin: 0; white-space: nowrap; }
+.project-word-circuit .wc-nav { display: flex; flex: none; gap: 18px; }
+.project-word-circuit .wc-nav > button { width: auto; min-height: 40px; padding-block: 6px; font-size: 14px; }
+.project-word-circuit .wc-nav > button svg, .project-word-circuit .wc-nav > button > span { display: none; }
+.project-word-circuit .wc-nav .wc-log-toggle { display: none; }
+.project-word-circuit .wc-workbench { flex: 1; min-height: 0; grid-template-columns: minmax(0, 1fr) 280px; align-items: stretch; }
+.project-word-circuit .wc-console {
+  min-height: 0; padding: 18px; gap: 14px 18px;
+  grid-template-columns: minmax(0, 1fr) minmax(230px, .8fr);
+  grid-template-areas: "heading heading" "circuit counters" "circuit entry" "circuit feedback" "utility hint";
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+}
+.project-word-circuit .wc-panel-heading { padding: 0; align-items: center; }
+.project-word-circuit .wc-panel-heading > div { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 18px; }
+.project-word-circuit .wc-panel-heading h2 { font-size: 24px; margin: 0; }
+.project-word-circuit .wc-panel-heading .wc-eyebrow { margin: 0; font-size: 14px; }
+.project-word-circuit .wc-circuit { display: flex; flex-direction: column; justify-content: center; min-height: 0; height: 100%; padding: 18px; }
+.project-word-circuit .wc-circuit-topline { flex: none; font-size: 14px; margin-bottom: 28px; }
+.project-word-circuit .wc-schematic { grid-template-columns: 90px minmax(0, 1fr); }
+.project-word-circuit .wc-terminal-label > span, .project-word-circuit .wc-terminal-label > strong { font-size: 14px; }
+.project-word-circuit .wc-tile { width: calc(100% - 6px); font-size: 30px; }
+.project-word-circuit .wc-wires { height: 68px; width: 100%; }
+.project-word-circuit .wc-counters { padding-bottom: 10px; }
+.project-word-circuit .wc-counters dt, .project-word-circuit .wc-counters small { font-size: 14px; }
+.project-word-circuit .wc-entry-row input { min-height: 46px; }
+.project-word-circuit .wc-entry-label > span { font-size: 14px; }
+.project-word-circuit .wc-feedback { min-height: 0; max-height: 100%; overflow: auto; overscroll-behavior: contain; }
+.project-word-circuit .wc-hint-area { align-self: end; }
+.project-word-circuit .wc-utility-row { padding: 0; border: 0; }
+.project-word-circuit .wc-utility-row svg { display: none; }
+.project-word-circuit .wc-route-panel { display: flex; flex-direction: column; min-height: 0; }
+.project-word-circuit .wc-log-heading { flex: none; padding: 16px; }
+.project-word-circuit .wc-log-heading h2 { font-size: 24px; }
+.project-word-circuit .wc-route-scroll,
+.project-word-circuit[data-solved="true"] .wc-route-scroll { flex: 1; min-height: 0; max-height: none; overflow: auto; margin: 0; }
+.project-word-circuit .wc-route-bottom { flex: none; margin-top: 8px; padding: 14px; }
+.project-word-circuit :is(.wc-small, .wc-stop-number, .wc-stop-detail, .wc-stop-current, .wc-neighbour-button, .wc-eyebrow) { font-size: 14px; }
+.project-word-circuit .workspace-dialog :is(.wc-routes-section, .wc-dictionary-section, .wc-guide) { margin-top: 0; }
+.project-word-circuit .workspace-dialog .wc-route-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.project-word-circuit .workspace-dialog :is(.wc-card-top, .wc-card-bottom, .wc-card-bottom > span, .wc-dictionary-entry button, .wc-word-used, .wc-dictionary-summary-note, .wc-footer) { font-size: 14px; }
+.project-word-circuit .workspace-dialog .wc-route-panel { max-height: calc(100dvh - 146px); }
+.project-word-circuit .workspace-dialog .wc-log-heading h2 br { display: none; }
+.project-word-circuit .workspace-dialog .wc-route-scroll { flex-basis: 160px; min-height: 120px; }
+.project-word-circuit .wc-play-notes { display: grid; gap: 14px; margin-bottom: 24px; }
+.project-word-circuit .wc-play-notes > * { margin: 0; font-size: 15px; }
+.project-word-circuit .wc-play-notes .wc-paper-tag { width: fit-content; }
+.project-word-circuit .wc-play-notes figcaption { color: var(--wc-muted); }
+.project-word-circuit .wc-result-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.project-word-circuit .wc-result-actions button { padding: 8px 12px; min-height: 44px; border: 1px solid var(--wc-ink); border-radius: 5px; background: var(--wc-panel); font-size: 14px; }
+.project-word-circuit .wc-error-detail { font-size: 16px; line-height: 1.6; }
+
+@media (max-width: 1120px) {
+  .project-word-circuit .wc-workbench { grid-template-columns: minmax(0, 1fr); }
+  .project-word-circuit .wc-nav .wc-log-toggle { display: flex; }
+  .project-word-circuit .wc-header { display: block; padding-bottom: 6px; }
+  .project-word-circuit .wc-nav { margin-top: 4px; gap: 20px; }
+}
+@media (max-width: 650px) {
+  .project-word-circuit .wc-shell { padding: 6px; gap: 5px; }
+  .project-word-circuit .wc-header { padding: 0; }
+  .project-word-circuit h1 { font-size: 29px; padding-right: 58px; }
+  .project-word-circuit .wc-nav { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; margin-top: 2px; }
+  .project-word-circuit .wc-nav > button { font-size: 14px; font-weight: 500; line-height: 1.2; min-height: 38px; padding: 3px 0; }
+  .project-word-circuit .wc-console {
+    padding: 7px; gap: 4px;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "heading" "circuit" "counters" "entry" "feedback" "hint" "utility";
+    grid-template-rows: auto minmax(116px, 1fr) auto auto 60px auto auto;
+    box-shadow: 0 2px 0 #dce0ce;
+  }
+  .project-word-circuit .wc-panel-heading > div { justify-content: space-between; width: 100%; gap: 4px; }
+  .project-word-circuit .wc-panel-heading h2 { font-size: 20px; }
+  .project-word-circuit .wc-panel-heading .wc-eyebrow { font-size: 14px; letter-spacing: 0; }
+  .project-word-circuit .wc-circuit { padding: 6px 9px; }
+  .project-word-circuit .wc-circuit-topline { margin-bottom: 4px; gap: 4px; font-size: 14px; }
+  .project-word-circuit .wc-live-label { gap: 5px; }
+  .project-word-circuit .wc-schematic { grid-template-columns: 86px minmax(0, 1fr); column-gap: 3px; }
+  .project-word-circuit .wc-terminal-label { gap: 0; }
+  .project-word-circuit .wc-terminal-label > strong { font-size: 14px; line-height: 1.2; }
+  .project-word-circuit .wc-tile { width: 32px; height: 32px; aspect-ratio: auto; font-size: 24px; }
+  .project-word-circuit .wc-wires { height: 16px; }
+  .project-word-circuit .wc-counters { padding: 2px 0 4px; }
+  .project-word-circuit .wc-counters > div { display: flex; flex-wrap: wrap; align-items: baseline; gap: 3px 6px; padding-inline: 6px; }
+  .project-word-circuit .wc-counters dt { font-size: 14px; margin: 0; line-height: 1.2; }
+  .project-word-circuit .wc-counters dd { font-size: 20px; gap: 3px; }
+  .project-word-circuit .wc-counters dd small { font-size: 14px; }
+  .project-word-circuit .wc-entry-label { margin-bottom: 4px; }
+  .project-word-circuit .wc-entry-label label { font-size: 14px; }
+  .project-word-circuit .wc-entry-row { grid-template-columns: minmax(0, 1fr) auto; gap: 6px; }
+  .project-word-circuit .wc-entry-row input { min-height: 44px; height: 44px; font-size: 22px; padding: 6px 8px; }
+  .project-word-circuit .wc-connect-button { min-height: 44px; padding: 6px 9px; gap: 5px; font-size: 14px; }
+  .project-word-circuit .wc-connect-button svg { width: 16px; }
+  .project-word-circuit .wc-feedback { height: 60px; padding: 5px 8px; font-size: 14px; line-height: 1.4; }
+  .project-word-circuit .wc-hint-button { min-height: 36px; padding: 4px 0; }
+  .project-word-circuit .wc-utility-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding-right: 60px; min-height: 54px; }
+  .project-word-circuit .wc-utility-row > button:last-child { grid-column: auto; }
+  .project-word-circuit .wc-utility-row button { min-height: 42px; padding: 5px 3px; font-size: 14px; }
+  .project-word-circuit .workspace-dialog .wc-route-grid { grid-template-columns: minmax(0, 1fr); }
+  .project-word-circuit .workspace-dialog-content { padding: 12px; }
+  .project-word-circuit .wc-dictionary-content { padding: 10px; }
+  .project-word-circuit .wc-dictionary summary { padding: 10px; }
+  .project-word-circuit .workspace-dialog .wc-guide { padding: 14px; }
+  .project-word-circuit .workspace-dialog .wc-route-panel { max-height: none; }
+  .project-word-circuit .workspace-dialog .wc-route-scroll { flex: none; max-height: 220px; }
+}
+@media (max-height: 540px) and (min-width: 651px) {
+  .project-word-circuit .wc-shell { padding-top: 6px; padding-bottom: 64px; gap: 5px; }
+  .project-word-circuit .wc-header { display: flex; padding-right: 54px; gap: 12px; }
+  .project-word-circuit h1 { font-size: 27px; }
+  .project-word-circuit .wc-nav { gap: 10px; margin: 0; }
+  .project-word-circuit .wc-nav > button { line-height: 1.2; max-width: 90px; }
+  .project-word-circuit .wc-console { padding: 10px; gap: 7px 12px; }
+  .project-word-circuit .wc-counters dd { font-size: 23px; }
+  .project-word-circuit .wc-counters dt { margin-bottom: 2px; }
+  .project-word-circuit .wc-entry-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .project-word-circuit .wc-connect-button { padding: 5px 8px; min-height: 44px; }
+  .project-word-circuit .wc-connect-button svg { display: none; }
+  .project-word-circuit .wc-circuit { padding: 10px; }
+  .project-word-circuit .wc-wires { height: 30px; }
+  .project-word-circuit .wc-circuit-topline { margin-bottom: 15px; }
+}

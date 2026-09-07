@@ -207,7 +207,7 @@ export function createWorkcell(host: HTMLElement, signal: AbortSignal, actions: 
   }
   fit();
   const stopSize = observeSize(host, size => {
-    width = size.width; height = size.height; renderer.setSize(width, height, false);
+    width = Math.max(1, size.width); height = Math.max(1, size.height); renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.fov = width < 480 ? 48 : 37;
     camera.updateProjectionMatrix(); requestRender();
@@ -215,6 +215,7 @@ export function createWorkcell(host: HTMLElement, signal: AbortSignal, actions: 
   const raycaster = new THREE.Raycaster();
   function planePoint(event: PointerEvent) {
     const rect = canvas.getBoundingClientRect();
+    if (rect.width <= 0 || rect.height <= 0) return null;
     raycaster.setFromCamera(new THREE.Vector2((event.clientX - rect.left) / rect.width * 2 - 1,
       1 - (event.clientY - rect.top) / rect.height * 2), camera);
     return raycaster.ray.intersectPlane(dragPlane, new THREE.Vector3());

@@ -194,6 +194,8 @@ test.describe('Transit website', () => {
   });
 
   test.beforeEach(async ({ page }) => {
+    // Disjoint workspace edits must not hot-reload this local-only graph session.
+    await page.routeWebSocket(/\/\?token=/u, () => {});
     await page.goto('./projects/transit/');
     await expect(page.locator('.project-transit h1')).toHaveText('Transit Weaver.');
   });
@@ -212,26 +214,24 @@ test.describe('Transit website', () => {
     await root.getByRole('button', { name: 'Save station', exact: true }).click();
     await expect(root.locator('[data-station="lantern-exchange"]')).toHaveAttribute('aria-label', /Paper & <Lantern>/);
     await expect(root.locator('script')).toHaveCount(0);
+    await root.getByRole('button', { name: 'Position, routes & removal', exact: true }).click();
     await root.locator('[data-membership="orchard"]').check();
     await expect(root.locator('.tw-selection-heading')).toContainText('4-route interchange');
     await root.getByRole('button', { name: 'Remove station', exact: true }).click();
     await expect(root.locator('[data-station="lantern-exchange"]')).toHaveCount(0);
     await expect(root.locator('[data-map] [data-station]')).toHaveCount(19);
+    await root.getByRole('button', { name: 'Close Selection details', exact: true }).click();
     await root.getByRole('button', { name: 'Undo', exact: true }).click();
     await expect(root.locator('[data-map] [data-station]')).toHaveCount(20);
     await root.getByLabel('Choose a station').selectOption('lantern-exchange');
+    await root.getByRole('button', { name: 'Position, routes & removal', exact: true }).click();
     await expect(root.locator('[data-membership="orchard"]')).toBeChecked();
   });
 
   test('drag coordinates follow the responsive viewBox, cancellation, and one-step undo', async ({ page }) => {
     const root = page.locator('.project-transit');
     await root.getByRole('button', { name: 'Move', exact: true }).click();
-    const station = root.locator('[data-station="lantern-exchange"]');
-    await root.locator('[data-map]').evaluate((element) => {
-      (element as SVGSVGElement).style.width = '850px';
-      (element as SVGSVGElement).style.minWidth = '850px';
-    });
-    await station.scrollIntoViewIfNeeded();
+    await page.setViewportSize({ width: 1280, height: 720 });
     const points = await root.locator('[data-map]').evaluate((element) => {
       const matrix = (element as SVGSVGElement).getScreenCTM()!;
       const start = new DOMPoint(460, 440).matrixTransform(matrix);
@@ -259,27 +259,37 @@ test.describe('Transit website', () => {
 
   test('route colors validate, stop ordering is editable, and new routes undo cleanly', async ({ page }) => {
     const root = page.locator('.project-transit');
+    await root.getByRole('button', { name: 'Routes & health', exact: true }).click();
     await root.getByRole('button', { name: 'Edit route Emberway', exact: true }).click();
+    await root.getByRole('button', { name: 'Stops & route actions', exact: true }).click();
     await root.getByLabel('Route color · six-digit hex').fill('#bad');
-    await root.getByRole('button', { name: 'Save route', exact: true }).click();
+    await root.getByRole('button', { name: 'Save color', exact: true }).click();
     await expect(root.locator('[data-status]')).toContainText('six-digit');
     await expect(root.locator('[data-local-status]')).toContainText('six-digit');
+    await expect(root.getByRole('dialog', { name: 'Check this edit', exact: true })).toBeVisible();
+    await root.getByRole('button', { name: 'Close Check this edit', exact: true }).click();
     await expect(root.locator('[data-map-route="emberway"]').first()).toHaveAttribute('stroke', '#df5935');
     await root.getByLabel('Route color · six-digit hex').fill('#234567');
+    await root.getByRole('button', { name: 'Close Selection details', exact: true }).click();
     await root.getByLabel('Route name', { exact: true }).fill('Copper & Clay');
     await root.getByRole('button', { name: 'Save route', exact: true }).click();
     await expect(root.locator('[data-map-route="emberway"]').first()).toHaveAttribute('stroke', '#234567');
+    await root.getByRole('button', { name: 'Routes & health', exact: true }).click();
     await expect(root.getByRole('button', { name: 'Edit route Copper & Clay', exact: true })).toBeVisible();
+    await root.getByRole('button', { name: 'Close Routes & health', exact: true }).click();
+    await root.getByRole('button', { name: 'Stops & route actions', exact: true }).click();
     await root.getByRole('button', { name: 'Move Copperfold later', exact: true }).click();
     await expect(root.locator('.tw-stop-list li').nth(2)).toContainText('Copperfold');
     await root.getByRole('button', { name: 'Add route', exact: true }).click();
     await expect(root.locator('.tw-legend-route')).toHaveCount(5);
+    await root.getByRole('button', { name: 'Stops & route actions', exact: true }).click();
     await root.getByRole('button', { name: 'Append stop', exact: true }).click();
     await root.getByRole('button', { name: 'Append stop', exact: true }).click();
     await expect(root.locator('.tw-stop-list li')).toHaveCount(2);
     await root.getByRole('button', { name: 'Remove route', exact: true }).click();
     await expect(root.locator('.tw-legend-route')).toHaveCount(4);
     await expect(root.locator('[data-map] [data-station]')).toHaveCount(20);
+    await root.getByRole('button', { name: 'Close Selection details', exact: true }).click();
     await root.getByRole('button', { name: 'Undo', exact: true }).click();
     await expect(root.locator('.tw-legend-route')).toHaveCount(5);
   });
@@ -289,11 +299,13 @@ test.describe('Transit website', () => {
     await root.getByRole('button', { name: 'Add without pointing', exact: true }).click();
     await expect(root.locator('[data-map] [data-station]')).toHaveCount(21);
     await expect(root.locator('[data-membership="emberway"]')).toBeChecked();
+    await root.getByRole('button', { name: 'Save & open', exact: true }).click();
     await root.locator('[data-file-input]').setInputFiles({
       name: 'broken.json', mimeType: 'application/json', buffer: Buffer.from('{"version":1,"city":"Incomplete"}'),
     });
     await expect(root.locator('[data-status]')).toContainText('stations array');
     await expect(root.locator('[data-map] [data-station]')).toHaveCount(21);
+    await root.getByRole('button', { name: 'Close Check this edit', exact: true }).click();
     const imported = renameCity(createDefaultNetwork(), 'Tomorrow & Tide');
     await root.locator('[data-file-input]').setInputFiles({
       name: 'city.json', mimeType: 'application/json', buffer: Buffer.from(serializeProject(imported)),
@@ -312,8 +324,60 @@ test.describe('Transit website', () => {
     expect(svg).toContain('Tomorrow &amp; Tide');
     expect(svg).toContain('ROUTE LEGEND');
     for (const route of imported.routes) expect(svg).toContain(route.name);
+    await root.getByRole('button', { name: 'Close Keep your city', exact: true }).click();
     await root.getByRole('button', { name: 'Undo', exact: true }).click();
     await expect(root.locator('[data-map] [data-station]')).toHaveCount(21);
     await expect(root.locator('[data-city-heading]')).toHaveText('Brindleport');
+  });
+
+  test('one-screen map workflows survive real resize, panes, export and reset', async ({ page }, testInfo) => {
+    const root = page.locator('.project-transit');
+    for (const viewport of [
+      { width: 1440, height: 900 }, { width: 1280, height: 720 },
+      { width: 375, height: 812 }, { width: 320, height: 640 }, { width: 768, height: 480 },
+    ]) {
+      await page.setViewportSize(viewport);
+      await page.goto('./projects/transit/');
+      await expect(root).toHaveAttribute('data-workspace', 'true');
+      const fit = async () => {
+        const geometry = await page.evaluate(() => ({
+          height: document.documentElement.scrollHeight, width: document.documentElement.scrollWidth,
+          viewportHeight: innerHeight, viewportWidth: innerWidth, scroll: scrollY,
+        }));
+        expect(geometry.height).toBeLessThanOrEqual(geometry.viewportHeight + 1);
+        expect(geometry.width).toBeLessThanOrEqual(geometry.viewportWidth + 1);
+        expect(geometry.scroll).toBe(0);
+      };
+      await fit();
+      await page.screenshot({ path: testInfo.outputPath(`transit-${viewport.width}x${viewport.height}-map.png`) });
+      await root.getByRole('button', { name: 'Add station', exact: true }).click();
+      const point = await root.locator('[data-map]').evaluate((element) => {
+        const result = new DOMPoint(680, 340).matrixTransform((element as SVGSVGElement).getScreenCTM()!);
+        return { x: result.x, y: result.y };
+      });
+      expect(point.y).toBeGreaterThan(0);
+      expect(point.y).toBeLessThan(viewport.height);
+      await page.mouse.click(point.x, point.y);
+      await expect(root.locator('[data-map] [data-station]')).toHaveCount(21);
+      await expect(root.locator('[name="x"]')).toHaveValue('680');
+      await expect(root.locator('[name="y"]')).toHaveValue('340');
+      await root.getByRole('button', { name: 'Edit selection', exact: true }).click();
+      await fit();
+      await root.getByLabel('Station name', { exact: true }).fill('Viewport stop');
+      await root.getByRole('button', { name: 'Save station', exact: true }).click();
+      await expect(root.getByLabel('Choose a station')).toHaveValue(/station-/);
+      await fit();
+      await page.screenshot({ path: testInfo.outputPath(`transit-${viewport.width}x${viewport.height}-workbench.png`) });
+      await root.getByRole('button', { name: 'Save & open', exact: true }).click();
+      const download = page.waitForEvent('download');
+      await root.getByRole('button', { name: 'Save project', exact: true }).click();
+      expect((await download).suggestedFilename()).toBe('brindleport-transit.json');
+      await root.getByRole('button', { name: 'Restore original Brindleport', exact: true }).click();
+      await expect(root.locator('[data-map] [data-station]')).toHaveCount(20);
+      await root.getByRole('button', { name: 'Close Keep your city', exact: true }).click();
+      await root.getByRole('button', { name: 'Undo', exact: true }).click();
+      await expect(root.locator('[data-map] [data-station]')).toHaveCount(21);
+      await fit();
+    }
   });
 });

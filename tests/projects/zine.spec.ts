@@ -243,6 +243,11 @@ async function mountStudio(page: Page): Promise<void> {
 }
 
 test.describe('zine browser behavior', () => {
+  test.beforeEach(async ({ page }) => {
+    // Disjoint workspace edits must not hot-reload this local-only writing session.
+    await page.routeWebSocket(/\/\?token=/u, () => {});
+  });
+
   test('maker content density: the reading copy leads the page and marks its preview', async ({ page }) => {
     for (const viewport of [{ width: 1322, height: 1160 }, { width: 375, height: 812 }]) {
       await page.setViewportSize(viewport);
@@ -262,13 +267,17 @@ test.describe('zine browser behavior', () => {
   test('opens its complete standalone website at the canonical URL', async ({ page }) => {
     await page.goto('./projects/zine/');
     await expect(page.locator('.project-zine').getByRole('heading', { name: 'Zine Machine.', level: 1 })).toBeVisible();
+    await page.getByRole('button', { name: 'Ink & export', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Download A4 sheet', exact: true })).toBeEnabled();
+    await page.getByRole('button', { name: 'Close Ink & export', exact: true }).click();
     await expect(page.locator('.project-zine .zine-reader-body')).toContainText('For the idea living in your notebook.');
   });
 
   test('edits, navigates, restores, reverses starters, and downloads the actual imposed issue', async ({ page }) => {
     await mountStudio(page);
+    await page.getByRole('button', { name: 'Ink & export', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Download A4 sheet', exact: true })).toBeEnabled();
+    await page.getByRole('button', { name: 'Close Ink & export', exact: true }).click();
     const title = page.getByRole('textbox', { name: 'Zine title' });
     await title.fill('A book <for> us & you');
     await page.getByRole('button', { name: 'Next page', exact: true }).click();
@@ -283,7 +292,9 @@ test.describe('zine browser behavior', () => {
     await expect(page.locator('.zine-page-announcement')).toContainText('3 / 8');
     await page.keyboard.press('ArrowLeft');
     await expect(body).toHaveValue(text);
+    await page.getByRole('button', { name: 'Ink & export', exact: true }).click();
     await page.getByRole('combobox', { name: 'Paper on your printer' }).selectOption('letter');
+    await page.getByRole('button', { name: 'Close Ink & export', exact: true }).click();
     await page.getByRole('button', { name: 'Print sheet', exact: true }).click();
     await expect(page.locator('.zine-sheet > svg')).toHaveAttribute('width', '279.4mm');
     await expect(page.locator('.zine-sheet g[data-page]')).toHaveCount(8);
@@ -304,9 +315,12 @@ test.describe('zine browser behavior', () => {
     expect(svg).not.toContain('id="cut-guide"');
     await mountStudio(page);
     await expect(title).toHaveValue('A book <for> us & you');
+    await page.getByRole('button', { name: 'All pages', exact: true }).click();
     await page.getByRole('button', { name: /^Page 2,?:/ }).click();
     await expect(page.getByRole('button', { name: /^Page 2,?:/ })).toBeFocused();
     await expect(body).toHaveValue(text);
+    await page.getByRole('button', { name: 'Close All eight pages', exact: true }).click();
+    await page.getByRole('link', { name: 'Starter library', exact: true }).click();
     await page.getByRole('button', { name: /A blank beginning/ }).click();
     await expect(title).toHaveValue('Something worth sharing');
     await page.getByRole('button', { name: 'Undo', exact: true }).click();
@@ -327,7 +341,9 @@ test.describe('zine browser behavior', () => {
     await body.fill('x'.repeat(361));
     await expect(body).toHaveValue('x'.repeat(361));
     await expect(body).toHaveAttribute('aria-invalid', 'true');
+    await page.getByRole('button', { name: 'Ink & export', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Download A4 sheet', exact: true })).toBeDisabled();
+    await page.getByRole('button', { name: 'Close Ink & export', exact: true }).click();
     const saved = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)!) as ZineDocument, STORAGE_KEY);
     expect(saved.pages[1]!.body).toBe(previous);
     await expect(page.locator('.zine-save-status')).toContainText('Not saved yet');
@@ -335,7 +351,9 @@ test.describe('zine browser behavior', () => {
     await expect(body).toHaveValue(previous);
     await body.fill('\n'.repeat(35));
     await expect(body).toHaveValue('\n'.repeat(35));
+    await page.getByRole('button', { name: 'Ink & export', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Download A4 sheet', exact: true })).toBeDisabled();
+    await page.getByRole('button', { name: 'Close Ink & export', exact: true }).click();
     await expect(page.locator('.zine-export-warning')).toContainText('will not fit');
     await page.evaluate(() => {
       const state = (window as typeof window & { zineTest: { controller: AbortController; instance: { destroy(): void } } }).zineTest;
@@ -397,6 +415,7 @@ test.describe('zine browser behavior', () => {
     await expect(page.locator('.zine-save-status')).toContainText('Local saving is unavailable');
     await page.getByRole('textbox', { name: 'Zine title' }).fill('A copy to keep');
     await expect(page.locator('.zine-save-status')).toContainText('Local saving is unavailable');
+    await page.getByRole('button', { name: 'Ink & export', exact: true }).click();
     await Promise.all([
       page.waitForEvent('download'),
       page.getByRole('button', { name: 'Download A4 sheet', exact: true }).click(),
@@ -415,5 +434,104 @@ test.describe('zine browser behavior', () => {
     expect(lifecycle.created).toHaveLength(1);
     expect(lifecycle.revoked).toEqual(lifecycle.created);
     await expect(page.locator('.project-zine')).toHaveCount(0);
+  });
+
+  test('one-screen writing, artwork and secondary panes work at actual viewport sizes', async ({ page }, testInfo) => {
+    for (const viewport of [
+      { width: 1440, height: 900 }, { width: 1280, height: 720 },
+      { width: 375, height: 812 }, { width: 320, height: 640 }, { width: 768, height: 480 },
+    ]) {
+      await page.setViewportSize(viewport);
+      await page.goto('./projects/zine/');
+      const root = page.locator('.project-zine');
+      await expect(root).toHaveAttribute('data-workspace', 'true');
+      const fit = async () => {
+        const geometry = await page.evaluate(() => ({
+          height: document.documentElement.scrollHeight, width: document.documentElement.scrollWidth,
+          viewportHeight: innerHeight, viewportWidth: innerWidth, scroll: scrollY,
+        }));
+        expect(geometry.height).toBeLessThanOrEqual(geometry.viewportHeight + 1);
+        expect(geometry.width).toBeLessThanOrEqual(geometry.viewportWidth + 1);
+        expect(geometry.scroll).toBe(0);
+      };
+      await page.screenshot({ path: testInfo.outputPath(`zine-${viewport.width}x${viewport.height}-read.png`) });
+      await fit();
+      await root.getByRole('button', { name: 'Edit text', exact: true }).click();
+      await root.getByRole('textbox', { name: 'Zine title' }).fill('One screen, eight pages');
+      await root.getByRole('button', { name: 'Next page', exact: true }).click();
+      await root.getByRole('textbox', { name: 'Page text', exact: true }).fill('A thought that fits on paper.');
+      await fit();
+      const bodyBox = await root.getByRole('textbox', { name: 'Page text', exact: true }).boundingBox();
+      expect(bodyBox!.height).toBeGreaterThanOrEqual(44);
+      expect(bodyBox!.y + bodyBox!.height).toBeLessThan(viewport.height);
+      await page.screenshot({ path: testInfo.outputPath(`zine-${viewport.width}x${viewport.height}-write.png`) });
+      await root.getByRole('button', { name: 'Ink & export', exact: true }).click();
+      await root.getByRole('button', { name: 'Field notes', exact: true }).click();
+      await expect(root.getByRole('button', { name: 'Field notes', exact: true })).toHaveAttribute('aria-pressed', 'true');
+      await expect(root.locator('.zine-sheet g[data-page]')).toHaveCount(8);
+      if (viewport.width === 320) {
+        await page.screenshot({ path: testInfo.outputPath('zine-320-export.png') });
+        await root.getByRole('tab', { name: 'Print layout', exact: true }).click();
+        await expect(root.locator('.zine-sheet > svg')).toBeVisible();
+        await page.screenshot({ path: testInfo.outputPath('zine-320-sheet.png') });
+        await root.getByRole('tab', { name: 'Ink & output', exact: true }).click();
+        const download = page.waitForEvent('download');
+        await root.getByRole('button', { name: 'Download A4 sheet', exact: true }).click();
+        expect((await download).suggestedFilename()).toBe('one-screen-eight-pages-a4-8-page.svg');
+      }
+      await root.getByRole('button', { name: 'Close Ink & export', exact: true }).click();
+      await expect(root.locator('.zine-page-announcement')).toHaveText('2 / 8');
+      await expect(root.getByRole('textbox', { name: 'Page text', exact: true })).toHaveValue('A thought that fits on paper.');
+      await fit();
+      await root.getByRole('textbox', { name: 'Page text', exact: true }).fill('x'.repeat(361));
+      await expect(root.locator('.zine-export-warning')).toBeVisible();
+      await expect(root.locator('.zine-export-warning')).toContainText('over 360');
+      if (viewport.width === 320) await page.screenshot({ path: testInfo.outputPath('zine-320-validation.png') });
+      await fit();
+      const countBox = await root.locator('.zine-field:has(textarea) .zine-field-count').boundingBox();
+      const feedbackBox = await root.locator('.zine-worktable-bottom').boundingBox();
+      expect(countBox!.y + countBox!.height).toBeLessThanOrEqual(feedbackBox!.y + 1);
+      await root.getByRole('button', { name: 'Undo', exact: true }).click();
+      await expect(root.getByRole('textbox', { name: 'Page text', exact: true })).toHaveValue('A thought that fits on paper.');
+      if (viewport.width === 375) {
+        await root.getByRole('link', { name: 'Starter library', exact: true }).click();
+        await root.getByRole('button', { name: /The nearby expedition/ }).click();
+        await expect(root.locator('.zine-page-announcement')).toHaveText('2 / 8');
+        await expect(root.getByRole('textbox', { name: 'Page text', exact: true })).toBeVisible();
+        await root.getByRole('button', { name: 'Undo', exact: true }).click();
+        await expect(root.getByRole('textbox', { name: 'Page text', exact: true })).toHaveValue('A thought that fits on paper.');
+      }
+      await root.getByRole('link', { name: 'Starter library', exact: true }).click();
+      await root.getByRole('button', { name: /A blank beginning/ }).click();
+      await root.getByRole('button', { name: 'Undo', exact: true }).click();
+      await expect(root.getByRole('textbox', { name: 'Zine title' })).toHaveValue('One screen, eight pages');
+      await fit();
+    }
+  });
+
+  test('print media uses the complete physical sheet, never the screen height or open panes', async ({ page }, testInfo) => {
+    await page.setViewportSize({ width: 320, height: 640 });
+    await page.goto('./projects/zine/');
+    for (const paper of ['a4', 'letter']) {
+      await page.emulateMedia({ media: 'screen' });
+      await page.getByRole('button', { name: 'Ink & export', exact: true }).click();
+      await page.getByRole('combobox', { name: 'Paper on your printer' }).selectOption(paper);
+      await page.getByRole('button', { name: 'Close Ink & export', exact: true }).click();
+      await page.evaluate(() => window.dispatchEvent(new Event('beforeprint')));
+      await page.emulateMedia({ media: 'print' });
+      const sheet = page.locator('.zine-print-output > svg');
+      await expect(sheet).toBeVisible();
+      await expect(sheet.locator('g[data-page]')).toHaveCount(8);
+      await expect(sheet).toHaveAttribute('width', paper === 'a4' ? '297mm' : '279.4mm');
+      const box = await sheet.boundingBox();
+      expect(box!.width).toBeCloseTo((paper === 'a4' ? 297 : 279.4) * 96 / 25.4, 0);
+      expect(box!.height).toBeCloseTo((paper === 'a4' ? 210 : 215.9) * 96 / 25.4, 0);
+      await expect(page.locator('.zine-shell')).toBeHidden();
+      await expect(page.locator('dialog[open]')).toHaveCount(0);
+      await expect(page.locator('.collection-menu')).toBeHidden();
+      await page.screenshot({ path: testInfo.outputPath(`zine-print-${paper}.png`), fullPage: true });
+    }
+    await page.emulateMedia({ media: 'screen' });
+    await expect(page.getByRole('button', { name: 'Collection menu', exact: true })).toBeVisible();
   });
 });

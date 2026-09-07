@@ -1,6 +1,7 @@
 import './style.css';
 import { createLoop } from '../../core/loop';
 import { createProjectPage, downloadText, escapeMarkup, query } from '../../core/page';
+import { createWorkspaceDialog } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { INITIAL_TIME, landscapes, seasonStops, YEAR_SECONDS } from './data';
 import { createSeasonScene } from './scene';
@@ -12,6 +13,7 @@ const arrowIcon = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10
 
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'season-clock');
+  page.root.dataset.workspace = 'true';
   page.root.setAttribute('aria-labelledby', 'season-clock-title');
   page.root.innerHTML = `
     <div class="season-shell">
@@ -25,7 +27,7 @@ export function mount(context: ProjectContext): ProjectInstance {
         </div>
         <div class="season-introduction">
           <p>A year, gently unfolding. <br>Turn the seasons. Stay awhile.</p>
-          <a href="#season-clock-notes">A note on this little world <span aria-hidden="true">↘</span></a>
+          <button class="season-button season-quiet" type="button" data-notes>Field notes <span aria-hidden="true">↗</span></button>
         </div>
       </header>
 
@@ -130,6 +132,40 @@ export function mount(context: ProjectContext): ProjectInstance {
       </section>
       <footer class="season-footer"><span>Season Clock <span aria-hidden="true">·</span> A quiet study of change</span><span>No hurry. It comes around again.</span></footer>
     </div>`;
+
+  const notebook = query<HTMLElement>(page.root, '.season-notebook');
+  const notes = query<HTMLElement>(page.root, '.season-notes');
+  const picker = query<HTMLElement>(page.root, '.season-place-picker');
+  notebook.prepend(query<HTMLElement>(picker, '[data-place-note]'));
+  const locationBar = document.createElement('div');
+  locationBar.className = 'season-location-bar';
+  locationBar.append(picker, query<HTMLElement>(page.root, '.season-phase-heading'));
+  query<HTMLElement>(page.root, '.season-work').prepend(locationBar);
+  notebook.prepend(query<HTMLElement>(page.root, '.season-speed'));
+  notes.prepend(query<HTMLElement>(page.root, '.season-introduction p'));
+  notes.append(query<HTMLElement>(page.root, '.season-help'));
+  const caption = query<HTMLElement>(page.root, '.season-figure figcaption');
+  const captionText = query<HTMLElement>(caption, '[data-place-caption]');
+  const captionNote = document.createElement('p');
+  notebook.prepend(captionNote);
+  const compact = window.matchMedia('(max-width: 600px)');
+  function placeCaption() {
+    captionNote.hidden = !compact.matches;
+    (compact.matches ? captionNote : caption).append(captionText);
+  }
+  compact.addEventListener('change', placeCaption, { signal: page.signal });
+  placeCaption();
+
+  const dock = document.createElement('div');
+  dock.className = 'season-dock';
+  dock.append(query<HTMLElement>(page.root, '[data-export]'), query<HTMLElement>(page.root, '[data-status]'));
+  query<HTMLElement>(page.root, '.season-shell').append(dock);
+  createWorkspaceDialog(page, {
+    id: 'season-field-notes',
+    title: 'Almanac and field notes',
+    triggers: [query<HTMLElement>(page.root, '[data-notes]')],
+    content: [notebook, notes, query<HTMLElement>(page.root, '.season-footer')],
+  });
 
   const host = query<HTMLElement>(page.root, '[data-scene-host]');
   const play = query<HTMLButtonElement>(page.root, '[data-play]');

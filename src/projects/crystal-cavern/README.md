@@ -19,11 +19,11 @@ The map is a decorative survey drawing, not navigation.
 ## Interaction
 
 Choose Pool’s edge, Upper passage or Crystal grove. Drag horizontally to look;
-touch retains vertical page scrolling. Focus the canvas for arrow-key looking,
+touch gestures stay with the scene rather than scrolling the document. Focus the canvas for arrow-key looking,
 plus/minus distance adjustment, and Space playback. Desktop pointer orbit also
 supports vertical looking. Orbit is bounded to keep the camera in the chamber;
 there is no inertia, automatic camera drift, or wheel-scroll capture.
-Labels stay at least 12 px, body notes are 15 px, and every range, view, playback,
+Labels stay at least 14 px, body notes are 15 px, and every range, view, playback,
 and palette control has at least 44 px of interaction height.
 
 Luminance and the three mineral palettes change actual crystal materials,
@@ -32,6 +32,22 @@ Mist changes depth fog, visible shafts, and particle opacity. Scrubbing the
 60-second light cycle pauses first; all moving properties derive from that
 one phase. Play is explicit after a reduced-motion preference appears or is
 removed. A still first frame has the entire environment and lighting.
+
+## Viewport workspace
+
+The `data-workspace="true"` root uses a `100dvh` grid. The real chamber takes the
+remaining height, with **Play/Pause mineral light** and **Fieldbook** always in
+the caption strip. **Views** holds all three camera stations and their caption;
+**Light** holds palette, luminance and the mineral reading; **Atmosphere** holds
+light-cycle scrubbing and mist. Panels scroll internally when needed, never the
+document. Short landscape screens put the instruments beside the chamber.
+
+**Fieldbook** opens the native **Cavern fieldbook** dialog with every specimen
+and the original geological/rendering notes. Close/Escape restores focus.
+Shared tab wrappers preserve nested groups and labels. Switching panels does
+not hide or resize the canvas; the existing size observer handles viewport
+changes and on-demand projection updates. The status row reserves the floating
+collection menu's corner. Tests retain screenshots for all five target sizes.
 
 ## Rendering / lifetime
 

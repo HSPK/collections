@@ -17,6 +17,7 @@ test('Paper Planet: radial cutouts and journal stops align with the real camera'
   await expect(page.locator('#main-content > [data-stage]')).toHaveAttribute('data-ready', 'true');
   const canvas = page.locator('[data-pp-scene] canvas');
   await expect(canvas).toBeVisible();
+  await page.getByRole('tab', { name: 'Field journal', exact: true }).click();
   for (const landmark of LANDMARKS) {
     const button = page.locator(`[data-pp-landmark="${landmark.id}"]`);
     await button.click();
@@ -107,6 +108,7 @@ test('Paper Planet: a large reduced-motion mobile globe releases its WebGL conte
   expect(bounds.height).toBeGreaterThan(400);
   expect(bounds.y).toBeLessThan(205);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await page.getByRole('tab', { name: 'Field journal', exact: true }).click();
   await page.locator('[data-pp-landmark="lighthouse"]').click();
   await expect.poll(async () => Number(await canvas.getAttribute('data-landmark-alignment'))).toBeGreaterThan(0.99999);
   const before = await canvas.getAttribute('data-camera');
@@ -118,4 +120,42 @@ test('Paper Planet: a large reduced-motion mobile globe releases its WebGL conte
   expect(await page.evaluate(() => Number(sessionStorage.getItem('paper-planet-context-releases')))).toBeGreaterThan(0);
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   expect(errors).toEqual([]);
+});
+
+test('Paper Planet: the live atlas and scrollable journal fit every workspace size', async ({ page }, testInfo) => {
+  test.setTimeout(120_000);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('./projects/paper-planet/');
+  const site = page.locator('.project-paper-planet');
+  await expect(page.locator('#main-content > [data-stage]')).toHaveAttribute('data-ready', 'true');
+  await expect(site).toHaveAttribute('data-workspace', 'true');
+  for (const [width, height] of [[1440, 900], [1280, 720], [375, 812], [320, 640], [768, 480]]) {
+    await page.setViewportSize({ width, height });
+    await page.getByRole('tab', { name: 'Atmosphere', exact: true }).click();
+    await expect.poll(() => site.evaluate(element => Math.round(element.getBoundingClientRect().height))).toBe(height);
+    expect(await page.evaluate(() => ({
+      width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight,
+    }))).toEqual({ width, height });
+    const canvas = site.locator('canvas');
+    await expect.poll(() => canvas.evaluate((element: HTMLCanvasElement) => Math.abs(element.width / element.height - element.clientWidth / element.clientHeight))).toBeLessThan(0.02);
+    for (const name of ['Play breeze', 'Dusk', 'Daylight', 'Whole world']) {
+      const button = page.getByRole('button', { name, exact: true });
+      const box = (await button.boundingBox())!;
+      expect(box.y + box.height).toBeLessThanOrEqual(height);
+      expect(await button.evaluate(element => parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(14);
+    }
+    await page.screenshot({ path: testInfo.outputPath(`paper-planet-${width}x${height}.png`) });
+    const camera = await canvas.getAttribute('data-camera');
+    await page.getByRole('tab', { name: 'Field journal', exact: true }).click();
+    await page.locator('[data-pp-landmark="lighthouse"]').click();
+    await expect.poll(async () => Number(await canvas.getAttribute('data-landmark-alignment'))).toBeGreaterThan(0.99999);
+    await page.getByRole('tab', { name: 'Atmosphere', exact: true }).click();
+    await page.getByRole('button', { name: 'Whole world', exact: true }).click();
+    await expect(canvas).toHaveAttribute('data-camera', camera!);
+    await page.getByRole('button', { name: 'Maker’s note', exact: true }).click();
+    await expect(page.getByRole('dialog', { name: 'Maker’s note', exact: true })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('button', { name: 'Maker’s note', exact: true })).toBeFocused();
+    expect(await page.evaluate(() => scrollY)).toBe(0);
+  }
 });

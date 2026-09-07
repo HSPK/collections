@@ -18,7 +18,7 @@ export, and explicitly user-initiated Web Audio convolution.
 - `floorplan.ts`: proportionally scaled SVG plan with pointer and keyboard
   source/listener positioning.
 - `audio.ts`: deterministic local source synthesis and one-shot audio graph.
-- `ui.ts`, `index.ts`, `style.css`: studio composition, validated edits,
+- `ui.ts`, `workspace.ts`, `index.ts`, `style.css`: studio composition, validated edits,
   reference comparison, responsive panes and lifecycle ownership.
 
 ## Model and coordinates
@@ -165,16 +165,41 @@ the renderer, orbit controls, observers, listeners, animation requests, audio
 work and download URLs. WebGL failure is explicit; the acoustic engine and
 editable SVG plan remain available.
 
-Mobile panes switch between Space, Edit room, and Listen & measure. SVG text
-sizes are adjusted to preserve at least 14 CSS-pixel labels. All pointer
-interactions have visible keyboard alternatives.
+The root is a `data-workspace="true"` fixed-viewport workbench, not a scrolling
+document. Desktop keeps the live cutaway beside a bounded Edit room, Response,
+or Compare pane. Geometry and Surfaces are separate specification tabs; their
+controls remain genuine numeric edits, drags and material assignments. On
+phones, Space is a one-tap live scene pane beside the same three workspace tabs.
+Play once, Stop, Sound, preset selection, reset and IR export stay on screen.
+Tabs support arrow keys, Home and End without capturing text-field input.
+
+Transport actions stay left of the floating menu, with the existing status line
+reserving its right-hand corner. `tests/workspaces/flagships.spec.ts` exercises
+real button and slider hit targets, including the modal sound controls, without
+hiding the menu or adding an empty footer.
+
+Sound opens a native dialog for source, A/B/dry audition, wet mix and output
+level; opening it never starts playback. Model notes and equations have their
+own bounded native dialog. Both restore trigger focus on close. Pane switches
+retain edits, references and the chosen reflection; desktop/phone resizing
+never clones the scene or sound graph. The room engine and all existing
+generation-guarded teardown behavior are unchanged. Only the active bounded
+pane or dialog scrolls; no body overflow masking or CSS scaling is used.
+
+SVG text sizes are adjusted to preserve at least 14 CSS-pixel labels. All
+pointer interactions have visible keyboard alternatives. Viewport checks cover
+1440×900, 1280×720, 375×812, 320×640 and short 768×480 landscape, including
+actual document/body scroll dimensions and edit/response/audio workflows.
+The owned browser tests ignore unrelated Vite full-reload messages on the
+shared development server; normal navigation and audio teardown remain tested.
 
 A diffuse-tail extension should remain independently labeled and expose its
 energy-matching rule, seed and truncation. Measured material data should include
 provenance and mounting conditions. Phase, directivity or binaural work needs a
 new model contract rather than suggesting this amplitude-only model includes it.
 
-Targeted coverage: `tests/projects/roomtone.spec.ts`. Review selectors:
+Targeted coverage: `tests/projects/roomtone.spec.ts` and
+`tests/projects/roomtone-gestures.spec.ts`. Review selectors:
 `.project-roomtone`, `[data-project-preview]`, `[data-scene]`,
 `.roomtone-canvas`, `[data-floorplan]`, `[data-field]`, `[data-material]`,
 `[data-path]`, `[data-path-route]`, `[data-comparison]`, `[data-audio-status]`,

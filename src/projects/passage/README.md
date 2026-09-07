@@ -6,9 +6,14 @@ evacuation certification, accessibility assessment, or crowd simulator.
 
 ## Workbench
 
-Choose a study and the A/B landmarks. Space and Plan share the selected level;
-Route inspects the result and Edit changes the problem. On narrow screens these
-are four separate panes. No action starts an automatic walk.
+The workbench fills the actual viewport without document scrolling. **Space**
+contains the study, A/B landmarks and mobility settings; **Plan**, **Route** and
+**Edit** open the native inspector at every screen size. The building remains
+beside the inspector on desktop and as a compact live preview above it on phones.
+On phones, Plan uses that entire working area for readable, interactive geometry.
+Space and Plan share the selected level. No action starts an automatic walk.
+Long inspectors scroll internally; Level, Pointer, pane selection and history stay
+outside that scroll. Tab lists support arrows, Home and End.
 
 - **Pick:** select Pick start or Pick destination, then click clear floor in either
   view. The selected level is explicit. Picks are checked before snapping to the
@@ -22,8 +27,10 @@ are four separate panes. No action starts an automatic walk.
 - **Walk:** use Walk / Pause, Step +1 s, rewind, a timed instruction, or the distance
   scrubber. Position is sampled from the routed 3D polyline. Stationary lift waits
   consume time but no distance. Scrubbing/walking follows the current level.
-- **Keep:** Undo/Redo retains 40 transactions, including resets/imports. A local
-  snapshot is explicit and never silently applied. JSON includes the layout and
+- **Keep / guide:** opens the keyboard-accessible local files/model dialog;
+  Escape or Close returns focus to its trigger. Undo/Redo retains 40 transactions,
+  including resets/imports. A local snapshot is explicit and never silently
+  applied. JSON includes the layout and
   computed route; imported route data is deliberately discarded and recomputed.
   SVG exports the full selected floor with real openings and its route segments.
 
@@ -69,6 +76,10 @@ A* uses a binary heap, a 3D Euclidean admissible/consistent heuristic, and a max
 Every mutation cancels the old search and stops the old walk before publishing a
 new graph. Mount awaits the first meaningful result. There is no worker URL or
 external asset, so normal Vite imports work under `/collections/projects/passage/`.
+Pane selection only changes presentation, never history, routing or reset origin.
+The renderer observes its allocated area, ignores hidden zero-sized measurements,
+and bounds projection dimensions away from zero. Showing Plan and returning to
+Space therefore restores a correctly sized view without rebuilding model state.
 
 Two objectives:
 
@@ -120,11 +131,9 @@ labels are escaped when rendered. Invalid transactions leave history unchanged.
 
 ## Focused verification
 
-Run only:
-
-```sh
-SITE_URL=http://127.0.0.1:4173 npx playwright test tests/projects/passage.spec.ts
-```
+Use the existing Playwright runner with the owned selectors
+`tests/projects/passage.spec.ts` and `tests/projects/passage-controls.spec.ts`.
+Coordinate concurrent browser runs through the session's shared browser lock.
 
 Numeric cases include independent reference Dijkstra costs, continuous clearance,
 door closures/widths, diagonal/boundary conditions, portal envelopes, step-free
@@ -134,11 +143,19 @@ canonical landmark/portal coordinates, and directed door order in both axes and
 travel directions with reversed door arrays. Browser cases cover rerouting, focus, real geometry edits,
 snapshots, JSON/SVG downloads, 320/375 px picking, reduced motion, and disposal.
 Browser cases use 90-second software-WebGL budgets and retain failure traces.
+Viewport regression checks cover 1440×900, 1280×720, 375×812, 320×640 and
+768×480: every pane, real door edit → undo → route step, reset, JSON download,
+model notes, live preview bounds and zero document overflow. They retain screenshots
+for each size in the runner's output directory.
 
 Review hooks: `.project-passage[data-ready="true"]`, `data-route-status`,
 `data-walk-state`, `data-walk-time`, `data-walk-y`, `data-revision`,
 `[data-passage-pane]`, `[data-passage-plan]`, `[data-passage-space]`,
 `[data-passage-door]`, `[data-passage-portal]`, `[data-passage-object]`,
 `[data-passage-object-x]`, `[data-passage-apply-object]`.
+`[data-passage-keep]` opens files/model notes; pane buttons retain their existing
+`data-passage-pane` and `aria-pressed` hooks as well as semantic tab state.
+The root declares `data-workspace="true"`. Add inspector content inside its bounded
+pane, not as a new root row; keep the stage's `min-height: 0` allocation.
 `data-project-preview` encloses the linked workbench. No collection header is
 injected and no background animation remains active while idle.

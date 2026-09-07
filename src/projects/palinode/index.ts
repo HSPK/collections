@@ -7,6 +7,7 @@ import {
 } from './engine';
 import type { Save } from './engine';
 import { mountMap } from './map';
+import { createFolioWorkspace } from './workspace';
 import { ARTIFACTS, DECISIONS, ENDINGS, ERAS, PLACES, RULES } from './world';
 import type { Artifact, Era, PlaceId } from './world';
 
@@ -33,6 +34,7 @@ export function mount(context: ProjectContext) {
   let hintVisible = false;
   let compareSide = 'current';
   let futureDocument = 'future-quay';
+  let renderedDocument = '';
 
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -73,7 +75,7 @@ export function mount(context: ProjectContext) {
       <button type="button" data-action="recover">Export preserved data</button><button type="button" data-action="replace-save">Save this city instead</button>
     </aside>
     <nav class="palinode-era-rail" aria-label="Historical era">
-      ${ERAS.map((era, index) => `<button type="button" data-era="${index}" aria-pressed="false"><span class="palinode-era-dot"></span><strong>${era.year}</strong><span>${e(era.name)}</span><small>${index + 1} / 4</small></button>`).join('')}
+      ${ERAS.map((era, index) => `<button type="button" data-era="${index}" aria-label="${era.year}: ${e(era.name)}" title="${e(era.name)}" aria-pressed="false"><span class="palinode-era-dot"></span><strong>${era.year}</strong><span>${e(era.name)}</span><small>${index + 1} / 4</small></button>`).join('')}
     </nav>
     <div class="palinode-workspace" id="palinode-workspace" data-project-preview>
       <section class="palinode-map-sheet" aria-labelledby="palinode-city-title">
@@ -148,11 +150,13 @@ export function mount(context: ProjectContext) {
     <dialog class="palinode-dialog" data-dialog aria-labelledby="palinode-dialog-title"><h2 id="palinode-dialog-title"></h2><p data-dialog-text></p><div><button type="button" data-action="dialog-cancel">Keep this folio</button><button type="button" data-action="dialog-confirm"></button></div></dialog>
   `;
 
+  const workspace = createFolioWorkspace(page);
   const status = query<HTMLElement>(root, '[data-status]');
   function report(message: string): void { status.textContent = message; }
   const mainMap = mountMap(query(root, '[data-main-map]'), 'palinode-main', selectPlace, signal);
   const pinnedMap = mountMap(query(root, '[data-pinned-map]'), 'palinode-pinned', selectPlace, signal);
   const revisedMap = mountMap(query(root, '[data-revised-map]'), 'palinode-revised', selectPlace, signal);
+  const fullMap = mountMap(query(root, '[data-full-map]'), 'palinode-full', selectPlace, signal);
   const docSelect = query<HTMLSelectElement>(root, '#palinode-document-select');
   const futureSelect = query<HTMLSelectElement>(root, '#palinode-future-document');
   const historySelect = query<HTMLSelectElement>(root, '#palinode-history');
@@ -195,7 +199,7 @@ export function mount(context: ProjectContext) {
     if (candidate) { state.document = candidate.id; selectedPlace = candidate.place; }
     update();
     save();
-    report(`${ERAS[era].year}: ${ERAS[era].name}. ${state.pinned ? 'The pinned future remains unchanged.' : 'Edit the decisions below the map.'}`);
+    report(`${ERAS[era].year}: ${ERAS[era].name}. ${state.pinned ? 'The pinned future remains unchanged.' : 'Open Decide to edit the causes.'}`);
   }
   function openRecord(id: string): void {
     const artifact = ARTIFACTS.find((item) => item.id === id);
@@ -213,6 +217,8 @@ export function mount(context: ProjectContext) {
     const pinned = state.pinned ? evaluate(state.pinned) : undefined;
     const places = locationStates(historical, state.era);
     mainMap.update(historical, state.era, selectedPlace);
+    fullMap.update(historical, state.era, selectedPlace);
+    workspace.place.value = selectedPlace;
     for (const text of root.querySelectorAll('[data-current-year]')) text.textContent = ERAS[state.era].year;
     setText('[data-era-title]', ERAS[state.era].name);
     setText('[data-era-line]', ERAS[state.era].line);
@@ -252,6 +258,10 @@ export function mount(context: ProjectContext) {
     setText('[data-doc-place]', `${ERAS[artifact.era].year} · ${PLACES.find((place) => place.id === artifact.place)!.name}`);
     paragraphs(query(root, '[data-doc-text]'), variant?.text ?? ['This document does not exist in the enacted branch. Its title remains here so you can see what changed; its evidence is not available.']);
     setText('[data-doc-annotation]', variant?.annotation ?? `Requires: ${getRule(artifact.visible!).label}. Restore that source to make this record visible again.`);
+    if (renderedDocument !== artifact.id) {
+      query<HTMLElement>(root, '.palinode-document').scrollTop = 0;
+      renderedDocument = artifact.id;
+    }
     for (const option of docSelect.options) {
       const record = ARTIFACTS.find((item) => item.id === option.value)!;
       option.textContent = `${record.title}${artifactText(record, evaluation) ? '' : ' [source absent]'}`;
@@ -263,7 +273,8 @@ export function mount(context: ProjectContext) {
 
     query<HTMLElement>(root, '[data-pin-empty]').hidden = !!pinned;
     query<HTMLElement>(root, '[data-comparison]').hidden = !pinned;
-    for (const button of root.querySelectorAll<HTMLButtonElement>('[data-action="pin"]')) button.textContent = pinned ? 'Repin current future' : 'Pin this future';
+    for (const button of root.querySelectorAll<HTMLButtonElement>('[data-action="pin"]')) button.textContent =
+      button.closest('.palinode-toolbar') ? pinned ? 'Repin future' : 'Pin future' : pinned ? 'Repin current future' : 'Pin this future';
     if (pinned && state.pinned) {
       const diff = branchDiff(state.pinned, choices);
       const revised = evaluate(choices);
@@ -312,6 +323,7 @@ export function mount(context: ProjectContext) {
     }
     const endingPanel = query<HTMLElement>(root, '[data-ending-panel]');
     endingPanel.hidden = !evaluation.ending;
+    query<HTMLElement>(root, '.palinode-no-ending').hidden = !!evaluation.ending;
     root.dataset.ending = evaluation.ending?.id ?? '';
     if (evaluation.ending) {
       setText('[data-ending-subtitle]', evaluation.ending.subtitle);
@@ -357,7 +369,13 @@ export function mount(context: ProjectContext) {
       if (place) selectPlace(place.id);
       return;
     }
-    if (button.dataset.record) { openRecord(button.dataset.record); query<HTMLElement>(root, '#palinode-document-title').focus(); return; }
+    if (button.dataset.record) {
+      openRecord(button.dataset.record);
+      workspace.archive.close();
+      workspace.tabs.select('read');
+      query<HTMLElement>(root, '#palinode-document-title').focus({ preventScroll: true });
+      return;
+    }
     if (button.dataset.compareSide) { compareSide = button.dataset.compareSide; update(); return; }
     if (button.dataset.choice) {
       const [decisionId, optionId] = button.dataset.choice.split(':');
@@ -372,7 +390,8 @@ export function mount(context: ProjectContext) {
       const ending = evaluate(current(state.history)).ending;
       report(`${option.label} entered. ${state.pinned ? `${branchDiff(state.pinned, current(state.history)).filter((change) => change.kind === 'fact').length} causal facts differ from your pin.` : 'The downstream city has been recalculated.'}`);
       if (decision.id === 'performance' && ending) {
-        query<HTMLElement>(root, '#palinode-ending-title').focus();
+        workspace.tabs.select('ending');
+        query<HTMLElement>(root, '#palinode-ending-title').focus({ preventScroll: true });
         report(`${ending.subtitle}. ${ending.title}. Your ending is recorded; you may continue exploring.`);
       }
       return;
@@ -382,7 +401,9 @@ export function mount(context: ProjectContext) {
         state.history = travel(state.history, button.dataset.action === 'undo' ? -1 : 1);
         update(); save(); report(`Now at revision ${state.history.cursor}: ${state.history.labels[state.history.cursor]}.`); break;
       case 'pin': case 'pin-ending':
-        state.pinned = { ...current(state.history) }; update(); save(); report('The 2026 future is pinned. Visit an earlier era; both future maps and the facing record will compare your branches.'); break;
+        state.pinned = { ...current(state.history) }; update(); save();
+        if (button.dataset.action === 'pin-ending') workspace.tabs.select('future', true);
+        report('The 2026 future is pinned. Visit an earlier era; Compare shows both future maps and the facing record.'); break;
       case 'unpin': state.pinned = null; update(); save(); report('Facing-page pin removed. Your current city and history are unchanged.'); break;
       case 'previous-era': if (state.era > 0) selectEra((state.era - 1) as Era); break;
       case 'next-era': if (state.era < 3) selectEra((state.era + 1) as Era); break;
@@ -416,10 +437,15 @@ export function mount(context: ProjectContext) {
         report(dialogAction === 'reset' ? 'The inherited city is restored. Undo can recover your previous decisions; the pin has not changed.' : dialogAction === 'import' ? 'Imported folio opened. Its history and pinned future are intact.' : written ? 'The current folio has replaced the preserved data.' : 'The browser could not write this folio. Saving remains paused; export to retain your work.');
         break;
       }
-      case 'explore': selectEra(0); query<HTMLButtonElement>(root, '[data-era="0"]').focus(); break;
+      case 'explore': selectEra(0); workspace.tabs.select('edit'); query<HTMLButtonElement>(root, '[data-era="0"]').focus(); break;
     }
   }, { signal });
   docSelect.addEventListener('change', () => openRecord(docSelect.value), { signal });
+  workspace.place.addEventListener('change', () => {
+    const place = PLACES.find(item => item.id === workspace.place.value);
+    if (!place) throw new RangeError('Unknown place in Aven.');
+    selectPlace(place.id);
+  }, { signal });
   futureSelect.addEventListener('change', () => { futureDocument = futureSelect.value; update(); }, { signal });
   query<HTMLSelectElement>(root, '#palinode-hint-target').addEventListener('change', (event) => {
     if (event.target instanceof HTMLSelectElement) { hintTarget = event.target.value; if (hintVisible) update(); }

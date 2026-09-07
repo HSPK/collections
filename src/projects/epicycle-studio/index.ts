@@ -4,6 +4,7 @@ import { createLoop } from '../../core/loop';
 import { clamp } from '../../core/math';
 import { createProjectPage, escapeMarkup, query } from '../../core/page';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
+import { createWorkspaceDialog } from '../../core/workspace';
 import { presets } from './data';
 import { MAX_INPUT_POINTS, SAMPLE_COUNT, makeDrawing, reconstructionPath, relativeError, selectHarmonics } from './engine';
 import type { FourierDrawing, Point } from './engine';
@@ -13,6 +14,7 @@ import { CYCLE_SECONDS, OPENING_PHASE, advancePhase, seekPhase } from './timelin
 
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'epicycle-studio');
+  page.root.dataset.workspace = 'true';
   const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
   const startsReduced = context.reducedMotion || preference.matches;
   page.root.tabIndex = 0;
@@ -45,6 +47,7 @@ export function mount(context: ProjectContext): ProjectInstance {
           <div><p class="ep-kicker">Field study 046 / a line in parts</p><h1 id="epicycle-title">Epicycle Studio</h1></div>
         </div>
         <p class="ep-deck">A drawing is a sum of turning circles.<br>Take it apart. Put the line back together.</p>
+        <button type="button" data-signal aria-label="Signal and notes">Signal & notes</button>
       </header>
 
       <section class="ep-workbench" aria-label="Fourier drawing workbench" data-project-preview>
@@ -133,6 +136,41 @@ export function mount(context: ProjectContext): ProjectInstance {
       <footer class="ep-footer"><span>EPICYCLE STUDIO / AN ORIGINAL LINE LAB</span><a href="#epicycle-title">Back to the drawing</a></footer>
     </div>`;
 
+  const signalDetails = document.createElement('div');
+  signalDetails.className = 'ep-signal-details';
+  signalDetails.append(
+    query(page.root, '.ep-inspector-title'),
+    query(page.root, '.ep-field'),
+    query(page.root, '[data-source-note]'),
+    query(page.root, '.ep-harmonics .ep-note'),
+  );
+  const meanDetails = document.createElement('dl');
+  meanDetails.className = 'ep-mean-details';
+  meanDetails.append(query(page.root, '.ep-error > div:last-child'));
+  createWorkspaceDialog(page, {
+    id: 'ep-signal-dialog',
+    title: 'Signal and notes',
+    triggers: [query(page.root, '[data-signal]')],
+    content: [
+      signalDetails,
+      meanDetails,
+      query(page.root, '.ep-visibility'),
+      query(page.root, '.ep-spectrum'),
+      query(page.root, '.ep-legend'),
+      query(page.root, '.ep-feedback-row'),
+      query(page.root, '.ep-help'),
+      query(page.root, '.ep-drawing-help'),
+      query(page.root, '.ep-deck'),
+      query(page.root, '.ep-reading'),
+      query(page.root, '.ep-footer'),
+    ],
+  });
+  query<HTMLAnchorElement>(page.root, '.ep-footer a').addEventListener('click', event => {
+    event.preventDefault();
+    query<HTMLDialogElement>(page.root, '#ep-signal-dialog').close();
+    query<HTMLCanvasElement>(page.root, '[data-plot] canvas').focus({ preventScroll: true });
+  }, { signal: page.signal });
+
   const plot = query<HTMLElement>(page.root, '[data-plot]');
   const play = query<HTMLButtonElement>(page.root, '[data-play]');
   const resetButton = query<HTMLButtonElement>(page.root, '[data-reset]');
@@ -220,6 +258,8 @@ export function mount(context: ProjectContext): ProjectInstance {
   function sketchControls() {
     page.root.dataset.inputMode = sketching ? 'draw' : 'view';
     query<HTMLElement>(page.root, '[data-sketch-tools]').hidden = !sketching;
+    query<HTMLElement>(page.root, '.ep-transport').hidden = sketching;
+    query<HTMLElement>(page.root, '.ep-inspector').hidden = sketching;
     query<HTMLElement>(page.root, '[data-drawing-help]').hidden = !sketching;
     query<HTMLElement>(page.root, '[data-plot-mode]').textContent = sketching ? 'Drawing desk / close the line' : 'Complex plane / live sum';
     query<HTMLElement>(page.root, '[data-sketch-count]').textContent = `${sketch.length} points. ${sketch.length < 3 ? 'Add at least 3.' : 'Ready to close and trace.'}`;
@@ -245,7 +285,6 @@ export function mount(context: ProjectContext): ProjectInstance {
     sketchControls();
     report('Draw one line, or use arrows and Space to place corners. The last point will join the first.');
     canvas.focus({ preventScroll: true });
-    plot.scrollIntoView({ block: 'nearest', behavior: 'instant' });
   }
 
   function leaveSketch() {

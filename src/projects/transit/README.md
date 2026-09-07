@@ -31,8 +31,9 @@ Tab to station circles; Enter or Space selects. Arrow keys move a focused
 station by 20 map units with snapping or 10 without; Shift triples the step.
 Ctrl/Command Z and Shift Z undo/redo outside text fields. Escape cancels a
 pending drag or leaves the placement/move tool. All graph operations also have
-ordinary labeled controls. On a small screen the map paper scrolls horizontally
-instead of shrinking its labels and touch targets.
+ordinary labeled controls. The fitted map is a compact overview; **Zoom map**
+opens readable, internally pannable paper, and **Fit map** restores the overview.
+The labeled station picker is an alternative to pointing at small markers.
 
 ## Architecture and extensions
 
@@ -57,8 +58,19 @@ instead of shrinking its labels and touch targets.
 - `style.css`: all styles stay inside `.project-transit`, including print and
   reduced-motion rules. Print hides the editor while keeping the map and legend.
 
-The compact civic masthead and tools lead straight to the map. One live feedback
-line below the paper replaces separate status and mode banners.
+The civic worktable fills the remaining viewport height without document scrolling.
+Desktop keeps the map beside a compact station/route editor. On narrow or short
+screens, **Map / Workbench** tabs switch in place without losing the selection.
+**Position, routes & removal** and **Stops & route actions** open native dialogs;
+long station lists may scroll inside them. **Routes & health**, **Save & open**,
+and **Field guide** retain the legend, connectivity report, files, reversible
+reset, instructions, and colophon without competing with the map for height.
+Errors open a visible, labeled dialog immediately. Feedback is local to this
+workspace rather than a floating collection toast over the tools. Escape closes dialogs and
+returns focus to their trigger; map Escape still cancels a drag.
+One live feedback line remains below the active workspace.
+The live feedback area keeps a stable height and a local right-hand gap for the
+floating collection menu, so short messages cannot pull action buttons behind it.
 `data-project-preview` marks the map/workbench region for collection covers.
 
 To extend graph features, add a pure operation to `engine.ts`, run the result
@@ -66,6 +78,12 @@ through the existing `commit` helper, and add a focused engine test. Keep route
 IDs stable, repair references when deleting stations, and update JSON validation
 along with any format change. The graph readout is computed from route adjacency,
 not visual crossings; reachability includes the selected station itself.
+
+Browser coverage includes 1440×900, 1280×720, 375×812, 320×640, and 768×480,
+actual SVG-coordinate placement after resizing, one-screen editing, project
+download, reset/undo, and desktop/mobile screenshot artifacts.
+The browser fixture isolates only Vite's development-reload socket so concurrent
+edits to unrelated sites cannot reset an in-progress graph test.
 
 Run `npm test -- tests/projects/transit.spec.ts --reporter=line`. To validate only
 the engine and XML export without starting the site server, set

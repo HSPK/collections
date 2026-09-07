@@ -69,9 +69,11 @@ test('Perspective Paradox: a paused camera reveals the construction and returns 
   await expect(scene).toHaveAttribute('data-aligned', 'false');
   expect(Number(await scene.getAttribute('data-projection-error'))).toBeGreaterThan(60);
   expect((await canvas.screenshot()).equals(alignedFrame)).toBe(false);
+  await page.getByRole('tab', { name: 'Instruments', exact: true }).click();
   await page.getByRole('button', { name: 'Projection guides', exact: false }).click();
   await expect(scene).toHaveAttribute('data-guides', 'true');
   await expect(scene).toHaveAttribute('data-physical-gaps', gaps.map((gap) => gap.toFixed(6)).join(','));
+  await page.getByRole('tab', { name: 'Viewpoints', exact: true }).click();
   await page.getByRole('button', { name: 'Find the viewpoint', exact: false }).click();
   await expect(scene).toHaveAttribute('data-aligned', 'true');
   await expect(scene).toHaveAttribute('data-camera', alignedCamera!);
@@ -79,6 +81,7 @@ test('Perspective Paradox: a paused camera reveals the construction and returns 
   await canvas.press('ArrowRight');
   await expect(scene).toHaveAttribute('data-aligned', 'false');
   const manualCamera = await scene.getAttribute('data-camera');
+  await page.getByRole('tab', { name: 'Instruments', exact: true }).click();
   await page.getByRole('slider', { name: 'Sun direction', exact: true }).focus();
   await page.keyboard.press('End');
   await expect(scene).toHaveAttribute('data-sun', '160');
@@ -89,6 +92,7 @@ test('Perspective Paradox: a paused camera reveals the construction and returns 
   await page.keyboard.press('ArrowRight');
   await expect(scene).toHaveAttribute('data-phase', '1.000000');
   await expect(scene).toHaveAttribute('data-aligned', 'false');
+  await page.getByRole('tab', { name: 'Viewpoints', exact: true }).click();
   await page.getByRole('button', { name: 'Reset model', exact: true }).click();
   await expect(scene).toHaveAttribute('data-camera', alignedCamera!);
   await expect(scene).toHaveAttribute('data-guides', 'false');
@@ -144,4 +148,41 @@ test('Perspective Paradox: mobile drawing board stays usable and releases graphi
   await expect(canvas).toHaveCount(0);
   expect(await page.evaluate(() => JSON.parse(sessionStorage.getItem('perspective-paradox-canvas-disposal') ?? 'null')))
     .toEqual({ connected: false, contextLost: true });
+});
+
+test('Perspective Paradox: viewport tabs preserve the measured camera and expose field notes', async ({ page }, testInfo) => {
+  test.setTimeout(120_000);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('./projects/perspective-paradox/');
+  const site = page.locator('.project-perspective-paradox');
+  const scene = page.locator('[data-paradox-scene]');
+  await expect(site).toHaveAttribute('data-ready', 'true');
+  await expect(site).toHaveAttribute('data-workspace', 'true');
+  for (const [width, height] of [[1440, 900], [1280, 720], [375, 812], [320, 640], [768, 480]]) {
+    await page.setViewportSize({ width, height });
+    await page.getByRole('tab', { name: 'Viewpoints', exact: true }).click();
+    await expect.poll(() => site.evaluate(element => Math.round(element.getBoundingClientRect().height))).toBe(height);
+    expect(await page.evaluate(() => ({
+      width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight,
+    }))).toEqual({ width, height });
+    const canvas = site.locator('canvas');
+    await expect.poll(() => canvas.evaluate((element: HTMLCanvasElement) => Math.abs(element.width / element.height - element.clientWidth / element.clientHeight))).toBeLessThan(0.02);
+    await expect(scene).toHaveAttribute('data-aligned', 'true');
+    const camera = await scene.getAttribute('data-camera');
+    await page.screenshot({ path: testInfo.outputPath(`perspective-paradox-${width}x${height}.png`) });
+    await page.getByRole('tab', { name: 'Instruments', exact: true }).click();
+    await page.getByRole('slider', { name: 'Sun direction', exact: true }).focus();
+    await page.keyboard.press('End');
+    await expect(scene).toHaveAttribute('data-sun', '160');
+    await expect(scene).toHaveAttribute('data-camera', camera!);
+    await page.getByRole('tab', { name: 'Viewpoints', exact: true }).click();
+    await page.getByRole('button', { name: 'Reset model', exact: true }).click();
+    await expect(scene).toHaveAttribute('data-aligned', 'true');
+    await page.getByRole('button', { name: 'Field notes', exact: true }).click();
+    await expect(page.getByRole('dialog', { name: 'Construction field notes', exact: true })).toBeVisible();
+    await expect(page.locator('output[data-physical-gaps]')).not.toHaveText('measuring');
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('button', { name: 'Field notes', exact: true })).toBeFocused();
+    expect(await page.evaluate(() => scrollY)).toBe(0);
+  }
 });

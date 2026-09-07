@@ -1,5 +1,6 @@
 import './style.css';
 import { createProjectPage, downloadText, escapeMarkup, query } from '../../core/page';
+import { createWorkspaceDialog, createWorkspaceTabs } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import {
   catalogue, comparisonPresets, DEFAULT_COMPARISON, DEFAULT_ENTRY,
@@ -70,6 +71,7 @@ function comparisonSentence(a: ScaleEntry, b: ScaleEntry): string {
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'scale');
   const root = page.root;
+  root.dataset.workspace = 'true';
   let selected = reference(DEFAULT_ENTRY);
   let a = reference(DEFAULT_COMPARISON.a);
   let b = reference(DEFAULT_COMPARISON.b);
@@ -90,13 +92,9 @@ export function mount(context: ProjectContext): ProjectInstance {
           <svg viewBox="0 0 38 38" aria-hidden="true" focusable="false"><path d="M4 30V23h8V15h9V6h12M4 34h30"/><circle cx="30" cy="10" r="5"/></svg>
           <span>A field guide<br>to magnitude</span>
         </a>
-        <nav aria-label="Atlas navigation">
-          <a href="#scale-compare">Compare</a>
-          <a href="#scale-explore">Explore</a>
-          <a href="#scale-catalogue">Catalogue</a>
-          <a href="#scale-notes">How to read</a>
-        </nav>
+        <button type="button" data-atlas-notes>How to read</button>
       </header>
+      <nav data-atlas-tabs aria-label="Atlas navigation"></nav>
 
       <section class="scale-intro" id="scale-top" aria-labelledby="scale-title">
         <div>
@@ -298,6 +296,55 @@ export function mount(context: ProjectContext): ProjectInstance {
       <p class="scale-sr-only" data-feedback role="status" aria-live="polite"></p>
     </div>`;
 
+  const atlasNotes = query<HTMLElement>(root, '.scale-notes');
+  atlasNotes.prepend(query<HTMLElement>(root, '.scale-wordmark'));
+  query<HTMLElement>(root, '.scale-header').prepend(query<HTMLElement>(root, '#scale-title'));
+  atlasNotes.prepend(query<HTMLElement>(root, '.scale-intro'));
+  const compare = query<HTMLElement>(root, '#scale-compare');
+  const explore = query<HTMLElement>(root, '#scale-explore');
+  const catalogueSection = query<HTMLElement>(root, '#scale-catalogue');
+  const paneStack = document.createElement('div');
+  paneStack.className = 'scale-pane-stack';
+  query<HTMLElement>(root, '.scale-site').append(paneStack);
+  const panes = [compare, explore, catalogueSection].map((section, index) => {
+    const panel = document.createElement('div');
+    panel.className = 'scale-atlas-pane';
+    panel.append(section);
+    paneStack.append(panel);
+    return { id: ['compare', 'explore', 'catalogue'][index], label: ['Compare', 'Explore', 'Catalogue'][index], panel };
+  });
+  const tabs = createWorkspaceTabs(page, { id: 'scale-atlas', label: 'Atlas navigation', host: query(root, '[data-atlas-tabs]'), panes });
+  atlasNotes.prepend(...[compare, explore].map(section => query<HTMLElement>(section, '.scale-section-heading')));
+  const notebookButton = document.createElement('button');
+  notebookButton.type = 'button';
+  notebookButton.className = 'scale-notebook-button';
+  notebookButton.textContent = 'Model & notebook';
+  notebookButton.setAttribute('aria-label', 'Model & comparison notebook');
+  compare.append(notebookButton);
+  const notebook = createWorkspaceDialog(page, {
+    id: 'scale-comparison-notebook', title: 'Comparison notebook', triggers: [notebookButton],
+    content: ['.scale-model', '.scale-display-control', '.scale-presets', '.scale-verdict > .scale-help', '.scale-linear-ruler', '.scale-pair-caveats', '.scale-download-row']
+      .map(selector => query<HTMLElement>(root, selector)),
+  });
+  atlasNotes.prepend(query<HTMLElement>(root, '#scale-log-help'));
+  createWorkspaceDialog(page, {
+    id: 'scale-atlas-notes', title: 'How to read this atlas',
+    content: [atlasNotes, query(root, '.scale-footer')], triggers: [query(root, '[data-atlas-notes]')],
+  });
+  const specimen = query<HTMLElement>(root, '.scale-specimen');
+  const referenceReading = document.createElement('div');
+  referenceReading.className = 'scale-reference-reading';
+  referenceReading.append(query<HTMLElement>(root, '.scale-specimen-copy'), query<HTMLElement>(root, '.scale-domain-links'));
+  specimen.append(referenceReading);
+  explore.prepend(query<HTMLElement>(root, '.scale-explorer-controls'), query<HTMLElement>(root, '.scale-log-panel'));
+  root.querySelectorAll<HTMLAnchorElement>('a[href="#scale-top"]').forEach(link => {
+    link.addEventListener('click', event => {
+      event.preventDefault();
+      link.closest('dialog')?.close();
+      tabs.select('compare', true);
+    }, { signal: page.signal });
+  });
+
   const selectReference = query<HTMLSelectElement>(root, '#scale-reference');
   const ruler = query<HTMLInputElement>(root, '#scale-log');
   const selectA = query<HTMLSelectElement>(root, '#scale-compare-a');
@@ -315,8 +362,13 @@ export function mount(context: ProjectContext): ProjectInstance {
 
   function goTo(id: string): void {
     const section = query<HTMLElement>(root, `#${id}`);
+    notebook.close();
+    tabs.select(id === 'scale-compare' ? 'compare' : id === 'scale-explore' ? 'explore' : 'catalogue');
     section.focus({ preventScroll: true });
-    section.scrollIntoView({ behavior: 'auto', block: 'start' });
+    if (id.startsWith('scale-entry-')) {
+      const list = query<HTMLElement>(root, '.scale-catalogue-list');
+      list.scrollTop += section.getBoundingClientRect().top - list.getBoundingClientRect().top;
+    }
   }
 
   function updateProbe(): void {

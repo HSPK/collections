@@ -1,6 +1,7 @@
 import { clamp } from '../../core/math';
 import { createProjectPage, downloadBlob, downloadText, escapeMarkup, query } from '../../core/page';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
+import { createWorkspaceDialog, createWorkspaceTabs } from '../../core/workspace';
 import { ComputeClient } from './compute';
 import { exportSTL, sectionDrawing } from './exports';
 import { planeBasis } from './fields';
@@ -87,8 +88,86 @@ function objectInspector(item: Primitive | undefined) {
 export async function mountSection(context: ProjectContext): Promise<ProjectInstance> {
   const page = createProjectPage(context, 'section');
   const { root, signal } = page;
+  root.dataset.workspace = 'true';
   root.innerHTML = shell();
   const get = <T extends Element>(selector: string) => query<T>(root, selector);
+  const files = document.createElement('button');
+  files.type = 'button'; files.textContent = 'Files & guide'; files.dataset.workspaceFiles = '';
+  get('.section-masthead').append(files);
+  const method = get<HTMLDetailsElement>('.section-method');
+  method.open = true;
+  method.append(get('[data-mode-help]'));
+  const fileDialog = createWorkspaceDialog(page, {
+    id: 'section-files', title: 'Construction files & guide', triggers: [files],
+    content: [get('.section-file-actions'), method, get('.section-footer')],
+  });
+  const inspector = get<HTMLElement>('.section-inspector');
+  const dock = document.createElement('div');
+  dock.className = 'section-inspector-scroll';
+  const results = document.createElement('div');
+  results.append(get('.section-metrics'), get('.section-resolution'));
+  const studies = document.createElement('div');
+  studies.append(get('.section-studies'), get('.section-study-note'));
+  const panels = [
+    { id: 'construction', label: 'Construction', panel: get<HTMLElement>('[data-construction]') },
+    { id: 'plane', label: 'Cut plane', panel: get<HTMLElement>('[data-plane-inspector]') },
+    { id: 'results', label: 'Results', panel: results },
+    { id: 'studies', label: 'Studies', panel: studies },
+  ];
+  dock.append(...panels.map(pane => pane.panel));
+  inspector.append(dock);
+  const inspectorTabs = createWorkspaceTabs(page, {
+    id: 'section-inspector', label: 'Inspector panels', host: get('.section-inspector-tabs'), panes: panels,
+    onSelect(id) {
+      dock.scrollTop = 0;
+      root.querySelectorAll<HTMLButtonElement>('[data-panel]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.panel === id)));
+    },
+  });
+  root.querySelectorAll<HTMLButtonElement>('.section-inspector-tabs button').forEach(button => {
+    button.dataset.panel = button.dataset.workspaceTab;
+    button.setAttribute('aria-pressed', String(button.dataset.panel === inspectorTabs.selected));
+  });
+  get('.section-status-row').prepend(get('[data-error]'));
+  const viewTabs = get<HTMLElement>('.section-mobile-tabs');
+  viewTabs.setAttribute('role', 'tablist');
+  root.querySelectorAll<HTMLButtonElement>('[data-view-tab]').forEach(button => {
+    const id = button.dataset.viewTab!;
+    const pane = get<HTMLElement>(`.section-${id}-pane`);
+    const panel = document.createElement('div');
+    panel.className = 'section-view-panel';
+    panel.id = `section-view-${id}`;
+    pane.before(panel); panel.append(pane);
+    button.id = `section-view-tab-${id}`;
+    button.setAttribute('role', 'tab'); button.setAttribute('aria-controls', panel.id);
+  });
+  const narrow = window.matchMedia('(max-width: 600px)');
+  let selectedView = 'solid';
+  function selectView(id: string) {
+    selectedView = id;
+    get<HTMLElement>('[data-mobile-view]').dataset.mobileView = id;
+    root.querySelectorAll<HTMLButtonElement>('[data-view-tab]').forEach(button => {
+      const selected = button.dataset.viewTab === id;
+      button.tabIndex = selected ? 0 : -1;
+      button.setAttribute('aria-selected', String(selected)); button.setAttribute('aria-pressed', String(selected));
+      const pane = get<HTMLElement>(`#section-view-${button.dataset.viewTab}`);
+      pane.inert = narrow.matches && !selected;
+      if (narrow.matches) {
+        pane.setAttribute('role', 'tabpanel');
+        pane.setAttribute('aria-labelledby', button.id);
+        pane.setAttribute('aria-hidden', String(!selected));
+      } else {
+        pane.removeAttribute('role'); pane.removeAttribute('aria-labelledby'); pane.removeAttribute('aria-hidden');
+      }
+    });
+  }
+  selectView(selectedView);
+  narrow.addEventListener('change', () => selectView(selectedView), { signal });
+  viewTabs.addEventListener('keydown', event => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    selectView(event.key === 'Home' ? 'solid' : event.key === 'End' ? 'slice' : selectedView === 'solid' ? 'slice' : 'solid');
+    get<HTMLButtonElement>(`[data-view-tab="${selectedView}"]`).focus({ preventScroll: true });
+  }, { signal });
   const history = new History(STUDIES[0].create(), STUDIES[0].id);
   let selectedId = history.current.primitives[0].id, nextId = 1;
   let solid: MeshResult | null = null, section: SliceResult | null = null;
@@ -104,7 +183,7 @@ export async function mountSection(context: ProjectContext): Promise<ProjectInst
   let view: ReturnType<typeof createSolidView>;
   try {
     view = createSolidView(get('[data-solid]'), {
-      select(id) { selectedId = id; renderInspector(); },
+      select(id) { selectedId = id; renderInspector(); inspectorTabs.select('construction'); dock.scrollTop = get<HTMLElement>('[data-object-inspector]').offsetTop; },
       beginPlane() { history.begin(); planeStart = history.current.plane.offset; },
       movePlane(delta) { const next = clone(history.current); next.plane.offset = Number(clamp(planeStart + delta, -240, 240).toFixed(2)); edit(next, false); },
       endPlane(cancel) { if (cancel) { history.cancel(); syncControls(); calculate(); } else history.finish(); updateHistory(); },
@@ -227,9 +306,7 @@ export async function mountSection(context: ProjectContext): Promise<ProjectInst
     error(''); syncControls(); renderInspector(); calculate();
   }
   function setPanel(panel: 'construction' | 'plane') {
-    get<HTMLElement>('[data-construction]').hidden = panel !== 'construction';
-    get<HTMLElement>('[data-plane-inspector]').hidden = panel !== 'plane';
-    root.querySelectorAll<HTMLButtonElement>('[data-panel]').forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.panel === panel)));
+    inspectorTabs.select(panel);
   }
   function stepCut(delta: number) {
     const next = clone(history.current); next.plane.offset = clamp(next.plane.offset + delta, -240, 240); edit(next, false);
@@ -256,8 +333,7 @@ export async function mountSection(context: ProjectContext): Promise<ProjectInst
     }
     if (button.dataset.panel === 'construction' || button.dataset.panel === 'plane') { setPanel(button.dataset.panel); return; }
     if (button.dataset.viewTab) {
-      get<HTMLElement>('[data-mobile-view]').dataset.mobileView = button.dataset.viewTab;
-      root.querySelectorAll<HTMLButtonElement>('[data-view-tab]').forEach((tab) => tab.setAttribute('aria-pressed', String(tab === button))); return;
+      selectView(button.dataset.viewTab); return;
     }
     if (button.dataset.mode === 'view' || button.dataset.mode === 'plane') {
       view.mode(button.dataset.mode);
@@ -291,7 +367,7 @@ export async function mountSection(context: ProjectContext): Promise<ProjectInst
       case 'fit': view.frameModel(solid?.bounds ?? null); break;
       case 'zoom-in': view.zoom(1.2); break;
       case 'zoom-out': view.zoom(1 / 1.2); break;
-      case 'cut-inspector': setPanel('plane'); get<HTMLButtonElement>('[data-panel="plane"]').focus(); get<HTMLElement>('[data-plane-inspector]').scrollIntoView({ block: 'nearest' }); break;
+      case 'cut-inspector': setPanel('plane'); get<HTMLButtonElement>('[data-panel="plane"]').focus({ preventScroll: true }); break;
       case 'cut-back': stepCut(-5); break;
       case 'cut-forward': stepCut(5); break;
       case 'center-cut': { const next = clone(history.current); next.plane.offset = 0; edit(next, false); break; }
@@ -359,6 +435,7 @@ export async function mountSection(context: ProjectContext): Promise<ProjectInst
     if (!(input instanceof HTMLInputElement)) return;
     const file = input.files?.[0]; input.value = '';
     if (!file) return;
+    fileDialog.close();
     const importId = ++latestImport;
     if (file.size > LIMITS.fileBytes) { error('The file exceeds 64 KB. Your current study has not changed.'); return; }
     try {

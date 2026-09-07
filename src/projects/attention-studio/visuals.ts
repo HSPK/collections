@@ -100,7 +100,7 @@ export function stageContent(
       }).join('');
       return {
         heading: 'One embedding, three different jobs.',
-        explanation: 'Rows multiply matrices on the right: Q = XWq, K = XWk, V = XWv. Each 3 × 2 matrix maps three input features to two output coordinates. All three matrices are printed below.',
+        explanation: 'Rows multiply matrices on the right: Q = XWq, K = XWk, V = XWv. Each 3 × 2 matrix maps three input features to two output coordinates. All three matrices are in the Matrices panel.',
         calculation: projectionLines
           + line(`k<sub>${kName}</sub> = x<sub>${kName}</sub>Wk`, vectorText(result.keys[key], 6))
           + line(`v<sub>${kName}</sub> = x<sub>${kName}</sub>Wv`, vectorText(result.values[key], 6)),

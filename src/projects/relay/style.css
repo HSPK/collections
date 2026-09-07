@@ -393,9 +393,6 @@
   .relay-mobile-tabs button:last-child { border-right: 0; }
   .relay-mobile-tabs button[aria-pressed="true"] { border-bottom-color: var(--relay-accent); background: #f7f5eb; }
   .relay-main-grid { display: block; }
-  .relay-main-grid[data-relay-active-pane="machine"] > :not(.relay-machine-pane),
-  .relay-main-grid[data-relay-active-pane="source"] > :not(.relay-source-pane),
-  .relay-main-grid[data-relay-active-pane="output"] > :not(.relay-output-pane) { display: none; }
   .relay-source-pane { border-right: 0; }
   .relay-pane-heading { padding: 0 13px; height: 49px; }
   .relay-pane-heading h2 { font-size: 14px; }
@@ -518,4 +515,181 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .project-relay *, .project-relay *::before, .project-relay *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* The workspace owns its viewport; only the editor and bounded inspectors scroll. */
+.project-relay[data-workspace] { height: 100dvh; min-height: 0; --workspace-paper: var(--relay-paper); }
+.project-relay .relay-shell { height: 100%; min-height: 0; max-width: none; padding: 0 16px 12px; display: grid; grid-template-rows: 56px minmax(0, 1fr); }
+.project-relay .relay-header { height: auto; min-width: 0; gap: 12px; border: 0; }
+.project-relay .relay-brand { font-size: 24px; letter-spacing: 2px; }
+.project-relay .relay-brand-edition { max-width: none; font-size: 11px; }
+.project-relay .relay-header nav { gap: 8px; }
+.project-relay .relay-header nav button { min-height: 44px; padding: 7px 12px; font-size: 14px; }
+.project-relay .relay-header nav button:hover { background: #e0dfd3; }
+.project-relay .relay-workbench { min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) 48px; box-shadow: none; }
+.project-relay .relay-toolbar { min-height: 64px; padding: 8px 14px; gap: 16px; }
+.project-relay .relay-state { min-width: 150px; }
+.project-relay .relay-main-grid { min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr) minmax(310px, 1fr); }
+.project-relay .relay-main-grid > * { min-width: 0; min-height: 0; }
+.project-relay .relay-source-pane, .project-relay .relay-machine-pane { display: flex; flex-direction: column; }
+.project-relay .relay-pane-heading { height: 42px; flex-shrink: 0; padding-inline: 12px; }
+.project-relay .relay-pane-heading h2 { font-size: 14px; }
+.project-relay .relay-pane-heading h2 > span { margin-right: 5px; }
+.project-relay .relay-filebar { flex-shrink: 0; padding: 8px 12px; }
+.project-relay .relay-filebar > span:last-child { display: none; }
+.project-relay .relay-editor-wrap { height: auto; min-height: 80px; flex: 1 1 0; }
+.project-relay .relay-editor-footer { flex-shrink: 0; padding: 8px 12px; }
+.project-relay .relay-source-help { flex-shrink: 0; font-size: 14px; line-height: 1.4; padding: 0 12px 9px; }
+.project-relay .relay-diagnostics { min-height: 0; max-height: 35%; overflow: auto; overscroll-behavior: contain; }
+.project-relay [data-relay-schematic] { min-height: 0; flex: 1 1 0; display: grid; align-items: center; overflow: auto; overscroll-behavior: contain; }
+.project-relay .relay-schematic { width: 100%; padding: 8px 0; }
+.project-relay .relay-bus-readout { flex-shrink: 0; min-height: 44px; padding: 8px 12px; font-size: 14px; }
+.project-relay .relay-registers { flex-shrink: 0; margin-top: 0; padding: 4px 12px 12px; }
+.project-relay .relay-register { padding: 7px; }
+.project-relay .relay-register > output { font-size: 25px; }
+.project-relay .relay-decode { flex-shrink: 0; min-height: 76px; padding: 10px 12px; }
+.project-relay .relay-current > span { font-size: 14px; letter-spacing: -.5px; }
+.project-relay .relay-current b { margin-left: 4px; font-size: 14px; }
+.project-relay .relay-tools-pane { display: flex; flex-direction: column; background: #f6f3e9; }
+.project-relay [data-relay-inspector-tabs] { border-bottom: 1px solid var(--relay-line); gap: 0; }
+.project-relay [data-relay-inspector-tabs] > button { min-height: 44px; padding: 7px 5px; font-size: 14px; }
+.project-relay .relay-tool-panels { min-height: 0; flex: 1; display: grid; }
+.project-relay [data-relay-panel] { min-height: 0; min-width: 0; grid-area: 1 / 1; }
+.project-relay [data-relay-panel] > section { height: 100%; min-height: 0; }
+.project-relay .relay-output-pane { display: flex; flex-direction: column; padding-bottom: 0; border: 0; }
+.project-relay .relay-output-pane .relay-pane-heading { height: 36px; }
+.project-relay .relay-display-housing { width: min(220px, calc(100% - 28px)); margin: 10px auto 0; padding: 10px; flex-shrink: 0; }
+.project-relay .relay-screen { gap: 2px; padding: 4px; margin: 7px 0; }
+.project-relay .relay-screen-address { margin: 0 12px; padding: 8px 0; flex-shrink: 0; }
+.project-relay .relay-observation { min-height: 0; flex: 1; overflow: auto; padding: 12px; overscroll-behavior: contain; }
+.project-relay .relay-observation h3 { font-size: 20px; margin: 6px 0; }
+.project-relay .relay-observation > p:last-child { font-size: 14px; line-height: 1.5; }
+.project-relay .relay-guide-launch { flex-shrink: 0; padding: 8px 12px; font-size: 14px; border-top: 1px solid var(--relay-line); gap: 2px; }
+.project-relay .relay-message { min-height: 0; padding: 5px 58px 5px 12px; overflow: auto; font-size: 14px; line-height: 1.3; overscroll-behavior: contain; }
+.project-relay .relay-memory-pane, .project-relay .relay-trace-pane { display: flex; flex-direction: column; border: 0; }
+.project-relay .relay-inspect-heading { flex-shrink: 0; height: auto; min-height: 48px; padding: 0 10px; flex-wrap: wrap; gap: 0 8px; }
+.project-relay .relay-inspect-tabs { min-height: 44px; gap: 12px; }
+.project-relay .relay-inspect-heading > span { display: block; font-size: 11px; }
+.project-relay .relay-memory-controls { flex-shrink: 0; padding: 8px 10px; gap: 6px; flex-wrap: wrap; }
+.project-relay .relay-memory-controls > label:first-child { display: block; }
+.project-relay .relay-memory-controls select { min-height: 44px; font-size: 14px; }
+.project-relay .relay-follow { margin-left: 0; min-height: 40px; }
+.project-relay .relay-follow input { width: 20px; height: 20px; }
+.project-relay .relay-inspector { min-height: 0; height: auto; flex: 1; padding: 0 10px; overscroll-behavior: contain; }
+.project-relay .relay-ram-grid { grid-template-columns: 28px repeat(8, minmax(30px, 1fr)); }
+.project-relay .relay-byte { min-height: 38px; line-height: 36px; }
+.project-relay .relay-rom-break { min-height: 44px; min-width: 44px; }
+.project-relay .relay-rom-table th, .project-relay .relay-rom-table td { padding-inline: 4px; }
+.project-relay .relay-memory-note { flex-shrink: 0; min-height: 0; font-size: 14px; padding: 8px 10px; line-height: 1.4; }
+.project-relay .relay-trace-head { flex-shrink: 0; min-height: 40px; padding-inline: 10px; }
+.project-relay .relay-trace { min-height: 0; height: auto; flex: 1; padding: 0 10px; overscroll-behavior: contain; }
+.project-relay .relay-trace-head, .project-relay .relay-trace > li { grid-template-columns: 43px 43px minmax(0, 1fr); }
+.project-relay [data-relay-panel="guide"] { overflow: auto; overscroll-behavior: contain; }
+.project-relay .relay-guide { display: flex; flex-direction: column; height: auto; min-height: 100%; padding: 16px; gap: 20px; }
+.project-relay .relay-guide h3 { font-size: 23px; }
+.project-relay .relay-guide-controls { margin-top: auto; flex-direction: column; gap: 8px; }
+.project-relay .relay-guide-intro { padding: 20px 16px; display: grid; gap: 20px; }
+.project-relay [hidden] { display: none !important; }
+.project-relay .workspace-dialog .relay-library, .project-relay .workspace-dialog .relay-manual { padding: 0; }
+.project-relay .workspace-dialog .relay-program-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.project-relay .workspace-dialog .relay-section-title { margin-bottom: 22px; }
+.project-relay .workspace-dialog .relay-section-title h2 { font-size: 27px; }
+.project-relay .workspace-dialog .relay-manual-intro { grid-template-columns: 1fr; gap: 20px; }
+.project-relay .relay-workbench-footer { display: grid; gap: 16px; padding: 0; }
+.project-relay .relay-workbench-footer > span { font-size: 12px; }
+.project-relay .relay-workbench-footer > div { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
+.project-relay .relay-workbench-footer button { border: 1px solid var(--relay-line); padding: 8px 12px; }
+.project-relay .relay-replace-dialog { max-height: calc(100dvh - 28px); overflow: auto; }
+.project-relay .relay-guide-launch { width: calc(100% - 64px); margin-right: 64px; }
+.project-relay .relay-guide-controls { padding-right: 48px; }
+.project-relay .relay-inspector, .project-relay .relay-trace { padding-bottom: 16px; scroll-padding-bottom: 16px; }
+
+@media (max-width: 999px) {
+  .project-relay .relay-shell { padding: 0 8px 8px; grid-template-rows: 48px minmax(0, 1fr); }
+  .project-relay .relay-workbench { grid-template-rows: auto auto minmax(0, 1fr) 46px; }
+  .project-relay .relay-brand-edition { display: none; }
+  .project-relay .relay-state { min-width: 0; }
+  .project-relay .relay-state > span { display: none; }
+  .project-relay .relay-main-grid { grid-template-columns: minmax(0, 1fr); }
+  .project-relay .relay-main-grid[data-relay-active-pane="machine"] > :not(.relay-machine-pane),
+  .project-relay .relay-main-grid[data-relay-active-pane="source"] > :not(.relay-source-pane),
+  .project-relay .relay-main-grid[data-relay-active-pane="output"] > :not(.relay-tools-pane) { display: none; }
+  .project-relay .relay-mobile-tabs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .project-relay .relay-mobile-tabs > button { min-height: 44px; font-size: 14px; }
+  .project-relay .relay-tools-pane > [data-relay-inspector-tabs] { display: none; }
+  .project-relay .relay-source-pane, .project-relay .relay-machine-pane { border: 0; }
+  .project-relay .relay-display-housing { width: min(220px, 34dvh); }
+}
+
+@media (max-width: 599px) {
+  .project-relay .relay-shell { padding: 0 4px 4px; }
+  .project-relay .relay-header { gap: 4px; padding-inline: 4px; }
+  .project-relay .relay-brand { font-size: 20px; letter-spacing: 1px; }
+  .project-relay .relay-header nav { gap: 0; }
+  .project-relay .relay-header nav button { padding-inline: 8px; }
+  .project-relay .relay-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; padding: 6px; gap: 5px 8px; }
+  .project-relay .relay-transport { gap: 4px; }
+  .project-relay .relay-transport button { min-width: 0; padding: 7px 3px; gap: 4px; }
+  .project-relay .relay-speed { margin: 0; }
+  .project-relay .relay-speed select { min-height: 40px; }
+  .project-relay .relay-cycles { min-width: 80px; padding-left: 8px; }
+  .project-relay .relay-mobile-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .project-relay .relay-pane-heading { height: 36px; padding-inline: 8px; }
+  .project-relay .relay-pane-heading .relay-live-label { font-size: 9px; }
+  .project-relay .relay-filebar { padding: 6px 8px; }
+  .project-relay .relay-editor-footer { padding: 6px 8px; }
+  .project-relay .relay-editor-footer .relay-assemble { padding-inline: 9px; gap: 5px; }
+  .project-relay .relay-source-help { font-size: 14px; padding: 0 8px 6px; }
+  .project-relay .relay-schematic { display: none; }
+  .project-relay .relay-compact-schematic { display: grid; padding: 4px 8px; gap: 3px 14px; }
+  .project-relay .relay-compact-node { padding: 2px 7px; gap: 0; }
+  .project-relay .relay-compact-node > b { font-size: 18px; line-height: 20px; }
+  .project-relay .relay-compact-node:nth-of-type(1)::after, .project-relay .relay-compact-node:nth-of-type(4)::after { width: 14px; right: -15px; }
+  .project-relay .relay-compact-bus { display: none; }
+  .project-relay .relay-compact-alu { padding: 2px 7px; margin-top: 0; width: 100%; }
+  .project-relay .relay-compact-alu > span { font-size: 14px; }
+  .project-relay .relay-compact-alu > b { font-size: 18px; }
+  .project-relay .relay-bus-readout { min-height: 36px; padding: 5px 8px; line-height: 1.3; }
+  .project-relay .relay-registers { padding: 3px 8px 6px; gap: 4px; }
+  .project-relay .relay-register { padding: 4px; gap: 0 2px; }
+  .project-relay .relay-register > output { font-size: 23px; }
+  .project-relay .relay-register-bits { margin-top: 4px; }
+  .project-relay .relay-decode { min-height: 66px; padding: 6px 8px; gap: 5px; }
+  .project-relay .relay-current { gap: 3px; }
+  .project-relay .relay-current > span { font-size: 14px; }
+  .project-relay .relay-current output { font-size: 16px; }
+  .project-relay .relay-display-housing { width: min(210px, 29dvh); padding: 8px; margin-top: 6px; }
+  .project-relay .relay-display-top, .project-relay .relay-display-bottom { font-size: 8px; }
+  .project-relay .relay-screen-address { padding: 5px 0; }
+  .project-relay .relay-observation { padding: 8px 12px; }
+  .project-relay .relay-guide-launch { flex-direction: row; flex-wrap: wrap; gap: 3px 6px; }
+  .project-relay .relay-guide-launch > span { font-size: 14px; }
+  .project-relay .relay-memory-controls > label:first-child { display: none; }
+  .project-relay .relay-follow { margin-left: auto; }
+  .project-relay .relay-inspect-heading > span { font-size: 11px; }
+  .project-relay .workspace-dialog .relay-program-grid { grid-template-columns: minmax(0, 1fr); }
+  .project-relay .workspace-dialog-content { padding: 12px; }
+  .project-relay .relay-program { padding: 14px; grid-template-columns: 60px minmax(0, 1fr); gap: 0 12px; }
+}
+
+@media (max-width: 599px) and (max-height: 700px) {
+  .project-relay .relay-display-housing { width: min(160px, 24dvh); }
+}
+
+@media (min-width: 600px) and (max-height: 600px) {
+  .project-relay .relay-shell { grid-template-rows: 44px minmax(0, 1fr); }
+  .project-relay .relay-toolbar { min-height: 56px; padding-block: 4px; }
+  .project-relay .relay-transport { grid-column: auto; grid-row: auto; width: auto; }
+  .project-relay .relay-machine-pane { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); grid-template-rows: 34px minmax(0, 1fr) 62px; }
+  .project-relay .relay-machine-pane .relay-pane-heading { grid-column: 1 / -1; height: 34px; }
+  .project-relay [data-relay-schematic] { grid-row: 2 / 4; }
+  .project-relay .relay-bus-readout { grid-column: 2; grid-row: 2; align-self: start; }
+  .project-relay .relay-registers { grid-column: 2; grid-row: 2; align-self: end; padding-bottom: 6px; }
+  .project-relay .relay-decode { grid-column: 2; min-height: 0; padding-block: 4px; }
+  .project-relay .relay-output-pane { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); grid-template-rows: 36px minmax(0, 1fr) 46px; }
+  .project-relay .relay-output-pane .relay-pane-heading { grid-column: 1 / -1; }
+  .project-relay .relay-display-housing { grid-row: 2 / 4; align-self: center; margin: 0 auto; width: min(180px, 38dvh); }
+  .project-relay .relay-screen-address { grid-column: 2; grid-row: 2; align-self: start; }
+  .project-relay .relay-observation { grid-column: 2; grid-row: 2; padding-top: 40px; }
+  .project-relay .relay-guide-launch { grid-column: 2; grid-row: 3; flex-direction: row; align-items: center; }
 }

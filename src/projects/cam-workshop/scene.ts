@@ -122,7 +122,7 @@ export function createScene(root: HTMLElement, signal: AbortSignal) {
     const { context: ctx, size, metric } = plot;
     const { width, height } = size;
     if (width < 2 || height < 2) return;
-    const left = 49;
+    const left = 57;
     const right = width - 12;
     const top = 10;
     const bottom = height - 25;
@@ -145,7 +145,7 @@ export function createScene(root: HTMLElement, signal: AbortSignal) {
     ctx.lineWidth = 1;
     ctx.setLineDash([]);
     ctx.strokeStyle = '#e9ddd8';
-    ctx.font = '12px ui-monospace, SFMono-Regular, Consolas, monospace';
+    ctx.font = '14px ui-monospace, SFMono-Regular, Consolas, monospace';
     ctx.fillStyle = '#796571';
     ctx.textBaseline = 'middle';
     for (const tick of metric === 's' ? [0, extent] : [-extent, 0, extent]) {
@@ -157,7 +157,7 @@ export function createScene(root: HTMLElement, signal: AbortSignal) {
       ctx.fillText(plotNumber(tick), left - 7, y(tick));
     }
     ctx.textBaseline = 'alphabetic';
-    for (const tick of [0, 90, 180, 270, 360]) {
+    for (const tick of width < 320 ? [0, 180, 360] : [0, 90, 180, 270, 360]) {
       ctx.beginPath();
       ctx.moveTo(x(tick), top);
       ctx.lineTo(x(tick), bottom + 3);

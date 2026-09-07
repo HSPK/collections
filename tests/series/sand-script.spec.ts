@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { SandGrid } from '../../src/projects/sand-script/engine';
+import { expectWorkspaceViewport, visibleControlProblems } from '../helpers/workspace';
 
 test('falling conserves every pigment; walls, brushes, boundaries, and snapshots are exact', () => {
   const grid = new SandGrid(64, 64);
@@ -43,12 +44,16 @@ test('edits have real undo, grain counts, pause, structures, and a local print',
   const frozen = await canvas.evaluate((node: HTMLCanvasElement) => node.toDataURL());
   await page.waitForTimeout(140);
   expect(await canvas.evaluate((node: HTMLCanvasElement) => node.toDataURL())).toBe(frozen);
+  await page.getByRole('button', { name: 'Materials and notes', exact: true }).click();
   await page.getByRole('button', { name: 'Clear grains', exact: true }).click();
   await expect(tray).toHaveAttribute('data-grains', '0');
+  await page.getByRole('button', { name: 'Close Materials and notes', exact: true }).click();
   await page.getByRole('button', { name: 'Undo edit', exact: true }).click();
   await expect(tray).toHaveAttribute('data-grains', grains!);
   await expect(page.getByRole('button', { name: 'Play animation', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Materials and notes', exact: true }).click();
   await page.getByRole('button', { name: 'Empty tray', exact: true }).click();
+  await page.getByRole('button', { name: 'Close Materials and notes', exact: true }).click();
   await canvas.focus();
   await page.keyboard.down('Space');
   await page.keyboard.press('ArrowRight');
@@ -57,6 +62,7 @@ test('edits have real undo, grain counts, pause, structures, and a local print',
   await expect.poll(async () => Number(await tray.getAttribute('data-grains'))).toBeGreaterThan(0);
   await page.keyboard.press('ControlOrMeta+z');
   await expect(tray).toHaveAttribute('data-grains', '0');
+  await page.getByRole('button', { name: 'Materials and notes', exact: true }).click();
   await page.getByLabel('Start with a structure').selectOption('hourglass');
   await expect.poll(async () => Number(await tray.getAttribute('data-grains'))).toBeGreaterThan(500);
   const download = page.waitForEvent('download');
@@ -75,7 +81,9 @@ test('the mobile reduced-motion tray supports material editing entirely by keybo
   expect(bounds.y).toBeLessThan(250);
   expect(bounds.height).toBeGreaterThan(330);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.getByRole('button', { name: 'Materials and notes', exact: true }).click();
   await page.getByRole('button', { name: 'Empty tray', exact: true }).click();
+  await page.getByRole('button', { name: 'Close Materials and notes', exact: true }).click();
   await tray.locator('canvas').focus();
   await page.keyboard.press('w');
   await page.keyboard.press('Enter');
@@ -94,3 +102,89 @@ test('the mobile reduced-motion tray supports material editing entirely by keybo
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await expect(page.getByRole('button', { name: 'Play animation', exact: true })).toBeVisible();
 });
+
+for (const [width, height] of [[1440, 900], [1280, 720], [375, 812], [320, 640], [768, 480]]) {
+  test(`sand workspace ${width}x${height}: brush, pigment, structures and print share one screen`, async ({ page }) => {
+    await page.setViewportSize({ width, height });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('./projects/sand-script/');
+    const root = page.locator('.project-sand-script');
+    const tray = root.locator('[data-tray]');
+    const canvas = tray.locator('canvas');
+    await expect(root).toHaveAttribute('data-workspace', 'true');
+    await expect.poll(async () => Number(await tray.getAttribute('data-grains'))).toBeGreaterThan(1000);
+    await expectWorkspaceViewport(page, width, height);
+    expect(await visibleControlProblems(root)).toEqual([]);
+    const menu = (await page.getByRole('button', { name: 'Collection menu', exact: true }).boundingBox())!;
+    expect(await root.locator('button:visible, input:visible, select:visible').evaluateAll((controls, corner) =>
+      controls.filter(control => {
+        const box = control.getBoundingClientRect();
+        return box.left < corner.x + corner.width && box.right > corner.x &&
+          box.top < corner.y + corner.height && box.bottom > corner.y;
+      }).map(control => control.getAttribute('aria-label') || control.id || control.textContent), menu)).toEqual([]);
+    for (const selector of ['[data-tool="sand"]', '[data-pigment-select]', '[data-play]', '[data-undo]', '[data-brush]', '[data-speed]']) {
+      await expect(root.locator(selector)).toBeInViewport({ ratio: 1 });
+    }
+    await page.screenshot({ path: test.info().outputPath(`sand-${width}x${height}.png`) });
+
+    const trigger = page.getByRole('button', { name: 'Materials and notes', exact: true });
+    const dialog = page.getByRole('dialog', { name: 'Materials and notes', exact: true });
+    await trigger.click();
+    await expect(dialog).toBeVisible();
+    await page.getByRole('button', { name: 'Empty tray', exact: true }).click();
+    await page.getByRole('button', { name: 'Close Materials and notes', exact: true }).click();
+    await expect(trigger).toBeFocused();
+    const brush = page.getByLabel('Brush width');
+    await brush.focus();
+    await brush.press('Home');
+    await expect(root.locator('[data-brush-value]')).toHaveText('3 cells');
+    await canvas.focus();
+    await canvas.press('Enter');
+    await expect.poll(async () => Number(await tray.getAttribute('data-grains'))).toBeGreaterThan(0);
+    const smallStamp = Number(await tray.getAttribute('data-grains'));
+    const smallBitmap = await canvas.evaluate(node => (node as HTMLCanvasElement).toDataURL());
+    await page.getByLabel('Sand pigment', { exact: true }).selectOption('3');
+    await expect(root.locator('[data-pigment="3"]')).toHaveAttribute('aria-pressed', 'true');
+    await trigger.click();
+    await page.getByRole('button', { name: 'Empty tray', exact: true }).click();
+    await root.locator('[data-pigment]').last().click();
+    await page.keyboard.press('Escape');
+    await expect(dialog).not.toBeVisible();
+    await expect(page.getByLabel('Sand pigment', { exact: true })).toHaveValue('6');
+    await brush.focus();
+    await brush.press('End');
+    await expect(root.locator('[data-brush-value]')).toHaveText('17 cells');
+    const bounds = (await canvas.boundingBox())!;
+    await page.mouse.click(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+    await expect.poll(async () => Number(await tray.getAttribute('data-grains'))).toBeGreaterThan(smallStamp);
+    await expect.poll(() => canvas.evaluate(node => (node as HTMLCanvasElement).toDataURL())).not.toBe(smallBitmap);
+    const pace = page.getByLabel('Falling pace');
+    await pace.focus();
+    await pace.press('Home');
+    await expect(root.locator('[data-speed-value]')).toHaveText('0.25x');
+    await trigger.click();
+    await page.getByLabel('Start with a structure').selectOption('hourglass');
+    await expect.poll(async () => Number(await tray.getAttribute('data-grains'))).toBeGreaterThan(500);
+    await page.getByRole('button', { name: 'Reload stencil', exact: true }).click();
+    const download = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'Save a sand print', exact: true }).click();
+    expect((await download).suggestedFilename()).toBe('sand-script.png');
+    await root.locator('.ss-footer').scrollIntoViewIfNeeded();
+    await expectWorkspaceViewport(page, width, height);
+    if (width === 320) await page.screenshot({ path: test.info().outputPath('sand-materials-dialog.png') });
+    await page.keyboard.press('Escape');
+    await expect(trigger).toBeFocused();
+    await expectWorkspaceViewport(page, width, height);
+    expect(await visibleControlProblems(root)).toEqual([]);
+    const grains = await tray.getAttribute('data-grains');
+    const next = width === 375 ? { width: 1280, height: 720 } : { width: 375, height: 812 };
+    await page.setViewportSize(next);
+    await expect.poll(() => canvas.evaluate(node => {
+      const element = node as HTMLCanvasElement;
+      const rect = element.getBoundingClientRect(), dpr = Math.min(devicePixelRatio, 2);
+      return Math.max(Math.abs(element.width - rect.width * dpr), Math.abs(element.height - rect.height * dpr));
+    })).toBeLessThanOrEqual(1);
+    await expect(tray).toHaveAttribute('data-grains', grains!);
+    await expectWorkspaceViewport(page, next.width, next.height);
+  });
+}

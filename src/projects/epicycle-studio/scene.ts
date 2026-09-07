@@ -69,7 +69,7 @@ export function drawPlot(
   ctx.moveTo(0, view.y); ctx.lineTo(width, view.y);
   ctx.stroke();
   ctx.fillStyle = '#607466';
-  ctx.font = '12px Consolas, monospace';
+  ctx.font = '14px Consolas, monospace';
   ctx.textAlign = 'left';
   ctx.fillText('Im / y', view.x + 9, 20);
   ctx.textAlign = 'right';
@@ -161,7 +161,7 @@ export function drawPlot(
   ctx.beginPath();
   ctx.arc(px(mean), py(mean), 3, 0, Math.PI * 2);
   ctx.fill();
-  ctx.font = '12px Consolas, monospace';
+  ctx.font = '14px Consolas, monospace';
   ctx.fillText('DC', px(mean) + 8, py(mean) + 16);
   ctx.strokeStyle = '#cf4c28';
   ctx.fillStyle = '#f5f2e8';
@@ -181,7 +181,7 @@ export function drawPlot(
   ctx.arc(px(start), py(start), 3, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = '#607466';
-  ctx.font = '12px Consolas, monospace';
+  ctx.font = '14px Consolas, monospace';
   ctx.fillText('128 samples / closed path', 14, height - 15);
   ctx.restore();
 }

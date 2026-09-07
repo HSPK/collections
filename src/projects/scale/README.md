@@ -9,7 +9,7 @@ on another project's private code.
 ## Files and lifecycle
 
 - `index.ts` exports `mount(context: ProjectContext): ProjectInstance`.
-  It creates an auto-height `.project-scale` root with
+  It creates a viewport-bounded `.project-scale[data-workspace="true"]` root with
   `createProjectPage(context, 'scale')` and returns `{ destroy: page.destroy }`.
 - `data.ts` owns the catalogue, domains, source ledger and comparison presets.
 - `engine.ts` contains pure conversion, logarithmic-coordinate, nearest-reference,
@@ -31,9 +31,15 @@ that whale against the Eiffel Tower's 330 m antenna-inclusive height: B/A = 11.
 Making A 10 cm long therefore makes B 1.1 m tall.
 
 The compact masthead opens on the comparison, not an oversized introduction.
-Its `data-project-preview` workspace places the two references and calculated
-ratio side by side on desktop. The logarithmic explorer follows the comparison;
-the extended atlas introduction remains in How to read.
+Its `data-project-preview` workspace keeps both reference selectors, plates,
+swap, ratio and directed quotients together. Compare, Explore and Catalogue
+are native workspace tabs. Model & comparison notebook opens the original
+model calculator, display units, suggested pairs, honest linear ruler, caveats
+and export in a native dialog. How to read retains the atlas introduction,
+unit explanations and source ledger. Content is moved intact, not reconstructed.
+Pane selection and closing dialogs never replace the current comparison.
+The notebook action reserves a local 64px right margin, keeping its complete
+hit target clear of the floating collection menu without adding a footer.
 
 The explorer and the comparison are deliberately independent. Use “Compare
 as A/B” to transfer a reference. The explorer supports a native reference
@@ -129,7 +135,7 @@ how each number is used. In particular:
 
 ## Accessibility and responsive behaviour
 
-Body text is 15–18 px; essential labels are at least 12 px. Controls have
+Body text is 14–18 px; essential labels are at least 14 px. Controls have
 44 px minimum heights, visible focus outlines and native keyboard behaviour.
 The range has a meaningful `aria-valuetext`; Home/End and arrow keys work
 without custom keyboard interception. Every select, input and section is
@@ -142,10 +148,12 @@ object/distance and approximation without relying on colour or illustration.
 The SVGs are decorative because all measurements and context are readable
 in HTML. Source links announce that they open a new tab.
 
-At narrow widths the main plate, comparison, notes and catalogue reflow into
-stacked editorial layouts. No fixed-height viewport or page-internal scroll
-trap is used. There is no autoplay or motion; reduced-motion styles also
-suppress inherited transitions.
+At narrow widths both comparison plates remain above the live ratio. Explorer
+controls and the log ruler stay with a compact illustration and a bounded
+reference-reading pane. The catalogue list scrolls beneath fixed filters;
+long notes scroll inside native dialogs, not the document. Reference assignment
+selects Compare, Explore selects the explorer, and Full field note selects and
+reveals its catalogue entry without scrolling the page. There is no autoplay.
 
 ## Focused validation
 
@@ -161,6 +169,11 @@ PWTEST_CACHE_DIR=src/projects/scale/.test-cache \
 npm test -- tests/projects/scale.spec.ts \
   --output=src/projects/scale/.test-results --workers=1
 ```
+
+`tests/workspaces/worlds-audio.spec.ts` adds real-route viewport round trips at
+1440x900, 1280x720, 375x812, 320x640 and 768x480, model-dialog edits, catalogue
+assignment and screenshots. Use the renderer lock supplied by the coordinator
+for every browser run, including screenshots.
 
 Set `SITE_URL` to an existing Vite server to avoid launching another one.
 For engine-only work, add `--grep-invert "isolated browser"` and set `SITE_URL`

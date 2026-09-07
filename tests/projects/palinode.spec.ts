@@ -235,11 +235,24 @@ test.describe('Palinode authored causal model', () => {
 });
 
 async function open(page: Page) {
-  await page.goto('/projects/palinode/');
+  await page.goto('./projects/palinode/');
   await expect(page.locator('.project-palinode h1')).toContainText('A city that remembers');
 }
 
+async function pane(page: Page, name: 'Read' | 'Decide' | 'Compare' | 'Ending') {
+  await page.getByRole('tab', { name, exact: true }).click();
+}
+
+async function desk(page: Page) {
+  await page.getByRole('button', { name: 'Folio desk', exact: true }).click();
+}
+
+async function closeDesk(page: Page) {
+  await page.getByRole('button', { name: 'Close Folio desk', exact: true }).click();
+}
+
 async function playReturn(page: Page) {
+  await pane(page, 'Decide');
   await page.locator('[data-era="0"]').click();
   await page.locator('[data-choice="shore:steps"]').click();
   await page.locator('[data-choice="charter:commons"]').click();
@@ -274,6 +287,7 @@ test('Palinode browser: genuine return playthrough, past edit, pinned future, an
   await page.locator('#palinode-future-document').selectOption('future-quay');
   await expect(page.locator('[data-pinned-text]')).toContainText('Seven steps');
   await page.locator('[data-era="0"]').click();
+  await pane(page, 'Decide');
   await page.locator('[data-choice="shore:wall"]').click();
   await expect(page.locator('[data-main-map]')).toHaveAttribute('data-era', '1891');
   await expect(page.locator('[data-main-map]')).toHaveAttribute('data-shore', 'wall');
@@ -284,19 +298,23 @@ test('Palinode browser: genuine return playthrough, past edit, pinned future, an
   await expect(page.locator('[data-suspended]')).toContainText('Reroute the crossing');
   await expect(page.locator('[data-ending-panel]')).toBeHidden();
   await expect(page.locator('[data-choice="shore:wall"]')).toBeFocused();
+  await desk(page);
   await page.locator('.palinode-ledger > summary').click();
   await expect(page.locator('[data-ledger-rule="old-circuit"] [data-rule-truth]')).toHaveText('NOT ENACTED');
   await expect(page.locator('[data-ledger-rule="footbridge"] [data-rule-deps]')).toContainText('tidal steps survive');
+  await closeDesk(page);
   await page.locator('[data-action="undo"]').click();
   await expect(page.locator('.project-palinode')).toHaveAttribute('data-ending', 'return');
   await page.locator('[data-action="redo"]').click();
   await expect(page.locator('.project-palinode')).toHaveAttribute('data-ending', '');
   await page.locator('[data-era="1"]').click();
   await page.locator('[data-choice="crossing:tram"]').click();
+  await pane(page, 'Compare');
   await page.locator('#palinode-future-document').selectOption('eli');
   await expect(page.locator('[data-pinned-text]')).toContainText('repair bicycles');
   await expect(page.locator('[data-revised-text]')).toContainText('18:10');
   await page.locator('[data-era="3"]').click();
+  await pane(page, 'Decide');
   await page.locator('[data-choice="performance:procession"]').click();
   await expect(page.locator('#palinode-ending-title')).toHaveText('The city carries it');
   await expect(page.locator('[data-main-map] [data-scene="ending-procession"]')).toBeVisible();
@@ -314,6 +332,7 @@ test('Palinode browser: documentary ending, validated import/export, and undoabl
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('console', (message) => { if (message.type() === 'error') errors.push(message.text()); });
   await open(page);
+  await pane(page, 'Decide');
   await page.locator('[data-era="2"]').click();
   await page.locator('[data-choice="room:reading"]').click();
   await page.locator('[data-choice="practice:collate"]').click();
@@ -323,6 +342,7 @@ test('Palinode browser: documentary ending, validated import/export, and undoabl
   await expect(page.locator('#palinode-ending-title')).toHaveText('A faithful incompleteness');
   await expect(page.locator('[data-main-map] [data-scene="ending-reading"]')).toBeVisible();
   await expect(page.locator('[data-ending-text]')).toContainText('The kitchen refrain is gone');
+  await desk(page);
   const downloadPromise = page.waitForEvent('download');
   await page.locator('[data-action="export"]').click();
   const download = await downloadPromise;
@@ -338,8 +358,10 @@ test('Palinode browser: documentary ending, validated import/export, and undoabl
   await page.locator('[data-action="reset"]').click();
   await page.locator('[data-action="dialog-confirm"]').click();
   await expect(page.locator('.project-palinode')).toHaveAttribute('data-ending', '');
+  await closeDesk(page);
   await page.locator('[data-action="undo"]').click();
   await expect(page.locator('.project-palinode')).toHaveAttribute('data-ending', 'reading');
+  await desk(page);
   const input = page.locator('[data-import-file]');
   await input.setInputFiles({ name: 'invalid.json', mimeType: 'application/json', buffer: Buffer.from('{"version":2}') });
   await expect(page.locator('[data-status]')).toContainText('Unsupported or invalid');
@@ -356,6 +378,7 @@ test('Palinode browser: protected corrupt save never silently overwrites the ori
   await open(page);
   await expect(page.locator('[data-storage-warning]')).toBeVisible();
   await page.locator('[data-era="0"]').click();
+  await pane(page, 'Decide');
   await page.locator('[data-choice="shore:steps"]').click();
   expect(await page.evaluate(() => localStorage.getItem('palinode.folio.v1'))).toBe('{"version":99,"important":"original bytes"}');
   await page.locator('[data-action="replace-save"]').click();
@@ -379,6 +402,7 @@ test('Palinode browser: mobile reading, keyboard selection, comparison panels an
   await era.focus();
   await page.keyboard.press('Enter');
   await expect(era).toBeFocused();
+  await pane(page, 'Decide');
   const choice = page.locator('[data-choice="shore:steps"]');
   await choice.focus();
   await page.keyboard.press('Enter');
@@ -394,12 +418,14 @@ test('Palinode browser: mobile reading, keyboard selection, comparison panels an
   await page.keyboard.press('Enter');
   await expect(choice).toBeFocused();
   await page.locator('[data-choice="shore:wall"]').click();
+  await pane(page, 'Compare');
   await expect(page.locator('[data-pinned-text]')).toBeHidden();
   await expect(page.locator('[data-revised-text]')).toBeVisible();
   await page.locator('[data-compare-side="pinned"]').click();
   await expect(page.locator('[data-pinned-text]')).toBeVisible();
   await expect(page.locator('[data-revised-text]')).toBeHidden();
   await expect(page.locator('[data-compare-side="pinned"]')).toBeFocused();
+  await pane(page, 'Read');
   const doc = page.locator('#palinode-document-select');
   await doc.selectOption('bench');
   await doc.focus();
@@ -407,6 +433,96 @@ test('Palinode browser: mobile reading, keyboard selection, comparison panels an
   await expect(page.locator('[data-doc-text]')).toContainText('sensible bench');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   expect(await page.locator('[data-main-map] .palinode-map-number').first().evaluate((element) => getComputedStyle(element).transitionDuration)).toBe('0s');
+  await pane(page, 'Compare');
   await page.locator('.palinode-comparison').screenshot({ path: testInfo.outputPath('palinode-mobile-comparison.png') });
   expect(errors).toEqual([]);
 });
+
+for (const viewport of [
+  { width: 1440, height: 900 }, { width: 1280, height: 720 },
+  { width: 375, height: 812 }, { width: 320, height: 640 },
+  { width: 768, height: 480 },
+]) {
+  test(`Palinode workspace: ${viewport.width}x${viewport.height} bounded reading, decisions and folio desk`, async ({ page }, testInfo) => {
+    const errors: string[] = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await page.setViewportSize(viewport);
+    await open(page);
+    const root = page.locator('.project-palinode');
+    await expect(root).toHaveAttribute('data-workspace', 'true');
+    const fits = async () => {
+      const dimensions = await page.evaluate(() => ({
+        width: document.documentElement.scrollWidth,
+        height: document.documentElement.scrollHeight,
+        body: document.body.scrollHeight,
+        x: window.scrollX, y: window.scrollY,
+        bodyOverflow: getComputedStyle(document.body).overflow,
+        documentOverflow: getComputedStyle(document.documentElement).overflow,
+      }));
+      expect(dimensions.width).toBeLessThanOrEqual(viewport.width);
+      expect(dimensions.height).toBeLessThanOrEqual(viewport.height);
+      expect(dimensions.body).toBeLessThanOrEqual(viewport.height);
+      expect(dimensions.x).toBe(0);
+      expect(dimensions.y).toBe(0);
+      expect(dimensions.bodyOverflow).not.toMatch(/hidden|clip/);
+      expect(dimensions.documentOverflow).not.toMatch(/hidden|clip/);
+      for (const selector of ['.palinode-toolbar', '.palinode-era-rail', '.palinode-main-map', '.workspace-tabs']) {
+        const bounds = await root.locator(selector).boundingBox();
+        expect(bounds).not.toBeNull();
+        expect(bounds!.height).toBeGreaterThan(0);
+        expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(viewport.height);
+      }
+    };
+    await fits();
+    await page.screenshot({ path: testInfo.outputPath(`palinode-workspace-${viewport.width}x${viewport.height}.png`) });
+    const reading = root.locator('.palinode-document');
+    await expect(root.locator('[data-doc-text]')).toContainText('measure');
+    await reading.evaluate(element => { element.scrollTop = element.scrollHeight; });
+    await expect(root.locator('.palinode-marginalia')).toBeInViewport();
+    await fits();
+    await page.locator('[data-action="pin"]').first().click();
+    await pane(page, 'Decide');
+    await page.locator('[data-era="0"]').click();
+    await page.locator('[data-choice="shore:steps"]').click();
+    await expect(page.locator('[data-main-map]')).toHaveAttribute('data-shore', 'steps');
+    await fits();
+    await page.screenshot({ path: testInfo.outputPath(`palinode-decide-${viewport.width}x${viewport.height}.png`) });
+    await pane(page, 'Compare');
+    await expect(page.locator('[data-revised-text]')).toContainText('The tidal steps remain');
+    await expect(page.locator('[data-pinned-text]')).toContainText('The tram doors open');
+    await page.locator('[data-action="undo"]').click();
+    await expect(page.locator('[data-main-map]')).toHaveAttribute('data-shore', 'wall');
+    await page.locator('[data-action="redo"]').click();
+    await expect(page.locator('[data-main-map]')).toHaveAttribute('data-shore', 'steps');
+    await fits();
+    await desk(page);
+    await page.locator('.palinode-ledger-area details').nth(1).locator('summary').click();
+    await page.locator('#palinode-history').selectOption('0');
+    await expect(root).toHaveAttribute('data-ending', '');
+    await closeDesk(page);
+    await expect(page.getByRole('button', { name: 'Folio desk', exact: true })).toBeFocused();
+    await page.getByRole('button', { name: 'Goals', exact: true }).click();
+    await page.locator('[data-action="hint"]').click();
+    await expect(page.locator('[data-hint]')).toContainText('1891');
+    await page.keyboard.press('Escape');
+    await page.getByRole('button', { name: 'Full map', exact: true }).click();
+    await expect(page.getByRole('dialog', { name: 'Aven city map' })).toBeVisible();
+    await page.locator('[data-full-map] [data-place="quay"]').click();
+    await page.keyboard.press('Escape');
+    await pane(page, 'Read');
+    await expect(page.locator('#palinode-document-title')).toHaveText('Two inches above the tide');
+    expect(await reading.evaluate(element => element.scrollTop)).toBe(0);
+    const readTab = page.getByRole('tab', { name: 'Read', exact: true });
+    await readTab.focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(page.getByRole('tab', { name: 'Decide', exact: true })).toBeFocused();
+    await expect(page.getByRole('tab', { name: 'Decide', exact: true })).toHaveAttribute('aria-selected', 'true');
+    await page.keyboard.press('Home');
+    await expect(readTab).toBeFocused();
+    await fits();
+    const sizes = await root.locator('button:visible, select:visible, .palinode-select-label:visible').evaluateAll(elements =>
+      elements.map(element => parseFloat(getComputedStyle(element).fontSize)));
+    expect(Math.min(...sizes)).toBeGreaterThanOrEqual(14);
+    expect(errors).toEqual([]);
+  });
+}

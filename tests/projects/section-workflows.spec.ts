@@ -23,15 +23,18 @@ async function editOffset(page: Page, offset: number) {
 }
 
 async function expectSavedConstruction(page: Page, document: Document) {
+  await page.getByRole('button', { name: 'Files & guide', exact: true }).click();
   const downloadPromise = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Save JSON', exact: true }).click();
   const path = await (await downloadPromise).path();
   if (!path) throw new Error('The construction download is missing.');
   expect(parseDocument(await readFile(path, 'utf8'))).toEqual(document);
+  await page.getByRole('button', { name: 'Close Construction files & guide', exact: true }).click();
 }
 
 async function openConstruction(page: Page, document: Document) {
   const previousRevision = await page.locator('.project-section').getAttribute('data-revision');
+  await page.getByRole('button', { name: 'Files & guide', exact: true }).click();
   const chooserPromise = page.waitForEvent('filechooser');
   await page.getByRole('button', { name: 'Open JSON', exact: true }).click();
   const chooser = await chooserPromise;
@@ -113,6 +116,7 @@ test('Section reset separates a same-title imported origin from a revisited buil
   await expect(page.locator('.project-section')).toHaveAttribute('data-ready', 'true');
   await openConstruction(page, imported);
   await expect(page.locator('[data-study="tender"]')).toHaveAttribute('aria-pressed', 'false');
+  await page.getByRole('tab', { name: 'Studies', exact: true }).click();
   await page.locator('[data-study="vessel"]').click();
   await settled(page);
   await page.locator('[data-study="tender"]').click();
@@ -150,4 +154,62 @@ test('Section reset retains origin-only imports when geometry matches the curren
   await page.getByRole('button', { name: 'Reset study', exact: true }).click();
   await settled(page);
   await expectSavedConstruction(page, first);
+});
+
+test('Section mobile panes retain live cuts, editable operands, exports and undo without page scrolling', async ({ page }, testInfo) => {
+  test.setTimeout(90_000);
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.goto('./projects/section/');
+  const root = page.locator('.project-section');
+  await expect(root).toHaveAttribute('data-ready', 'true');
+  const initial = STUDIES[0].create();
+  await page.getByRole('tab', { name: 'Cut plane', exact: true }).click();
+  const tilt = page.locator('[data-field="plane-1"]');
+  await tilt.fill('25');
+  await tilt.press('Tab');
+  await settled(page);
+  await page.getByRole('tab', { name: '01 Solid', exact: true }).focus();
+  await page.keyboard.press('End');
+  await expect(page.getByRole('tab', { name: '02 Section A\u2013A', exact: true })).toBeFocused();
+  await expect(page.getByRole('tabpanel', { name: '02 Section A\u2013A', exact: true })
+    .getByRole('region', { name: 'Measured two-dimensional section', exact: true })).toBeVisible();
+  await expect(page.locator('[data-drawing] svg')).toBeInViewport({ ratio: 1 });
+  await expect(page.locator('[data-solid] canvas')).toBeHidden();
+  expect(await page.locator('[data-solid]').evaluate(element => element.clientHeight)).toBeGreaterThan(60);
+  await page.getByRole('tab', { name: 'Results', exact: true }).click();
+  await expect(page.locator('[data-area]')).toBeVisible();
+  const changed = clone(initial); changed.plane.rotation[1] = 25;
+  await expectSavedConstruction(page, changed);
+  await page.getByRole('button', { name: 'Files & guide', exact: true }).click();
+  await page.screenshot({ path: testInfo.outputPath('section-mobile-files.png') });
+  for (const [action, extension] of [['svg', '.svg'], ['stl', '.stl']]) {
+    const pending = page.waitForEvent('download');
+    await page.locator(`[data-action="${action}"]`).click();
+    const download = await pending;
+    expect(download.suggestedFilename()).toContain(extension);
+    const path = await download.path();
+    if (!path) throw new Error(`Missing ${extension} download`);
+    const data = await readFile(path);
+    if (action === 'svg') expect(data.toString()).toContain('<metadata>');
+    else expect(data.length).toBe(84 + data.readUInt32LE(80) * 50);
+  }
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: 'Undo last edit', exact: true }).click();
+  await settled(page);
+  await expectSavedConstruction(page, initial);
+  await page.getByRole('tab', { name: 'Construction', exact: true }).click();
+  const inspector = page.locator('.section-inspector-scroll');
+  await inspector.evaluate(element => { element.scrollTop = element.scrollHeight; });
+  await page.locator('[data-field="radius"]').fill('31');
+  await page.locator('[data-field="radius"]').press('Tab');
+  await settled(page);
+  await page.getByRole('tab', { name: '01 Solid', exact: true }).click();
+  await expect(page.locator('[data-solid] canvas')).toBeInViewport({ ratio: 1 });
+  await page.getByRole('button', { name: 'Reset study', exact: true }).click();
+  await settled(page);
+  await expectSavedConstruction(page, initial);
+  expect(await page.evaluate(() => ({
+    width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight, x: scrollX, y: scrollY,
+  }))).toEqual({ width: 320, height: 640, x: 0, y: 0 });
+  await page.screenshot({ path: testInfo.outputPath('section-mobile-edit.png') });
 });

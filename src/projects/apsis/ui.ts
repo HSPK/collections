@@ -144,7 +144,7 @@ export function deskMarkup(id: string): string {
 }
 
 export function timelineMarkup(flight: Flight): string {
-  if (!flight.maneuvers.length) return '<li class="apsis-timeline-empty"><span aria-hidden="true">＋</span><p>No impulses queued.<br>Build a solution or write your own below.</p></li>';
+  if (!flight.maneuvers.length) return '<li class="apsis-timeline-empty"><span aria-hidden="true">＋</span><p>No impulses queued.<br>Build a solution or use the Manual pane.</p></li>';
   return flight.maneuvers.slice(-10).map((maneuver, index) => {
     const executed = maneuver.status === 'executed';
     return `<li class="apsis-burn ${executed ? 'apsis-burn-executed' : ''}" data-apsis-burn="${maneuver.id}">

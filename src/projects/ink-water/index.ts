@@ -3,6 +3,7 @@ import { canvas2D, pointerPosition } from '../../core/canvas';
 import { createLoop } from '../../core/loop';
 import { clamp } from '../../core/math';
 import { createProjectPage, downloadBlob, query } from '../../core/page';
+import { createWorkspaceDialog } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { INKS, viscosityFromControl } from './data';
 import type { Pigment } from './data';
@@ -11,6 +12,7 @@ import { WaterRenderer } from './render';
 
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'ink-water');
+  page.root.dataset.workspace = 'true';
   try {
     return createWaterSite(page, context);
   } catch (error) {
@@ -28,6 +30,7 @@ function createWaterSite(page: ReturnType<typeof createProjectPage>, context: Pr
           <h1>Ink <em>in Water</em></h1>
         </div></div>
         <p class="iw-intro">A drop becomes a world.<br>Leave a little room for the unexpected.</p>
+        <button type="button" data-guide>Studio notes ↗</button>
       </header>
       <div class="iw-workbench">
         <section class="iw-exhibit" aria-label="Pigment in water">
@@ -73,6 +76,24 @@ function createWaterSite(page: ReturnType<typeof createProjectPage>, context: Pr
         <span>Made locally. Kept locally.</span></footer>
     </div>`;
 
+  query(page.root, '.iw-transport').append(query(page.root, '[data-clear]'));
+  query(page.root, '.iw-exhibit-heading').append(query(page.root, '.iw-tracers'));
+  createWorkspaceDialog(page, {
+    id: 'iw-guide',
+    title: 'Studio notes and prints',
+    triggers: [query(page.root, '[data-guide]')],
+    content: [
+      query(page.root, '.iw-intro'),
+      query(page.root, '.iw-desk > .iw-eyebrow'),
+      query(page.root, '.iw-desk h2'),
+      query(page.root, '.iw-actions'),
+      query(page.root, '.iw-status'),
+      query(page.root, '.iw-hint'),
+      query(page.root, '.iw-viscosity p'),
+      query(page.root, '.iw-model-note'),
+      query(page.root, '.iw-footer'),
+    ],
+  });
   const host = query<HTMLElement>(page.root, '[data-water-canvas]');
   const surface = canvas2D(host, 'Soft indigo and madder plumes suspended in pale water');
   page.onCleanup(surface.dispose);

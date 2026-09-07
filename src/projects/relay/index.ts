@@ -1,6 +1,7 @@
 import './style.css';
 import { createLoop } from '../../core/loop';
 import { createProjectPage, downloadText, escapeMarkup, query } from '../../core/page';
+import { createWorkspaceDialog, createWorkspaceTabs } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { assemble } from './assembler';
 import type { Diagnostic } from './assembler';
@@ -15,7 +16,7 @@ import { pixelGrid, schematic } from './diagram';
 import { workbenchMarkup } from './ui';
 
 type MemorySpace = 'ram' | 'rom' | 'stack';
-type Pane = 'source' | 'machine' | 'output';
+type Pane = 'source' | 'machine' | 'output' | 'memory' | 'trace' | 'guide';
 
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'relay');
@@ -40,6 +41,7 @@ export function mount(context: ProjectContext): ProjectInstance {
 
   page.root.innerHTML = workbenchMarkup();
   const root = page.root;
+  root.dataset.workspace = 'true';
   const get = <T extends Element>(selector: string) => query<T>(root, selector);
   const source = get<HTMLTextAreaElement>('#relay-source');
   const gutter = get<HTMLElement>('[data-relay-gutter]');
@@ -59,12 +61,83 @@ export function mount(context: ProjectContext): ProjectInstance {
   const lastEvent = () => machine.trace[machine.trace.length - 1];
   source.value = defaultPreset.source;
 
-  function setPane(pane: Pane): void {
-    get<HTMLElement>('.relay-main-grid').dataset.relayActivePane = pane;
-    root.querySelectorAll<HTMLButtonElement>('[data-relay-pane]').forEach((button) => {
-      button.setAttribute('aria-pressed', String(button.dataset.relayPane === pane));
-    });
+  const inspectorPanes = ['output', 'memory', 'trace', 'guide'] as const;
+  const inspectorTabs = createWorkspaceTabs(page, {
+    id: 'relay-tools',
+    label: 'Machine inspectors',
+    host: get<HTMLElement>('[data-relay-inspector-tabs]'),
+    panes: inspectorPanes.map(id => ({
+      id, label: id === 'output' ? 'Screen' : id[0].toUpperCase() + id.slice(1),
+      panel: get<HTMLElement>(`[data-relay-panel="${id}"]`),
+    })),
+  });
+  const resources = {
+    programs: createWorkspaceDialog(page, {
+      id: 'relay-programs-dialog', title: 'Program library',
+      content: [get<HTMLElement>('.relay-library')],
+      triggers: [get<HTMLElement>('[data-relay-resource="programs"]')],
+    }),
+    manual: createWorkspaceDialog(page, {
+      id: 'relay-manual-dialog', title: 'Field manual',
+      content: [get<HTMLElement>('.relay-manual')],
+      triggers: [get<HTMLElement>('[data-relay-resource="manual"]')],
+    }),
+    files: createWorkspaceDialog(page, {
+      id: 'relay-files-dialog', title: 'Project files',
+      content: [get<HTMLElement>('.relay-workbench-footer')],
+      triggers: [get<HTMLElement>('[data-relay-resource="files"]')],
+    }),
+  };
+  const compact = window.matchMedia('(max-width: 999px)');
+  let activePane: Pane = 'machine';
+  const paneButtons = [...root.querySelectorAll<HTMLButtonElement>('[data-relay-pane]')];
+  for (const button of paneButtons) {
+    const pane = button.dataset.relayPane as Pane;
+    button.id = `relay-pane-tab-${pane}`;
+    button.setAttribute('role', 'tab');
+    const panel = pane === 'source' ? get<HTMLElement>('.relay-source-pane') :
+      pane === 'machine' ? get<HTMLElement>('.relay-machine-pane') :
+        get<HTMLElement>(`[data-relay-panel="${pane}"]`);
+    panel.id ||= `relay-pane-${pane}`;
+    button.setAttribute('aria-controls', panel.id);
   }
+
+  function setPane(pane: Pane): void {
+    const focused = document.activeElement;
+    activePane = pane;
+    const isTool = pane !== 'source' && pane !== 'machine';
+    if (isTool) inspectorTabs.select(pane);
+    get<HTMLElement>('.relay-main-grid').dataset.relayActivePane = isTool ? 'output' : pane;
+    paneButtons.forEach((button) => {
+      const selected = button.dataset.relayPane === pane;
+      button.setAttribute('aria-pressed', String(selected));
+      button.setAttribute('aria-selected', String(selected));
+      button.tabIndex = selected ? 0 : -1;
+    });
+    for (const [selector, active] of [
+      ['.relay-source-pane', pane === 'source'],
+      ['.relay-machine-pane', pane === 'machine'],
+      ['.relay-tools-pane', isTool],
+    ] as const) {
+      get<HTMLElement>(selector).inert = compact.matches && !active;
+    }
+    if (compact.matches && focused instanceof HTMLElement && focused.closest('[inert]')) {
+      paneButtons.find(button => button.dataset.relayPane === pane)?.focus({ preventScroll: true });
+    }
+  }
+  compact.addEventListener('change', () => { setPane(activePane); syncSourceScroll(); }, { signal: page.signal });
+  get<HTMLElement>('.relay-mobile-tabs').addEventListener('keydown', event => {
+    const index = paneButtons.indexOf(document.activeElement as HTMLButtonElement);
+    if (index < 0) return;
+    const next = event.key === 'ArrowRight' ? (index + 1) % paneButtons.length :
+      event.key === 'ArrowLeft' ? (index + paneButtons.length - 1) % paneButtons.length :
+        event.key === 'Home' ? 0 : event.key === 'End' ? paneButtons.length - 1 : -1;
+    if (next < 0) return;
+    event.preventDefault();
+    setPane(paneButtons[next].dataset.relayPane as Pane);
+    paneButtons[next].focus({ preventScroll: true });
+  }, { signal: page.signal });
+  setPane(activePane);
 
   function syncSourceScroll(): void {
     gutter.scrollTop = source.scrollTop;
@@ -165,6 +238,7 @@ export function mount(context: ProjectContext): ProjectInstance {
 
   function renderGuide(): void {
     get<HTMLElement>('[data-relay-guide]').hidden = !guided;
+    get<HTMLElement>('[data-relay-guide-intro]').hidden = guided;
     if (!guided) return;
     const index = Math.min(machine.cpu.cycles, 4);
     const entry = guideSteps[index];
@@ -312,12 +386,11 @@ export function mount(context: ProjectContext): ProjectInstance {
     announce(`“${preset.title}” is loaded. ${preset.goal}`);
     render();
     revealCurrentSource();
-    setPane('machine');
-    if (guided) get<HTMLElement>('[data-relay-guide]').scrollIntoView({ block: 'nearest', behavior: 'instant' });
-    else get<HTMLElement>('#relay-workbench').scrollIntoView({ block: 'start', behavior: 'instant' });
+    setPane(guided ? 'guide' : 'machine');
   }
 
   function requestPreset(preset: Preset): void {
+    resources.programs.close();
     pause();
     render();
     if (dirty() || workRevision > savedRevision) {
@@ -359,6 +432,7 @@ export function mount(context: ProjectContext): ProjectInstance {
   }
 
   async function importFile(file: File): Promise<void> {
+    resources.files.close();
     pause();
     render();
     const revision = ++importRevision;
@@ -424,7 +498,7 @@ export function mount(context: ProjectContext): ProjectInstance {
       announce('Assembly draft exported as relay-source.asm.');
     } else if (action === 'save') saveProject();
     else if (action === 'import') fileInput.click();
-    else if (action === 'guide') {
+    else if (action === 'guide' || action === 'guide-start') {
       const preset = presets.find((entry) => entry.id === 'first-steps');
       if (preset) requestPreset(preset);
     } else if (action === 'guide-next') {
@@ -443,7 +517,7 @@ export function mount(context: ProjectContext): ProjectInstance {
       if (preset) requestPreset(preset);
     }
     const pane = button.dataset.relayPane;
-    if (pane === 'source' || pane === 'machine' || pane === 'output') {
+    if (pane === 'source' || pane === 'machine' || pane === 'output' || pane === 'memory' || pane === 'trace' || pane === 'guide') {
       setPane(pane);
       if (pane === 'source') revealCurrentSource();
     }

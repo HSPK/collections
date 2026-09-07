@@ -57,7 +57,7 @@ function arrow(context: CanvasRenderingContext2D, start: Point, end: Point, head
 }
 
 function label(context: CanvasRenderingContext2D, text: string, x: number, y: number, color = '#a4c3cc') {
-  context.font = '12px ui-monospace, monospace';
+  context.font = '14px ui-monospace, monospace';
   context.textAlign = 'left';
   const width = context.measureText(text).width;
   context.fillStyle = '#0b1c28';

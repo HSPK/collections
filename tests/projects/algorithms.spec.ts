@@ -329,8 +329,10 @@ test.describe('Algorithm Theatre isolated browser', () => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await mountIsolated(page);
     const input = page.getByRole('textbox', { name: 'Write your opening array' });
+    await page.getByRole('tab', { name: 'Trace', exact: true }).click();
     await expect(page.getByLabel('Playback tempo')).toHaveValue('1.5');
     await expect(page.locator('.at-motion-note')).toContainText('Reduced motion is on');
+    await page.getByRole('tab', { name: 'Array', exact: true }).click();
     await input.fill('3, , -1');
     await input.press('Enter');
     await expect(input).toHaveAttribute('aria-invalid', 'true');
@@ -351,6 +353,7 @@ test.describe('Algorithm Theatre isolated browser', () => {
     await page.getByRole('radio', { name: /Bubble sort/ }).check();
     await expect(input).toHaveValue(reverse.values.join(', '));
     await expect(page.locator('[data-play-state]')).toHaveText('Paused');
+    await page.getByRole('button', { name: 'Field notes', exact: true }).click();
     await page.getByRole('button', { name: 'Try the stability witness' }).click();
     await expect(page.getByRole('radio', { name: /Selection sort/ })).toBeChecked();
     await expect(input).toHaveValue('2, 2, 1');
@@ -373,7 +376,9 @@ test.describe('Algorithm Theatre isolated browser', () => {
     const input = page.getByRole('textbox', { name: 'Write your opening array' });
     await input.fill('3, 2, 1');
     await input.press('Enter');
+    await page.getByRole('tab', { name: 'Trace', exact: true }).click();
     await page.getByLabel('Playback tempo').selectOption('0.4');
+    await page.getByRole('tab', { name: 'Array', exact: true }).click();
     await page.getByRole('button', { name: 'Play', exact: true }).click();
     await expect.poll(async () => Number(await page.locator('[data-step-number]').textContent())).toBeGreaterThan(0);
     await page.getByRole('button', { name: 'Next', exact: true }).click();

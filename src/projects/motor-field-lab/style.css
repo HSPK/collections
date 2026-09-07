@@ -269,3 +269,145 @@
   .project-motor-field-lab .mfl-current-line > strong { font-size: 16px; }
   .project-motor-field-lab .mfl-preset-strip > button { gap: 7px; padding-inline: 10px; }
 }
+
+.project-motor-field-lab[data-workspace="true"] {
+  --workspace-paper: var(--mfl-bg);
+  box-sizing: border-box;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  padding: 12px;
+  overflow: clip;
+}
+.project-motor-field-lab .mfl-shell {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: 8px;
+}
+.project-motor-field-lab .mfl-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.project-motor-field-lab .mfl-identity { font-size: 14px; letter-spacing: .04em; }
+.project-motor-field-lab .mfl-heading-row { padding: 0; }
+.project-motor-field-lab h1 { font-size: clamp(26px, 3vw, 36px); }
+.project-motor-field-lab .mfl-workspace-tools { display: flex; gap: 6px; }
+.project-motor-field-lab .mfl-workspace-tools button { padding: 7px 12px; }
+.project-motor-field-lab .mfl-workbench {
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 350px);
+  grid-template-rows: minmax(0, 1fr);
+  overflow: clip;
+}
+.project-motor-field-lab .mfl-visual {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+.project-motor-field-lab .mfl-viewbar { min-height: 0; padding: 5px 12px; }
+.project-motor-field-lab .mfl-panel-title { font-size: 14px; letter-spacing: .02em; }
+.project-motor-field-lab .mfl-motor-figure {
+  min-height: 0;
+  min-width: 0;
+  padding: 0 8px 6px;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+.project-motor-field-lab .mfl-motor-holder { min-height: 0; min-width: 0; width: 100%; height: 100%; max-width: none; }
+.project-motor-field-lab .mfl-motor-svg { width: 100%; height: 100%; overflow: hidden; }
+.project-motor-field-lab .mfl-legend { font-size: 14px; gap: 2px 14px; }
+.project-motor-field-lab .mfl-drive-controls { padding: 8px 12px; }
+.project-motor-field-lab .mfl-transport { margin-top: 8px; gap: 8px; }
+.project-motor-field-lab .mfl-speed-label { flex-direction: row; align-items: center; gap: 6px; padding-left: 0; }
+.project-motor-field-lab .mfl-motion-note { margin-top: 5px; line-height: 1.4; }
+.project-motor-field-lab .mfl-instruments {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  border-top: 0;
+}
+.project-motor-field-lab .workspace-tabs { padding: 5px; }
+.project-motor-field-lab[data-workspace="true"] .workspace-tabs > button { min-height: 44px; padding: 7px; }
+.project-motor-field-lab .mfl-dock-body { min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr); }
+.project-motor-field-lab .mfl-dock-body > .workspace-pane {
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.project-motor-field-lab .mfl-channels,
+.project-motor-field-lab .mfl-rotor-controls,
+.project-motor-field-lab .mfl-readout,
+.project-motor-field-lab .mfl-scope { padding: 12px; }
+.project-motor-field-lab .mfl-channel { padding-block: 9px; gap: 10px; }
+.project-motor-field-lab .mfl-rotor-range { margin-top: 10px; }
+.project-motor-field-lab .mfl-range-ends,
+.project-motor-field-lab .mfl-small-note,
+.project-motor-field-lab .mfl-motion-note,
+.project-motor-field-lab .mfl-reading-label,
+.project-motor-field-lab .mfl-reading-unit,
+.project-motor-field-lab .mfl-control-label,
+.project-motor-field-lab .mfl-control-label > span,
+.project-motor-field-lab .mfl-rotor-range .mfl-control-label,
+.project-motor-field-lab .mfl-speed-label,
+.project-motor-field-lab .mfl-current-line > span,
+.project-motor-field-lab .mfl-axis,
+.project-motor-field-lab .mfl-pole-reading,
+.project-motor-field-lab .mfl-phase-switch > span,
+.project-motor-field-lab .mfl-torque-direction,
+.project-motor-field-lab .mfl-angle-readings > div,
+.project-motor-field-lab .mfl-angle-readings dd,
+.project-motor-field-lab .mfl-components,
+.project-motor-field-lab .mfl-scope-heading > p,
+.project-motor-field-lab .mfl-trace-legend,
+.project-motor-field-lab .mfl-wave-figure figcaption,
+.project-motor-field-lab .mfl-scope-x,
+.project-motor-field-lab .mfl-scope-y,
+.project-motor-field-lab .mfl-preset-strip > button { font-size: 14px; }
+.project-motor-field-lab .mfl-status-strip { min-height: 0; max-height: 44px; overflow: auto; padding: 0 2px; }
+.project-motor-field-lab .mfl-status-strip > p { font-size: 14px; line-height: 1.5; }
+.project-motor-field-lab .mfl-instruments-dialog .workspace-dialog-content {
+  height: min(650px, calc(100dvh - 112px));
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  padding: 0;
+}
+.project-motor-field-lab[data-workspace="true"] .workspace-dialog-heading > button { min-height: 44px; }
+.project-motor-field-lab .workspace-dialog .mfl-notebook { margin: 0; padding-top: 0; border-top: 0; gap: 24px; }
+.project-motor-field-lab .workspace-dialog .mfl-model-stamp { display: block; margin-block: 12px; }
+.project-motor-field-lab .workspace-dialog .mfl-notes > p { color: var(--mfl-muted); font-size: 14px; }
+.project-motor-field-lab .workspace-dialog .mfl-kicker { margin-top: 18px; }
+.project-motor-field-lab .workspace-dialog .mfl-experiments { padding: 0; border: 0; }
+.project-motor-field-lab .workspace-dialog .mfl-scope-heading { display: block; }
+.project-motor-field-lab .workspace-dialog .mfl-boundary { margin-top: 20px; }
+@media (max-width: 700px), (max-height: 540px) {
+  .project-motor-field-lab .mfl-workbench { grid-template-columns: minmax(0, 1fr); }
+  .project-motor-field-lab .mfl-visual { border-right: 0; }
+}
+@media (max-width: 700px) {
+  .project-motor-field-lab[data-workspace="true"] { padding: 8px; }
+  .project-motor-field-lab .mfl-header { display: grid; gap: 2px; }
+  .project-motor-field-lab .mfl-identity { line-height: 18px; font-size: 14px; }
+  .project-motor-field-lab .mfl-emblem { width: 18px; height: 18px; font-size: 18px; }
+  .project-motor-field-lab .mfl-workspace-tools button { flex: 1; padding-inline: 5px; }
+  .project-motor-field-lab .mfl-legend { max-width: none; gap: 2px 10px; }
+  .project-motor-field-lab .mfl-key { width: 16px; }
+  .project-motor-field-lab .mfl-transport button { font-size: 14px; }
+  .project-motor-field-lab .mfl-transport select { min-width: 65px; padding-inline: 5px; }
+  .project-motor-field-lab .mfl-drive-controls { padding-inline: 8px; }
+  .project-motor-field-lab .mfl-range-ends { gap: 5px; }
+}
+@media (min-width: 600px) and (max-height: 540px) {
+  .project-motor-field-lab .mfl-visual {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .project-motor-field-lab .mfl-viewbar { grid-column: 1 / -1; }
+  .project-motor-field-lab .mfl-drive-controls { min-height: 0; overflow: auto; border-top: 0; border-left: 1px solid var(--mfl-line); }
+  .project-motor-field-lab .mfl-status-strip { max-height: 22px; }
+}
+.project-motor-field-lab .mfl-workbench .mfl-dock-body > .workspace-pane { padding-inline-end: calc(64px + env(safe-area-inset-right, 0px)); }
+@media (max-width: 700px), (max-height: 540px) {
+  .project-motor-field-lab .mfl-transport { padding-inline-end: calc(64px + env(safe-area-inset-right, 0px)); }
+  .project-motor-field-lab .mfl-speed-label { flex-direction: column; align-items: flex-start; gap: 0; }
+}

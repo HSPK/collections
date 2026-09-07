@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import { visibleControlProblems } from '../helpers/workspace';
 import { landscapes, seasonStops } from '../../src/projects/season-clock/data';
 import { makeLeaves, sampleLeaf, sampleYear, windAt, yearTime } from '../../src/projects/season-clock/timeline';
 
@@ -159,7 +160,9 @@ test('native controls scrub, change pace, play, pause, and restart without losin
   await expect(slider).toHaveValue('1000');
   await page.getByRole('button', { name: 'Jump to spring' }).click();
   await page.getByLabel('A place to return to').selectOption('hillside-orchard');
+  await page.getByRole('button', { name: 'Field notes' }).click();
   await page.getByLabel('Pace', { exact: true }).selectOption('4');
+  await page.getByRole('button', { name: 'Close Almanac and field notes' }).click();
   await expect(root.locator('[data-status]')).toContainText('18 seconds');
   await page.getByRole('button', { name: 'Play year', exact: true }).click();
   await expect(root).toHaveAttribute('data-playback', 'playing');
@@ -180,6 +183,94 @@ test('native controls scrub, change pace, play, pause, and restart without losin
     await expect(button).toHaveAttribute('aria-pressed', 'true');
   }
 });
+
+for (const viewport of [
+  { width: 1440, height: 900 },
+  { width: 1280, height: 720 },
+  { width: 375, height: 812 },
+  { width: 320, height: 640 },
+  { width: 768, height: 480 },
+]) {
+  test(`season workspace ${viewport.width}x${viewport.height} keeps the year and living landscape together`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await openClock(page);
+    const root = page.locator('.project-season-clock');
+    const slider = page.getByRole('slider', { name: 'Turn the year' });
+    const scene = root.locator('[data-season-scene]');
+    const errors: string[] = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await expect(root).toHaveAttribute('data-workspace', 'true');
+
+    async function fits() {
+      const dimensions = await page.evaluate(() => ({
+        width: document.documentElement.scrollWidth,
+        height: document.documentElement.scrollHeight,
+        top: window.scrollY,
+      }));
+      expect(dimensions).toEqual({ width: viewport.width, height: viewport.height, top: 0 });
+      for (const target of [
+        scene, slider, page.getByRole('button', { name: /^(Play|Pause) year$/ }),
+        page.getByRole('button', { name: 'Restart year' }),
+        page.getByRole('button', { name: 'Jump to autumn' }),
+        page.getByLabel('A place to return to'),
+        page.getByRole('button', { name: 'Field notes' }),
+        page.getByRole('button', { name: 'Save SVG still' }),
+      ]) {
+        await expect(target).toBeInViewport({ ratio: 1 });
+        const box = await target.boundingBox();
+        expect(box).not.toBeNull();
+        expect(box!.height).toBeGreaterThanOrEqual(44);
+      }
+      expect((await scene.boundingBox())!.height).toBeGreaterThan(110);
+      expect(await visibleControlProblems(root)).toEqual([]);
+    }
+
+    await fits();
+    const spring = await drawing(page);
+    await page.getByRole('button', { name: 'Jump to autumn' }).click();
+    await expect(root.locator('[data-season]')).toHaveText('Autumn');
+    expect(await root.locator('[data-leaf-state="falling"]').count()).toBeGreaterThan(0);
+    expect(await drawing(page)).not.toEqual(spring);
+    await slider.focus();
+    await slider.press('Home');
+    await expect(slider).toHaveValue('0');
+    await expect(root.locator('[data-season]')).toHaveText('Winter');
+    await page.getByRole('button', { name: 'Jump to spring' }).click();
+    expect(await drawing(page)).toEqual(spring);
+    await page.getByLabel('A place to return to').selectOption('highland-birches');
+    await expect(scene).toHaveAttribute('data-season-scene', 'highland-birches');
+    await expect(root.locator('[data-tree]')).toHaveCount(3);
+    await fits();
+    await page.screenshot({ path: test.info().outputPath(`season-workspace-${viewport.width}x${viewport.height}.png`) });
+
+    const notesTrigger = page.getByRole('button', { name: 'Field notes' });
+    await notesTrigger.click();
+    const dialog = page.getByRole('dialog', { name: 'Almanac and field notes' });
+    await expect(dialog).toBeVisible();
+    await expect(page.getByLabel('Pace', { exact: true })).toBeInViewport({ ratio: 1 });
+    await page.getByLabel('Pace', { exact: true }).selectOption('4');
+    await expect(root.locator('[data-place-note]')).toHaveText(landscapes[2].note);
+    expect(await page.getByRole('meter', { name: 'Blossom layer' }).evaluate(element =>
+      (element as HTMLMeterElement).value)).toBeGreaterThan(0.9);
+    await page.getByRole('heading', { name: 'Even the breeze can go back.' }).scrollIntoViewIfNeeded();
+    await expect(page.getByText('Wind, light, and falling leaves all belong to the slider', { exact: false })).toBeVisible();
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+    await page.screenshot({ path: test.info().outputPath(`season-notes-${viewport.width}x${viewport.height}.png`) });
+    await page.keyboard.press('Escape');
+    await expect(dialog).not.toBeVisible();
+    await expect(notesTrigger).toBeFocused();
+    await expect(root.locator('[data-status]')).toContainText('18 seconds');
+    await page.getByRole('button', { name: 'Play year', exact: true }).click();
+    await expect.poll(async () => Number(await root.getAttribute('data-year-position'))).toBeGreaterThan(0.27);
+    await page.getByRole('button', { name: 'Pause year', exact: true }).click();
+    await page.getByRole('button', { name: 'Restart year' }).click();
+    await expect(slider).toHaveValue('0');
+    await expect(root).toHaveAttribute('data-playback', 'paused');
+    await expect(page.getByLabel('A place to return to')).toHaveValue('highland-birches');
+    await fits();
+    expect(errors).toEqual([]);
+  });
+}
 
 test('SVG download is the self-contained current frame, including the selected place and falling leaves', async ({ page }) => {
   await openClock(page);

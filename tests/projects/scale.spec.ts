@@ -324,6 +324,7 @@ test.describe('Scale atlas isolated browser', () => {
     await expect(page.locator('#scale-compare-a')).toHaveValue('eiffel-tower');
     await expect(page.locator('[data-a-over-b]')).toHaveText('≈ 11');
     await expect(page.locator('#scale-reference')).toHaveValue('whale');
+    await page.getByRole('tab', { name: 'Explore', exact: true }).click();
     await page.locator('#scale-log').focus();
     await page.locator('#scale-log').press('Home');
     await expect(page.locator('#scale-reference')).toHaveValue('dna');
@@ -337,6 +338,7 @@ test.describe('Scale atlas isolated browser', () => {
     await expect(page.locator('[data-ratio]')).toHaveText('1×');
     await expect(page.locator('[data-ratio-sentence]')).toContainText('same reference length');
     await page.locator('#scale-compare-b').selectOption('eiffel-tower');
+    await page.getByRole('button', { name: 'Model & comparison notebook', exact: true }).click();
     await page.locator('#scale-units').selectOption('cm');
     await expect(page.locator('[data-value-a]')).toContainText('3,000 cm');
     await expect(page.locator('[data-ratio]')).toHaveText('≈ 11×');
@@ -344,6 +346,7 @@ test.describe('Scale atlas isolated browser', () => {
 
   test('search, domain and measurement filters reveal substantive field notes', async ({ page }) => {
     await mountScale(page);
+    await page.getByRole('tab', { name: 'Catalogue', exact: true }).click();
     await expect(page.locator('.scale-catalogue-item')).toHaveCount(17);
     await page.getByRole('searchbox', { name: 'Search field notes' }).fill('no-such-reference-zz');
     await expect(page.locator('[data-result-count]')).toHaveText('0 of 17 references');
@@ -353,6 +356,7 @@ test.describe('Scale atlas isolated browser', () => {
     await page.locator('#scale-domain-filter').selectOption('planetary');
     await page.locator('#scale-kind-filter').selectOption('distance');
     await expect(page.locator('.scale-catalogue-item')).toHaveCount(2);
+    await page.getByRole('tab', { name: 'Explore', exact: true }).click();
     await page.locator('#scale-reference').selectOption('dna');
     await page.getByRole('button', { name: 'Full field note', exact: true }).click();
     await expect(page.locator('.scale-catalogue-item')).toHaveCount(17);
@@ -363,6 +367,7 @@ test.describe('Scale atlas isolated browser', () => {
 
   test('invalid models are explained and sourced downloads reflect the actual comparison', async ({ page }) => {
     await mountScale(page);
+    await page.getByRole('button', { name: 'Model & comparison notebook', exact: true }).click();
     await page.locator('#scale-model-length').fill('0');
     await expect(page.locator('#scale-model-length')).toHaveAttribute('aria-invalid', 'true');
     await expect(page.locator('#scale-model-error')).toContainText('cannot be zero or negative');
@@ -394,7 +399,7 @@ test.describe('Scale atlas isolated browser', () => {
     const smallest = await page.locator('button, label, .scale-help, .scale-eyebrow').evaluateAll((elements) =>
       Math.min(...elements.filter((element) => element.getBoundingClientRect().height).map((element) => parseFloat(getComputedStyle(element).fontSize))),
     );
-    expect(smallest).toBeGreaterThanOrEqual(12);
+    expect(smallest).toBeGreaterThanOrEqual(14);
     expect(await page.locator('[data-action="swap"]').evaluate((element) => element.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
     const unchanged = await page.evaluate(() => {
       const harness = window.__scaleHarness;

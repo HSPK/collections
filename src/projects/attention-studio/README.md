@@ -73,9 +73,26 @@ arithmetic. Display rounding never feeds back into calculation.
 
 ## Interaction and verification
 
+Inspector panes reserve 64px plus the right safe-area inset for the floating
+collection menu. Keep that local clearance when adding inputs or pane content.
+
+The root is a fixed-height viewport workspace, not a scrolling notebook page.
+The weight map, preset, causal mask, reset, and selected pair stay together.
+The adjacent inspector becomes a lower dock on narrow screens; only its content
+scrolls. **Embeddings**, **Calculation**, **Matrices**, **Challenge**, and **Notes**
+retain the complete notebook. Calculation contains all six pipeline buttons and
+the selected output; Matrices contains Q/K/V and the expandable full ledger.
+Starting the challenge opens Embeddings and focuses moss's first coordinate.
+Tabs support Left/Right/Home/End without changing the numeric state.
+
+`workspace.ts` assembles the existing regions into persistent pane wrappers using
+the core workspace helper. Add inspector content there without replacing its
+interactive nodes or overwriting a named region's role. Keep viewport tracks
+`minmax(0, …)` and scrolling inside the inspector when extending the layout.
+
 The heatmap remains a normalized-weight map through all six pipeline steps.
 Click a cell, or use arrow keys/Home/End inside it, to select a query/key pair.
-All projection matrices and Q/K/V rows are visible below; the expandable full
+All projection matrices and Q/K/V rows are in Matrices; the expandable full
 ledger includes raw dot products, scaled/masked scores and every output.
 Every event listener uses `page.signal`. `page.onCleanup` makes retained reset
 handles inert after abort/destroy; there are no ongoing resources to stop.

@@ -206,12 +206,22 @@ async function downloadText(download: Download): Promise<string> {
   return Buffer.concat(chunks).toString('utf8');
 }
 
+async function closeCityPanel(page: Page): Promise<void> {
+  const dialog = page.locator('.project-city dialog[open]');
+  if (await dialog.count()) await dialog.getByRole('button', { name: /^Close / }).click();
+}
+
+async function openCityPanel(page: Page, name: string): Promise<void> {
+  await closeCityPanel(page);
+  await page.getByRole('navigation', { name: 'Recipe for a City' }).getByRole('button', { name, exact: true }).click();
+}
+
 test('city: placement, pointer selection, undo, redo, clear, and reset use the actual plan', async ({ page }) => {
   const errors = await mountCity(page);
   await expect(page.getByRole('heading', { level: 1, name: 'Recipe for a City', exact: true })).toBeVisible();
   await expect(page.getByRole('navigation', { name: 'Recipe for a City' })).toBeVisible();
   await expect(page.locator('[data-city-road-count]')).toHaveText('24');
-  await page.getByRole('button', { name: 'Street', exact: true }).click();
+  await page.getByLabel('Ingredient', { exact: true }).selectOption('road');
   await page.getByLabel('Plot column').selectOption('4');
   await page.getByLabel('Plot row').selectOption({ value: '1' });
   await expect(page.locator('[data-city-current-tile]')).toHaveText('Square');
@@ -225,14 +235,18 @@ test('city: placement, pointer selection, undo, redo, clear, and reset use the a
   await page.getByRole('button', { name: 'Remove tile at E2', exact: true }).click();
   await expect(page.locator('[data-city-current-tile]')).toHaveText('Empty plot');
   await page.getByRole('button', { name: '↶ Undo', exact: true }).click();
+  await openCityPanel(page, 'Tools');
   await page.getByRole('button', { name: 'Clear all plots', exact: true }).click();
   await expect(page.locator('[data-city-road-groups]')).toHaveText('0');
   await expect(page.locator('[data-city-frontage]')).toHaveText('0 / 0');
   await expect(page.locator('[data-city-count="empty"]')).toHaveText('64 on this plan');
+  await closeCityPanel(page);
   await page.getByRole('button', { name: '↶ Undo', exact: true }).click();
   await expect(page.locator('[data-city-road-count]')).toHaveText('25');
+  await openCityPanel(page, 'Tools');
   await page.getByRole('button', { name: 'Restore canal starter', exact: true }).click();
   await expect(page.locator('[data-city-road-count]')).toHaveText('24');
+  await closeCityPanel(page);
   await page.getByRole('button', { name: '↶ Undo', exact: true }).click();
   await expect(page.locator('[data-city-road-count]')).toHaveText('25');
   await page.locator('[data-city-cell="7"] polygon').first().click();
@@ -246,6 +260,7 @@ test('city: keyboard address editing, graph overlays, and recipe loading remain 
   const errors = await mountCity(page);
   await page.getByLabel('Plot column').selectOption('0');
   await page.getByLabel('Plot row').selectOption('0');
+  await openCityPanel(page, 'Tools');
   const pad = page.locator('[data-city-navigator]');
   await pad.focus();
   await page.keyboard.press('ArrowLeft');
@@ -265,13 +280,17 @@ test('city: keyboard address editing, graph overlays, and recipe loading remain 
   await expect(page.locator('[data-city-current-tile]')).toHaveText('Empty plot');
   await page.keyboard.press('Space');
   await expect(page.locator('[data-city-current-tile]')).toHaveText('Library');
+  await closeCityPanel(page);
   await page.getByRole('checkbox', { name: 'Road groups', exact: true }).check();
+  await openCityPanel(page, 'Tools');
   await expect(page.locator('[data-city-group-note]')).toBeVisible();
   await expect(page.locator('[data-city-cell="2"] text')).toHaveText('1');
+  await openCityPanel(page, 'Recipes');
   await page.getByRole('button', { name: 'Try Two quiet lanes', exact: true }).click();
   await expect(page.locator('[data-city-plan-name]')).toHaveText('Two quiet lanes');
   await expect(page.locator('[data-city-plan-name]')).toBeFocused();
   await expect(page.locator('[data-city-road-groups]')).toHaveText('2');
+  await openCityPanel(page, 'Tools');
   await page.getByLabel('Start from a recipe').selectOption('commons');
   await expect(page.locator('[data-city-plan-name]')).toHaveText('A square to share');
   expect(errors).toEqual([]);
@@ -290,19 +309,21 @@ test('city: a 375px touch layout keeps controls readable and enlarged artwork co
     })));
   for (const control of controlSizes) {
     expect(control.height).toBeGreaterThanOrEqual(44);
-    expect(control.font).toBeGreaterThanOrEqual(12);
+    expect(control.font).toBeGreaterThanOrEqual(14);
     expect(control.right).toBeLessThanOrEqual(375);
   }
   await page.getByRole('button', { name: 'Enlarge drawing', exact: true }).click();
   expect(await fits()).toBe(true);
   expect(await page.locator('[data-city-art]').evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true);
-  await page.getByRole('button', { name: 'Bakery', exact: true }).click();
+  await page.getByLabel('Ingredient', { exact: true }).selectOption('bakery');
   await page.getByLabel('Plot column').selectOption('0');
   await page.getByLabel('Plot row').selectOption('0');
   await page.getByRole('button', { name: 'Place Bakery at A1', exact: true }).click();
   await expect(page.locator('[data-city-current-tile]')).toHaveText('Bakery');
+  await openCityPanel(page, 'Tools');
   await page.getByRole('button', { name: 'Select next row', exact: true }).click();
   await expect(page.locator('[data-city-address-label]')).toHaveText('A2');
+  await closeCityPanel(page);
   await page.getByRole('button', { name: 'Fit drawing', exact: true }).click();
   expect(await fits()).toBe(true);
   expect(errors).toEqual([]);
@@ -311,10 +332,13 @@ test('city: a 375px touch layout keeps controls readable and enlarged artwork co
 test('city: SVG and JSON downloads are valid, re-openable, and safe with a custom title', async ({ page }) => {
   const errors = await mountCity(page);
   const title = `Mira's <paper> & pond`;
+  await openCityPanel(page, 'Save');
   await page.getByLabel('Title on your illustration').fill(title);
   await page.getByRole('button', { name: 'Set title', exact: true }).click();
   await expect(page.locator('[data-city-plan-name]')).toHaveText(title);
+  await closeCityPanel(page);
   await page.getByRole('checkbox', { name: 'Road groups', exact: true }).check();
+  await openCityPanel(page, 'Save');
   const svgEvent = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Keep the illustration SVG ↓', exact: true }).click();
   const svgDownload = await svgEvent;
@@ -339,14 +363,18 @@ test('city: SVG and JSON downloads are valid, re-openable, and safe with a custo
   const jsonDownload = await jsonEvent;
   const json = await downloadText(jsonDownload);
   expect(deserializePlan(json).name).toBe(title);
+  await openCityPanel(page, 'Tools');
   await page.getByRole('button', { name: 'Clear all plots', exact: true }).click();
+  await openCityPanel(page, 'Save');
   await page.locator('[data-city-import]').setInputFiles({
     name: 'saved-quarter.json', mimeType: 'application/json', buffer: Buffer.from(json),
   });
   await expect(page.locator('[data-city-export-status]')).toContainText('Opened');
   await expect(page.locator('[data-city-road-count]')).toHaveText('24');
+  await closeCityPanel(page);
   await page.getByRole('button', { name: '↶ Undo', exact: true }).click();
   await expect(page.locator('[data-city-road-count]')).toHaveText('0');
+  await openCityPanel(page, 'Save');
   await page.locator('[data-city-import]').setInputFiles({
     name: 'broken.json', mimeType: 'application/json', buffer: Buffer.from('{broken'),
   });
@@ -367,11 +395,12 @@ test('city: destroy and parent abort remove the page and retire its event handle
   const result = await page.evaluate(() => {
     const root = document.querySelector('.project-city')!;
     const oldClear = root.querySelector<HTMLButtonElement>('[data-city-action="clear"]')!;
-    const before = root.querySelector('[data-city-road-count]')!.textContent;
+    const oldCount = root.querySelector('[data-city-road-count]')!;
+    const before = oldCount.textContent;
     Reflect.get(window, 'cityTestDestroy')();
     Reflect.get(window, 'cityTestDestroy')();
     oldClear.click();
-    return { connected: root.isConnected, before, after: root.querySelector('[data-city-road-count]')!.textContent };
+    return { connected: root.isConnected, before, after: oldCount.textContent };
   });
   expect(result.connected).toBe(false);
   expect(result.after).toBe(result.before);
@@ -379,4 +408,91 @@ test('city: destroy and parent abort remove the page and retire its event handle
   await page.evaluate(() => Reflect.get(window, 'cityTestAbort')());
   await expect(page.locator('.project-city')).toHaveCount(0);
   expect(errors).toEqual([]);
+});
+
+for (const viewport of [
+  { width: 1440, height: 900 }, { width: 1280, height: 720 },
+  { width: 375, height: 812 }, { width: 320, height: 640 }, { width: 768, height: 480 },
+]) {
+  test(`city: bounded workspace ${viewport.width}×${viewport.height} keeps edits and notebooks usable`, async ({ page }, testInfo) => {
+    await page.setViewportSize(viewport);
+    await page.goto('./projects/city/');
+    const root = page.locator('.project-city[data-workspace="true"]');
+    await expect(root).toBeVisible();
+    const expectFits = async () => {
+      const dimensions = await page.evaluate(() => ({
+        width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight,
+        bodyHeight: document.body.scrollHeight, y: window.scrollY,
+      }));
+      expect(dimensions.width).toBeLessThanOrEqual(viewport.width + 1);
+      expect(dimensions.height).toBeLessThanOrEqual(viewport.height + 1);
+      expect(dimensions.bodyHeight).toBeLessThanOrEqual(viewport.height + 1);
+      expect(dimensions.y).toBe(0);
+    };
+    await expectFits();
+    for (const selector of ['[data-city-art]', '[data-city-brush]', '[data-city-column]', '[data-city-row]', '[data-city-action="place"]']) {
+      const box = await root.locator(selector).boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.y).toBeGreaterThanOrEqual(0);
+      expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
+      expect(box!.width).toBeGreaterThan(30);
+    }
+    await page.getByLabel('Ingredient', { exact: true }).selectOption('road');
+    await page.getByLabel('Plot column').selectOption('4');
+    await page.getByLabel('Plot row').selectOption({ value: '1' });
+    await page.getByRole('button', { name: 'Place Street at E2', exact: true }).click();
+    await expect(root.locator('[data-city-cell="12"] > title')).toHaveText('E2 · Street');
+    await expect(root.locator('[data-city-road-count]')).toHaveText('25');
+    await page.screenshot({ path: testInfo.outputPath(`city-workspace-${viewport.width}x${viewport.height}.png`) });
+    await openCityPanel(page, 'Notes');
+    await page.getByText('1 building tile has no street frontage · show addresses', { exact: true }).click();
+    await page.getByRole('button', { name: 'E8 · Library', exact: true }).click();
+    await expect(page.locator('dialog[open]')).toHaveCount(0);
+    await expect(root.locator('[data-city-map-selection]')).toContainText('E8');
+    await openCityPanel(page, 'Guide');
+    await page.getByRole('heading', { name: 'A drawing is not a policy', exact: true }).scrollIntoViewIfNeeded();
+    await expect(page.locator('.city-caveat')).toContainText('not real urban planning advice');
+    await expectFits();
+    const scroll = await page.locator('#city-guide-dialog').evaluate(element => element.scrollTop);
+    expect(scroll).toBeGreaterThan(0);
+    if (viewport.width === 320) await page.screenshot({ path: testInfo.outputPath('city-guide-320x640.png') });
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('button', { name: 'Guide', exact: true })).toBeFocused();
+    await page.getByRole('button', { name: '↶ Undo', exact: true }).click();
+    await expect(root.locator('[data-city-road-count]')).toHaveText('24');
+    await page.getByRole('button', { name: '↷ Redo', exact: true }).click();
+    await expect(root.locator('[data-city-road-count]')).toHaveText('25');
+    await page.mouse.move(20, 110);
+    await page.mouse.wheel(0, 700);
+    await expectFits();
+    await page.getByRole('button', { name: 'Collection menu', exact: true }).click();
+    await expect(page.getByRole('navigation', { name: 'Collection navigation' })).toBeVisible();
+  });
+}
+
+test('city: a maximum-size imported plan still maps pointer addresses in the compact workspace', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 640 });
+  await page.goto('./projects/city/');
+  const large = createPlan('A'.repeat(60), 16, 16, Array<TileId>(256).fill('empty'));
+  await openCityPanel(page, 'Save');
+  const chooserEvent = page.waitForEvent('filechooser');
+  await page.getByRole('button', { name: /Open a saved JSON plan/ }).click();
+  await (await chooserEvent).setFiles({
+    name: 'large-neighborhood.json', mimeType: 'application/json', buffer: Buffer.from(serializePlan(large)),
+  });
+  await expect(page.locator('[data-city-export-status]')).toContainText('Opened');
+  await closeCityPanel(page);
+  await expect(page.getByLabel('Plot column').locator('option')).toHaveCount(16);
+  await expect(page.getByLabel('Plot row').locator('option')).toHaveCount(16);
+  const tile = page.locator('[data-city-cell="255"] polygon').first();
+  await tile.click();
+  await expect(page.locator('[data-city-map-selection]')).toHaveText('Selected: P16 · Empty plot');
+  await page.getByLabel('Ingredient', { exact: true }).selectOption('library');
+  await page.getByRole('button', { name: 'Place Library at P16', exact: true }).click();
+  await expect(page.locator('[data-city-cell="255"] > title')).toHaveText('P16 · Library');
+  expect(await page.evaluate(() => ({
+    width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight, scroll: window.scrollY,
+  }))).toEqual({ width: 320, height: 640, scroll: 0 });
+  await page.getByRole('button', { name: '↶ Undo', exact: true }).click();
+  await expect(page.locator('[data-city-cell="255"] > title')).toHaveText('P16 · Empty plot');
 });

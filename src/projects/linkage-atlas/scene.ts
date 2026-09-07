@@ -39,7 +39,7 @@ function fitView(width: number, height: number, model: SceneModel): PlotView {
     include({ x: d - c, y: -c });
     include({ x: d + c, y: c });
   }
-  const padding = width < 500 ? 43 : 58;
+  const padding = Math.min(width < 500 ? 43 : 58, width * .12, height * .2);
   const scale = Math.min((width - 2 * padding) / (maxX - minX), (height - 2 * padding) / (maxY - minY));
   return {
     x: width / 2 - (minX / 2 + maxX / 2) * scale,
@@ -220,9 +220,11 @@ export function createScene(host: HTMLElement) {
     draw,
     angleAt(clientX: number, clientY: number): number | null {
       if (destroyed) return null;
-      const bounds = svg.getBoundingClientRect();
-      const dx = clientX - bounds.left - view.x;
-      const dy = view.y - (clientY - bounds.top);
+      const matrix = svg.getScreenCTM();
+      if (!matrix) return null;
+      const point = new DOMPoint(clientX, clientY).matrixTransform(matrix.inverse());
+      const dx = point.x - view.x;
+      const dy = view.y - point.y;
       if (Math.hypot(dx, dy) < 3) return null;
       const angle = Math.atan2(dy, dx);
       return angle < 0 ? angle + 2 * Math.PI : angle;

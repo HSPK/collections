@@ -9,6 +9,8 @@ test.describe('Project covers', () => {
   for (const project of projects) {
     test(`Capture ${project.id}`, async ({ page }) => {
       test.skip(Boolean(project.preview && !project.preview.endsWith('.jpg')), 'This project supplies its own preview asset.');
+      const viewportHeight = project.category === 'read' ? 1160 : 900;
+      await page.setViewportSize({ width: 1322, height: viewportHeight });
       await page.emulateMedia({ reducedMotion: 'reduce' });
       await page.goto(`./projects/${project.id}/`);
       const surface = page.locator('#main-content > [data-stage]');
@@ -25,7 +27,7 @@ test.describe('Project covers', () => {
         type: 'jpeg',
         quality: 88,
         animations: 'disabled',
-        clip: { x: 0, y: top, width: 1322, height: Math.min(850, Math.max(400, bounds.height), 1160 - top) },
+        clip: { x: 0, y: top, width: 1322, height: Math.min(850, Math.max(400, bounds.height), viewportHeight - top) },
       });
     });
   }

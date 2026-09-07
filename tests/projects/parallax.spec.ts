@@ -222,6 +222,7 @@ test.describe('PARALLAX numerical model', () => {
 async function openStudio(page: Page) {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
+  await page.routeWebSocket(/^ws:\/\/127\.0\.0\.1:4173\/\?token=/, () => {});
   await page.goto('./projects/parallax/');
   await expect(page.locator('.project-parallax')).toBeVisible();
   await expect(page.locator('[data-point3d]')).toHaveAttribute('data-xyz', /^\[/);
@@ -230,16 +231,21 @@ async function openStudio(page: Page) {
 }
 async function xyz(page: Page): Promise<V3> { return JSON.parse((await page.locator('[data-point3d]').getAttribute('data-xyz'))!); }
 async function range(page: Page, selector: string, value: number) {
+  await page.getByRole('tab', { name: 'Rig', exact: true }).click();
   await page.locator(selector).fill(String(value));
   await page.locator(selector).dispatchEvent('change');
 }
 async function downloadExperiment(page: Page): Promise<Experiment> {
+  const alreadyOpen = await page.locator('#px-notebook').evaluate((element) => (element as HTMLDialogElement).open);
+  if (!alreadyOpen) await page.getByRole('button', { name: 'Notebook', exact: true }).click();
   const downloading = page.waitForEvent('download');
   await page.locator('[data-action="export-json"]').click();
   const download = await downloading;
   const path = await download.path();
   expect(path).not.toBeNull();
-  return JSON.parse(await readFile(path!, 'utf8'));
+  const experiment = JSON.parse(await readFile(path!, 'utf8'));
+  if (!alreadyOpen) await page.getByRole('button', { name: 'Close Field notebook', exact: true }).click();
+  return experiment;
 }
 
 test.describe('PARALLAX linked browser instrument', () => {
@@ -248,6 +254,7 @@ test.describe('PARALLAX linked browser instrument', () => {
     await page.setViewportSize({ width: 1440, height: 1080 });
     const errors = await openStudio(page);
     const original = await xyz(page);
+    await page.getByRole('tab', { name: 'Inspect', exact: true }).click();
     const originalY = Number(await page.locator('[data-pixel="b-y"]').inputValue());
     await page.locator('[data-pixel="b-y"]').fill(String(originalY + 20));
     await page.locator('[data-pixels] button[type="submit"]').click();
@@ -288,6 +295,7 @@ test.describe('PARALLAX linked browser instrument', () => {
     const differentViews = await page.locator('[data-camera-image]').evaluateAll((canvases) => canvases.map((canvas) => (canvas as HTMLCanvasElement).toDataURL()));
     expect(differentViews[0]).not.toBe(differentViews[1]);
     await page.locator('[data-action="reset"]').click();
+    await page.getByRole('tab', { name: 'Space', exact: true }).click();
     await page.locator('[data-reveal]').check();
     await expect(page.locator('[data-truth-error]')).toContainText('Euclidean error');
     await page.locator('[data-reveal]').uncheck();
@@ -303,12 +311,15 @@ test.describe('PARALLAX linked browser instrument', () => {
     await page.locator('[data-method="robust"]').click();
     const saved = await downloadExperiment(page);
     await page.locator('[data-action="reset"]').click();
+    await page.getByRole('button', { name: 'Notebook', exact: true }).click();
     await page.locator('.px-import summary').click();
     await page.locator('[data-import-text]').fill(JSON.stringify(saved));
     await page.locator('[data-action="import-json"]').click();
     await expect(page.locator('[data-status]')).toContainText('restored exactly');
     expect(await downloadExperiment(page)).toEqual(saved);
+    await page.getByRole('button', { name: 'Close Field notebook', exact: true }).click();
     await page.locator('[data-action="reset"]').click();
+    await page.getByRole('button', { name: 'Notebook', exact: true }).click();
     await page.locator('[data-import-file]').setInputFiles({ name: 'study.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(saved)) });
     await expect(page.locator('[data-status]')).toContainText('restored exactly');
     expect(await downloadExperiment(page)).toEqual(saved);
@@ -337,6 +348,7 @@ test.describe('PARALLAX linked browser instrument', () => {
       await expect(page.locator('[data-point3d]')).toHaveAttribute('data-xyz', /^\[/);
       expect(Number(await page.locator('.px-space-canvas').getAttribute('data-points'))).toBeGreaterThan(20);
     }
+    await page.getByRole('button', { name: 'Notebook', exact: true }).click();
     await page.locator('[data-action="fit-f"]').click();
     await expect(page.locator('[data-fit-status]')).toContainText('consensus inliers');
     await expect(page.locator('[data-image-overlay="a"] .px-estimated-line')).toHaveCount(1);
@@ -361,6 +373,7 @@ test.describe('PARALLAX linked browser instrument', () => {
     await expect(page.locator('[data-point-id]')).not.toHaveText(originalId!);
     await page.keyboard.press('ArrowLeft');
     await expect(page.locator('[data-point-id]')).toHaveText(originalId!);
+    await page.getByRole('tab', { name: 'View B', exact: true }).click();
     await page.locator('[data-action="edit-mode"]').click();
     const feature = page.locator(`[data-image-overlay="b"] [data-feature="${originalId}"]`);
     const bounds = await feature.locator('.px-feature-dot').boundingBox();

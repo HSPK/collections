@@ -203,7 +203,9 @@ test.describe('Glyph Garden on a narrow touch screen', () => {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await expect(site).toHaveAttribute('data-paused', 'true');
-    await site.locator('.gg-mechanics summary').click();
+    await site.getByRole('button', { name: 'Garden notes', exact: true }).click();
+    await expect(site.getByRole('dialog', { name: 'Garden notes', exact: true })).toBeVisible();
+    await expect(site.locator('.gg-mechanics')).toHaveAttribute('open', '');
     const dimensions = await page.evaluate(() => ({
       content: document.documentElement.scrollWidth,
       viewport: document.documentElement.clientWidth,
@@ -213,6 +215,50 @@ test.describe('Glyph Garden on a narrow touch screen', () => {
       const target = await button.boundingBox();
       expect(target!.width).toBeGreaterThanOrEqual(44);
       expect(target!.height).toBeGreaterThanOrEqual(44);
+    }
+  });
+
+  test('garden tools, field guide, and notes preserve a live resized viewport canvas', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const site = await openGarden(page);
+    const canvas = site.locator('canvas.gg-canvas');
+    for (const viewport of [
+      { width: 1440, height: 900 }, { width: 1280, height: 720 }, { width: 375, height: 812 },
+      { width: 320, height: 640 }, { width: 768, height: 480 },
+    ]) {
+      await page.setViewportSize(viewport);
+      await expect(site).toHaveAttribute('data-workspace', 'true');
+      await expect.poll(async () => (await site.boundingBox())!.height).toBe(viewport.height);
+      await expect.poll(async () => canvas.evaluate(element => Math.abs(
+        (element as HTMLCanvasElement).width - element.getBoundingClientRect().width * Math.min(devicePixelRatio, 2),
+      ))).toBeLessThanOrEqual(1);
+      const bounds = (await canvas.boundingBox())!;
+      expect(bounds.height).toBeGreaterThan(140);
+      for (const control of await site.locator('[data-bed], [data-command], [data-undo], [data-reset], [data-pause]').all()) {
+        const box = (await control.boundingBox())!;
+        expect(box.y).toBeGreaterThanOrEqual(0);
+        expect(box.y + box.height).toBeLessThanOrEqual(viewport.height);
+        expect(await control.evaluate(element => parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(14);
+      }
+      await site.getByRole('tab', { name: 'Field guide', exact: true }).click();
+      await expect(site.getByRole('heading', { name: 'Three little spells', exact: true })).toBeVisible();
+      expect((await canvas.boundingBox())!).toEqual(bounds);
+      const before = Number(await site.locator('[data-plant-count]').textContent());
+      await draw(page, canvas, circle());
+      await expect(site.getByRole('tab', { name: 'Grow', exact: true })).toHaveAttribute('aria-selected', 'true');
+      await expect(site.locator('[data-plant-count]')).toHaveText(String(before + 1));
+      await expect(site.locator('[data-feedback-title]')).toHaveText('Circle understood.');
+      await site.getByRole('button', { name: 'Garden notes', exact: true }).click();
+      await expect(site.getByRole('dialog', { name: 'Garden notes', exact: true })).toBeVisible();
+      await page.keyboard.press('Control+z');
+      await expect(site.locator('[data-plant-count]')).toHaveText(String(before + 1));
+      await page.keyboard.press('Escape');
+      await expect(site.getByRole('button', { name: 'Garden notes', exact: true })).toBeFocused();
+      expect(await page.evaluate(() => ({
+        width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight,
+        x: window.scrollX, y: window.scrollY,
+      }))).toEqual({ ...viewport, x: 0, y: 0 });
+      await page.screenshot({ path: test.info().outputPath(`garden-workspace-${viewport.width}x${viewport.height}.png`), fullPage: true });
     }
   });
 });

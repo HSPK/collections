@@ -1,6 +1,7 @@
 import './style.css';
 import { createLoop } from '../../core/loop';
 import { createProjectPage, escapeMarkup, query } from '../../core/page';
+import { createWorkspaceDialog, createWorkspaceTabs } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { ELECTRICAL_SPEED, FIELD_NOTES, PHASES, PRESETS, SPEEDS } from './data';
 import { advanceElectricalAngle, normalizeDegrees, sampleMotor, signedDegrees } from './engine';
@@ -40,6 +41,7 @@ function observation(frame: MotorFrame, settings: MotorInput): string {
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'motor-field-lab');
   const { root } = page;
+  root.dataset.workspace = 'true';
   const id = `motor-field-${++mountNumber}`;
   const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
   let disposed = false;
@@ -57,6 +59,11 @@ export function mount(context: ProjectContext): ProjectInstance {
           <p class="mfl-model-stamp">PERMANENT MAGNET<br><strong>1 pole pair · normalized</strong></p>
         </div>
       </header>
+      <nav class="mfl-workspace-tools" aria-label="Workbench panels">
+        <button type="button" data-mfl-instruments-open>Parameters</button>
+        <button type="button" data-mfl-experiments-open>Experiments</button>
+        <button type="button" data-mfl-notebook-open>Notebook</button>
+      </nav>
 
       <section class="mfl-workbench" aria-label="Interactive motor field workbench" data-project-preview>
         <div class="mfl-visual">
@@ -201,6 +208,70 @@ export function mount(context: ProjectContext): ProjectInstance {
       <footer class="mfl-boundary"><span>MODEL BOUNDARY</span><p>A schematic teaching instrument, not a motor design or wiring guide. Enabled phases are independent ideal current sources; switching one off does not redistribute the others. No circuit connections, voltages, losses, saturation, back EMF, inertia, or load dynamics are modeled.</p><span class="mfl-footer-code">MFL—01 / END OF NOTES</span></footer>
     </div>
   `;
+
+  const instruments = query<HTMLElement>(root, '.mfl-instruments');
+  const instrumentsTabs = document.createElement('div');
+  const instrumentsBody = document.createElement('div');
+  instrumentsBody.className = 'mfl-dock-body';
+  const parameterPane = document.createElement('div');
+  parameterPane.append(query(root, '.mfl-channels'), query(root, '.mfl-rotor-controls'));
+  const readoutPane = document.createElement('div');
+  readoutPane.append(query(root, '.mfl-readout'));
+  const tracesPane = document.createElement('div');
+  tracesPane.append(query(root, '.mfl-scope'));
+  instrumentsBody.append(parameterPane, readoutPane, tracesPane);
+  instruments.append(instrumentsTabs, instrumentsBody);
+  const tabs = createWorkspaceTabs(page, {
+    id: `${id}-instruments`, label: 'Motor instruments', host: instrumentsTabs,
+    panes: [
+      { id: 'parameters', label: 'Parameters', panel: parameterPane },
+      { id: 'readout', label: 'Readout', panel: readoutPane },
+      { id: 'traces', label: 'Traces', panel: tracesPane },
+    ],
+  });
+  const instrumentsDialog = createWorkspaceDialog(page, {
+    id: `${id}-parameters`, title: 'Motor measurements and controls',
+    content: [instruments], className: 'mfl-instruments-dialog',
+  });
+  const instrumentsTrigger = query<HTMLButtonElement>(root, '[data-mfl-instruments-open]');
+  const compact = window.matchMedia('(max-width: 700px), (max-height: 540px)');
+  function placeInstruments() {
+    const focused = instruments.contains(document.activeElement);
+    instrumentsDialog.close();
+    if (compact.matches) {
+      query(instrumentsDialog.dialog, '.workspace-dialog-content').append(instruments);
+      instrumentsTrigger.setAttribute('aria-haspopup', 'dialog');
+      instrumentsTrigger.setAttribute('aria-controls', instrumentsDialog.dialog.id);
+    } else {
+      query(root, '.mfl-workbench').append(instruments);
+      instrumentsTrigger.removeAttribute('aria-haspopup');
+      instrumentsTrigger.removeAttribute('aria-controls');
+    }
+    if (focused) instrumentsTrigger.focus({ preventScroll: true });
+  }
+  instrumentsTrigger.addEventListener('click', () => {
+    tabs.select('parameters');
+    if (compact.matches) instrumentsDialog.open();
+    else query<HTMLButtonElement>(instrumentsTabs, 'button').focus({ preventScroll: true });
+  }, { signal: page.signal });
+  compact.addEventListener('change', placeInstruments, { signal: page.signal });
+  placeInstruments();
+  createWorkspaceDialog(page, {
+    id: `${id}-experiments`, title: 'Bench experiments',
+    content: [query(root, '.mfl-experiments')],
+    triggers: [query(root, '[data-mfl-experiments-open]')],
+  });
+  const notebook = query<HTMLElement>(root, '.mfl-notebook');
+  query(notebook, '.mfl-notes').prepend(
+    query(root, '.mfl-heading-row > div > p'),
+    query(root, '.mfl-model-stamp'),
+    query(root, '.mfl-motor-figure figcaption > p'),
+  );
+  createWorkspaceDialog(page, {
+    id: `${id}-notebook`, title: 'Field notebook & equations',
+    content: [notebook, query(root, '.mfl-boundary')],
+    triggers: [query(root, '[data-mfl-notebook-open]')],
+  });
 
   const motor = createMotorScene(query(root, '[data-mfl-motor]'), id);
   const waveforms = createWaveformScene(query(root, '[data-mfl-waveform]'), id);

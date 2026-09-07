@@ -49,7 +49,7 @@ export function createCavernEngine(
   orbit.minAzimuthAngle = -0.48;
   orbit.maxAzimuthAngle = 0.48;
   orbit.enableZoom = false;
-  stage.canvas.style.touchAction = 'pan-y';
+  stage.canvas.style.touchAction = 'none';
   stage.canvas.setAttribute('aria-keyshortcuts', 'ArrowLeft ArrowRight ArrowUp ArrowDown + - Space');
 
   function publishCamera() {

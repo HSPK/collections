@@ -5,6 +5,18 @@ construction tool or structural-code certification service.
 
 ## The instrument
 
+The `100dvh` workbench allocates one live structural preview and a bounded
+**Structure / Edit / Results** dock. The preview remains visible beside the dock
+on desktop and above it on phones; long controls and ledgers scroll internally,
+not the document. Structure contains camera, deformation, color and reaction
+controls; Edit contains all exact inputs and the builder; Results contains
+metrics, pin/restore, member ledger, reactions and elevation. **Files & notes**
+opens JSON/CSV/SVG interchange and all assumptions in a themed native dialog.
+Tabs support arrows, Home/End and a single tab stop; Escape closes the dialog.
+The live-status strip reserves bottom-right collection-menu clearance, with
+64 px of local text inset. Keep dock controls above this occupied strip rather
+than placing editing or result actions under floating navigation.
+
 The workbench edits one `Structure`: nodes, axial members, global translational
 restraints, solid circular sections, linear elastic materials, and point-load
 cases. The solver, picking geometry, load glyphs, deformed endpoints, inspector,
@@ -178,7 +190,7 @@ reset behavior intact when an imported file happens to use a preset's name.
 | `scene.ts` | Y-up Three.js renderer, point/member picking, single-pointer plane edits |
 | `ui.ts` | Semantic controls, result ledgers, comparison, assumptions |
 | `index.ts` | Atomic edits, selection, history, import cancellation, lifecycle |
-| `style.css` | Scoped drafting studio and Structure/Edit/Results mobile panes |
+| `style.css` | Scoped drafting studio, viewport allocation and Structure/Edit/Results dock |
 
 To add a **solid circular section**, add `{id, name, area}` in square metres
 to a preset or imported model. The renderer and solver discover it through the
@@ -213,15 +225,22 @@ Root attributes `data-analysis`, `data-revision`, `data-selected` and
 `data-ready` describe the currently displayed state. Canvas `data-frames`
 and `data-pointer-owner` support real lifecycle and gesture assertions.
 
-On small screens use `[data-lp-pane="structure|edit|results"]`; the model
-persists when switching panes. Exact coordinates, selectors, camera keys,
+At every size use `[data-lp-pane="structure|edit|results"]`; these remain the
+existing integration selectors and now expose semantic tab/tabpanel behavior
+and `aria-selected`. Root `data-mobile-pane` remains the selected dock ID.
+The Structure preview itself remains live across all panes, while its tab owns
+the view controls. Wrapper tabpanels preserve the editor's native aside.
+The model persists when switching panes. Exact coordinates, selectors, camera keys,
 zoom/fit buttons, and step moves mean editing never requires dragging.
 
 The paused core render loop draws only on changes or resize, with no damping
 or autoplay even without reduced-motion. Teardown aborts listeners, cancels
 RAF and gestures, disconnects ResizeObserver, revokes download URLs, disposes
 all owned geometries/materials/render lists, and releases the WebGL context.
-Mount awaits the first rendered structural frame. All imports are relative;
+Mount awaits the first rendered structural frame. ResizeObserver ignores
+zero-size regions; hidden/zero-height hosts never render or produce a zero
+camera aspect. Fit can retain the last valid aspect until a host becomes visible.
+All imports are relative;
 there are no root-relative project assets, so nested `/collections/` hosting
 is supported by the existing collection page build.
 
@@ -230,7 +249,7 @@ is supported by the existing collection page build.
 Use the existing shared server; do not start a second server:
 
 ```sh
-SITE_URL=http://127.0.0.1:4173 npx playwright test tests/projects/loadpath.spec.ts tests/projects/loadpath-workflows.spec.ts tests/flagships.spec.ts --grep 'LOADPATH|Loadpath|loadpath: small-screen'
+SITE_URL=http://127.0.0.1:4173/ npm test -- tests/projects/loadpath.spec.ts tests/projects/loadpath-workflows.spec.ts --reporter=dot
 ```
 
 Numerical fixtures cover closed-form axial/serial bars, symmetric spatial
@@ -247,6 +266,12 @@ independent permutations. Real WebGL framebuffer comparisons exercise force
 colors, support reactions, deformation and rejected incomplete scene updates.
 Only real WebGL browser cases receive a 90-second budget. Traces are retained
 on failure by the existing Playwright configuration.
+
+Workspace workflows cover 1440×900, 1280×720, 375×812, 320×640 and 768×480:
+no document scrolling in any pane, live preview bounds, edit/view/undo, exact
+model exports, secondary reactions, reset and dialog focus restoration.
+Screenshots are retained in the configured Playwright output directory.
+Acquire the coordinator's browser lock when sharing the server/browser.
 
 The browser helper isolates only the development server's Vite HMR socket, so
 concurrent edits to other collection projects cannot reload a page mid-test.

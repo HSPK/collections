@@ -104,6 +104,7 @@ test('Attention Studio: real edits, numeric stages, challenge and keyboard contr
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('./projects/attention-studio/');
   const root = page.locator('.project-attention-studio');
+  const panel = (name: string) => root.getByRole('tab', { name, exact: true });
   await expect(root).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Attention Studio', exact: true })).toBeVisible();
   await expect(root.locator('.as-model-stamp')).toContainText('Hand-authored toy weights');
@@ -120,6 +121,7 @@ test('Attention Studio: real edits, numeric stages, challenge and keyboard contr
   const initialColor = await cell(0, 1).getAttribute('style');
   const initialOutput = await output.getAttribute('data-values');
   await embedding.fill('4');
+  await expect(embedding).toBeFocused();
   await expect(cell(0, 1)).not.toHaveAttribute('data-weight', initialWeight ?? '');
   await expect(cell(0, 1)).not.toHaveAttribute('style', initialColor ?? '');
   await expect(output).not.toHaveAttribute('data-values', initialOutput ?? '');
@@ -147,6 +149,7 @@ test('Attention Studio: real edits, numeric stages, challenge and keyboard contr
   await expect(embedding).toHaveAttribute('aria-invalid', 'true');
   await embedding.press('Escape');
   await expect(embedding).toHaveValue('4');
+  await panel('Calculation').click();
   await root.locator('[data-step="softmax"]').click();
   await expect(root).toHaveAttribute('data-pipeline-stage', 'softmax');
   await expect(root.locator('[data-stage-calculation]')).toContainText('1.000000000000');
@@ -185,7 +188,9 @@ test('Attention Studio: real edits, numeric stages, challenge and keyboard contr
   await expect(root).toHaveAttribute('data-causal', 'true');
   await expect(cell(0, 3)).toHaveAttribute('data-weight', '0');
 
+  await panel('Challenge').click();
   await page.getByRole('button', { name: 'Start routing challenge', exact: true }).click();
+  await expect(panel('Embeddings')).toHaveAttribute('aria-selected', 'true');
   await expect(embedding).toBeFocused();
   await expect(root).toHaveAttribute('data-challenge', 'true');
   await embedding.fill('4');
@@ -195,6 +200,7 @@ test('Attention Studio: real edits, numeric stages, challenge and keyboard contr
   await expect(root).toHaveAttribute('data-challenge-solved', 'false');
   await expect(root.locator('[data-challenge-status]')).toContainText('future key');
   await page.getByRole('button', { name: 'Reset preset', exact: true }).click();
+  await panel('Matrices').click();
   await root.locator('.as-ledger > summary').click();
   await expect(root.locator('[data-dot-matrix]')).toBeVisible();
   const dismiss = page.getByRole('button', { name: 'Dismiss message', exact: true });
@@ -215,6 +221,7 @@ test('Attention Studio: real edits, numeric stages, challenge and keyboard contr
       fontSize: Number.parseFloat(getComputedStyle(element).fontSize),
     })));
   expect(sizes.every((size) => size.height >= 44 && size.width >= 44 && size.fontSize >= 12)).toBe(true);
+  await panel('Embeddings').click();
   await embedding.focus();
   await embedding.press('ArrowUp');
   await expect(embedding).toHaveValue('2.5');
@@ -226,6 +233,7 @@ test('Attention Studio: real edits, numeric stages, challenge and keyboard contr
   await page.keyboard.press('Space');
   await expect(mask).toBeChecked();
   await expect(cell(0, 1)).toHaveAttribute('data-weight', '0');
+  await panel('Calculation').click();
   await root.locator('[data-step="mix"]').focus();
   await page.keyboard.press('Enter');
   await expect(root).toHaveAttribute('data-pipeline-stage', 'mix');

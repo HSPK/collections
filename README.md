@@ -54,6 +54,12 @@ eclipse or put it below the horizon. Keep an observation as JSON or a share link
 The overview's compressed distances and enlarged bodies never enter the
 true-angular Earth-sky calculations.
 
+The single-screen desk keeps the scene, transport, and draggable UTC axis
+together. **Now** samples device time; **Live** stays synchronized without
+accumulating frame-time drift. Explore hours, days, or years, open computed
+historical studies, and pan or zoom the offline Earth picker. Shared records
+restore a fixed observation in Manual, not a running clock.
+
 Helios uses the locally bundled
 [Astronomy Engine](https://github.com/cosinekitty/astronomy) rather than a hosted
 API or a scripted eclipse. Its [project notes](src/projects/helios/README.md)
@@ -61,6 +67,9 @@ describe frames, assumptions, extension points, and accuracy limits; the
 [third-party license](public/third-party/astronomy-engine-LICENSE.txt) is included
 with the site. Non-Earth cameras are orbital reference views, not calibrated
 surface observatories.
+The map and Earth texture share public-domain Natural Earth land geometry;
+[cartographic attribution and limits](public/helios/attribution.txt) are bundled
+with the data, with no remote map tiles or location tracking.
 
 ### Spatial systems
 
@@ -248,6 +257,10 @@ All project manifests use `format: "page"`.
   Its first load does not request Three.js or the astronomy engine.
 - Controls, labels, and body copy use readable sizes. Sites are designed
   for narrow screens and provide keyboard or touch alternatives.
+- Interactive sites use viewport-height workspaces: primary controls stay
+  with their live result, while secondary notes, logs, and settings open in
+  bounded panes or dialogs. Mobile docks and explicit views replace long
+  control-to-canvas scrolling. Reading websites keep normal document flow.
 - Motion respects the system preference where appropriate. The original
   art websites own their Play/Pause controls and keyboard behavior;
   the collection does not control their playback.

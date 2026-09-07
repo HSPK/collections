@@ -81,6 +81,24 @@ a warm-up animation. Changes to the media preference are listened to.
 Touch-friendly DOM magnet handles maintain legible N/S labels at narrow
 widths; their field coordinates still come from the same bed projection.
 
+## One-screen workspace
+
+The `data-workspace="true"` root occupies the dynamic viewport without masking
+document overflow. The field, A/B selection, angle, nudges, flip, play, and shake
+are always in the same workspace: a side instrument panel on wide screens and
+a compact lower dock on phones. Essential labels and pole markings are at least
+14px. The lower-right collection menu has a reserved control-free corner.
+Layout rules apply independently of the motion preference, including when that
+preference changes while the field is open.
+
+**Field notes** (`[data-notes]`, accessible name **Field notes and settings**)
+opens the native `#ml-notes-dialog`. It contains trace visibility, deterministic
+reset, the complete live status, keyboard guidance, pole key, and field theory.
+Only the dialog scrolls; Close or Escape restores trigger focus. Opening it
+does not replace or resize the field. Live viewport resizing refits both the
+filing canvas and DOM magnet handles through `projectionFor`, without moving
+the underlying magnets or advancing paused time.
+
 ## Rendering and lifecycle
 
 Drawing is throttled to about 30 Hz during playback. Paper grain, drafting
@@ -104,4 +122,8 @@ SITE_URL=http://127.0.0.1:4173 npm test -- tests/series/magnetic-loom.spec.ts
 
 Tests cover finite/symmetric field behavior, polarity superposition,
 bounded settling and zero-delta invariance, genuine browser drag/rotation/
-flip/shake/pause, and a 375px reduced-motion layout.
+flip/shake/pause, and a 375px reduced-motion layout. The five workspace sizes
+(1440×900, 1280×720, 375×812, 320×640, 768×480) also test zero document scrolling,
+uncovered primary controls, real field-pixel changes, trace/reset and notes
+dialog workflows, focus return, and stable magnet coordinates through resize.
+Each viewport has a screenshot in Playwright's per-test output directory.

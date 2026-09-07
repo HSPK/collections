@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import type { Locator } from '@playwright/test';
 import { returnToCollection } from '../helpers/navigation';
+import { expectWorkspaceViewport, visibleControlProblems } from '../helpers/workspace';
 import {
   CYCLE_SECONDS, MOORING, TIDE_MAX, TIDE_MIN, waterHeight, waterSurfaceHeight,
 } from '../../src/projects/tidal-observatory/data';
@@ -159,5 +160,41 @@ test.describe('Tidal Observatory', () => {
     expect(after.buffers).toBeGreaterThan(before.buffers);
     expect(after.programs).toBeGreaterThan(before.programs);
     expect(errors).toEqual([]);
+  });
+
+  test('the station resizes within the viewport and its notebook preserves live water readings', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('./projects/tidal-observatory/');
+    const root = page.locator('.project-tidal-observatory');
+    const scene = page.locator('[data-tidal-scene]');
+    await expect(scene).toHaveAttribute('data-ready', 'true');
+    const heldTime = await scene.getAttribute('data-scene-time');
+    for (const [width, height] of [[1440, 900], [1280, 720], [375, 812], [320, 640], [768, 480]]) {
+      await page.setViewportSize({ width, height });
+      await expect(root).toHaveAttribute('data-workspace', 'true');
+      await expect.poll(() => root.evaluate(element => Math.round(element.getBoundingClientRect().height))).toBe(height);
+      await page.getByRole('slider', { name: 'Tide', exact: true }).focus();
+      await page.keyboard.press('End');
+      await expect(scene).toHaveAttribute('data-tide', String(TIDE_MAX));
+      await expect(scene).toHaveAttribute('data-scene-time', heldTime!);
+      const sample = await observation(scene);
+      expect(sample.water).toBeCloseTo(sample.vessel, 6);
+      await page.getByRole('button', { name: 'Station notebook', exact: true }).click();
+      const dialog = page.getByRole('dialog', { name: 'Station notebook', exact: true });
+      await expect(dialog).toBeVisible();
+      await expect(dialog.locator('[data-tidal-water-output]')).toHaveText(await dialog.locator('[data-tidal-float-output]').textContent() ?? '');
+      await dialog.getByRole('button', { name: 'Close Station notebook', exact: true }).click();
+      const layout = await root.evaluate(element => ({
+        height: document.documentElement.scrollHeight,
+        width: document.documentElement.scrollWidth,
+        sceneHeight: element.querySelector('[data-tidal-scene]')!.getBoundingClientRect().height,
+      }));
+      expect(layout.height).toBeLessThanOrEqual(height);
+      expect(layout.width).toBeLessThanOrEqual(width);
+      expect(layout.sceneHeight).toBeGreaterThan(170);
+      await expectWorkspaceViewport(page, width, height);
+      expect(await visibleControlProblems(root)).toEqual([]);
+      await page.screenshot({ path: test.info().outputPath(`tidal-observatory-${width}x${height}.png`) });
+    }
   });
 });

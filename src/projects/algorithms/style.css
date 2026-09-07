@@ -1678,3 +1678,119 @@
     transition: none;
   }
 }
+
+.project-algorithms[data-workspace] {
+  --workspace-paper: var(--at-paper);
+  height: 100dvh;
+  min-height: 0;
+  line-height: 1.4;
+}
+.project-algorithms .at-shell { height: 100%; display: flex; flex-direction: column; gap: 10px; padding: 8px 18px 12px; }
+.project-algorithms .at-site-header { flex: 0 0 auto; padding: 0 0 8px; gap: 8px; }
+.project-algorithms .at-site-header h1 { font-size: 32px; margin: 0; }
+.project-algorithms .at-site-header nav { gap: 6px; flex-wrap: nowrap; }
+.project-algorithms .at-workbench { display: flex; flex: 1; min-height: 0; padding: 0; border: 0; }
+.project-algorithms .at-live-grid { flex: 1; min-height: 0; height: 100%; grid-template-columns: minmax(0,1.5fr) minmax(310px,1fr); grid-template-rows: minmax(0,1fr); grid-template-areas: 'stage inspector'; align-items: stretch; gap: 12px; }
+.project-algorithms .at-inspector { grid-area: inspector; min-width: 0; min-height: 0; display: flex; flex-direction: column; border: 1px solid var(--at-line); background: #101d30; padding: 6px; }
+.project-algorithms .workspace-tabs > button { color: var(--at-ink); background: #172943; border: 1px solid var(--at-line); }
+.project-algorithms .at-inspector-pane { flex: 1 1 0; min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-gutter: stable; padding: 8px 8px 56px; }
+.project-algorithms .at-stage { display: flex; flex-direction: column; min-height: 0; }
+.project-algorithms .at-stage-top { flex-shrink: 0; padding: 5px 8px; gap: 8px; }
+.project-algorithms .at-stage-body { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; padding: 10px; }
+.project-algorithms .at-stage-caption { flex-shrink: 0; margin: 0; gap: 2px 8px; }
+.project-algorithms .at-slots { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; grid-auto-rows: minmax(140px,1fr); gap: 5px; scrollbar-gutter: stable; }
+.project-algorithms .at-slot { display: flex; flex-direction: column; padding: 4px 2px; }
+.project-algorithms .at-slot-rail { flex: 1; min-height: 20px; height: auto; margin: 2px 0; }
+.project-algorithms .at-slot-value { font-size: 18px; line-height: 1.2; }
+.project-algorithms .at-slot-state { margin-top: 0; }
+.project-algorithms :is(.at-method-name-short,.at-state-short) { display: none; }
+.project-algorithms .at-legend { flex-shrink: 0; margin: 0; gap: 4px 12px; }
+.project-algorithms .at-array-readout { flex-shrink: 0; margin: 0; gap: 3px 8px; }
+.project-algorithms .at-counters { flex-shrink: 0; margin: 0; padding: 4px 0; }
+.project-algorithms .at-counters dd { flex-direction: row; flex-wrap: wrap; gap: 0 8px; align-items: baseline; }
+.project-algorithms .at-counters output { font-size: 25px; line-height: 1.2; }
+.project-algorithms .at-transport { flex-shrink: 0; padding: 5px 10px; }
+.project-algorithms .at-scrubber { height: 32px; margin: 0; }
+.project-algorithms .at-scrub-label { gap: 2px 8px; }
+.project-algorithms .at-setup { border: 0; padding: 0; }
+.project-algorithms .at-methods { margin-bottom: 12px; }
+.project-algorithms .at-method-content { min-height: 40px; padding-block: 7px; }
+.project-algorithms .at-method input { top: 11px; }
+.project-algorithms .at-input-grid { gap: 12px; }
+.project-algorithms .at-input-grid label { margin-bottom: 5px; }
+.project-algorithms .at-method-grid { gap: 5px; }
+.project-algorithms .at-input-row { flex-wrap: wrap; gap: 5px; }
+.project-algorithms .at-input-row input { flex-basis: 100%; }
+.project-algorithms .at-step-details { padding: 0 2px; }
+.project-algorithms .at-step-deltas { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; font-size: 14px; margin-bottom: 12px; color: var(--at-blue); }
+.project-algorithms .at-operation { margin: 0; padding: 0; border: 0; }
+.project-algorithms .at-operation h3 { font-size: 23px; }
+.project-algorithms .at-operation > p:last-child { line-height: 1.5; }
+.project-algorithms .at-tempo-row { margin-top: 16px; }
+.project-algorithms .at-script { display: flex; padding: 0; border: 0; }
+.project-algorithms .at-script h3 { font-size: 25px; }
+.project-algorithms .at-script-facts { margin: 12px 0; }
+.project-algorithms .at-code li { padding: 7px 4px; }
+.project-algorithms .at-scorecard { padding: 0; border: 0; }
+.project-algorithms .at-scorecard .at-section-heading { display: block; margin-bottom: 12px; }
+.project-algorithms .at-scorecard h2 { font-size: 25px; }
+.project-algorithms .at-scorecard .at-section-heading > p { font-size: 14px; margin-top: 8px; }
+.project-algorithms .at-scorecard :is(th,td) { padding: 8px 4px; }
+.project-algorithms .at-on-stage { display: block; margin: 3px 0 0; }
+.project-algorithms :is(.at-eyebrow,.at-help,.at-input-note,.at-input-error,.at-slot-index,.at-origin,.at-slot-state,.at-stage-caption,.at-stage-status,.at-frame-readout,.at-restart,.at-legend,.at-array-readout > span,.at-focus-readout > span,.at-counters dt,.at-counters dd > span,.at-scrub-label,.at-scrub-label > span:last-child,.at-region-note,.at-counter-note,.at-tempo-row label,.at-tempo-row select,.at-motion-note,.at-code code,.at-line-number,.at-script-facts span,.at-script-note,.at-script-footer p,.at-chart-note,.at-on-stage,.at-scorecard th,.at-register p) { font-size: 14px; }
+.project-algorithms .workspace-dialog :is(.at-field-notes,.at-counting-room) { padding: 20px 0; }
+.project-algorithms .workspace-dialog .at-section-heading { display: block; }
+.project-algorithms .workspace-dialog .at-section-heading > p { margin-top: 10px; }
+@media (max-width: 650px) {
+  .project-algorithms .at-shell { padding: 6px 10px 10px; gap: 6px; }
+  .project-algorithms .at-site-header { flex-wrap: wrap; padding-bottom: 4px; gap: 5px; }
+  .project-algorithms .at-site-header h1 { font-size: 29px; width: 100%; }
+  .project-algorithms .at-site-header nav { width: 100%; }
+  .project-algorithms .at-site-header nav button { flex: 1; min-height: 36px; padding: 5px 8px; }
+  .project-algorithms .at-live-grid { grid-template-columns: minmax(0,1fr); grid-template-rows: minmax(0,1fr) minmax(0,180px); grid-template-areas: 'stage' 'inspector'; gap: 6px; }
+  .project-algorithms .at-stage-top { grid-template-columns: minmax(0,1fr) auto auto; padding: 4px 6px; gap: 4px; }
+  .project-algorithms .at-stage-top .at-transport-buttons { gap: 5px; }
+  .project-algorithms .at-stage-top .at-transport-buttons .at-button { min-height: 36px; padding: 5px 8px; }
+  .project-algorithms .at-restart { min-height: 26px; padding: 2px 0; }
+  .project-algorithms .at-stage-body { padding: 5px; gap: 4px; }
+  .project-algorithms .at-stage-caption { font-size: 14px; }
+  .project-algorithms .at-slots { grid-template-columns: repeat(var(--at-small-slot-count),minmax(0,1fr)); }
+  .project-algorithms .at-counters > div { padding-left: 5px; }
+  .project-algorithms .at-counters output { font-size: 21px; }
+  .project-algorithms .at-counters dd > span { font-size: 14px; }
+  .project-algorithms .at-transport { padding: 3px 6px; }
+  .project-algorithms .at-scrub-label > span:last-child { font-size: 14px; }
+  .project-algorithms .at-inspector { padding: 4px; }
+  .project-algorithms .at-inspector-pane { padding: 6px 6px 56px; }
+  .project-algorithms .at-method-grid { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 4px; }
+  .project-algorithms .at-method-content { padding: 6px 3px 6px 23px; min-height: 36px; justify-content: center; }
+  .project-algorithms .at-method input { left: 4px; top: 10px; width: 14px; height: 14px; }
+  .project-algorithms .at-method-top { display: block; }
+  .project-algorithms .at-method-top > span, .project-algorithms .at-method-name-full { display: none; }
+  .project-algorithms .at-method-top .at-method-name-short { display: block; font-size: 14px; letter-spacing: -.03em; }
+  .project-algorithms .at-methods { margin-bottom: 6px; }
+  .project-algorithms .at-methods legend { margin-bottom: 4px; }
+  .project-algorithms .at-array-form .at-input-row { flex-wrap: nowrap; padding-right: 56px; }
+  .project-algorithms .at-array-form .at-input-row input { flex: 1; min-width: 0; }
+  .project-algorithms .at-array-form .at-button { width: auto; padding-inline: 6px; }
+}
+@media (min-width: 651px) and (max-width: 950px) {
+  .project-algorithms .at-live-grid { grid-template-columns: minmax(0,1fr) 280px; gap: 8px; }
+  .project-algorithms .at-stage-top { grid-template-columns: minmax(0,1fr) auto auto; gap: 3px; }
+  .project-algorithms .at-stage-top .at-transport-buttons { grid-row: 2; grid-column: 1 / -1; justify-content: stretch; }
+  .project-algorithms .at-stage-top .at-transport-buttons .at-button { flex: 1; min-height: 36px; padding: 4px; }
+  .project-algorithms .at-restart { min-height: 28px; }
+  .project-algorithms .at-slots { grid-template-columns: repeat(var(--at-small-slot-count),minmax(0,1fr)); }
+}
+@media (max-width: 950px) {
+  .project-algorithms .at-slots { grid-auto-rows: minmax(62px,1fr); }
+  .project-algorithms .at-slot { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); grid-template-rows: 17px minmax(18px,1fr) 19px; gap: 1px; padding: 2px; }
+  .project-algorithms .at-slot.is-ordered { padding-bottom: 0; }
+  .project-algorithms .at-slot-index { grid-row: 1; grid-column: 1; line-height: 1.2; }
+  .project-algorithms .at-origin { grid-row: 1; grid-column: 2; line-height: 1.2; white-space: nowrap; }
+  .project-algorithms .at-slot-rail { grid-row: 2; grid-column: 1 / -1; min-height: 18px; margin: 0; }
+  .project-algorithms .at-slot-value { grid-row: 3; grid-column: 1; font-size: 16px; }
+  .project-algorithms .at-slot-state { grid-row: 3; grid-column: 2; line-height: 1.3; }
+  .project-algorithms .at-state-full { display: none; }
+  .project-algorithms .at-state-short { display: inline; }
+}

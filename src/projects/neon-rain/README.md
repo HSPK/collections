@@ -28,6 +28,20 @@ separated by 12 seconds agree. The phase slider pauses before scrubbing.
 Light power changes the real point lights, sign materials, window illumination
 and reflection intensity; it does not merely tint a CSS overlay.
 
+## Viewport workspace
+
+The `data-workspace="true"` root occupies exactly `100dvh`. The street takes the
+remaining grid space, with camera views, playback and all three sliders kept
+on-screen. Compact screens use a two-column console, not a scaled page.
+**Directory** opens the native **Directory & field notes** dialog for the six
+addresses, rain-count readout, control explanations and field notes. Escape or
+Close returns focus to the trigger. The status area reserves the floating
+collection menu's corner. All text and primary controls are at least 14 px.
+
+The scene never changes tab or gets reparented; the existing size observer
+updates camera projection and the real drawing buffer, including while paused.
+Tests exercise five viewport sizes and save screenshots in their run artifacts.
+
 ## Rendering and ownership
 
 Static primitives share geometries and are instanced by material. Signs,

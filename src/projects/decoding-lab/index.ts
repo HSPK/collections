@@ -5,15 +5,17 @@ import { CORPORA, PRESETS, PRESET_SEED } from './data';
 import type { Corpus } from './data';
 import { createSession, decode, MAX_SEED, MAX_STEPS, resetSession, rewindTo, runBatch } from './engine';
 import type { DecoderSettings, GenerationSession } from './engine';
-import { countTable, decimal, drawStrip, percent, probabilityTable } from './graphics';
+import { countTable, decimal, drawStrip, percent, probabilityOverview, probabilityTable } from './graphics';
 import { END, fitCounts, logitsFor, readableToken, START } from './model';
 import type { LogitSource } from './model';
 import { arrow, choiceMarkup, historyMarkup, outputMarkup, proofMarkup, siteMarkup } from './ui';
+import { createDecodingWorkspace } from './workspace';
 
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'decoding-lab');
   const { root, signal } = page;
   root.innerHTML = siteMarkup();
+  const inspector = createDecodingWorkspace(page);
 
   let corpus = CORPORA[0];
   let model = fitCounts(corpus.sentences);
@@ -75,7 +77,7 @@ export function mount(context: ProjectContext): ProjectInstance {
     element('[data-top-p-value]').textContent = decimal(settings.topP, 2);
     element('[data-policy-note]').textContent = greedy
       ? `${settings.temperature === 0 ? 'T = 0' : 'Greedy'}: first argmax wins with probability 1. Filters are bypassed and no random number is consumed.`
-      : 'Draw order: largest final probability first. Equal scores use the inventory order below.';
+      : 'Draw order: largest final probability first. Equal scores use the inventory order in Model.';
     for (const button of root.querySelectorAll<HTMLButtonElement>('[data-preset]')) {
       button.setAttribute('aria-pressed', String(button.dataset.preset === presetId));
     }
@@ -124,6 +126,8 @@ export function mount(context: ProjectContext): ProjectInstance {
     buttons.live.hidden = inspected === null;
     buttons.live.innerHTML = `${session.end ? 'Latest impression' : 'Return to live'} ${arrow}`;
     element('[data-chart-context]').textContent = readableToken(chartSource.context);
+    element('[data-workspace-context]').textContent = readableToken(chartSource.context);
+    element('[data-overview-label]').textContent = recorded ? `Recorded step ${recorded.number}` : 'Next-token probabilities';
     const sourceNote = chartSource.unseen
       ? 'Unseen context: all counts are zero. Smoothing gives a uniform base distribution.'
       : `${chartSource.total} observed transitions from this token. The model remembers only this last token.`;
@@ -132,6 +136,10 @@ export function mount(context: ProjectContext): ProjectInstance {
     element('[data-final-entropy]').textContent = decimal(distribution.entropy);
     element('[data-kept-count]').textContent = `${distribution.kept.length} / ${model.vocabulary.length}`;
     element('[data-distribution]').innerHTML = probabilityTable(model, distribution, recorded?.index ?? null);
+    const overview = element('[data-probability-overview]');
+    overview.innerHTML = probabilityOverview(model, distribution, recorded?.index ?? null);
+    overview.style.setProperty('--dl-token-count', String(model.vocabulary.length));
+    overview.setAttribute('aria-label', `${recorded ? `Recorded step ${recorded.number}` : 'Next-token'} probabilities given ${readableToken(chartSource.context)}. Gray: base; orange: final, both on a 0–100% scale. ${distribution.order.map(index => `${readableToken(model.vocabulary[index])}: ${percent(distribution.final[index])}`).join(', ')}. Exact values and filter reasons are in Distribution.`);
     element('[data-draw-strip]').innerHTML = drawStrip(model, distribution, recorded);
 
     element('[data-output]').innerHTML = outputMarkup(session);
@@ -244,12 +252,14 @@ export function mount(context: ProjectContext): ProjectInstance {
         proof = { session, corpus };
         element('[data-proof]').hidden = false;
         element('[data-proof-content]').innerHTML = proofMarkup(proof.session, proof.corpus);
+        inspector.select('experiments');
         announce('Run pinned with its own corpus, context, settings, and seed. Change a setting to compare a new run.');
         break;
       case 'clear-proof':
         proof = null;
         element('[data-proof]').hidden = true;
         element('[data-proof-content]').textContent = '';
+        if (!buttons.pin.disabled) inspector.select('history');
         (buttons.pin.disabled ? buttons.step : buttons.pin).focus({ preventScroll: true });
         announce('Pinned proof cleared. The live run is unchanged.');
         break;
@@ -263,7 +273,7 @@ export function mount(context: ProjectContext): ProjectInstance {
     else if (input === controls.topP) settings = { ...settings, topP: input.valueAsNumber };
     else return;
     presetId = null;
-    freshRun('Setting changed. The run is cleared and the seed restored; the distribution above is the new next step.');
+    freshRun('Setting changed. The run is cleared and the seed restored; the probability overview shows the new next step.');
   }, { signal });
 
   root.addEventListener('change', (event) => {
@@ -309,6 +319,6 @@ export function mount(context: ProjectContext): ProjectInstance {
   renderCorpus();
   renderControls();
   render();
-  announce('Ready. These are fitted bigram counts, not a neural LLM. Print a token, or inspect the complete corpus below.');
+  announce('Ready. These are fitted bigram counts, not a neural LLM. Print a token, or inspect the complete corpus in Model.');
   return { destroy: page.destroy, reset: resetRun };
 }

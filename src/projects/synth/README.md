@@ -9,8 +9,9 @@ Audio is created only after the visitor activates **Play**.
 
 - `index.ts`: page markup, transport controls, accessible pads, lifecycle listeners,
   explicit persistence, and JSON workflows. Exports `mount(ProjectContext)`.
-- `style.css`: styles scoped to `.project-synth`. The page has natural height; only
-  the wide pad table scrolls horizontally.
+- `style.css`: viewport-bounded styles scoped to `.project-synth`; the wide pad
+  editor scrolls horizontally, while long notebook and reference panes scroll
+  internally.
 - `types.ts`: shared pattern, track, and transport types.
 - `data.ts`: track descriptions, original starter patterns, cloning, strict
   validation, JSON parsing/serialization, and filename generation.
@@ -22,6 +23,17 @@ Audio is created only after the visitor activates **Play**.
 
 ## Controls
 
+The `data-workspace="true"` root fills the viewport without document scrolling.
+**Machine**, **Notebook**, and **Guide** are native keyboard-accessible tabs.
+The machine keeps all five rows, Play/Stop, tempo, and Clear pads together,
+including at 320 × 640 and 768 × 480. Pads retain their 44 px minimum targets and
+horizontal keyboard/swipe navigation; no steps or model limits are removed.
+**Sound settings** opens a native dialog for the starter, bass root, and master
+volume. Escape/Close returns focus to its trigger. Opening settings or another
+workspace pane never interrupts playback; switching away from the browser tab
+still stops it. Tab-list keys are scoped to tabs and do not capture editor keys.
+The floating collection menu remains available.
+
 The five rows are Kick, Snare, Hat, Bass, and Chime. A pressed/red pad triggers its
 voice at that subdivision. Four subdivisions make one beat, and sixteen make one
 4/4 bar. The tempo is an integer from **50–180 BPM**. There is deliberately no
@@ -31,7 +43,7 @@ swing control: every subdivision has equal duration.
   Play stays disabled during startup, but Stop remains available to cancel it.
 - Track-name buttons toggle mute (`aria-pressed="true"` means muted).
   Muting retires sounding voices and cancels scheduled future hits in that row.
-- **Bass root** selects MIDI notes 36–59 (C2–B3); bass pads repeat that root.
+- **Bass root**, in Sound settings, selects MIDI notes 36–59 (C2–B3); bass pads repeat that root.
   Chime's lower partial follows at +31 semitones.
 - **Master volume** is 0–100% of a deliberately capped gain, not an uncapped
   amplitude percentage. Factory peaks are conservative and a compressor follows
@@ -104,7 +116,10 @@ by a later import, pattern replacement, edit, or page destruction.
 validated result. Nothing is loaded automatically at mount. Storage denial,
 corruption, and quota failures are reported; JSON export remains available.
 **Show current JSON** fills the text field with the real current pattern for
-manual copying or editing. File export uses the shared `downloadText` helper.
+manual copying or editing. These controls, the pattern name, local save slot,
+import editor, and all original starters are in **Notebook**. File export uses
+the shared `downloadText` helper. Switching panes preserves edits and scroll
+positions; it neither saves nor loads a pattern.
 
 ## Scheduling and ownership
 
@@ -183,15 +198,22 @@ Owned tests are `tests/projects/synth.spec.ts`. They cover the pure schema, star
 isolation, JSON round trips, modern/legacy gain holding, browser editing and
 persistence, no autoplay, audio timing and retirement, asynchronous resume races,
 visibility/pagehide/exit, failure states, and the contained mobile keyboard grid.
+Workspace tests cover 1440 × 900, 1280 × 720, 375 × 812, 320 × 640, and 768 × 480,
+including internal reading/editor scroll, focus, and uninterrupted opted-in audio.
+Screenshots are stored in each test run's artifact directory.
 
 With the collection's existing Playwright setup:
 
 ```sh
-npx playwright test tests/projects/synth.spec.ts
+flock "$BROWSER_LOCK" npm test -- tests/projects/synth.spec.ts --reporter=dot
 ```
 
 To use an already-running server without Playwright starting one:
 
 ```sh
-SITE_URL=http://127.0.0.1:4173/ npx playwright test tests/projects/synth.spec.ts
+SITE_URL=http://127.0.0.1:4173/ flock "$BROWSER_LOCK" npm test -- tests/projects/synth.spec.ts --reporter=dot
 ```
+
+Set `BROWSER_LOCK` to the shared renderer-lock path supplied by your review
+session. Use that same exclusive lock for browser tests and screenshots when
+other reviewers share the renderer.

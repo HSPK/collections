@@ -7,12 +7,29 @@ A self-contained, two-dimensional linear algebra workbench. Its graph-paper draw
 - `index.ts` owns the project lifecycle, local state, number controls, results, challenge, and mode changes. It exports the collection's `mount(context): ProjectInstance` contract.
 - `engine.ts` contains DOM-free vector arithmetic, matrix transforms, determinant/numerical rank, projection, and real eigenspace analysis. Matrices are **row-major**: `A = [[a, b], [c, d]]`; the draggable columns are `(a, c)` and `(b, d)`.
 - `data.ts` holds transformation/projection presets, coordinate limits, reference links, and the original pavilion vertices. Add presets here without changing the engine or registry.
-- `diagram.ts` renders responsive SVG. Its base grid stays fixed; its finite input grid patch (−4…4), unit square, and every pavilion vertex follow the same matrix. Eigenlines are dashed guides, not vectors. SVG handles remain mounted during redraws so focus and pointer capture survive editing.
+- `diagram.ts` renders responsive SVG. Its base grid stays fixed; its finite input grid patch (−4…4), unit square, and every pavilion vertex follow the same matrix. Eigenlines are dashed guides, not vectors. SVG handles remain mounted during redraws so focus and pointer capture survive editing. Overlapping 44px touch regions are partitioned by nearest endpoint, so a nearby tip cannot intercept another tip's center after resizing. Exactly coincident endpoints retain their stacking order and their independent keyboard/number alternatives.
 - `view.ts` provides the semantic page markup, scoped input labels, and short field guide.
-- `style.css` is scoped to `.project-vector-playground`; layout reaches a single column before the inspector would squeeze the drawing.
+- `workspace.ts` organizes the existing controls and educational content into
+  Parameters, Readout, and Guide tabs using the shared lifecycle helper.
+- `style.css` is scoped to `.project-vector-playground`; a `100dvh` grid keeps
+  the drawing and live mathematical results above the compact mobile dock.
 - `manifest.json` registers order **51**. No shared navigation, catalog edits, or preview assets are required.
 
 ## Interaction and lifecycle
+
+Local dock spacing reserves the collection launcher's 64px corner, including
+safe-area insets. Mobile vector inputs sit above that corner; projection
+transfer and scrollable panes keep a right-side clearance rather than a footer.
+
+The workspace stays within the viewport, including narrow phones and short
+landscape windows. Parameters are beside the drawing on desktop and in the
+bottom dock on phones; the diagram and live results remain visible. Readout
+holds the eigen toggle, exact combinations, and projection explanations.
+Guide retains the legend, keyboard help, rank-one challenge, field notes,
+precision notes, and references. These dedicated panes can scroll internally.
+Tabs do not reset either lab. Enter/Space on a diagram handle opens Parameters
+and focuses its matching number; the challenge does the same for matrix d.
+Add inspector content in `workspace.ts` without replacing live input nodes.
 
 Drag either basis endpoint or edit all four matrix entries. The input vector can also be dragged or entered numerically. The other lab compares a source with a direction and can transfer its orthogonal projection matrix, plus source vector, into the matrix lab.
 

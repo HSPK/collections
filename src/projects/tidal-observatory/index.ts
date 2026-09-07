@@ -1,6 +1,7 @@
 import './style.css';
 import { createProjectPage, query } from '../../core/page';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
+import { createWorkspaceDialog } from '../../core/workspace';
 import {
   CYCLE_SECONDS, INITIAL_STATE, TIDE_MAX, TIDE_MIN, VIEWPOINTS, daylightName, signedMetres,
 } from './data';
@@ -10,6 +11,7 @@ import type { CoastalSnapshot } from './scene';
 
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'tidal-observatory');
+  page.root.dataset.workspace = 'true';
   page.root.setAttribute('aria-labelledby', 'tidal-title');
   page.root.innerHTML = `
     <header class="tidal-masthead">
@@ -69,7 +71,15 @@ export function mount(context: ProjectContext): ProjectInstance {
         <article><span class="tidal-note-number">III.</span><h2>Outside the almanac</h2><p>This place and its coordinates are imagined. These are playful chart-datum metres, not forecasts or navigation advice. Everything is drawn locally.</p></article>
       </div>
       <div class="tidal-sounding"><span><span class="tidal-sounding-dot" aria-hidden="true"></span>Live mooring observation</span><span>Water <output data-tidal-water-output>—</output></span><span>Vessel waterline <output data-tidal-float-output>—</output></span><span class="tidal-sounding-coordinate">E 3.35 · N 4.65 / local m</span></div>
-    </footer>`;
+    </footer>
+    <div class="tidal-workspace-actions"><button type="button" data-tidal-notes>Station notebook</button></div>`;
+
+  const notebook = query<HTMLElement>(page.root, '.tidal-notebook');
+  notebook.prepend(query<HTMLElement>(page.root, '#tidal-camera-help'));
+  createWorkspaceDialog(page, {
+    id: 'tidal-notebook-dialog', title: 'Station notebook', content: [notebook],
+    triggers: [query<HTMLElement>(page.root, '[data-tidal-notes]')],
+  });
 
   const host = query<HTMLElement>(page.root, '[data-tidal-host]');
   const workbench = query<HTMLElement>(page.root, '[data-tidal-scene]');

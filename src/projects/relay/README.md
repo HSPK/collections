@@ -468,12 +468,15 @@ source editing, assembly failures and injection-shaped input, actual ALU/RAM/vid
 effects, forward and reverse stepping, halt/fault recovery, breakpoints and resume,
 bounded runaway, the guide, file downloads and validated imports, keyboard scope,
 mobile panes, reduced motion, and responsive layouts from 320 to 1440 pixels.
+Workspace workflows assert document, body, and root scroll dimensions at
+1440×900, 1280×720, 375×812, 320×640, and 768×480. They exercise source input,
+video RAM, reverse, trace, and all resource dialogs without forced clicks.
 Screenshot cases capture both the initial machine and an executed STORE, plus
 mobile computer and screen views. Test artifacts belong to the runner's output
 directory, not this project.
 
 ```sh
-SITE_URL=http://127.0.0.1:4173 npx playwright test tests/projects/relay.spec.ts
+SITE_URL=http://127.0.0.1:4173/ npm test -- tests/projects/relay.spec.ts --reporter=dot
 ```
 
 ### Workbench surfaces
@@ -507,8 +510,24 @@ separate selector), `[data-relay-register="0"]` for R0,
 have explicit "Set/Remove breakpoint" accessible names. Source-gutter breakpoints
 are disabled for a dirty draft; ROM breakpoints still address the loaded program.
 
-On mobile, `[data-relay-pane="machine"|"source"|"output"]` buttons select the
-computer, editor, or screen. The machine pane alone owns ArrowRight (step),
+The root declares `data-workspace="true"` and occupies one viewport with no
+document scrolling or body overflow masking. At widths of 1000 pixels and above,
+Source and Computer remain alongside a bounded inspector with Screen, Memory,
+Trace, and Guide tabs. Editors, diagnostics, schematics on short screens, and
+inspector content own their scrolling; transport, clock, cycles, and the status
+console stay visible. Programs, Manual, and Files open native, bounded dialogs.
+Selecting a program closes its library before asking to replace unsaved work.
+These layout changes do not remount or reset the model.
+
+The bottom guide launch and guided actions leave local right-hand clearance for
+the floating menu. Memory and trace inspectors retain bottom scroll clearance;
+there is no additional blank footer.
+
+Below 1000 pixels, `[data-relay-pane="machine"|"source"|"output"|"memory"|"trace"|"guide"]`
+buttons directly select each pane. Inactive panes are inert, and arrow keys,
+Home, and End navigate the pane tabs. The phone Computer pane uses a readable
+live compact schematic; short landscape layouts place registers beside the
+diagram. The machine pane alone owns ArrowRight (step),
 ArrowLeft (back), and Space (run/pause); typing and navigation in form controls
 are never intercepted. The memory inspector's tab list supports arrows and
 Home/End. Run is optional even with reduced motion; highlights are held states,
@@ -516,8 +535,8 @@ not interpolated or pulsing decoration.
 
 The clock uses the collection's `createLoop`, starts paused, and stops when the
 document is hidden or `setPaused(true)` is called. It does not automatically
-resume. Destroy aborts UI listeners, cancels the RAF loop, closes the replacement
-dialog, and invalidates pending file reads. File-import errors leave the current
+resume. Destroy aborts UI listeners, cancels the RAF loop, closes all dialogs,
+and invalidates pending file reads. File-import errors leave the current
 CPU and draft intact. If the user edits or advances the machine during a file
 read, the import is explicitly cancelled instead of overwriting newer work.
 

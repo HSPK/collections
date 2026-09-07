@@ -1,5 +1,6 @@
 import './style.css';
 import { createProjectPage, escapeMarkup, query } from '../../core/page';
+import { createWorkspaceDialog } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { puzzles } from './data';
 import type { ClubPuzzle } from './data';
@@ -31,6 +32,7 @@ const demoLine = (cells: readonly number[], label: string) => `<div class="nc-de
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'nonogram');
   const { root, signal } = page;
+  root.dataset.workspace = 'true';
   const sessions = new Map<string, PuzzleSession>(puzzles.map((puzzle) => [puzzle.id, {
     game: createState(puzzle),
     focus: 0,
@@ -243,6 +245,98 @@ export function mount(context: ProjectContext): ProjectInstance {
   const resultTitle = query<HTMLElement>(root, '[data-result-title]');
   const progress = query<HTMLProgressElement>(root, '[data-progress]');
   const selectorButtons = [...root.querySelectorAll<HTMLButtonElement>('[data-puzzle]')];
+  const masthead = query<HTMLElement>(root, '.nc-masthead');
+  const hero = query<HTMLElement>(root, '.nc-hero');
+  const handbook = query<HTMLElement>(root, '.nc-handbook');
+  const figure = query<HTMLElement>(root, '.nc-board-figure');
+  const tools = query<HTMLElement>(root, '.nc-paint-tools');
+  const desk = query<HTMLElement>(root, '.nc-desk');
+  const heading = query<HTMLElement>(root, 'h1');
+  hero.prepend(query(root, '.nc-wordmark'), query(root, '.nc-edition'));
+  const navigation = document.createElement('nav');
+  navigation.className = 'nc-workspace-nav';
+  navigation.setAttribute('aria-label', 'Club panes');
+  navigation.innerHTML = '<button type="button" data-open-shelf>Puzzles & collection</button>';
+  navigation.append(query(root, '.nc-handbook-link'));
+  masthead.append(heading, navigation);
+  const notes = document.createElement('div');
+  notes.className = 'nc-play-notes';
+  notes.append(query(root, '[data-invitation]'), query(root, '.nc-paint-tools > p'),
+    query(root, '#nonogram-board-note'), query(root, '.nc-attempt-note'), query(root, '.nc-page-turn > span'));
+  handbook.prepend(notes);
+  const shelfDialog = createWorkspaceDialog(page, {
+    id: 'nc-collection-pane', title: 'Puzzles & collection',
+    content: [query(root, '.nc-shelf')], triggers: [query(root, '[data-open-shelf]')],
+  });
+  const handbookDialog = createWorkspaceDialog(page, {
+    id: 'nc-handbook-pane', title: 'The club handbook',
+    content: [hero, handbook, query(root, '.nc-footer')], triggers: [query(root, '.nc-handbook-link')],
+  });
+  query<HTMLAnchorElement>(root, '.nc-footer a').addEventListener('click', event => {
+    event.preventDefault();
+    handbookDialog.close();
+    focusBoard();
+  }, { signal });
+  const resetDialog = createWorkspaceDialog(page, {
+    id: 'nc-reset-pane', title: 'A fresh sheet?', content: [resetConfirm],
+  });
+  const resultDialog = createWorkspaceDialog(page, {
+    id: 'nc-result-pane', title: 'Picture found', content: [result],
+  });
+  const detail = document.createElement('p');
+  detail.className = 'nc-feedback-detail';
+  const feedbackDialog = createWorkspaceDialog(page, {
+    id: 'nc-feedback-pane', title: 'A little honest help', content: [detail],
+  });
+  const feedbackButton = document.createElement('button');
+  feedbackButton.type = 'button';
+  feedbackButton.className = 'nc-feedback-detail-button';
+  feedbackButton.textContent = 'Details';
+  feedbackButton.addEventListener('click', () => {
+    if (isComplete(currentPuzzle(), currentSession().game)) resultDialog.open();
+    else { detail.textContent = currentSession().message; feedbackDialog.open(); }
+  }, { signal });
+  feedbackBox.append(feedbackButton);
+  const focusButton = document.createElement('button');
+  focusButton.type = 'button';
+  focusButton.className = 'nc-focus-button';
+  focusButton.textContent = 'Focus board';
+  const focusHost = document.createElement('div');
+  focusHost.className = 'nc-focus-host';
+  const focusDialog = createWorkspaceDialog(page, {
+    id: 'nc-focus-pane', title: 'Focused play · pan to explore', content: [focusHost],
+    className: 'nc-focus-dialog',
+  });
+  tools.append(focusButton);
+  focusButton.addEventListener('click', () => {
+    if (focusDialog.dialog.open) { focusDialog.close(); return; }
+    focusHost.append(paper);
+    focusButton.textContent = 'Return to desk';
+    focusDialog.open();
+    sizeBoard();
+    focusBoard();
+  }, { signal });
+  focusDialog.dialog.addEventListener('close', () => {
+    desk.prepend(paper);
+    focusButton.textContent = 'Focus board';
+    sizeBoard();
+    focusButton.focus({ preventScroll: true });
+  }, { signal });
+  resetDialog.dialog.addEventListener('close', () => { resetConfirm.hidden = true; }, { signal });
+
+  function sizeBoard() {
+    const puzzle = currentPuzzle();
+    const clueHeight = Math.max(...puzzle.clues.columns.map(runs => Math.max(1, runs.length))) * 23 + 16;
+    const minimum = focusDialog.dialog.open ? 36 : 32;
+    const cell = Math.max(minimum, Math.min(46,
+      Math.floor((board.clientWidth - 64) / puzzle.width) - 3,
+      Math.floor((board.clientHeight - clueHeight) / puzzle.height) - 1));
+    board.style.setProperty('--nc-cell-size', `${cell}px`);
+    board.style.setProperty('--nc-board-width', `${64 + (cell + 3) * puzzle.width}px`);
+  }
+  const resizeObserver = new ResizeObserver(sizeBoard);
+  resizeObserver.observe(figure);
+  page.onCleanup(() => resizeObserver.disconnect());
 
   function setText(selector: string, value: string | number) {
     query<HTMLElement>(root, selector).textContent = String(value);
@@ -287,6 +381,9 @@ export function mount(context: ProjectContext): ProjectInstance {
     setText('[data-puzzle-level]', puzzle.level);
     setText('[data-puzzle-title]', puzzle.label);
     setText('[data-invitation]', puzzle.invitation);
+    board.scrollTop = 0;
+    board.scrollLeft = 0;
+    sizeBoard();
   }
 
   function renderShelf() {
@@ -380,8 +477,8 @@ export function mount(context: ProjectContext): ProjectInstance {
     }
     renderGame();
     if (isComplete(currentPuzzle(), session.game)) {
+      resultDialog.open();
       resultTitle.focus({ preventScroll: true });
-      result.scrollIntoView({ block: 'nearest', behavior: 'auto' });
     }
   }
 
@@ -402,10 +499,20 @@ export function mount(context: ProjectContext): ProjectInstance {
 
   function focusBoard() {
     cells[currentSession().focus]?.focus({ preventScroll: true });
-    board.scrollIntoView({ block: 'nearest', behavior: 'auto' });
+    const cell = cells[currentSession().focus];
+    if (cell) {
+      const bounds = cell.getBoundingClientRect();
+      const surface = board.getBoundingClientRect();
+      if (bounds.left < surface.left + 64) board.scrollLeft -= surface.left + 64 - bounds.left;
+      if (bounds.right > surface.right) board.scrollLeft += bounds.right - surface.right;
+      if (bounds.top < surface.top + 90) board.scrollTop -= surface.top + 90 - bounds.top;
+      if (bounds.bottom > surface.bottom) board.scrollTop += bounds.bottom - surface.bottom;
+    }
   }
 
   function selectPuzzle(index: number) {
+    shelfDialog.close();
+    resultDialog.close();
     selected = (index + puzzles.length) % puzzles.length;
     resetConfirm.hidden = true;
     makeBoard();
@@ -414,6 +521,8 @@ export function mount(context: ProjectContext): ProjectInstance {
   }
 
   function resetCurrent() {
+    resetDialog.close();
+    resultDialog.close();
     const session = currentSession();
     session.game = createState(currentPuzzle());
     session.focus = 0;
@@ -466,6 +575,8 @@ export function mount(context: ProjectContext): ProjectInstance {
           ? `Check: ${problems.join('; ')}. Highlighted with a dashed border. Unfilled squares are not counted as mistakes.`
           : `No contradictions in your marked squares. ${checked.remaining} picture ${checked.remaining === 1 ? 'square still needs' : 'squares still need'} ink; untouched squares are unfinished, not wrong.`,
         problems.length ? 'warning' : 'good');
+        detail.textContent = session.message;
+        feedbackDialog.open();
         break;
       }
       case 'hint': {
@@ -475,6 +586,10 @@ export function mount(context: ProjectContext): ProjectInstance {
         if (hint.index !== null) session.errors.delete(hint.index);
         resetConfirm.hidden = true;
         finishAction(hint.message, 'hint');
+        if (!isComplete(currentPuzzle(), session.game)) {
+          detail.textContent = session.message;
+          feedbackDialog.open();
+        }
         break;
       }
       case 'reset':
@@ -484,7 +599,8 @@ export function mount(context: ProjectContext): ProjectInstance {
           renderGame();
         } else {
           resetConfirm.hidden = false;
-          query<HTMLButtonElement>(root, '[data-action="cancel-reset"]').focus();
+          resetDialog.open();
+          query<HTMLButtonElement>(root, '[data-action="cancel-reset"]').focus({ preventScroll: true });
         }
         break;
       case 'confirm-reset':
@@ -492,6 +608,7 @@ export function mount(context: ProjectContext): ProjectInstance {
         resetCurrent();
         break;
       case 'cancel-reset':
+        resetDialog.close();
         resetConfirm.hidden = true;
         query<HTMLButtonElement>(root, '[data-action="reset"]').focus();
         break;
@@ -543,7 +660,7 @@ export function mount(context: ProjectContext): ProjectInstance {
     if (event.key in destinations) {
       event.preventDefault();
       currentSession().focus = destinations[event.key];
-      cells[currentSession().focus].focus();
+      focusBoard();
       return;
     }
     const key = event.key.toLowerCase();
@@ -559,8 +676,9 @@ export function mount(context: ProjectContext): ProjectInstance {
   root.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && !resetConfirm.hidden) {
       event.preventDefault();
+      resetDialog.close();
       resetConfirm.hidden = true;
-      query<HTMLButtonElement>(root, '[data-action="reset"]').focus();
+      query<HTMLButtonElement>(root, '[data-action="reset"]').focus({ preventScroll: true });
     }
   }, { signal });
 

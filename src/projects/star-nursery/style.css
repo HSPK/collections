@@ -895,3 +895,99 @@
     scroll-behavior: auto;
   }
 }
+
+.project-star-nursery[data-workspace] {
+  --workspace-paper: #11141d;
+  height: 100dvh;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 16px;
+  padding: 18px clamp(12px, 2.5vw, 40px);
+}
+.project-star-nursery[data-workspace] .sn-masthead {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 0 48px 0 0;
+}
+.project-star-nursery[data-workspace] h1 { font-size: clamp(30px, 3vw, 44px); }
+.project-star-nursery[data-workspace] .sn-explore {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid #847363;
+  border-radius: 3px;
+  background: #171921;
+  white-space: nowrap;
+}
+.project-star-nursery[data-workspace] .sn-workspace {
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr) 280px;
+}
+.project-star-nursery[data-workspace] .sn-observation { min-height: 0; }
+.project-star-nursery[data-workspace] .sn-view { flex: 1; min-height: 0; height: auto; }
+.project-star-nursery[data-workspace] .sn-view-caption {
+  justify-content: flex-end;
+  min-height: 44px;
+  padding: 0 16px;
+}
+.project-star-nursery[data-workspace] .sn-inspector {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 16px;
+}
+.project-star-nursery[data-workspace] .sn-shaping {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.project-star-nursery[data-workspace] .sn-shaping legend { float: none; margin-bottom: 16px; }
+.project-star-nursery[data-workspace] .sn-parameter + .sn-parameter { margin-top: 12px; }
+.project-star-nursery[data-workspace] .sn-wind-heading { margin-top: 0; }
+.project-star-nursery[data-workspace] .sn-playback { margin-top: 16px; }
+.project-star-nursery[data-workspace] .sn-status { min-height: 0; margin-top: 12px; line-height: 1.4; }
+.project-star-nursery[data-workspace] :is(
+  .sn-range-heading, .sn-range-heading output, .sn-text-button, .sn-play-button,
+  .sn-reseed-button, .sn-status, .sn-preset strong, .sn-preset small, .sn-start-over,
+  .sn-control-note, .sn-range-ends, .sn-motion-note, legend, #sn-view-help
+) { font-size: 14px; }
+.project-star-nursery[data-workspace] .workspace-dialog .sn-intro { text-align: left; margin-bottom: 18px; }
+.project-star-nursery[data-workspace] .workspace-dialog .sn-notes {
+  grid-template-columns: 1fr;
+  gap: 24px;
+  padding-block: 24px;
+}
+.project-star-nursery[data-workspace] .workspace-dialog .sn-start-over { margin-block: 16px; }
+.project-star-nursery[data-workspace] .workspace-dialog #sn-view-help { margin-block: 16px; }
+.project-star-nursery[data-workspace] .workspace-dialog .sn-range-ends { margin-top: 14px; }
+@media (max-width: 600px) {
+  .project-star-nursery[data-workspace] { gap: 10px; padding: 10px 10px max(10px, env(safe-area-inset-bottom)); }
+  .project-star-nursery[data-workspace] .sn-masthead { padding: 0; gap: 6px; }
+  .project-star-nursery[data-workspace] .sn-identity { gap: 8px; }
+  .project-star-nursery[data-workspace] .sn-mark { width: 22px; height: 22px; }
+  .project-star-nursery[data-workspace] .sn-eyebrow { font-size: 12px; letter-spacing: .04em; }
+  .project-star-nursery[data-workspace] .sn-explore { padding: 8px; font-size: 14px; }
+  .project-star-nursery[data-workspace] .sn-workspace {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+  .project-star-nursery[data-workspace] .sn-inspector { padding: 12px; }
+  .project-star-nursery[data-workspace] .sn-shaping { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .project-star-nursery[data-workspace] .sn-shaping legend { margin-bottom: 10px; }
+  .project-star-nursery[data-workspace] .sn-parameter + .sn-parameter { margin: 0; }
+  .project-star-nursery[data-workspace] .sn-range-heading { gap: 4px; }
+  .project-star-nursery[data-workspace] .sn-playback { margin-top: 4px; }
+  .project-star-nursery[data-workspace] .sn-status { margin-top: 8px; padding-right: 52px; }
+  .project-star-nursery[data-workspace] .sn-view-top { padding: 12px; }
+  .project-star-nursery[data-workspace] .sn-view-bottom { padding: 28px 12px 12px; }
+  .project-star-nursery[data-workspace] .sn-view-bottom p { font-size: 20px; }
+}
+@media (max-width: 350px) {
+  .project-star-nursery[data-workspace] .sn-mark { display: none; }
+  .project-star-nursery[data-workspace] h1 { font-size: 29px; }
+}
+@media (max-height: 540px) and (min-width: 601px) {
+  .project-star-nursery[data-workspace] { padding-block: 10px max(10px, env(safe-area-inset-bottom)); gap: 10px; }
+  .project-star-nursery[data-workspace] h1 { font-size: 30px; }
+}

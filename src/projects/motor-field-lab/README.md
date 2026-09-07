@@ -23,9 +23,34 @@ are needed.
   and the single `createLoop` lifecycle. `page.signal` owns event listeners;
   `page.onCleanup` cancels the loop and releases both SVG scenes. Returned
   playback/reset methods cannot act after destruction or context abort.
+  Workspace tabs/dialogs reuse `src/core/workspace.ts`; move existing content
+  nodes into new panes rather than rebuilding inputs or the simulation.
 - `style.css`: selectors are scoped to `.project-motor-field-lab`. Essential
-  diagram letters use 26–28 SVG units, remaining above 12 CSS pixels at 375px;
-  legends, scales, and longer labels are unscaled DOM text.
+  diagram letters retain a 14 CSS-pixel minimum through a scene-owned
+  `ResizeObserver`, disconnected on destruction. Legends, scales, and longer
+  labels are unscaled DOM text. The root is one viewport tall; shrinkable grid
+  tracks size the SVG, while instrument panes and dialogs scroll independently.
+
+## Workspace controls
+
+The compact transport and desktop inspector reserve a local 64px right-side
+gap plus the safe-area inset. The speed label stacks above its select to
+keep every transport target clear of the collection launcher.
+
+The air-gap view, electrical-angle scrubber, Play/Pause, step, Reset, and playback
+speed stay together. The adjacent instrument dock has **Parameters** (phase
+sources and rotor constraint), **Readout** (vectors and torque), and **Traces**
+tabs. Arrow keys, Home, and End navigate the tabs without resetting the model.
+At widths up to 700px or heights up to 540px, **Parameters** opens the same dock
+in a native dialog, one tap away from the simulation. Short landscape layouts
+place the diagram and transport side by side.
+
+**Experiments** opens every original preset and its live observation.
+**Notebook** opens the diagram conventions, field notes, exact equations, and
+model boundary. Close or Escape returns focus to the opener; opening a panel
+does not pause or restart playback. Dialog surfaces use the instrument's dark
+paper theme via `--workspace-paper`. Preserve named regions inside tab-panel
+wrappers, and attach new listeners to `page.signal`.
 
 ## Model contract
 

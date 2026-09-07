@@ -315,3 +315,107 @@
   .project-attention-studio .as-challenge h2 { font-size: 28px; }
   .project-attention-studio .as-notes { gap: 24px; margin-top: 26px; }
 }
+
+.project-attention-studio[data-workspace="true"] {
+  --workspace-paper: var(--as-paper);
+  height: 100dvh;
+  min-height: 0;
+}
+.project-attention-studio[data-workspace="true"] .as-shell {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 10px 16px 14px;
+}
+.project-attention-studio[data-workspace="true"] .as-masthead { padding: 0 0 8px; }
+.project-attention-studio[data-workspace="true"] h1 { font-size: 30px; }
+.project-attention-studio[data-workspace="true"] .as-workbench {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+  overflow: visible;
+  box-shadow: 0 3px 0 #e6dded;
+}
+.project-attention-studio[data-workspace="true"] .as-toolbar { padding: 5px 12px; border-radius: 12px 12px 0 0; }
+.project-attention-studio .as-workspace-content { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); min-height: 0; }
+.project-attention-studio .as-dock { display: grid; grid-template-rows: auto minmax(0, 1fr); min-height: 0; min-width: 0; border-left: 1px solid var(--as-line); }
+.project-attention-studio .as-dock .workspace-tabs { overflow-x: auto; padding: 4px; background: #eee6f7; }
+.project-attention-studio .as-dock .workspace-tabs > button { flex: 1 0 auto; min-height: 44px; padding: 6px 9px; }
+.project-attention-studio .as-dock-panels { min-width: 0; min-height: 0; display: grid; }
+.project-attention-studio .as-inspector-pane { position: relative; min-height: 0; min-width: 0; overflow: auto; overscroll-behavior: contain; scrollbar-gutter: stable; padding: 12px; }
+.project-attention-studio[data-workspace="true"] .as-map-panel { min-height: 0; display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto auto; padding: 12px; }
+.project-attention-studio[data-workspace="true"] .as-panel-title { flex-shrink: 0; }
+.project-attention-studio[data-workspace="true"] .as-heatmap { height: 100%; min-height: 0; margin: 0; }
+.project-attention-studio[data-workspace="true"] .as-cell { height: 100%; min-width: 0; min-height: 44px; font-size: 16px; }
+.project-attention-studio[data-workspace="true"] .as-map-footer { flex-wrap: wrap; gap: 4px 10px; padding-block: 5px; }
+.project-attention-studio[data-workspace="true"] .as-selection-bar { flex-wrap: wrap; flex-shrink: 0; padding: 6px 8px; gap: 2px 8px; margin-top: 4px; }
+.project-attention-studio[data-workspace="true"] .as-route-goal { margin-top: 4px; padding: 4px 8px; }
+.project-attention-studio[data-workspace="true"] .as-input-panel { padding: 0; border: 0; }
+.project-attention-studio[data-workspace="true"] .as-projections,
+.project-attention-studio[data-workspace="true"] .as-challenge,
+.project-attention-studio[data-workspace="true"] .as-notes { margin-top: 0; padding-top: 0; }
+.project-attention-studio[data-workspace="true"] .as-challenge { padding: 16px; grid-template-columns: 1fr; gap: 18px; }
+.project-attention-studio[data-workspace="true"] .as-pipeline { padding: 0; }
+.project-attention-studio[data-workspace="true"] .as-pipeline ol { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.project-attention-studio[data-workspace="true"] .as-pipeline li:nth-child(4) { border-left: 0; }
+.project-attention-studio[data-workspace="true"] .as-pipeline li:nth-child(n+4) { border-top: 1px solid var(--as-line); }
+.project-attention-studio[data-workspace="true"] .as-pipeline button { padding: 8px; }
+.project-attention-studio[data-workspace="true"] .as-trace-grid,
+.project-attention-studio[data-workspace="true"] .as-pair-grid { grid-template-columns: 1fr; padding: 16px 0; }
+.project-attention-studio[data-workspace="true"] .as-projection-grid,
+.project-attention-studio[data-workspace="true"] .as-ledger-grid,
+.project-attention-studio[data-workspace="true"] .as-notes { grid-template-columns: 1fr; }
+.project-attention-studio[data-workspace="true"] .as-model-stamp { display: flex; max-width: none; font-size: 14px; margin-bottom: 12px; }
+.project-attention-studio[data-workspace="true"] .as-stamp-dimensions,
+.project-attention-studio[data-workspace="true"] .as-intro { display: block; }
+.project-attention-studio[data-workspace="true"] .as-ledger summary { flex-wrap: wrap; }
+.project-attention-studio[data-workspace="true"] .as-ledger summary > span { display: block; }
+.project-attention-studio[data-workspace="true"] :is(.as-eyebrow, .as-model-stamp, .as-stamp-dimensions, .as-preset-field,
+  .as-mask-toggle, .as-math-tag small, .as-map-axis, .as-heatmap small, .as-row-select, .as-row-select small,
+  .as-cell small, .as-map-footer, .as-map-help, .as-input-table th, .as-input-help, .as-input-feedback,
+  .as-selection-weight, .as-step-number, .as-step-name, .as-step-symbol, .as-equation-line > span,
+  .as-output-dimensions, .as-mixture-key li, .as-pair-grid h3, .as-detail-caption, .as-rounding-note,
+  .as-section-heading > p, .as-projection-card header p, .as-matrix caption, .as-matrix th, .as-contributions,
+  .as-contributions caption, .as-ledger summary > span, .as-ledger > p, .as-challenge-target,
+  .as-challenge-control > p, .as-route-goal, .as-reference-equation, .as-equation-line > strong,
+  .as-ledger .as-matrix td) { font-size: 14px; }
+
+@media (max-width: 700px) {
+  .project-attention-studio[data-workspace="true"] .as-shell { padding: 6px; }
+  .project-attention-studio[data-workspace="true"] h1 { font-size: 26px; }
+  .project-attention-studio[data-workspace="true"] .as-masthead { padding-bottom: 5px; }
+  .project-attention-studio[data-workspace="true"] .as-toolbar { gap: 4px; padding: 4px; }
+  .project-attention-studio[data-workspace="true"] .as-preset-field select { font-size: 14px; }
+  .project-attention-studio .as-workspace-content { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1.65fr) minmax(0, 1fr); }
+  .project-attention-studio .as-dock { border-left: 0; border-top: 1px solid var(--as-line); }
+  .project-attention-studio[data-workspace="true"] .as-map-panel { padding: 5px 7px; }
+  .project-attention-studio[data-workspace="true"] .as-panel-title { margin-bottom: 2px; }
+  .project-attention-studio[data-workspace="true"] .as-panel-title h2 { font-size: 21px; }
+  .project-attention-studio[data-workspace="true"] .as-math-tag { font-size: 22px; }
+  .project-attention-studio[data-workspace="true"] .as-math-tag small { padding: 1px 3px; }
+  .project-attention-studio[data-workspace="true"] .as-map-axis { flex-wrap: wrap; gap: 0 8px; line-height: 1.2; }
+  .project-attention-studio[data-workspace="true"] .as-heatmap { border-spacing: 2px; }
+  .project-attention-studio[data-workspace="true"] .as-heatmap thead th { height: 22px; font-size: 14px; }
+  .project-attention-studio[data-workspace="true"] .as-heatmap thead small { display: inline; margin-left: 2px; font-size: 14px; }
+  .project-attention-studio[data-workspace="true"] .as-cell { font-size: 14px; }
+  .project-attention-studio[data-workspace="true"] .as-map-footer { line-height: 1.2; padding-block: 2px; }
+  .project-attention-studio[data-workspace="true"] .as-color-key i { width: 24px; }
+  .project-attention-studio[data-workspace="true"] .as-selection-bar { min-height: 0; line-height: 1.25; padding: 3px 5px; font-size: 14px; }
+  .project-attention-studio[data-workspace="true"] .as-inspector-pane { padding: 9px; }
+}
+@media (min-width: 701px) and (max-height: 540px) {
+  .project-attention-studio[data-workspace="true"] .as-map-panel { padding: 5px 7px; }
+  .project-attention-studio[data-workspace="true"] .as-panel-title { margin-bottom: 2px; }
+  .project-attention-studio[data-workspace="true"] .as-panel-title h2 { font-size: 21px; }
+  .project-attention-studio[data-workspace="true"] .as-math-tag { flex-direction: row; font-size: 22px; }
+  .project-attention-studio[data-workspace="true"] .as-math-tag small { padding: 1px 3px; }
+  .project-attention-studio[data-workspace="true"] .as-map-axis { flex-wrap: wrap; gap: 0 8px; line-height: 1.2; }
+  .project-attention-studio[data-workspace="true"] .as-heatmap { border-spacing: 2px; }
+  .project-attention-studio[data-workspace="true"] .as-heatmap thead th { height: 22px; }
+  .project-attention-studio[data-workspace="true"] .as-map-footer { line-height: 1.2; padding-block: 2px; }
+  .project-attention-studio[data-workspace="true"] .as-color-key i { width: 24px; }
+  .project-attention-studio[data-workspace="true"] .as-selection-bar { min-height: 0; line-height: 1.25; padding: 3px 5px; font-size: 14px; }
+}
+.project-attention-studio[data-workspace="true"] .as-inspector-pane { padding-inline-end: calc(64px + env(safe-area-inset-right, 0px)); }

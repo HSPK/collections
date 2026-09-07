@@ -1,5 +1,6 @@
 import './style.css';
 import { createProjectPage, escapeMarkup, query } from '../../core/page';
+import { createWorkspaceDialog } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { DICTIONARY, PUZZLES, WORDS } from './data';
 import {
@@ -29,6 +30,7 @@ function tileMarkup(word: string, goal: string): string {
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'word-circuit');
   const { root, signal } = page;
+  root.dataset.workspace = 'true';
   let selectedIndex = 0;
   let state = createGame(routes[selectedIndex]);
 
@@ -47,9 +49,10 @@ export function mount(context: ProjectContext): ProjectInstance {
           <p class="wc-intro">Four letters. One change at a time. Find the words that make the connection.</p>
         </div>
         <nav class="wc-nav" aria-label="Word Circuit sections">
-          <a href="#word-circuit-routes">Choose a route ${arrow}</a>
-          <a href="#word-circuit-guide">How to play <span aria-hidden="true">?</span></a>
+          <button type="button" data-open-routes>Choose a route ${arrow}</button>
+          <button type="button" data-open-guide>How to play <span aria-hidden="true">?</span></button>
           <button type="button" data-action="dictionary">Browse dictionary <span aria-hidden="true">A–Z</span></button>
+          <button type="button" data-action="log" class="wc-log-toggle">Route log</button>
         </nav>
       </header>
 
@@ -209,6 +212,58 @@ export function mount(context: ProjectContext): ProjectInstance {
   const nextFilter = query<HTMLInputElement>(root, '[data-next-filter]');
   const dictionaryList = query<HTMLUListElement>(root, '[data-dictionary-list]');
   const cards = [...root.querySelectorAll<HTMLButtonElement>('[data-puzzle-id]')];
+  const guide = query<HTMLElement>(root, '.wc-guide');
+  const introduction = document.createElement('div');
+  introduction.className = 'wc-play-notes';
+  introduction.append(query(root, '.wc-title-group > .wc-eyebrow'), query(root, '.wc-intro'),
+    query(root, '.wc-paper-tag'), query(root, '.wc-description'), query(root, '.wc-circuit figcaption'),
+    query(root, '[data-word-help]'), query(root, '.wc-hint-area > .wc-small'),
+    ...root.querySelectorAll<HTMLElement>('.wc-terminal-label > strong'));
+  const routesDialog = createWorkspaceDialog(page, {
+    id: 'wc-routes-pane', title: 'Choose a route', content: [query(root, '.wc-routes-section')],
+    triggers: [query(root, '[data-open-routes]')],
+  });
+  createWorkspaceDialog(page, {
+    id: 'wc-guide-pane', title: 'How to play', content: [introduction, guide, query(root, '.wc-footer')],
+    triggers: [query(root, '[data-open-guide]')],
+  });
+  const dictionaryDialog = createWorkspaceDialog(page, {
+    id: 'wc-dictionary-pane', title: 'Browse dictionary', content: [query(root, '.wc-dictionary-section')],
+  });
+  const resultActions = document.createElement('div');
+  resultActions.className = 'wc-result-actions';
+  resultActions.innerHTML = '<button type="button" data-action="log">Review route log</button><button type="button" data-action="reset">Start again</button><button type="button" data-action="next">Try next connection</button>';
+  completion.append(resultActions);
+  const completionDialog = createWorkspaceDialog(page, {
+    id: 'wc-completion-pane', title: 'Connection complete', content: [completion],
+  });
+  const hintDialog = createWorkspaceDialog(page, {
+    id: 'wc-hint-pane', title: 'Next-word hint', content: [hintReveal],
+  });
+  const errorMessage = document.createElement('p');
+  errorMessage.className = 'wc-error-detail';
+  const errorDialog = createWorkspaceDialog(page, {
+    id: 'wc-error-pane', title: 'Check your connection', content: [errorMessage],
+  });
+  const routePanel = query<HTMLElement>(root, '.wc-route-panel');
+  const workbench = query<HTMLElement>(root, '.wc-workbench');
+  const logDialog = createWorkspaceDialog(page, {
+    id: 'wc-log-pane', title: 'Your route log', content: [routePanel],
+  });
+  const wideScreen = matchMedia('(min-width: 1121px)');
+  function placeLog() {
+    const focused = routePanel.contains(document.activeElement) ? document.activeElement as HTMLElement : null;
+    if (wideScreen.matches) {
+      logDialog.close();
+      workbench.append(routePanel);
+    } else {
+      query(logDialog.dialog, '.workspace-dialog-content').append(routePanel);
+      if (focused) logDialog.open();
+    }
+    focused?.focus({ preventScroll: true });
+  }
+  wideScreen.addEventListener('change', placeLog, { signal });
+  placeLog();
 
   function text(selector: string, value: string) {
     query<HTMLElement>(root, selector).textContent = value;
@@ -217,6 +272,11 @@ export function mount(context: ProjectContext): ProjectInstance {
   function announce(message: string, kind: 'neutral' | 'error' | 'success' = 'neutral') {
     feedback.textContent = message;
     feedback.dataset.kind = kind;
+    feedback.scrollTop = 0;
+    if (kind === 'error') {
+      errorMessage.textContent = message;
+      errorDialog.open();
+    }
   }
 
   function clearHint() {
@@ -310,7 +370,12 @@ export function mount(context: ProjectContext): ProjectInstance {
   }
 
   function focusEntry() {
-    input.focus();
+    dictionaryDialog.close();
+    routesDialog.close();
+    logDialog.close();
+    completionDialog.close();
+    if (isSolved(state)) query<HTMLElement>(root, '[data-action="reset"]').focus({ preventScroll: true });
+    else input.focus({ preventScroll: true });
   }
 
   function openDictionary(onlyNext: boolean) {
@@ -318,7 +383,9 @@ export function mount(context: ProjectContext): ProjectInstance {
     search.value = '';
     dictionary.open = true;
     renderDictionary();
-    search.focus();
+    logDialog.close();
+    dictionaryDialog.open();
+    search.focus({ preventScroll: true });
   }
 
   function choosePuzzle(index: number) {
@@ -354,7 +421,6 @@ export function mount(context: ProjectContext): ProjectInstance {
     if (!result.validation.ok) {
       input.setAttribute('aria-invalid', 'true');
       announce(result.validation.message, 'error');
-      focusEntry();
       input.select();
       return;
     }
@@ -365,6 +431,7 @@ export function mount(context: ProjectContext): ProjectInstance {
     render(true);
     if (isSolved(state)) {
       announce(`Circuit connected! ${state.start} to ${state.goal} in ${movesLabel(moveCount(state))}, with ${hintsLabel(state.hintsUsed)} shown.`, 'success');
+      completionDialog.open();
       query<HTMLElement>(root, '#wc-complete-title').focus({ preventScroll: true });
     } else {
       const slot = result.validation.changedIndex;
@@ -401,6 +468,13 @@ export function mount(context: ProjectContext): ProjectInstance {
       return;
     }
     switch (target.dataset.action) {
+      case 'log':
+        completionDialog.close();
+        if (wideScreen.matches) {
+          routePanel.tabIndex = -1;
+          routePanel.focus({ preventScroll: true });
+        } else logDialog.open();
+        break;
       case 'dictionary': openDictionary(false); break;
       case 'neighbours': openDictionary(true); break;
       case 'backtrack': rewind(); break;
@@ -431,6 +505,7 @@ export function mount(context: ProjectContext): ProjectInstance {
           hintReveal.hidden = false;
           hintReveal.textContent = explanation;
           announce(`${explanation} ${hint.alreadyRevealed ? 'This hint was already counted.' : 'One next-word hint counted.'}`);
+          hintDialog.open();
         }
         break;
       }

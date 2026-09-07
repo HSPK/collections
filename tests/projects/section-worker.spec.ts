@@ -11,6 +11,7 @@ test('Section surfaces a blocked worker and recovers without losing its construc
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.routeWebSocket(url => url.searchParams.has('token'), socket => { socket.onMessage(() => {}); });
   await page.goto('./projects/section/');
   const root = page.locator('.project-section');
   await expect(root).toHaveAttribute('data-ready', 'true');

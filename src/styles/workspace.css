@@ -1,0 +1,85 @@
+.project-app .workspace-status {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.project-app .workspace-tabs {
+  display: flex;
+  flex-shrink: 0;
+  gap: 4px;
+  min-width: 0;
+}
+.project-app .workspace-tabs > button {
+  flex: 1;
+  min-width: 0;
+  min-height: 36px;
+  padding: 7px 10px;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.25;
+  cursor: pointer;
+}
+.project-app .workspace-tabs > button[aria-selected="true"] {
+  font-weight: 600;
+  box-shadow: inset 0 -2px currentColor;
+}
+.project-app .workspace-pane[hidden] { display: none !important; }
+.project-app .workspace-pane[data-workspace-inactive] {
+  visibility: hidden;
+  pointer-events: none;
+}
+.project-app .workspace-dialog {
+  box-sizing: border-box;
+  width: min(860px, calc(100vw - 28px));
+  max-width: calc(100vw - 28px);
+  max-height: calc(100dvh - 28px);
+  margin: auto;
+  padding: 0;
+  color: inherit;
+  background: var(--workspace-paper, var(--paper, Canvas));
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+}
+.project-app .workspace-dialog::backdrop { background: #10182099; }
+.project-app .workspace-dialog-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  padding: 14px 18px;
+  background: inherit;
+  border-bottom: 1px solid currentColor;
+}
+.project-app .workspace-dialog-heading > h2 { margin: 0; font: inherit; font-size: 20px; }
+.project-app .workspace-dialog-heading > button {
+  flex-shrink: 0;
+  min-height: 40px;
+  padding: 7px 12px;
+  font: inherit;
+  font-size: 14px;
+  color: inherit;
+  background: transparent;
+  border: 1px solid currentColor;
+  cursor: pointer;
+}
+.project-app .workspace-dialog-content { min-width: 0; padding: 18px; }
+.project-app .workspace-dialog-content > :first-child { margin-top: 0; }
+@media print {
+  .project-app .workspace-tabs { display: none; }
+}

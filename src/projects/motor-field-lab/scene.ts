@@ -101,6 +101,15 @@ export function createMotorScene(host: HTMLElement, id: string) {
     <circle cx="300" cy="300" r="5" fill="#bacbc6"/>
   `;
   host.append(svg);
+  const labelObserver = new ResizeObserver(() => {
+    const bounds = svg.getBoundingClientRect();
+    const size = Math.min(bounds.width, bounds.height);
+    if (size <= 0) return;
+    for (const label of svg.querySelectorAll<SVGTextElement>('text')) {
+      label.style.fontSize = `${Math.max(label.classList.contains('mfl-svg-magnet') ? 28 : 26, 14.1 * 600 / size)}px`;
+    }
+  });
+  labelObserver.observe(svg);
 
   const description = query<SVGDescElement>(svg, 'desc');
   const result = query<SVGLineElement>(svg, '[data-mfl-resultant]');
@@ -152,7 +161,7 @@ export function createMotorScene(host: HTMLElement, id: string) {
       });
       description.textContent = `A, B, C axes: 0, 120, 240 degrees, each with opposite coil faces. Electrical command ${frame.electricalAngle.toFixed(1)} degrees. Currents ${frame.currents.map((value) => value.toFixed(3)).join(', ')}. Resultant magnitude ${frame.field.magnitude.toFixed(3)}, direction ${frame.field.angle === null ? 'undefined: zero field' : `${frame.field.angle.toFixed(1)} degrees counterclockwise from right`}. Rotor mechanical angle ${frame.rotorMechanicalAngle.toFixed(1)} degrees. Normalized torque ${frame.torque.toFixed(3)}; positive is counterclockwise.`;
     },
-    destroy() { svg.remove(); },
+    destroy() { labelObserver.disconnect(); svg.remove(); },
   };
 }
 

@@ -1,5 +1,6 @@
 import './style.css';
 import { createProjectPage, escapeMarkup, query } from '../../core/page';
+import { createWorkspaceDialog, createWorkspaceTabs } from '../../core/workspace';
 import { spatialExperiment } from '../../core/spatial';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { DEFAULT_INTENSITY, DEFAULT_MIST, MINERALS, VIEWS, getCavernView, getMineral } from './data';
@@ -8,6 +9,7 @@ import { createCavernEngine, type CavernEngine, type CavernState } from './engin
 
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'crystal-cavern');
+  page.root.dataset.workspace = 'true';
   page.root.setAttribute('aria-labelledby', 'cavern-title');
   page.root.innerHTML = `
     <header class="cavern-masthead">
@@ -81,8 +83,45 @@ export function mount(context: ProjectContext): ProjectInstance {
     <footer class="cavern-footer"><span>039 / AN EXERCISE IN LOOKING CLOSER</span><p>Water reflections are a local, stylized light study—not a physical simulation.</p><span data-cavern-status role="status" aria-live="polite">Explore slowly. Sound is not required.</span></footer>
   `;
 
-  const environment = query<HTMLElement>(page.root, '[data-cavern-scene]');
   const consoleElement = query<HTMLElement>(page.root, '.cavern-console');
+  const tabs = document.createElement('div');
+  const views = document.createElement('div');
+  const light = document.createElement('div');
+  const atmosphere = document.createElement('div');
+  const caption = query<HTMLElement>(page.root, '.cavern-caption');
+  views.append(
+    query<HTMLElement>(page.root, '.cavern-vantages'),
+    query<HTMLElement>(page.root, '[data-view-caption]'),
+  );
+  light.append(
+    query<HTMLElement>(page.root, '.cavern-light-settings'),
+    query<HTMLElement>(page.root, '.cavern-reading'),
+  );
+  caption.prepend(query<HTMLElement>(page.root, '.cavern-transport'));
+  atmosphere.append(query<HTMLElement>(page.root, '.cavern-time-settings'));
+  const consoleTitle = query<HTMLElement>(page.root, '.cavern-console-title');
+  consoleElement.append(tabs, views, light, atmosphere);
+  createWorkspaceTabs(page, {
+    id: 'cavern-instruments', label: 'Chamber instruments', host: tabs,
+    panes: [
+      { id: 'views', label: 'Views', panel: views },
+      { id: 'light', label: 'Light', panel: light },
+      { id: 'atmosphere', label: 'Atmosphere', panel: atmosphere },
+    ],
+  });
+  const fieldbook = document.createElement('button');
+  fieldbook.type = 'button';
+  fieldbook.textContent = 'Fieldbook';
+  caption.append(fieldbook);
+  const footer = query<HTMLElement>(page.root, '.cavern-footer');
+  const statusLine = query<HTMLElement>(page.root, '[data-cavern-status]');
+  page.root.append(statusLine);
+  createWorkspaceDialog(page, {
+    id: 'cavern-fieldbook-dialog', title: 'Cavern fieldbook', triggers: [fieldbook],
+    content: [consoleTitle, query<HTMLElement>(page.root, '.cavern-fieldbook'), footer],
+  });
+
+  const environment = query<HTMLElement>(page.root, '[data-cavern-scene]');
   const play = query<HTMLButtonElement>(page.root, '[data-cavern-play]');
   const palette = query<HTMLSelectElement>(page.root, '#cavern-mineral');
   const intensity = query<HTMLInputElement>(page.root, '#cavern-intensity');

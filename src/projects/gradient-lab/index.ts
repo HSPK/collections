@@ -10,10 +10,12 @@ import {
 } from './engine';
 import type { Method, Point } from './engine';
 import { createInterface, formatNumber } from './ui';
+import { createGradientWorkspace } from './workspace';
 
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'gradient-lab');
   const ui = createInterface(page.root);
+  const workspace = createGradientWorkspace(page);
   const landscape = createLandscape(ui.mapHost, page.signal);
   const history = createLossHistory(ui.lossHost, page.signal);
   const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -190,6 +192,7 @@ export function mount(context: ProjectContext): ProjectInstance {
       challengeNote = challenge.observation;
       ui.challengeButtons.forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
       resetRun(`${challenge.title} loaded, paused at t = 0. ${challenge.observation}`);
+      workspace.closeExperiments();
     }, listenerOptions);
   });
 

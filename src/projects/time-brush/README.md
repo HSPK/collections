@@ -72,6 +72,26 @@ reflow to the new layout rather than turning patches into object attachments.
 
 ## Interaction, accessibility, and cleanup
 
+The root is a `data-workspace="true"` viewport-height workbench, not a scrolling
+document. Flex/grid allocation gives the canvas the remaining real space.
+Modes, playback, undo/clear/reset, and the live field remain visible. The local
+**Brush**, **Clock**, and **Discover** tabs use `core/workspace.ts` with separate
+tabpanel wrappers; they never replace the nested groups or clock labels.
+Brush contains diameter and aim/stamp controls. Clock contains the object
+selector, aim-at-object control, and both readouts. Discover contains all three
+experiments, brush instructions, and the expandable explanation. An experiment
+opens Clock so its actual result is inspectable. Only dock content and the
+bounded polite status area scroll; mobile keeps a compact field above the dock.
+The collection menu remains floating beside the existing live status row.
+That row and the shell padding reserve its full 64 px corner, keeping the
+entire rightmost nudge button and the scrollable dock clear, not just their
+centres. This space carries feedback rather than adding an empty footer.
+
+Tab changes finish an in-progress stroke and request a paused redraw without
+resetting clocks. Resize still uses the measured canvas dimensions for rendering
+and pointer coordinates. Short fields omit decorative canvas captions rather
+than shrinking their type; UI and rendered text are at least 14 px.
+
 - Mouse, pen, and single-finger touch paint. Captured strokes interpolate stamps
   at 38% of the radius, and are one Undo group.
 - The field is keyboard-focusable: arrows move a visible reticle, Shift+arrows
@@ -103,9 +123,13 @@ the existing normalized field metric when adding a responsive layout.
 Focused checks live in `tests/series/time-brush.spec.ts`:
 
 ```sh
-npx --no-install playwright test tests/series/time-brush.spec.ts
+SITE_URL=http://127.0.0.1:4173/ npm test -- tests/series/time-brush.spec.ts --reporter=dot
 ```
 
 They cover exact freeze and negative clocks, field bounds/layering, retained
 stroke limits, paused painting, keyboard input, pointer cancellation, lifecycle,
-and the narrow touch layout. No full-repository build is needed for this site.
+and the narrow touch layout. A resize test covers 1440×900, 1280×720, 375×812,
+320×640, and 768×480, checks document bounds and canvas backing dimensions, and
+writes viewport screenshots to the configured test-artifact directory.
+Use the shared browser lock when coordinating with other project suites.
+No full-repository build is needed for this site.

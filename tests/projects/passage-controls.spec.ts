@@ -28,6 +28,7 @@ test('Passage rewind returns both the walker and its linked plan to the starting
   const root = page.locator('.project-passage');
   await expect(root).toHaveAttribute('data-ready', 'true');
   await expect(root).toHaveAttribute('data-route-status', 'found');
+  await page.locator('[data-passage-pane="route"]').click();
   await page.locator('[data-passage-scrub]').focus();
   await page.keyboard.press('End');
   await expect(root).toHaveAttribute('data-walk-kind', 'arrive');

@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { writeFile } from 'node:fs/promises';
 import { BACKGROUND, PATCH_COUNT, SCENES, TILE_SIZE } from '../../src/projects/patchwork-vision/data';
 import { cosine, extractFeatures, maskedSoftmax, matchImage, normalize, parseDescriptor, rasterizePatch } from '../../src/projects/patchwork-vision/engine';
 import type { Descriptor, Patch } from '../../src/projects/patchwork-vision/types';
@@ -83,6 +84,68 @@ test('masked attention normalizes, rejects invalid inputs, and cannot invent pos
   expect(focused.entropy).toBeLessThan(uniform.entropy);
 });
 
+test('patchwork-vision: native vocabulary disclosure hides closed controls and applies real edits', async ({ page }, info) => {
+  await page.goto('./projects/patchwork-vision/');
+  const root = page.locator('.project-patchwork-vision');
+  const details = root.locator('.pw-vocabulary');
+  const color = root.locator('[data-text-color]');
+  const shape = root.locator('[data-text-shape]');
+  await expect(color).toHaveCount(1);
+  await expect(shape).toHaveCount(1);
+  for (const size of [{ width: 1440, height: 900 }, { width: 320, height: 640 }]) {
+    await page.setViewportSize(size);
+    await root.getByRole('button', { name: 'red circle', exact: true }).click();
+    await expect(details).not.toHaveAttribute('open');
+    await expect(color).toBeHidden();
+    await expect(shape).toBeHidden();
+    const closed = await color.evaluate(control => ({
+      closed: control.closest('details')?.open === false,
+      rendered: control.checkVisibility(),
+      rect: control.getBoundingClientRect().toJSON(),
+    }));
+    expect(closed.closed).toBe(true);
+    expect(closed.rendered).toBe(false);
+    await details.locator('summary').click();
+    await expect(color).toBeVisible();
+    await expect(color).toHaveAccessibleName('Descriptor color');
+    await expect(shape).toHaveAccessibleName('Descriptor shape');
+    const pickers: { id: string; hitId: string | null; hitTag: string | null; pointerTarget: string | null; nativeOpen: boolean }[] = [];
+    for (const picker of [color, shape]) {
+      await picker.scrollIntoViewIfNeeded();
+      const hit = await picker.evaluate(control => {
+        const box = control.getBoundingClientRect();
+        const target = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
+        control.addEventListener('pointerdown', event => {
+          if (event.target instanceof Element) control.setAttribute('data-pointer-target', event.target.id);
+        }, { once: true });
+        return { id: control.id, hitId: target?.id ?? null, hitTag: target?.tagName ?? null };
+      });
+      expect(hit.hitTag).toBe('SELECT');
+      expect(hit.hitId).toBe(hit.id);
+      await picker.click();
+      await expect(picker).toBeFocused();
+      await expect(picker).toHaveAttribute('data-pointer-target', hit.id);
+      await expect.poll(() => picker.evaluate(control => control.matches(':open'))).toBe(true);
+      pickers.push({ ...hit, pointerTarget: await picker.getAttribute('data-pointer-target'), nativeOpen: true });
+      await page.keyboard.press('Home');
+      await page.keyboard.press('ArrowDown');
+      await page.keyboard.press('ArrowDown');
+      await page.keyboard.press('Enter');
+      await expect.poll(() => picker.evaluate(control => control.matches(':open'))).toBe(false);
+    }
+    await expect(color).toHaveValue('blue');
+    await expect(shape).toHaveValue('square');
+    await expect(root).toHaveAttribute('data-descriptor', 'blue square');
+    await expect(root.locator('[data-query-message]')).toHaveText('Fixed dictionary mapping, not language understanding.');
+    await page.screenshot({ path: info.outputPath(`vocabulary-pointer-${size.width}x${size.height}.png`) });
+    await writeFile(info.outputPath(`vocabulary-pointer-${size.width}x${size.height}.json`), JSON.stringify({ size, closed, pickers }, null, 2));
+    await details.locator('summary').click();
+    await expect(color).toBeHidden();
+    await expect(shape).toBeHidden();
+    await expect(root).toHaveAttribute('data-descriptor', 'blue square');
+  }
+});
+
 test('the responsive pixel bench changes real scores, refuses unsupported text, and disposes cleanly', async ({ page }, testInfo) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
@@ -90,6 +153,7 @@ test('the responsive pixel bench changes real scores, refuses unsupported text, 
   await page.setViewportSize({ width: 1440, height: 1080 });
   await page.goto('./projects/patchwork-vision/');
   const root = page.locator('.project-patchwork-vision');
+  const panel = (name: string) => root.getByRole('tab', { name, exact: true });
   await expect(root.getByRole('heading', { name: 'Patchwork Vision', exact: true })).toBeVisible();
   await expect(root).toHaveAttribute('data-descriptor', 'red circle');
   await expect(root.locator('.pw-model-stamp')).toContainText('No learned weights');
@@ -101,22 +165,26 @@ test('the responsive pixel bench changes real scores, refuses unsupported text, 
   expect(Number(await root.locator('[data-patch-cosine]').textContent())).toBeCloseTo(originalPatchScore - 0.5, 3);
   const editedScore = Number(await root.getAttribute('data-score'));
   const editedPixels = await root.locator('canvas').evaluate((canvas) => (canvas as HTMLCanvasElement).toDataURL());
+  await panel('Image').click();
   await root.getByRole('button', { name: 'Flip arrangement', exact: true }).click();
   expect(Number(await root.getAttribute('data-score'))).toBeCloseTo(editedScore, 11);
   await expect(root).toHaveAttribute('data-selected', '16');
   await root.getByRole('button', { name: 'Undo edit', exact: true }).click();
   await expect(root).toHaveAttribute('data-selected', '1');
   expect(await root.locator('canvas').evaluate((canvas) => (canvas as HTMLCanvasElement).toDataURL())).toBe(editedPixels);
+  await panel('Match').click();
   await root.getByLabel('Text descriptor', { exact: true }).fill('red circle on the left');
+  await expect(root.getByLabel('Text descriptor', { exact: true })).toBeFocused();
   await expect(root).toHaveAttribute('data-descriptor', 'unsupported');
   await expect(root.locator('[data-score]')).toHaveText('n/a');
   await expect(root.locator('[data-query-message]')).toContainText('Unsupported words');
-  await expect(root.getByRole('button', { name: 'Download numeric snapshot', exact: true })).toBeDisabled();
+  await expect(root.locator('[data-export]')).toBeDisabled();
   await root.getByRole('button', { name: 'gold triangle', exact: true }).click();
   await expect(root).toHaveAttribute('data-descriptor', 'gold triangle');
   await root.getByRole('combobox', { name: 'Pool the visual tokens', exact: true }).selectOption('mean');
   await expect(root.getByRole('slider')).toBeDisabled();
   await expect(root.locator('[data-score-label]')).toHaveText('Mean-pooled cosine');
+  await panel('Image').click();
   await root.getByRole('button', { name: 'Clear image', exact: true }).click();
   await expect(root).toHaveAttribute('data-active', '0');
   await expect(root.locator('[data-score-note]')).toContainText('No occupied patches');
@@ -124,6 +192,7 @@ test('the responsive pixel bench changes real scores, refuses unsupported text, 
   await root.getByRole('button', { name: 'Undo edit', exact: true }).click();
   await expect(root).toHaveAttribute('data-active', '11');
   await root.getByRole('button', { name: 'Reset image', exact: true }).click();
+  await panel('Match').click();
   await root.getByRole('button', { name: 'red circle', exact: true }).click();
   await root.getByRole('combobox', { name: 'Pool the visual tokens', exact: true }).selectOption('attention');
   await page.evaluate(() => scrollTo(0, 0));
@@ -138,6 +207,12 @@ test('the responsive pixel bench changes real scores, refuses unsupported text, 
   await root.locator('[data-patch="0"]').press('ArrowRight');
   await expect(root).toHaveAttribute('data-selected', '2');
   await expect(root.locator('[data-patch="1"]')).toBeFocused();
+  await root.locator('[data-patch="5"]').click();
+  await expect(root).toHaveAttribute('data-selected', '6');
+  await panel('Token').click();
+  await expect(root.locator('[data-selected-title]')).toHaveText('Patch 06');
+  await expect(root.getByRole('region', { name: 'Read the token', exact: false })).toBeVisible();
+  await root.locator('[data-patch="1"]').focus();
   await root.locator('[data-patch="1"]').press('End');
   await expect(root).toHaveAttribute('data-selected', '16');
   for (const selector of ['[data-reset]', '[data-color]', '[data-shape]', '[data-patch="0"]']) {

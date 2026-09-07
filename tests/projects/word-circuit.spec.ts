@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { DICTIONARY, PUZZLES, WORDS } from '../../src/projects/word-circuit/data';
 import {
   backtrack, buildGraph, changedLetterIndex, createGame, currentWord, findShortestPath,
@@ -6,6 +7,12 @@ import {
 } from '../../src/projects/word-circuit/engine';
 
 const graph = buildGraph(WORDS);
+
+async function openCircuit(page: Page) {
+  // Other projects share this Vite server; their hot updates must not reset this attempt.
+  await page.routeWebSocket(url => url.searchParams.has('token'), () => {});
+  await page.goto('./projects/word-circuit/');
+}
 
 test.describe('word-circuit engine', () => {
   test('every curated entry is unique, defined, four-letter, and connected', () => {
@@ -169,7 +176,7 @@ test.describe('word-circuit engine', () => {
 
 test('word-circuit browser: laptop entry, route controls, and circuit share the first workbench', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
-  await page.goto('./projects/word-circuit/');
+  await openCircuit(page);
   const root = page.locator('.project-word-circuit');
   const preview = root.locator('[data-project-preview]');
   await expect(preview).toHaveCount(1);
@@ -188,7 +195,7 @@ test('word-circuit browser: laptop entry, route controls, and circuit share the 
 
 test('word-circuit browser: complete a real route with stable input, honest feedback, and phone layout', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
-  await page.goto('./projects/word-circuit/');
+  await openCircuit(page);
   const root = page.locator('.project-word-circuit');
   await expect(root.getByRole('heading', { name: 'Word Circuit', exact: true })).toBeVisible();
   const input = root.getByLabel('Next word', { exact: true });
@@ -197,6 +204,8 @@ test('word-circuit browser: complete a real route with stable input, honest feed
   await expect(input).toHaveAttribute('aria-invalid', 'true');
   await expect(root.locator('[data-feedback]')).toContainText('more than one letter');
   await expect(root.locator('[data-moves]')).toHaveText('00');
+  await expect(root.getByRole('dialog', { name: 'Check your connection', exact: true })).toBeVisible();
+  await root.getByRole('button', { name: 'Close Check your connection', exact: true }).click();
   for (const word of ['CORD', 'CARD', 'WARD', 'WARM']) {
     await input.fill(word);
     await input.press('Enter');
@@ -206,6 +215,7 @@ test('word-circuit browser: complete a real route with stable input, honest feed
   await expect(root.locator('[data-completion]')).toContainText('shortest possible');
   await expect(root.locator('[data-moves]')).toHaveText('04');
   await expect(root.locator('[data-route-log] > li')).toHaveCount(5);
+  await root.getByRole('button', { name: 'Close Connection complete', exact: true }).click();
   await root.getByRole('button', { name: 'Backtrack', exact: true }).click();
   await expect(root.locator('[data-completion]')).toBeHidden();
   await expect(root.locator('[data-moves]')).toHaveText('03');
@@ -218,3 +228,83 @@ test('word-circuit browser: complete a real route with stable input, honest feed
   await expect(root.locator('[data-dictionary-list]')).toContainText('SINE');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
+
+for (const viewport of [
+  { width: 1440, height: 900 }, { width: 1280, height: 720 },
+  { width: 375, height: 812 }, { width: 320, height: 640 }, { width: 768, height: 480 },
+]) {
+  test(`word-circuit workspace ${viewport.width}×${viewport.height}: reference, hints, ladder and solved actions`, async ({ page }, testInfo) => {
+    await page.setViewportSize(viewport);
+    await openCircuit(page);
+    const root = page.locator('.project-word-circuit');
+    const input = root.getByLabel('Next word', { exact: true });
+    const assertScreen = async () => {
+      expect(await page.evaluate(() => ({
+        x: scrollX, y: scrollY,
+        width: document.documentElement.scrollWidth <= innerWidth,
+        height: document.documentElement.scrollHeight <= innerHeight + 1,
+      }))).toEqual({ x: 0, y: 0, width: true, height: true });
+    };
+    await expect(root).toHaveAttribute('data-workspace', 'true');
+    for (const selector of ['.wc-circuit', '.wc-entry-row', '.wc-utility-row', '.wc-hint-area', '.wc-feedback']) {
+      await expect(root.locator(selector)).toBeInViewport({ ratio: 1 });
+    }
+    await assertScreen();
+    await page.screenshot({ path: testInfo.outputPath(`word-circuit-${viewport.width}-desk.png`) });
+    await root.getByRole('button', { name: 'How to play', exact: true }).click();
+    await expect(root.getByRole('dialog', { name: 'How to play', exact: true })).toContainText('A hint follows your actual route');
+    await root.getByRole('button', { name: 'Close How to play', exact: true }).click();
+    await root.getByRole('button', { name: 'Choose a route', exact: true }).click();
+    await root.locator('[data-puzzle-id="cold-front"]').click();
+    await expect(input).toBeFocused();
+    await input.fill('ZZZZ');
+    await input.press('Enter');
+    await expect(root.getByRole('dialog', { name: 'Check your connection', exact: true })).toBeInViewport({ ratio: 1 });
+    await expect(root.locator('[data-moves]')).toHaveText('00');
+    await root.getByRole('button', { name: 'Close Check your connection', exact: true }).click();
+    await expect(input).toBeFocused();
+    await root.getByRole('button', { name: 'Show a next-word hint', exact: true }).click();
+    await expect(root.getByRole('dialog', { name: 'Next-word hint', exact: true })).toContainText('CORD');
+    await expect(root.locator('[data-hints]')).toHaveText('01');
+    await root.getByRole('button', { name: 'Close Next-word hint', exact: true }).click();
+    await root.getByRole('button', { name: 'Browse dictionary', exact: true }).click();
+    await root.getByLabel('Search words or meanings').fill('cord');
+    await root.getByLabel('Only legal next words').check();
+    await root.getByRole('button', { name: 'Use CORD in the next-word field', exact: true }).click();
+    await expect(input).toBeFocused();
+    await expect(input).toHaveValue('CORD');
+    await expect(root.locator('[data-moves]')).toHaveText('00');
+    await input.press('Enter');
+    await input.fill('CARD');
+    await input.press('Enter');
+    if (viewport.width <= 1120) await root.getByRole('button', { name: 'Route log', exact: true }).click();
+    await root.getByRole('button', { name: 'Backtrack to CORD, move 1', exact: true }).click();
+    await expect(input).toBeFocused();
+    await expect(root.locator('[data-moves]')).toHaveText('01');
+    await expect(root.locator('[data-hints]')).toHaveText('01');
+    for (const word of ['CARD', 'WARD', 'WARM']) {
+      await input.fill(word);
+      await input.press('Enter');
+    }
+    const completion = root.getByRole('dialog', { name: 'Connection complete', exact: true });
+    await expect(completion).toBeVisible();
+    await expect(root.locator('#wc-complete-title')).toBeFocused();
+    await expect(completion).toContainText('shortest possible');
+    await assertScreen();
+    await page.screenshot({ path: testInfo.outputPath(`word-circuit-${viewport.width}-completed.png`) });
+    await root.getByRole('button', { name: 'Start again', exact: true }).click();
+    await expect(input).toBeFocused();
+    await expect(root.locator('[data-moves]')).toHaveText('00');
+    await expect(root.locator('[data-hints]')).toHaveText('00');
+    await root.getByRole('button', { name: 'Choose a route', exact: true }).click();
+    await root.locator(`[data-puzzle-id="${PUZZLES[1].id}"]`).click();
+    await expect(input).toBeFocused();
+    await expect(root.locator('[data-puzzle-name]')).toHaveText('Change of heart');
+    await assertScreen();
+    // Resize an active attempt and verify the stable entry and current word survive.
+    await page.setViewportSize({ width: viewport.width === 320 ? 1280 : 320, height: viewport.width === 320 ? 720 : 640 });
+    await expect(input).toBeInViewport({ ratio: 1 });
+    await expect(root.locator('[data-current-tiles]')).toHaveAttribute('aria-label', `Current word: ${PUZZLES[1].start}`);
+    await assertScreen();
+  });
+}

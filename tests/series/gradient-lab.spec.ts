@@ -214,6 +214,7 @@ test('desktop controls change real paths and losses, preserve stopped endpoints,
   const valleyLoss = await loss(root);
   await root.getByRole('button', { name: 'Step all', exact: true }).click();
   expect(await loss(root)).toBeLessThan(valleyLoss);
+  await root.getByRole('tab', { name: 'Start', exact: true }).click();
   await root.getByLabel('Start x', { exact: true }).fill('-1');
   await root.getByLabel('Start y', { exact: true }).fill('1');
   await root.getByRole('button', { name: 'Set start', exact: true }).click();
@@ -235,6 +236,7 @@ test('desktop controls change real paths and losses, preserve stopped endpoints,
   await page.mouse.up();
   await expect(root).toHaveAttribute('data-round', '1');
 
+  await root.getByRole('button', { name: 'Experiments', exact: true }).click();
   await root.locator('[data-challenge="bounce-budget"]').click();
   for (let index = 0; index < 4; index++) await root.getByRole('button', { name: 'Step all', exact: true }).click();
   await expect(root.locator('[data-method="gd"]')).toHaveAttribute('data-status', 'out-of-view');
@@ -254,6 +256,7 @@ test('desktop controls change real paths and losses, preserve stopped endpoints,
   await expect(root).toHaveAttribute('data-round', '0');
   await expect(root.locator('[data-method="gd"]')).toHaveAttribute('data-status', 'active');
 
+  await root.getByRole('button', { name: 'Experiments', exact: true }).click();
   await root.locator('[data-challenge="false-finish"]').click();
   await root.getByRole('button', { name: 'Play all', exact: true }).click();
   await expect(root).toHaveAttribute('data-round', '1');
@@ -262,9 +265,11 @@ test('desktop controls change real paths and losses, preserve stopped endpoints,
   await root.getByRole('button', { name: 'Reset', exact: true }).click();
   await expect(root).toHaveAttribute('data-round', '0');
 
+  await root.getByRole('tab', { name: 'Setup', exact: true }).click();
   await root.getByLabel('Choose a landscape', { exact: true }).selectOption('valley');
   await root.getByLabel('Choose a landscape', { exact: true }).selectOption('bowl');
   for (let index = 0; index < 8; index++) await root.getByRole('button', { name: 'Step all', exact: true }).click();
+  await root.getByRole('tab', { name: 'History', exact: true }).click();
   const downloadEvent = page.waitForEvent('download');
   await root.getByRole('button', { name: 'Export samples', exact: false }).click();
   const download = await downloadEvent;
@@ -311,6 +316,7 @@ test('375px keyboard controls, honest saddle labels, reduced motion, and teardow
   await exactRate.fill('0.05');
   await exactRate.press('Tab');
   await expect(root).toHaveAttribute('data-rate', '0.05');
+  await root.getByRole('tab', { name: 'Start', exact: true }).click();
   await root.getByLabel('Start x', { exact: true }).fill('0.5');
   await root.getByLabel('Start y', { exact: true }).fill('-0.5');
   await root.getByLabel('Start y', { exact: true }).press('Enter');
@@ -318,6 +324,7 @@ test('375px keyboard controls, honest saddle labels, reduced motion, and teardow
   await expect(root.locator('[data-current-y]')).toHaveText('-0.5000');
   await expect(root.locator('[data-current-gradient]')).toHaveText('(0.5000, -2.0000)');
 
+  await root.getByRole('button', { name: 'Experiments', exact: true }).click();
   await root.locator('[data-challenge="false-finish"]').click();
   await root.getByRole('button', { name: 'Step all', exact: true }).focus();
   await page.keyboard.press('Enter');
@@ -345,12 +352,24 @@ test('375px keyboard controls, honest saddle labels, reduced motion, and teardow
   const paused = await root.getAttribute('data-round');
   await page.waitForTimeout(180);
   expect(await root.getAttribute('data-round')).toBe(paused);
+  await root.getByRole('tab', { name: 'History', exact: true }).click();
   await root.getByText('Inspect recent samples', { exact: true }).click();
   await expect(root.locator('[data-sample-rows]')).toContainText('-');
+  await root.getByRole('button', { name: 'Guide', exact: true }).click();
   await root.getByText('The exact rules & numerical boundaries', { exact: true }).click();
   await expect(root.locator('.gl-rulebook')).toContainText('epsilon is outside the square root');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   for (const control of await root.locator('button, select, input[type="range"], input[type="number"], .gl-toggle, summary').all()) {
+    const owner = await control.evaluate((element) => ({
+      dialog: element.closest('dialog')?.id,
+      tab: element.closest('[role="tabpanel"]')?.getAttribute('aria-labelledby'),
+    }));
+    const open = root.locator('dialog[open]');
+    if (await open.count() && await open.getAttribute('id') !== owner.dialog) await page.keyboard.press('Escape');
+    if (owner.dialog && !await root.locator(`#${owner.dialog}`).isVisible()) {
+      await root.locator(`button[aria-controls="${owner.dialog}"]`).click();
+    }
+    if (owner.tab) await root.locator(`#${owner.tab}`).click();
     expect((await control.boundingBox())!.height).toBeGreaterThanOrEqual(44);
   }
   for (const label of await root.locator('label').all()) {

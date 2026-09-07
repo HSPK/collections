@@ -1,5 +1,6 @@
 import './style.css';
 import { createProjectPage, downloadText, escapeMarkup, query } from '../../core/page';
+import { createWorkspaceDialog, createWorkspaceTabs } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import {
   addRoute, addStation, analyzeNetwork, appendStop, createHistory, GRID_SIZE, LABEL_SIDES, LIMITS,
@@ -25,6 +26,7 @@ const icon = (symbol: string) => `<span aria-hidden="true">${symbol}</span>`;
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'transit');
   const { root, signal } = page;
+  root.dataset.workspace = 'true';
   let history = createHistory(createDefaultNetwork());
   let network = history.present;
   let selectedStation = DEFAULT_STATION_ID;
@@ -40,7 +42,7 @@ export function mount(context: ProjectContext): ProjectInstance {
   root.innerHTML = `
     <header class="tw-masthead">
       <div class="tw-brand"><span class="tw-brand-mark" aria-hidden="true"><i></i><i></i><i></i></span><div><h1>Transit <span>Weaver.</span></h1><p>Imaginary transport department</p></div></div>
-      <a href="#transit-guide">Field guide ${icon('↗')}</a>
+      <nav aria-label="Studio resources"><button type="button" data-open-files>Save &amp; open</button><a href="#transit-guide">Field guide ${icon('↗')}</a></nav>
     </header>
     <section class="tw-studio" aria-labelledby="transit-studio-title">
       <header class="tw-studio-heading">
@@ -59,13 +61,14 @@ export function mount(context: ProjectContext): ProjectInstance {
         <label class="tw-extend-label">Extend route<select data-active-route aria-label="Route for new stations"></select></label>
         <label class="tw-snap"><input type="checkbox" data-snap checked> Snap to grid</label>
       </div>
+      <div class="tw-pane-tabs"></div>
       <div class="tw-workspace" data-project-preview>
         <div class="tw-map-column">
-          <div class="tw-map-scroll" data-map-scroll data-mode="select" tabindex="0" role="region" aria-label="Map paper, horizontally scrollable on smaller screens" aria-describedby="transit-map-help">
+          <div class="tw-map-scroll" data-map-scroll data-mode="select" tabindex="0" role="region" aria-label="Map paper. Fit overview or zoom for station labels." aria-describedby="transit-map-help">
             <svg data-map viewBox="0 0 ${MAP_WIDTH} ${MAP_HEIGHT}" width="${MAP_WIDTH}" height="${MAP_HEIGHT}" xmlns="http://www.w3.org/2000/svg" role="group" aria-label="Editable fictional transit map"></svg>
           </div>
           <p class="tw-status" data-mode-hint data-status id="transit-map-help" role="status" aria-live="polite" aria-atomic="true"></p>
-          <div class="tw-map-caption"><span>Fictional geography. Real connections.<span class="tw-scroll-hint"> Scroll the paper sideways ${icon('↔')}</span></span><button type="button" class="tw-editor-link" data-action="show-editor">Edit selection ${icon('↘')}</button></div>
+          <div class="tw-map-caption"><button type="button" data-action="zoom" aria-pressed="false">Zoom map</button><button type="button" data-open-network>Routes &amp; health</button><button type="button" class="tw-editor-link" data-action="show-editor">Edit selection ${icon('↘')}</button></div>
           <div class="tw-legend" data-legend aria-label="Route legend"></div>
           <div class="tw-health" data-health></div>
         </div>
@@ -78,7 +81,7 @@ export function mount(context: ProjectContext): ProjectInstance {
           <p class="tw-local-status" data-local-status hidden></p>
           <div data-inspector></div>
           <button type="button" class="tw-add-station-button" data-action="add-station">${icon('+')} Add without pointing</button>
-          <p class="tw-small">New stations append to the “Extend route” selection. Choose “No route” to place an unserved station.</p>
+          <p class="tw-small tw-placement-note">New stations append to the “Extend route” selection. Choose “No route” to place an unserved station.</p>
         </aside>
       </div>
     </section>
@@ -117,7 +120,7 @@ export function mount(context: ProjectContext): ProjectInstance {
             <div><dt>Arrow keys on a station</dt><dd>Move by ${GRID_SIZE} units with snapping, or 10 without. Hold Shift for a larger step. Position fields also accept exact coordinates.</dd></div>
             <div><dt>Ctrl / ⌘ Z · Shift Z</dt><dd>Undo and redo when not typing in a field. Text fields keep their normal text-editing shortcuts.</dd></div>
             <div><dt>Escape</dt><dd>Cancel an unfinished drag or leave Add / Move mode.</dd></div>
-            <div><dt>A smaller screen</dt><dd>Swipe the paper sideways; it stays large enough to read. “Edit selection” takes you to the workbench. “Add without pointing” finds a position for you.</dd></div>
+            <div><dt>A smaller screen</dt><dd>The Map and Workbench tabs share one screen. Zoom map makes labels larger and lets you pan the paper; Fit map restores the whole network. “Edit selection” opens the workbench. “Add without pointing” finds a position for you.</dd></div>
           </dl>
         </details>
       </section>
@@ -132,10 +135,68 @@ export function mount(context: ProjectContext): ProjectInstance {
   const activeRouteSelect = query<HTMLSelectElement>(root, '[data-active-route]');
   const cityInput = query<HTMLInputElement>(root, '#transit-city-name');
   const fileInput = query<HTMLInputElement>(root, '[data-file-input]');
+  const addStationButton = query<HTMLButtonElement>(root, '[data-action="add-station"]');
+  const editorActions = document.createElement('div');
+  editorActions.className = 'tw-editor-actions';
+  workbench.append(editorActions);
+  const mapColumn = query<HTMLElement>(root, '.tw-map-column');
+  const tabHost = query<HTMLElement>(root, '.tw-pane-tabs');
+  const compact = window.matchMedia('(max-width: 900px), (max-height: 560px)');
+  const syncPanes = () => {
+    tabHost.hidden = !compact.matches;
+    if (!compact.matches) {
+      for (const panel of [mapColumn, workbench]) {
+        panel.hidden = false;
+        panel.inert = false;
+        panel.setAttribute('aria-hidden', 'false');
+      }
+    }
+  };
+  const panes = createWorkspaceTabs(page, {
+    id: 'transit-workspace', label: 'Transit workspace', host: tabHost,
+    panes: [{ id: 'map', label: 'Map', panel: mapColumn }, { id: 'edit', label: 'Workbench', panel: workbench }],
+    onSelect: syncPanes,
+  });
+  compact.addEventListener('change', () => { panes.select(panes.selected); syncPanes(); }, { signal });
+  syncPanes();
+  const detailContent = document.createElement('div');
+  const details = createWorkspaceDialog(page, { id: 'transit-details', title: 'Selection details', content: [detailContent] });
+  details.dialog.addEventListener('close', () => {
+    if (!root.contains(document.activeElement)) {
+      editorActions.querySelector<HTMLButtonElement>('.tw-details-button')?.focus({ preventScroll: true });
+    }
+  }, { signal });
+  const networkDialog = createWorkspaceDialog(page, {
+    id: 'transit-network', title: 'Routes & health',
+    content: [query(root, '[data-legend]'), query(root, '[data-health]')],
+    triggers: [query(root, '[data-open-network]')],
+  });
+  createWorkspaceDialog(page, {
+    id: 'transit-files', title: 'Keep your city', content: [query(root, '.tw-takeaway')],
+    triggers: [query(root, '[data-open-files]')],
+  });
+  const guide = query<HTMLElement>(root, '.tw-guide');
+  guide.append(query(root, '.tw-placement-note'), query(root, '[data-local-status]'), query(root, '.tw-footer'));
+  createWorkspaceDialog(page, {
+    id: 'transit-help', title: 'Field guide', content: [guide],
+    triggers: [query(root, '.tw-masthead a')],
+  });
+  query(root, '.tw-bottom').remove();
+  query(root, '.tw-studio').append(status);
+  const errorText = document.createElement('p');
+  errorText.setAttribute('role', 'alert');
+  const errors = createWorkspaceDialog(page, { id: 'transit-error', title: 'Check this edit', content: [errorText] });
+  const printPoster = document.createElement('div');
+  printPoster.className = 'tw-print-poster';
+  root.append(printPoster);
+  window.addEventListener('beforeprint', () => {
+    printPoster.innerHTML = serializeSvg(network).replace(/^<\?xml[^>]+\?>\s*/u, '');
+  }, { signal });
 
   function announce(message: string, error = false) {
     if (signal.aborted) return;
-    status.textContent = message;
+    const sentenceEnd = message.indexOf('. ');
+    status.textContent = sentenceEnd < 0 ? message : message.slice(0, sentenceEnd + 1);
     status.dataset.tone = error ? 'error' : 'info';
     const local = root.querySelector<HTMLElement>(document.activeElement?.closest('.tw-takeaway') ? '[data-file-status]' : '[data-local-status]');
     if (local) {
@@ -143,7 +204,10 @@ export function mount(context: ProjectContext): ProjectInstance {
       local.textContent = message;
       local.dataset.tone = error ? 'error' : 'info';
     }
-    page.report(message);
+    if (error) {
+      errorText.textContent = message;
+      errors.open();
+    }
   }
 
   function run(operation: () => void) {
@@ -194,10 +258,10 @@ export function mount(context: ProjectContext): ProjectInstance {
     }
     const route = routeById(activeRoute);
     const hint = mode === 'select'
-      ? 'Select a station circle or a route in the legend. The workbench is ready for your next edit.'
+      ? 'Select a station. Edit its name and routes in Workbench.'
       : mode === 'move'
-        ? 'Drag a station circle to move it. The paper around it still scrolls. Or focus a circle and use the arrow keys.'
-        : `Click empty map paper to place a station${route ? ` at the end of ${route.name}` : ' without a route'}. Escape cancels. “Add without pointing” works from the keyboard.`;
+        ? 'Drag a station, or focus it and use arrow keys. Escape cancels.'
+        : `Tap empty paper to extend ${route ? route.name : 'no route'}. Escape cancels.`;
     query<HTMLElement>(root, '[data-mode-hint]').textContent = hint;
     activeRouteSelect.innerHTML = `<option value="">No route · unserved</option>${network.routes.map((item, index) =>
       `<option value="${item.id}">${routeNumber(index)} · ${escapeMarkup(item.name)}</option>`).join('')}`;
@@ -215,9 +279,14 @@ export function mount(context: ProjectContext): ProjectInstance {
       <select id="transit-station-picker" data-station-picker data-focus-key="station-picker">${network.stations.map((item) =>
         `<option value="${item.id}" ${item.id === station.id ? 'selected' : ''}>${escapeMarkup(item.name)}</option>`).join('')}</select>
       <div class="tw-selection-heading"><h3>${escapeMarkup(station.name)}</h3><span>${memberships.length > 1 ? `${memberships.length}-route interchange` : memberships.length ? 'Local station' : 'Not on a route'}</span></div>
-      <form data-form="station" novalidate>
+      <form data-form="station-name" novalidate>
         <label for="transit-station-name">Station name</label>
         <input id="transit-station-name" data-focus-key="station-name" name="name" value="${escapeMarkup(station.name)}" maxlength="${LIMITS.name}" required autocomplete="off">
+        <button type="submit" class="tw-save" data-focus-key="save-station">Save station</button>
+      </form>
+      <button type="button" class="tw-details-button" data-action="details">Position, routes &amp; removal</button>
+      <div data-detail-content>
+      <form data-form="station-position" novalidate>
         <div class="tw-coordinate-fields">
           <label>X position<input name="x" data-focus-key="station-x" type="number" min="${MAP_BOUNDS.minX}" max="${MAP_BOUNDS.maxX}" step="any" value="${station.x}" required></label>
           <label>Y position<input name="y" data-focus-key="station-y" type="number" min="${MAP_BOUNDS.minY}" max="${MAP_BOUNDS.maxY}" step="any" value="${station.y}" required></label>
@@ -225,7 +294,7 @@ export function mount(context: ProjectContext): ProjectInstance {
         <label for="transit-label-side">Label position</label>
         <select id="transit-label-side" name="label" data-focus-key="label-side">${LABEL_SIDES.map((side) =>
           `<option value="${side}" ${side === station.label ? 'selected' : ''}>${side[0].toUpperCase()}${side.slice(1).replace('-', ' ')}</option>`).join('')}</select>
-        <button type="submit" class="tw-save" data-focus-key="save-station">Save station</button>
+        <button type="submit" class="tw-save" data-focus-key="save-position">Save position</button>
       </form>
       <fieldset class="tw-memberships"><legend>Routes calling here</legend>
         ${network.routes.length ? network.routes.map((route, index) => {
@@ -234,7 +303,7 @@ export function mount(context: ProjectContext): ProjectInstance {
         }).join('') : '<p class="tw-small">No routes yet. Open Routes to add the first one.</p>'}
       </fieldset>
       <button type="button" class="tw-danger" data-action="remove-station" data-focus-key="remove-station">${icon('−')} Remove station</button>
-      <p class="tw-small">Removal reconnects its neighbors on every route. Undo brings the station and its route memberships back.</p>`;
+      <p class="tw-small">Removal reconnects its neighbors on every route. Undo brings the station and its route memberships back.</p></div>`;
   }
 
   function routeInspector(): string {
@@ -245,15 +314,18 @@ export function mount(context: ProjectContext): ProjectInstance {
       <label class="tw-field-label" for="transit-route-picker">Choose a route</label>
       <select id="transit-route-picker" data-route-picker data-focus-key="route-picker">${network.routes.map((item, index) =>
         `<option value="${item.id}" ${item.id === route.id ? 'selected' : ''}>${routeNumber(index)} · ${escapeMarkup(item.name)}</option>`).join('')}</select>
-      <div class="tw-selection-heading"><h3>${escapeMarkup(route.name)}</h3><span>${route.stops.length} ${route.stops.length === 1 ? 'stop' : 'stops'} · connected in list order</span></div>
-      <form data-form="route" novalidate>
+      <form id="transit-route-form" data-form="route" novalidate>
         <label for="transit-route-name">Route name</label>
         <input id="transit-route-name" data-focus-key="route-name" name="name" value="${escapeMarkup(route.name)}" maxlength="${LIMITS.name}" required autocomplete="off">
-        <label for="transit-route-color">Route color · six-digit hex</label>
-        <div class="tw-color-fields"><input type="color" data-color-picker data-focus-key="route-color-picker" aria-label="Choose route color" value="${route.color}"><input id="transit-route-color" name="color" data-focus-key="route-color" value="${route.color}" maxlength="7" spellcheck="false" autocomplete="off" aria-describedby="transit-color-help"></div>
-        <p id="transit-color-help" class="tw-small">For example, #326ad3. Apply both fields with Save route.</p>
         <button type="submit" class="tw-save" data-focus-key="save-route">Save route</button>
       </form>
+      <button type="button" class="tw-details-button" data-action="details">Stops &amp; route actions</button>
+      <div data-detail-content>
+      <div class="tw-selection-heading"><h3>${escapeMarkup(route.name)}</h3><span>${route.stops.length} ${route.stops.length === 1 ? 'stop' : 'stops'} · connected in list order</span></div>
+      <label class="tw-field-label" for="transit-route-color">Route color · six-digit hex</label>
+      <div class="tw-color-fields"><input type="color" data-color-picker data-focus-key="route-color-picker" aria-label="Choose route color" value="${route.color}"><input id="transit-route-color" form="transit-route-form" name="color" data-focus-key="route-color" value="${route.color}" maxlength="7" spellcheck="false" autocomplete="off" aria-describedby="transit-color-help"></div>
+      <p id="transit-color-help" class="tw-small">For example, #326ad3. Save color applies the current name and color, just like Save route in the workbench.</p>
+      <button type="submit" form="transit-route-form" class="tw-save" data-focus-key="save-route-color">Save color</button>
       <div class="tw-stop-heading"><h4>Stop order</h4><span>First → last</span></div>
       ${route.stops.length ? `<ol class="tw-stop-list" aria-label="Route stop order">${route.stops.map((id, index) => {
         const station = stationById(id)!;
@@ -277,7 +349,7 @@ export function mount(context: ProjectContext): ProjectInstance {
         <button type="button" data-action="add-route">${icon('+')} Add route</button>
         <button type="button" class="tw-danger" data-action="remove-route" data-focus-key="remove-route">Remove route</button>
       </div>
-      <p class="tw-small">Removing a route keeps all its stations. New edits, including stop order, can be undone.</p>`;
+      <p class="tw-small">Removing a route keeps all its stations. New edits, including stop order, can be undone.</p></div>`;
   }
 
   function renderLegend() {
@@ -308,13 +380,17 @@ export function mount(context: ProjectContext): ProjectInstance {
     const focusKey = focused instanceof Element && root.contains(focused) ? focused.getAttribute('data-focus-key') : null;
     const selection = focused instanceof HTMLInputElement && focused.type === 'text'
       ? { start: focused.selectionStart, end: focused.selectionEnd } : null;
-    const stopListScroll = inspector.querySelector('.tw-stop-list')?.scrollTop ?? 0;
+    const stopListScroll = detailContent.querySelector('.tw-stop-list')?.scrollTop ?? 0;
     renderMap();
     renderTools();
     renderLegend();
     renderHealth();
     inspector.innerHTML = desk === 'station' ? stationInspector() : routeInspector();
-    const stopList = inspector.querySelector('.tw-stop-list');
+    const detailButton = inspector.querySelector<HTMLButtonElement>('.tw-details-button');
+    editorActions.replaceChildren(...(detailButton ? [detailButton, addStationButton] : [addStationButton]));
+    const nextDetails = inspector.querySelector<HTMLElement>('[data-detail-content]');
+    detailContent.replaceChildren(...(nextDetails ? [nextDetails] : []));
+    const stopList = detailContent.querySelector('.tw-stop-list');
     if (stopList) stopList.scrollTop = stopListScroll;
     query<HTMLElement>(root, '[data-city-heading]').textContent = network.city;
     if (document.activeElement !== cityInput) cityInput.value = network.city;
@@ -392,6 +468,8 @@ export function mount(context: ProjectContext): ProjectInstance {
     activeRoute = selectedRoute;
     desk = 'route';
     commit(next, 'New route added. Name it, choose a color, and append its first station. Undo is available.');
+    details.close();
+    panes.select('edit');
     query<HTMLInputElement>(root, '#transit-route-name').focus({ preventScroll: true });
   }
 
@@ -438,11 +516,28 @@ export function mount(context: ProjectContext): ProjectInstance {
         case 'undo': applyHistory('undo'); break;
         case 'redo': applyHistory('redo'); break;
         case 'show-editor':
-          workbench.scrollIntoView({ behavior: context.reducedMotion ? 'auto' : 'smooth', block: 'start' });
+          panes.select('edit');
           workbench.focus({ preventScroll: true });
           break;
-        case 'select-station': selectStation(id); break;
-        case 'select-route': selectRoute(id); break;
+        case 'details': details.open(); break;
+        case 'zoom': {
+          const zoomed = mapScroll.classList.toggle('tw-zoomed');
+          button.setAttribute('aria-pressed', String(zoomed));
+          button.textContent = zoomed ? 'Fit map' : 'Zoom map';
+          break;
+        }
+        case 'select-station':
+          details.close();
+          selectStation(id);
+          panes.select('edit');
+          query<HTMLInputElement>(root, '#transit-station-name').focus({ preventScroll: true });
+          break;
+        case 'select-route':
+          networkDialog.close();
+          selectRoute(id);
+          panes.select('edit');
+          query<HTMLInputElement>(root, '#transit-route-name').focus({ preventScroll: true });
+          break;
         case 'add-station': addAt(suggestStationPosition(network, activeRoute)); break;
         case 'add-route': addNewRoute(); break;
         case 'remove-station': {
@@ -490,10 +585,13 @@ export function mount(context: ProjectContext): ProjectInstance {
     run(() => {
       const values = new FormData(form);
       const text = (key: string) => String(values.get(key) ?? '');
-      if (form.dataset.form === 'station') {
+      if (form.dataset.form === 'station-name') {
+        commit(updateStation(network, selectedStation, { name: text('name') }),
+          'Station saved. Its name is reflected on the map.');
+      } else if (form.dataset.form === 'station-position') {
         if (!text('x').trim() || !text('y').trim()) throw new NetworkError('Enter both X and Y positions before saving.');
         commit(updateStation(network, selectedStation, {
-          name: text('name'), x: Number(text('x')), y: Number(text('y')), label: text('label') as LabelSide,
+          x: Number(text('x')), y: Number(text('y')), label: text('label') as LabelSide,
         }), 'Station saved. Its name, label position, and connections are reflected on the map.');
       } else if (form.dataset.form === 'route') {
         commit(updateRoute(network, selectedRoute, { name: text('name'), color: text('color') }), 'Route name and color saved on the map and in the legend.');
@@ -625,8 +723,8 @@ export function mount(context: ProjectContext): ProjectInstance {
         drag!.station.x + point.x - drag!.start.x, drag!.station.y + point.y - drag!.start.y, snap);
       renderMap();
       const station = stationById(drag!.station.id)!;
-      const x = inspector.querySelector<HTMLInputElement>('[name="x"]');
-      const y = inspector.querySelector<HTMLInputElement>('[name="y"]');
+      const x = detailContent.querySelector<HTMLInputElement>('[name="x"]');
+      const y = detailContent.querySelector<HTMLInputElement>('[name="y"]');
       if (x) x.value = String(station.x);
       if (y) y.value = String(station.y);
     });
@@ -665,6 +763,7 @@ export function mount(context: ProjectContext): ProjectInstance {
   root.addEventListener('keydown', (event) => {
     const target = event.target;
     if (!(target instanceof Element)) return;
+    if (target.closest('dialog') && event.key === 'Escape') return;
     if (target.closest('input, textarea, select, [contenteditable="true"]')) return;
     const stationId = target.closest<SVGElement>('[data-station]')?.dataset.station;
     if (event.key === 'Escape') {

@@ -146,6 +146,19 @@ export function createDrawing(host: HTMLElement) {
   const rodLabel = part('[data-rod-label]');
   const crankLabel = part('[data-crank-label]');
   const description = part('[data-description]');
+  const labelObserver = new ResizeObserver(() => {
+    const matrix = svg.getScreenCTM();
+    if (!matrix || matrix.a <= 0) return;
+    const size = Math.max(20, 14 / Math.hypot(matrix.a, matrix.b));
+    for (const text of svg.querySelectorAll<SVGTextElement>('.er-part-numbers text')) {
+      text.style.fontSize = `${size}px`;
+      text.setAttribute('y', String(size * .35));
+    }
+    for (const circle of svg.querySelectorAll<SVGCircleElement>('.er-part-numbers circle')) {
+      circle.setAttribute('r', String(size * .7));
+    }
+  });
+  labelObserver.observe(svg);
 
   function draw(state: EngineState, geometry: Geometry, showConstruction: boolean, showFlow: boolean) {
     const origin = crankCenter(geometry);
@@ -195,7 +208,7 @@ export function createDrawing(host: HTMLElement) {
     description.textContent = `${strokes[state.strokeIndex].name}, ${state.angle.toFixed(1)} degrees of 720. Piston ${(state.pose.strokeFraction * 100).toFixed(1)} percent down its stroke. Intake valve ${state.intakeLift > 0 ? 'open' : 'closed'}; exhaust valve ${state.exhaustLift > 0 ? 'open' : 'closed'}. Parts: 1 piston, 2 connecting rod, 3 crank.`;
   }
 
-  return { svg, draw };
+  return { svg, draw, destroy: () => labelObserver.disconnect() };
 }
 
 export function travelPath(geometry: Geometry): string {

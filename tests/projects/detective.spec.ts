@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { CASES } from '../../src/projects/detective/data';
 import {
   assessConclusion,
@@ -119,23 +120,35 @@ test.describe('detective engine', () => {
   });
 });
 
-test('detective: evidence, accusations, pencil notes, case selection, and replay work', async ({ page }) => {
+async function openDesk(page: Page) {
+  // Other sites share this Vite server; their reloads must not clear the case.
+  await page.routeWebSocket(url => url.searchParams.has('token'), () => {});
   await page.goto('./projects/detective/');
+}
+
+test('detective: evidence, accusations, pencil notes, case selection, and replay work', async ({ page }) => {
+  await openDesk(page);
   const project = page.locator('.project-detective');
   await expect(project.getByRole('heading', { level: 1 })).toContainText('Detective.');
   await expect(project.locator('[data-project-preview]')).toHaveCount(1);
   await expect(project.locator('[data-project-preview] [data-action="evidence"]')).toHaveCount(4);
   const note = 'A cart is not enough. <img src=x onerror=alert(1)> Check the exit.';
+  await project.getByRole('tab', { name: 'Notes & timeline' }).click();
   await project.getByLabel('My working theory', { exact: true }).fill(note);
+  await project.getByRole('tab', { name: 'People', exact: true }).click();
   await project.getByRole('radio', { name: 'Choose Orin', exact: true }).check();
   await project.getByRole('button', { name: 'File my conclusion' }).click();
   await expect(project.getByRole('heading', { name: 'A hunch needs a little evidence.' })).toBeVisible();
+  await project.getByRole('button', { name: 'Close Conclusion review' }).click();
+  await project.getByRole('tab', { name: 'Evidence', exact: true }).click();
   for (const evidence of CASES[0].evidence.filter((item) => item.rules.length)) {
     await project.locator(`[data-action="evidence"][data-id="${evidence.id}"]`).click();
     await project.getByLabel(`Pin exhibit ${evidence.letter} to my reasoning`).check();
   }
   await project.getByRole('button', { name: 'File my conclusion' }).click();
   await expect(project.getByRole('heading', { name: 'One thread does not fit.' })).toBeVisible();
+  await project.getByRole('button', { name: 'Close Conclusion review' }).click();
+  await project.getByRole('tab', { name: 'People', exact: true }).click();
   await project.getByRole('button', { name: 'Rule out Orin Pipp', exact: true }).click();
   await expect(project.getByRole('radio', { name: 'Choose Orin', exact: true })).toBeDisabled();
   await project.getByRole('button', { name: 'Restore Orin Pipp', exact: true }).click();
@@ -147,18 +160,24 @@ test('detective: evidence, accusations, pencil notes, case selection, and replay
   await expect(project.getByRole('heading', { name: 'A parcel out of place', exact: true })).toBeVisible();
   await expect(project.locator('[data-project-preview]')).toHaveCount(1);
   await expect(project.locator('[data-project-preview] [data-pin]')).toHaveCount(4);
+  await project.getByRole('tab', { name: 'Notes & timeline' }).click();
   await project.getByLabel('My working theory', { exact: true }).fill('Three details belong to the same box.');
+  await project.getByRole('tab', { name: 'Evidence', exact: true }).click();
   for (const evidence of CASES[1].evidence.filter((item) => item.rules.length)) {
     await project.locator(`[data-action="evidence"][data-id="${evidence.id}"]`).click();
     await project.getByLabel(`Pin exhibit ${evidence.letter} to my reasoning`).check();
   }
+  await project.getByRole('tab', { name: 'People', exact: true }).click();
   await project.getByRole('radio', { name: 'Choose Sula', exact: true }).check();
   await project.getByRole('button', { name: 'File my conclusion' }).click();
   await expect(project.getByRole('heading', { name: 'Case closed. Nicely reasoned.' })).toBeVisible();
+  await project.getByRole('button', { name: 'Close Conclusion review' }).click();
+  await project.getByRole('button', { name: 'Cases', exact: true }).click();
   await project.locator('[data-action="choose-case"][data-id="cake-under-cover"]').click();
   await expect(project.getByLabel('My working theory', { exact: true })).toHaveValue(note);
   await expect(project.locator('.td-notebook img')).toHaveCount(0);
   await expect(project.getByRole('heading', { name: 'Case closed. Nicely reasoned.' })).toBeVisible();
+  await project.getByRole('button', { name: 'Close Conclusion review' }).click();
   await project.getByRole('button', { name: 'Restart this case', exact: true }).click();
   await project.getByRole('button', { name: 'Keep investigating', exact: true }).click();
   await expect(project.getByLabel('My working theory', { exact: true })).toHaveValue(note);
@@ -167,6 +186,7 @@ test('detective: evidence, accusations, pencil notes, case selection, and replay
   await expect(project.getByLabel('My working theory', { exact: true })).toHaveValue('');
   await expect(project.locator('[data-pin]:checked')).toHaveCount(0);
   await expect(project.locator('[data-nominee]:checked')).toHaveCount(0);
+  await project.getByRole('button', { name: 'Cases', exact: true }).click();
   await project.locator('[data-action="choose-case"][data-id="parcel-out-of-place"]').click();
   await expect(project.getByLabel('My working theory', { exact: true })).toHaveValue('Three details belong to the same box.');
   await expect(project.getByRole('heading', { name: 'Case closed. Nicely reasoned.' })).toBeVisible();
@@ -174,8 +194,9 @@ test('detective: evidence, accusations, pencil notes, case selection, and replay
 
 test('detective: narrow-screen ordering case has a real proof and native keyboard controls', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
-  await page.goto('./projects/detective/');
+  await openDesk(page);
   const project = page.locator('.project-detective');
+  await project.getByRole('button', { name: 'Cases', exact: true }).click();
   await project.locator('[data-action="choose-case"][data-id="wandering-label"]').click();
   await expect(project.getByRole('heading', { name: 'The wandering museum label', exact: true })).toBeFocused();
   const firstExhibit = project.locator('[data-action="evidence"][data-id="drying-note"]');
@@ -189,9 +210,12 @@ test('detective: narrow-screen ordering case has a real proof and native keyboar
   await expect(pinA).toBeFocused();
   await project.locator('[data-action="evidence"][data-id="tour-note"]').click();
   await project.getByLabel('Pin exhibit B to my reasoning').check();
+  await project.getByRole('tab', { name: 'People', exact: true }).click();
   await project.getByRole('radio', { name: 'Choose Ada', exact: true }).check();
   await project.getByRole('button', { name: 'File my conclusion' }).click();
   await expect(project.getByRole('heading', { name: 'A good start, not quite a proof.' })).toBeVisible();
+  await project.getByRole('button', { name: 'Close Conclusion review' }).click();
+  await project.getByRole('tab', { name: 'Notes & timeline' }).click();
   await project.getByLabel('Visitor at 14:00', { exact: true }).selectOption('theo');
   await project.getByLabel('Visitor at 14:10', { exact: true }).selectOption('theo');
   await expect(project.getByLabel('Visitor at 14:00', { exact: true })).toHaveValue('');
@@ -199,6 +223,7 @@ test('detective: narrow-screen ordering case has a real proof and native keyboar
   await project.getByLabel('Visitor at 14:10', { exact: true }).selectOption('miri');
   await project.getByLabel('Visitor at 14:20', { exact: true }).selectOption('ada');
   await project.getByLabel('Visitor at 14:30', { exact: true }).selectOption('rook');
+  await project.getByRole('tab', { name: 'Evidence', exact: true }).click();
   await project.locator('[data-action="evidence"][data-id="gallery-pass"]').click();
   await project.getByLabel('Pin exhibit C to my reasoning').check();
   await project.getByRole('button', { name: 'File my conclusion' }).click();
@@ -208,3 +233,85 @@ test('detective: narrow-screen ordering case has a real proof and native keyboar
   ]);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
+
+for (const viewport of [
+  { width: 1440, height: 900 }, { width: 1280, height: 720 },
+  { width: 375, height: 812 }, { width: 320, height: 640 }, { width: 768, height: 480 },
+]) {
+  test(`detective workspace: ${viewport.width}×${viewport.height} keeps the desk and decisions in view`, async ({ page }, testInfo) => {
+    await page.setViewportSize(viewport);
+    await openDesk(page);
+    const site = page.locator('.project-detective');
+    await expect(site).toHaveAttribute('data-workspace', 'true');
+    const assertDesk = async () => {
+      expect(await page.evaluate(() => ({
+        width: document.documentElement.scrollWidth,
+        height: document.documentElement.scrollHeight,
+        x: window.scrollX, y: window.scrollY,
+      }))).toEqual({ ...{ width: viewport.width, height: viewport.height }, x: 0, y: 0 });
+      for (const control of [
+        site.getByRole('tab', { name: 'Evidence', exact: true }),
+        site.getByRole('button', { name: 'File my conclusion', exact: true }),
+        site.getByRole('button', { name: 'Restart this case', exact: true }),
+      ]) {
+        const box = await control.boundingBox();
+        expect(box).not.toBeNull();
+        expect(box!.y).toBeGreaterThanOrEqual(0);
+        expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height);
+        expect(await control.evaluate(element => parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(14);
+        expect(await control.evaluate(element => {
+          const box = element.getBoundingClientRect();
+          return element.contains(document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2));
+        })).toBe(true);
+      }
+    };
+    await assertDesk();
+    const firstExhibit = site.locator('[data-action="evidence"]').first();
+    const exhibitBox = await firstExhibit.boundingBox();
+    expect(exhibitBox!.y + exhibitBox!.height).toBeLessThanOrEqual(viewport.height - 100);
+    expect(await firstExhibit.evaluate(element => {
+      const box = element.getBoundingClientRect();
+      return element.contains(document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2));
+    })).toBe(true);
+    await page.screenshot({ path: testInfo.outputPath(`detective-${viewport.width}x${viewport.height}.png`) });
+    await site.getByRole('button', { name: 'Scene & rules' }).click();
+    await expect(site.getByRole('dialog', { name: 'Scene and case rules' })).toBeVisible();
+    await site.getByText('The rules of this case', { exact: true }).click();
+    await expect(site.getByText(CASES[0].groundRules, { exact: true })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(site.getByRole('button', { name: 'Scene & rules' })).toBeFocused();
+    await site.getByRole('tab', { name: 'Notes & timeline' }).click();
+    await site.getByLabel('My working theory', { exact: true }).fill('Keep the witness record with this file.');
+    await site.getByRole('button', { name: 'Cases', exact: true }).click();
+    await site.locator('[data-action="choose-case"][data-id="wandering-label"]').click();
+    await assertDesk();
+    await site.getByRole('button', { name: 'Cases', exact: true }).click();
+    await site.locator('[data-action="choose-case"][data-id="cake-under-cover"]').click();
+    await expect(site.getByRole('tab', { name: 'Notes & timeline' })).toHaveAttribute('aria-selected', 'true');
+    await expect(site.getByLabel('My working theory', { exact: true })).toHaveValue('Keep the witness record with this file.');
+    await site.getByRole('button', { name: 'File my conclusion', exact: true }).click();
+    const result = site.getByRole('dialog', { name: 'Conclusion review' });
+    await expect(result).toBeVisible();
+    const resultTitle = await result.locator('h3').boundingBox();
+    expect(resultTitle!.y).toBeGreaterThanOrEqual(0);
+    expect(resultTitle!.y + resultTitle!.height).toBeLessThanOrEqual(viewport.height);
+    await page.keyboard.press('Escape');
+    await site.getByRole('button', { name: 'Restart this case', exact: true }).click();
+    await expect(site.getByRole('dialog', { name: 'Restart this case?', exact: true })).toBeVisible();
+    await site.getByRole('button', { name: 'Yes, restart this case', exact: true }).click();
+    await expect(site.getByLabel('My working theory', { exact: true })).toHaveValue('');
+    await assertDesk();
+    for (const evidence of CASES[0].evidence.filter(item => item.rules.length)) {
+      await site.locator(`[data-action="evidence"][data-id="${evidence.id}"]`).click();
+      await site.getByLabel(`Pin exhibit ${evidence.letter} to my reasoning`).check();
+    }
+    await site.getByRole('tab', { name: 'People', exact: true }).click();
+    await site.getByRole('radio', { name: 'Choose Leda', exact: true }).check();
+    await site.getByRole('button', { name: 'File my conclusion', exact: true }).click();
+    await expect(result.getByRole('heading', { name: 'Case closed. Nicely reasoned.' })).toBeVisible();
+    const solvedTitle = await result.locator('h3').boundingBox();
+    expect(solvedTitle!.y).toBeGreaterThanOrEqual(0);
+    expect(solvedTitle!.y + solvedTitle!.height).toBeLessThanOrEqual(viewport.height);
+    await page.screenshot({ path: testInfo.outputPath(`detective-finish-${viewport.width}x${viewport.height}.png`) });
+  });
+}

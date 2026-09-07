@@ -2,6 +2,7 @@ import './style.css';
 import { copyText, createProjectPage, escapeMarkup, query } from '../../core/page';
 import { clamp } from '../../core/math';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
+import { createWorkspaceTabs } from '../../core/workspace';
 import { RadioAudio } from './audio';
 import type { RadioMode, RadioStatus } from './audio';
 import { stationFromHash, stations } from './data';
@@ -28,8 +29,10 @@ function stationNotebook(station: Station): string {
   return `<section class="radio-notebook" id="radio-notebook" aria-labelledby="radio-story-title">
     <article class="radio-story">
       <p class="radio-eyebrow">Field notebook / ${station.number} <span>Fictional place</span></p>
+      <p class="radio-notebook-invitation">${escapeMarkup(station.invitation)}</p>
       <p class="radio-place">${escapeMarkup(station.place)}</p>
       <h2 id="radio-story-title">${escapeMarkup(station.storyTitle)}</h2>
+      <figure class="radio-notebook-sketch">${stationSketch(station)}<figcaption>${escapeMarkup(station.sketchCaption)}</figcaption></figure>
       <div class="radio-story-prose">${station.story.map((paragraph) => `<p>${escapeMarkup(paragraph)}</p>`).join('')}</div>
       <div class="radio-pocket-list"><h3>Objects to notice</h3><ul>${station.objects.map((object) => `<li>${escapeMarkup(object)}</li>`).join('')}</ul></div>
     </article>
@@ -58,6 +61,7 @@ function stationNotebook(station: Station): string {
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'radio');
   const { root, signal } = page;
+  root.dataset.workspace = 'true';
   let selected = Math.max(0, stationFromHash(window.location.hash));
   let mode: RadioMode = 'off';
   const initial = stations[selected];
@@ -66,14 +70,14 @@ export function mount(context: ProjectContext): ProjectInstance {
   root.dataset.radioMode = 'off';
   root.innerHTML = `<div class="radio-wrap">
     <header class="radio-header">
-      <a class="radio-brand" href="#radio-receiver" aria-label="Radio 404 receiver">${antenna}<span>R / 404<span>Field radio service</span></span></a>
+      <a class="radio-brand" href="#radio-receiver" aria-label="Radio 404 receiver">${antenna}<div class="radio-brand-text"><h1>Radio <span>404</span></h1><span>Four places / no signal required</span></div></a>
       <nav class="radio-navigation" aria-label="Radio 404 navigation">
-        <a href="#radio-receiver">Receiver</a><a href="#radio-stations">Stations</a><a href="#radio-guide">Field guide</a>
+        <div data-radio-tabs></div>
       </nav>
     </header>
 
     <div class="radio-introduction">
-      <div><p class="radio-eyebrow">Four places / no signal required</p><h1>Radio <span>404</span></h1></div>
+      <div><p class="radio-eyebrow">Four places / no signal required</p><h2>Fiction, at low volume.</h2></div>
       <p>A warm window. A room below the tide.<br class="radio-desktop-break"/> Tune to somewhere that isn’t on the map.</p>
       <div class="radio-edition" aria-label="Volume one, four fictional stations"><span>VOL. 01</span><strong>Fiction,<br/>at low volume.</strong></div>
     </div>
@@ -105,7 +109,7 @@ export function mount(context: ProjectContext): ProjectInstance {
       </div>
       <div class="radio-receiver-footer"><p><span aria-hidden="true">✳</span> Generated on your device, not a live broadcast.</p><button type="button" data-radio-copy>Copy station link <span aria-hidden="true">↗</span></button></div>
     </section>
-    <div class="radio-receiver-afterword"><p id="radio-volume-help">Start low; raise your device volume gently. At 0%, the receiver is muted.</p><p role="status" aria-live="polite" data-radio-link-status></p></div>
+    <div class="radio-receiver-afterword"><p id="radio-volume-help">Start low. 0% mutes.</p><p role="status" aria-live="polite" data-radio-link-status></p></div>
 
     <section class="radio-stations" id="radio-stations" aria-labelledby="radio-stations-title">
       <div class="radio-section-heading"><div><p class="radio-eyebrow">The station directory</p><h2 id="radio-stations-title">Where shall we linger?</h2></div><p>Choose a station to open its notebook.<br/>Sound stays off until you press Listen.</p></div>
@@ -126,6 +130,45 @@ export function mount(context: ProjectContext): ProjectInstance {
 
     <footer class="radio-footer"><div>${antenna}<p><strong>Radio 404</strong><span>Four fictional places. All words and sounds original.</span></p></div><a href="#radio-receiver">Back to the receiver ↑</a></footer>
   </div>`;
+
+  const wrap = query<HTMLElement>(root, '.radio-wrap');
+  const guide = query<HTMLElement>(root, '#radio-guide');
+  const receiverPane = document.createElement('div');
+  receiverPane.className = 'radio-pane radio-pane-receiver';
+  receiverPane.append(
+    query<HTMLElement>(root, '#radio-receiver'),
+    query<HTMLElement>(root, '.radio-receiver-afterword'),
+  );
+  const panes = [
+    { id: 'receiver', label: 'Receiver', panel: receiverPane },
+    { id: 'stations', label: 'Stations', panel: query<HTMLElement>(root, '#radio-stations') },
+    { id: 'notebook', label: 'Notebook', panel: query<HTMLElement>(root, '[data-radio-content]') },
+    { id: 'guide', label: 'Guide', panel: guide },
+  ].map(pane => {
+    if (pane.panel === receiverPane) {
+      wrap.append(receiverPane);
+      return pane;
+    }
+    const wrapper = document.createElement('div');
+    wrapper.className = `radio-pane radio-pane-${pane.id}`;
+    wrapper.append(pane.panel);
+    if (pane.id === 'guide') wrapper.append(
+      query<HTMLElement>(root, '.radio-introduction'),
+      query<HTMLElement>(root, '.radio-footer'),
+    );
+    wrap.append(wrapper);
+    return { ...pane, panel: wrapper };
+  });
+  const tabs = createWorkspaceTabs(page, {
+    id: 'radio-workspace', label: 'Radio 404 workspace',
+    host: query<HTMLElement>(root, '[data-radio-tabs]'), panes,
+  });
+  for (const link of root.querySelectorAll<HTMLAnchorElement>('a[href="#radio-receiver"]')) {
+    link.addEventListener('click', event => {
+      event.preventDefault();
+      tabs.select('receiver');
+    }, { signal });
+  }
 
   const listenButton = query<HTMLButtonElement>(root, '[data-radio-listen]');
   const stopButton = query<HTMLButtonElement>(root, '[data-radio-stop]');
@@ -152,7 +195,7 @@ export function mount(context: ProjectContext): ProjectInstance {
     const failed = mode === 'error' || mode === 'unavailable';
     errorMessage.hidden = !failed;
     errorMessage.textContent = failed ? next.message : '';
-    status.textContent = failed ? 'The receiver is silent. You can still explore every station.' : next.message;
+    status.textContent = failed ? 'Receiver silent. The notebook is available.' : next.message;
     if (mode === 'error') page.report(next.message);
   }
 
@@ -202,7 +245,10 @@ export function mount(context: ProjectContext): ProjectInstance {
   }
 
   stationButtons.forEach((button, index) => {
-    button.addEventListener('click', () => selectStation(index, 'control'), { signal });
+    button.addEventListener('click', () => {
+      selectStation(index, 'control');
+      tabs.select('notebook');
+    }, { signal });
   });
   query<HTMLButtonElement>(root, '[data-radio-previous]').addEventListener('click', () => {
     selectStation((selected - 1 + stations.length) % stations.length, 'control');

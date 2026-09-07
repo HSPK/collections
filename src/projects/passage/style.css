@@ -225,3 +225,83 @@
   .project-passage .passage-space { min-height: 390px; height: 390px; }
   .project-passage .passage-walk-controls label { width: 100%; margin-left: 0; }
 }
+
+.project-passage[data-workspace] {
+  --workspace-paper: var(--passage-paper);
+  height: 100dvh;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: 8px;
+  padding: 12px 20px;
+}
+.project-passage[data-workspace] .passage-masthead { padding: 0 0 8px; gap: 16px; flex-wrap: nowrap; }
+.project-passage[data-workspace] h1 { font-size: 40px; white-space: nowrap; }
+.project-passage[data-workspace] .passage-history { flex-wrap: wrap; }
+.project-passage[data-workspace] .passage-viewbar { padding: 0; }
+.project-passage[data-workspace] .passage-pane-nav { width: auto; }
+.project-passage[data-workspace] .passage-pane-nav button { min-width: 64px; white-space: nowrap; }
+.project-passage[data-workspace] .passage-pane-nav button[aria-selected="true"] { background: var(--passage-ink); color: var(--passage-paper); }
+.project-passage[data-workspace] .passage-workbench { min-height: 0; grid-template-columns: minmax(0, 1.4fr) minmax(330px, 1fr); grid-template-rows: minmax(0, 1fr); }
+.project-passage[data-workspace] .passage-space-pane { grid-row: auto; display: flex; min-height: 0; }
+.project-passage[data-workspace] .passage-space { min-height: 0; height: auto; flex: 1; }
+.project-passage[data-workspace] .passage-dock { min-height: 0; min-width: 0; display: grid; grid-template-rows: minmax(0, 1fr); }
+.project-passage[data-workspace] .passage-dock > :not([hidden]) { display: flex; flex-direction: column; grid-row: auto; min-height: 0; min-width: 0; overflow: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+.project-passage[data-workspace] .passage-space-controls { padding: 16px; background: #f9f6ee; }
+.project-passage[data-workspace] .passage-building-line { display: grid; gap: 12px; padding: 0 0 16px; }
+.project-passage[data-workspace] .passage-building-line > div > span { display: block; }
+.project-passage[data-workspace] .passage-building-line > label { display: grid; gap: 4px; font-size: 14px; }
+.project-passage[data-workspace] .passage-building-line select { width: 100%; }
+.project-passage[data-workspace] .passage-journey { grid-template-columns: minmax(0, 1fr) 36px; gap: 10px; padding: 12px; }
+.project-passage[data-workspace] .passage-journey > label { grid-column: 1; display: flex; flex-wrap: nowrap; }
+.project-passage[data-workspace] .passage-journey > label select { flex: 1; width: 0; }
+.project-passage[data-workspace] .passage-journey > label:last-child { grid-column: 1 / -1; }
+.project-passage[data-workspace] .passage-swap { grid-column: 2; grid-row: 1 / 3; align-self: stretch; }
+.project-passage[data-workspace] .passage-plan-pane { border: 0; }
+.project-passage[data-workspace] .passage-panel-heading { flex-shrink: 0; padding: 6px 10px; min-height: 42px; }
+.project-passage[data-workspace] .passage-plan { min-height: 100px; flex: 1; position: relative; }
+.project-passage[data-workspace] .passage-plan svg { position: absolute; inset: 0; width: 100%; height: 100%; max-height: none; }
+.project-passage[data-workspace] .passage-plan-key, .project-passage[data-workspace] .passage-plan-tools,
+.project-passage[data-workspace] .passage-pick-hint { flex-shrink: 0; }
+.project-passage[data-workspace] .passage-editor-scroll { max-height: none; overflow: visible; padding: 0 12px 14px; }
+.project-passage[data-workspace] .passage-route-pane { border-top: 0; }
+.project-passage[data-workspace] .passage-directions ol { max-height: none; overflow: visible; }
+.project-passage[data-workspace] .passage-search-strip { min-height: 58px; max-height: 58px; overflow: auto; padding: 4px 64px 4px 0; font-size: 14px; }
+.project-passage[data-workspace] .passage-search-actions { font-size: 14px; }
+.project-passage[data-workspace] .passage-bottom { display: grid; grid-template-columns: 1fr; gap: 20px; padding: 0; }
+.project-passage[data-workspace] .passage-deck { display: block; margin-top: 20px; }
+.project-passage[data-workspace] .passage-space-footer { margin-top: 16px; flex-wrap: wrap; }
+.project-passage[data-workspace] .passage-scale { display: inline; }
+@media (max-width: 760px) {
+  .project-passage[data-workspace] { padding: 8px; gap: 6px; }
+  .project-passage[data-workspace] .passage-masthead { display: flex; align-items: center; padding-right: 0; gap: 8px; }
+  .project-passage[data-workspace] h1 { font-size: 30px; }
+  .project-passage[data-workspace] .passage-kicker { display: none; }
+  .project-passage[data-workspace] .passage-history { gap: 3px; justify-content: flex-end; }
+  .project-passage[data-workspace] .passage-history button { min-height: 32px; padding: 3px 5px; }
+  .project-passage[data-workspace] .passage-viewbar { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+  .project-passage[data-workspace] .passage-pane-nav { grid-column: 1 / -1; width: 100%; }
+  .project-passage[data-workspace] .passage-pane-nav button { min-width: 0; min-height: 36px; padding: 6px; }
+  .project-passage[data-workspace] .passage-viewbar > label { width: auto; display: flex; gap: 4px; font-size: 14px; min-width: 0; }
+  .project-passage[data-workspace] .passage-viewbar select { width: 0; flex: 1; min-height: 36px; padding-left: 5px; }
+  .project-passage[data-workspace] .passage-workbench { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(170px, .55fr) minmax(0, 1fr); }
+  .project-passage[data-workspace] .passage-workbench .passage-space-pane { display: flex; border: 0; border-bottom: 1px solid var(--passage-rule); }
+  .project-passage[data-workspace] .passage-workbench[data-pane="plan"] { grid-template-rows: minmax(0, 1fr); }
+  .project-passage[data-workspace] .passage-workbench[data-pane="plan"] .passage-space-pane { display: none; }
+  .project-passage[data-workspace] .passage-space-controls { padding: 10px; }
+  .project-passage[data-workspace] .passage-building-line { padding-bottom: 8px; gap: 8px; }
+  .project-passage[data-workspace] .passage-building-line > label { display: flex; margin: 0; }
+  .project-passage[data-workspace] .passage-building-line select { flex: 1; width: 0; }
+  .project-passage[data-workspace] .passage-building-line > div > span { font-size: 14px; }
+  .project-passage[data-workspace] .passage-search-strip { display: flex; max-height: 58px; gap: 6px; }
+  .project-passage[data-workspace] .passage-search-actions { padding: 0; max-width: 40%; }
+  .project-passage[data-workspace] .passage-search-actions button { margin-left: 0; padding: 4px; min-height: 32px; }
+  .project-passage[data-workspace] .passage-walk-controls label { width: auto; }
+  .project-passage[data-workspace] .passage-method { margin-top: 0; }
+}
+@media (max-height: 550px) and (min-width: 761px) {
+  .project-passage[data-workspace] { padding: 6px 12px; gap: 5px; }
+  .project-passage[data-workspace] .passage-kicker { display: none; }
+  .project-passage[data-workspace] h1 { font-size: 32px; }
+  .project-passage[data-workspace] .passage-search-strip { max-height: 58px; }
+}

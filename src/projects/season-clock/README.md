@@ -5,6 +5,21 @@ An original illustrated almanac, not a botanical or weather model. One fictional
 motion opens the same beautiful still, paused; explicit Play remains available.
 Changing the motion preference pauses rather than silently resuming.
 
+## One-screen almanac
+
+The `data-workspace="true"` root allocates one dynamic viewport to the landscape,
+place selector, live phase, year slider, seasonal shortcuts, playback and SVG
+save. Desktop and short landscape screens put transport beside the illustration;
+portrait screens retain a live illustration directly above the transport.
+Neither layout scrolls the document or clips it to conceal overflow.
+
+**Field notes** opens the project-colored native almanac dialog. Pace, layer
+meters, day count, landscape and phase descriptions, scrubbing guidance and all
+three explanatory essays remain available there. Escape or Close returns focus
+to the trigger without changing the year. The retained SVG uses its original
+viewBox and scales to its grid allocation; the scene, leaf identities and
+self-contained export do not change when the dialog opens.
+
 ## Files and extension points
 
 - `index.ts` owns the standalone page, native controls, accessible feedback,
@@ -85,9 +100,12 @@ The native `downloadText` helper downloads it locally and revokes its object URL
 ## Focused verification
 
 ```sh
-SITE_URL=http://127.0.0.1:4173 ./node_modules/.bin/playwright test tests/series/season-clock.spec.ts
+SITE_URL=http://127.0.0.1:4173/ flock /home/hangxingwei/.copilot/session-state/23f8825b-223c-4cb6-95ec-3e7881d9e65f/files/viewport-browser.lock npm test -- tests/series/season-clock.spec.ts --reporter=dot
 ```
 
 The tests cover phase boundaries, the repeated winter endpoint, fixed geometry,
 reversible leaf trajectories, native controls, SVG contents, reduced motion,
-375px layout, and abort/destroy cleanup.
+375px layout, and abort/destroy cleanup. Workspace workflows cover 1440x900,
+1280x720, 375x812, 320x640 and 768x480: no document scroll, onscreen controls,
+actual seasonal geometry changes, reversible scrubs, place selection, almanac
+pace changes, focus restoration and playback/restart.

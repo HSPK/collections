@@ -95,6 +95,7 @@ test('Crystal Cavern: paused views, mineral lighting and direct exploration chan
   await expect(scene).toHaveAttribute('data-view', 'grove');
   await expect(page.getByRole('button', { name: 'Crystal grove', exact: false })).toHaveAttribute('aria-pressed', 'true');
   const originalColor = await scene.getAttribute('data-crystal-color');
+  await page.getByRole('tab', { name: 'Light', exact: true }).click();
   await page.getByLabel('Light palette', { exact: true }).selectOption('amber');
   await expect(scene).toHaveAttribute('data-mineral', 'amber');
   await expect(scene).not.toHaveAttribute('data-crystal-color', originalColor!);
@@ -125,6 +126,7 @@ test('Crystal Cavern: paused views, mineral lighting and direct exploration chan
   expect((await canvas.screenshot()).equals(heldFrame)).toBe(true);
   await page.getByRole('button', { name: 'Play mineral light', exact: true }).click();
   await expect.poll(() => scene.getAttribute('data-phase')).not.toBe(held);
+  await page.getByRole('tab', { name: 'Atmosphere', exact: true }).click();
   const cycle = page.getByRole('slider', { name: 'Light cycle', exact: true });
   await cycle.focus();
   await page.keyboard.press('Home');
@@ -166,8 +168,11 @@ test('Crystal Cavern: 375px reduced motion stays still and leaving releases its 
     'p, label, button, select, small, output, [data-phase-time], .cavern-eyebrow, .cavern-contour span, .cavern-view-label div > span',
   ).evaluateAll((elements) => elements.map((element) => Number.parseFloat(getComputedStyle(element).fontSize)));
   expect(Math.min(...labelSizes)).toBeGreaterThanOrEqual(12);
-  for (const control of await page.locator('.project-crystal-cavern input[type="range"]').all()) {
-    expect((await control.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  for (const pane of ['Light', 'Atmosphere']) {
+    await page.getByRole('tab', { name: pane, exact: true }).click();
+    for (const control of await page.getByRole('tabpanel', { name: pane, exact: true }).locator('input[type="range"]').all()) {
+      expect((await control.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    }
   }
   const canvas = scene.locator('canvas');
   expect(await canvas.evaluate((element: HTMLCanvasElement) => element.width / element.getBoundingClientRect().width)).toBeLessThanOrEqual(1.01);
@@ -193,4 +198,39 @@ test('Crystal Cavern: 375px reduced motion stays still and leaving releases its 
   expect(await page.evaluate(() => JSON.parse(sessionStorage.getItem('crystal-cavern-canvas-disposal') ?? 'null')))
     .toEqual({ connected: false, contextLost: true });
   expect(errors).toEqual([]);
+});
+
+test('Crystal Cavern: viewport instruments and fieldbook keep the chamber on screen', async ({ page }, testInfo) => {
+  test.setTimeout(120_000);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('./projects/crystal-cavern/');
+  const site = page.locator('.project-crystal-cavern');
+  await expect(page.locator('[data-cavern-scene]')).toHaveAttribute('data-ready', 'true');
+  await expect(site).toHaveAttribute('data-workspace', 'true');
+  for (const [width, height] of [[1440, 900], [1280, 720], [375, 812], [320, 640], [768, 480]]) {
+    await page.setViewportSize({ width, height });
+    await page.getByRole('tab', { name: 'Views', exact: true }).click();
+    await expect.poll(() => site.evaluate(element => Math.round(element.getBoundingClientRect().height))).toBe(height);
+    expect(await page.evaluate(() => ({
+      width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight,
+    }))).toEqual({ width, height });
+    const canvas = site.locator('canvas');
+    await expect.poll(() => canvas.evaluate((element: HTMLCanvasElement) => Math.abs(element.width / element.height - element.clientWidth / element.clientHeight))).toBeLessThan(0.02);
+    await page.screenshot({ path: testInfo.outputPath(`crystal-cavern-${width}x${height}.png`) });
+    for (const pane of ['Views', 'Light', 'Atmosphere']) {
+      await page.getByRole('tab', { name: pane, exact: true }).click();
+      const panel = page.getByRole('tabpanel', { name: pane, exact: true });
+      const box = (await panel.boundingBox())!;
+      expect(box.y + box.height).toBeLessThanOrEqual(height);
+      expect(await panel.evaluate(element => getComputedStyle(element).overflowY)).toBe('auto');
+    }
+    await page.getByRole('button', { name: 'Fieldbook', exact: true }).click();
+    await expect(page.getByRole('dialog', { name: 'Cavern fieldbook', exact: true })).toBeVisible();
+    const lanternite = page.getByRole('term').filter({ hasText: 'Lanternite' });
+    await lanternite.scrollIntoViewIfNeeded();
+    await expect(lanternite).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('button', { name: 'Fieldbook', exact: true })).toBeFocused();
+    expect(await page.evaluate(() => scrollY)).toBe(0);
+  }
 });

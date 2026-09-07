@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import { expectWorkspaceViewport, visibleControlProblems } from '../helpers/workspace';
 import type { ProjectContext, ProjectInstance } from '../../src/core/types';
 import { advanceGarden, createGarden, LoudnessEnvelope, paperOpened, rootMeanSquare, unfoldStep } from '../../src/projects/breath-garden/engine';
 
@@ -133,15 +134,20 @@ test('microphone consent, denial, live input, cancellation, visibility, and disp
   expect(await page.evaluate(() => window.__breathMock.requests)).toBe(0);
   await page.screenshot({ path: test.info().outputPath('breath-garden-desktop.png'), fullPage: true });
 
+  await site.getByRole('button', { name: 'Microphone · off', exact: true }).click();
+  await expect(site.getByRole('dialog', { name: 'Optional microphone', exact: true })).toBeVisible();
+  expect(await page.evaluate(() => window.__breathMock.requests)).toBe(0);
   await page.evaluate(() => { window.__breathMock.mode = 'deny'; });
   await site.getByRole('button', { name: 'Enable microphone', exact: true }).click();
   await expect(site).toHaveAttribute('data-mic-state', 'denied');
   await expect(site.locator('[data-mic-message]')).toContainText('Nothing is listening.');
   const initial = Number(await site.getAttribute('data-opened'));
+  await site.getByRole('button', { name: 'Close Optional microphone', exact: true }).click();
   await site.getByRole('button', { name: 'Send a breeze', exact: true }).click();
   expect(Number(await site.getAttribute('data-opened'))).toBeGreaterThan(initial);
   expect(await page.evaluate(() => window.__breathMock.contexts)).toBe(0);
 
+  await site.getByRole('button', { name: 'Microphone · denied', exact: true }).click();
   await page.evaluate(() => { window.__breathMock.mode = 'allow'; });
   await site.getByRole('button', { name: 'Enable microphone', exact: true }).click();
   await expect(site).toHaveAttribute('data-mic-state', 'live');
@@ -191,6 +197,7 @@ test('microphone consent, denial, live input, cancellation, visibility, and disp
   await page.evaluate(() => window.__breathMock.grantPending());
   await expect.poll(() => page.evaluate(() => window.__breathMock.stopped)).toBe(4);
   expect(await page.evaluate(() => window.__breathMock.contexts)).toBe(3);
+  await site.getByRole('button', { name: 'Close Optional microphone', exact: true }).click();
 
   const cleanup = await page.evaluate(async () => {
     window.__breathMock.mode = 'allow';
@@ -206,6 +213,7 @@ test('microphone consent, denial, live input, cancellation, visibility, and disp
       instance = project.mount({ container: holder, controls: holder, signal: controller.signal, reducedMotion: true, report: () => {} });
       const root = holder.querySelector<HTMLElement>('.project-breath-garden')!;
       const button = root.querySelector<HTMLButtonElement>('[data-mic]')!;
+      root.querySelector<HTMLButtonElement>('[data-open-microphone]')!.click();
       button.click();
       for (let frame = 0; frame < 120 && root.dataset.micState !== 'live'; frame += 1) {
         await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
@@ -276,12 +284,58 @@ test('375px touch and Space unfold the paused garden without requesting a microp
     expect(await page.evaluate(() => window.__breathMock.requests)).toBe(0);
     expect(await page.evaluate(() => window.__breathMock.contexts)).toBe(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-    for (const control of await site.locator('button, input').all()) {
+    for (const control of await site.locator('button:visible, input:visible').all()) {
       expect((await control.boundingBox())!.height).toBeGreaterThanOrEqual(44);
     }
+    for (const [trigger, title] of [['Microphone · off', 'Optional microphone'], ['Field notes', 'Field notes']]) {
+      await site.getByRole('button', { name: trigger, exact: true }).click();
+      const dialog = site.getByRole('dialog', { name: title, exact: true });
+      for (const control of await dialog.locator('button, input').all()) {
+        expect((await control.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+      }
+      await dialog.getByRole('button', { name: `Close ${title}`, exact: true }).click();
+    }
+    expect(await page.evaluate(() => window.__breathMock.requests)).toBe(0);
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.screenshot({ path: test.info().outputPath('breath-garden-mobile.png'), fullPage: true });
   } finally {
     await context.close();
+  }
+});
+
+test('Breath Garden resizes the live garden and keeps optional information in local dialogs', async ({ page }) => {
+  await mockMicrophone(page);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('./projects/breath-garden/');
+  const root = page.locator('.project-breath-garden');
+  for (const [width, height] of [[1440, 900], [1280, 720], [375, 812], [320, 640], [768, 480]]) {
+    await page.setViewportSize({ width, height });
+    await expect(root).toHaveAttribute('data-workspace', 'true');
+    await expect.poll(() => root.evaluate(element => Math.round(element.getBoundingClientRect().height))).toBe(height);
+    const before = Number(await root.getAttribute('data-opened'));
+    await root.getByRole('button', { name: 'Send a breeze', exact: true }).click();
+    expect(Number(await root.getAttribute('data-opened'))).toBeGreaterThan(before);
+    await root.getByRole('button', { name: 'Fold back', exact: true }).click();
+    await root.getByRole('button', { name: 'Field notes', exact: true }).click();
+    const notes = root.getByRole('dialog', { name: 'Field notes', exact: true });
+    await notes.getByText('Meet the nine paper specimens', { exact: true }).click();
+    await expect(notes).toBeVisible();
+    await notes.getByRole('button', { name: 'Close Field notes', exact: true }).click();
+    const dimensions = await root.evaluate(element => ({
+      root: element.getBoundingClientRect().height,
+      height: document.documentElement.scrollHeight,
+      width: document.documentElement.scrollWidth,
+      stage: element.querySelector('canvas')!.getBoundingClientRect().height,
+    }));
+    expect(dimensions.root).toBe(height);
+    expect(dimensions.height).toBeLessThanOrEqual(height);
+    expect(dimensions.width).toBeLessThanOrEqual(width);
+    expect(dimensions.stage).toBeGreaterThan(100);
+    expect(await page.evaluate(() => window.__breathMock.requests)).toBe(0);
+    await expectWorkspaceViewport(page, width, height);
+    expect(await visibleControlProblems(root)).toEqual([]);
+    expect(await root.locator('.bg-garden-actions button').evaluateAll(buttons =>
+      buttons.filter(button => button.scrollWidth > button.clientWidth).map(button => button.textContent))).toEqual([]);
+    await page.screenshot({ path: test.info().outputPath(`breath-garden-${width}x${height}.png`) });
   }
 });

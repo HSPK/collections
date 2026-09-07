@@ -71,8 +71,8 @@ and clamped, reflected positions keep agents within the meadow rectangle
   running at the base frequency, inside normalized radius 0.21. Its ring is the
   actual influence boundary. There is no global phase reset.
 - **Pointer/touch:** tap the clearing to enable and position the torch. Once
-  enabled, mouse movement or dragging repositions it. Vertical touch scrolling
-  remains available.
+  enabled, mouse movement or dragging repositions it. The clearing owns touch
+  gestures so dragging the torch is not interrupted by document panning.
 - **Keyboard:** focus the garden; arrows move the torch, Shift+arrows move
   farther, Home centers it, T toggles it, and Space toggles playback.
 - **Begin again:** restore the authored seed and settings, preserving pause.
@@ -80,6 +80,24 @@ and clamped, reflected positions keep agents within the meadow rectangle
 Native labeled range inputs and 44px controls provide keyboard/touch alternatives.
 Changing a control or moving the torch while paused redraws the direct input,
 but does not advance positions, phases, time, or the coherence readout's clock.
+
+## One-screen garden
+
+The root declares `data-workspace="true"` and fits a `100dvh` grid. The garden,
+live Phase agreement, playback, Scatter, all three primary ranges, and the torch
+button remain in one workspace. Phones use a three-column parameter strip below
+the clearing; desktop and short landscape retain a side desk. Primary controls
+and readouts use at least 14px text, with 44px touch targets. Local right clearance
+on the torch button keeps it beside the collection menu instead of sacrificing
+a full-width bottom strip.
+
+**Field notes ↗** opens the native `#fc-guide` dialog, labeled **Field notes**.
+All authored notes, interpretation, complete keyboard help, descriptive live
+feedback, and Begin again are retained there. Only this long secondary content
+scrolls. Escape or **Close Field notes** returns focus to its trigger. The garden
+is never unmounted or layout-hidden by this dialog, so its normalized torch
+coordinates and cached scenery remain valid. Viewport resizing still rebuilds
+the painter's cached layers and redraws a paused garden without advancing time.
 
 ## Rendering and lifecycle
 
@@ -112,3 +130,8 @@ The tests compare seeded uncoupled/coupled trajectories, check true locality,
 local torch attraction/phase influence, finite bounds and candidate limits,
 and exercise actual playback, paused resize, keyboard controls, torch input,
 resets, mobile layout, touch, and reduced-motion changes.
+Five viewport workflows also cover 1440×900, 1280×720, 375×812, 320×640,
+and 768×480: no document scrolling, on-screen controls, real population/canvas
+changes, exact pointer-to-torch coordinates, keyboard movement, secondary notes,
+reset, and modal focus restoration. Screenshots are captured to per-test
+`test.info().outputPath()` files.

@@ -1,5 +1,6 @@
 import './style.css';
 import { createProjectPage, query } from '../../core/page';
+import { createWorkspaceDialog } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { CHAPTERS, DURATION, EXPLODED_FRAME, PARTS, VIEWS } from './data';
 import type { PartId, ViewId } from './data';
@@ -20,6 +21,7 @@ export function mount(context: ProjectContext): ProjectInstance {
   let activeChapter = -1;
 
   page.root.tabIndex = 0;
+  page.root.dataset.workspace = 'true';
   page.root.setAttribute('aria-labelledby', 'ca-title');
   page.root.innerHTML = `
     <header class="ca-header">
@@ -91,12 +93,32 @@ export function mount(context: ProjectContext): ProjectInstance {
       <p><span>Design fiction.</span> Original geometry, invented mechanics. The final picture is drawn locally—no camera, uploads, or external assets.</p>
       <p>Focus the scene: arrow keys orbit, + / − zoom, Space plays or pauses.</p>
     </footer>
-    <div class="ca-engine-controls" data-ca-engine-controls hidden></div>`;
+    <nav class="ca-workspace-actions" aria-label="Camera workspace">
+      <button type="button" data-ca-open-parts>Inspect parts</button>
+      <button type="button" data-ca-open-notes>Stages &amp; notes</button>
+    </nav>
+    <div class="ca-engine-controls" data-ca-engine-controls hidden></div>
+    <p class="sr-only" data-ca-announcement role="status" aria-live="polite"></p>`;
+
+  createWorkspaceDialog(page, {
+    id: 'ca-parts-dialog', title: 'Camera parts inspector',
+    triggers: [query(page.root, '[data-ca-open-parts]')],
+    content: [query(page.root, '.ca-index')],
+  });
+  createWorkspaceDialog(page, {
+    id: 'ca-notes-dialog', title: 'Stages & notes',
+    triggers: [query(page.root, '[data-ca-open-notes]')],
+    content: [
+      query(page.root, '.ca-chapters'), query(page.root, '.ca-stage-note'),
+      query(page.root, '.ca-intro'), query(page.root, '.ca-footer'),
+    ],
+  });
 
   const play = query<HTMLButtonElement>(page.root, '[data-ca-play]');
   const slider = query<HTMLInputElement>(page.root, '[data-ca-progress]');
   const speed = query<HTMLSelectElement>(page.root, '[data-ca-speed]');
   const status = query<HTMLElement>(page.root, '[data-ca-status]');
+  const announcement = query<HTMLElement>(page.root, '[data-ca-announcement]');
   const time = query<HTMLOutputElement>(page.root, '[data-ca-time]');
   const elapsedText = time.firstChild!;
   const percentage = query<HTMLElement>(page.root, '[data-ca-percentage]');
@@ -114,6 +136,7 @@ export function mount(context: ProjectContext): ProjectInstance {
   function report(message: string, notifyCollection = false) {
     if (page.signal.aborted) return;
     status.textContent = message;
+    announcement.textContent = status.closest('dialog')?.open ? '' : message;
     if (notifyCollection) page.report(message);
   }
 

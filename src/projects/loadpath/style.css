@@ -282,3 +282,98 @@
 @media (prefers-reduced-motion: reduce) {
   .project-loadpath *, .project-loadpath *::before, .project-loadpath *::after { scroll-behavior: auto; animation: none !important; transition: none !important; }
 }
+
+.project-loadpath[data-workspace] {
+  --workspace-paper: var(--lp-paper);
+  height: 100dvh;
+  min-height: 0;
+  padding: 12px 20px;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: 8px;
+}
+.project-loadpath[data-workspace] .lp-header { padding: 0 64px 8px 0; }
+.project-loadpath[data-workspace] .lp-brand { gap: 10px; }
+.project-loadpath[data-workspace] .lp-brand svg { width: 34px; height: 34px; }
+.project-loadpath[data-workspace] h1 { font-size: 28px; }
+.project-loadpath[data-workspace] h1 span { margin-top: 3px; font-size: 14px; }
+.project-loadpath[data-workspace] .lp-controls { padding: 0; gap: 8px 14px; }
+.project-loadpath[data-workspace] .lp-controls .lp-field { gap: 2px; }
+.project-loadpath[data-workspace] .lp-history { margin-left: auto; }
+.project-loadpath[data-workspace] .lp-workspace { min-height: 0; grid-template-columns: minmax(0, 1.4fr) minmax(300px, 1fr); gap: 16px; border: 0; }
+.project-loadpath[data-workspace] .lp-structure-pane { display: grid; min-height: 0; grid-template-rows: auto minmax(0, 1fr) auto; border: 1px solid var(--lp-rule); }
+.project-loadpath[data-workspace] .lp-stage-heading { position: static; padding: 12px 14px 0; flex-direction: row; }
+.project-loadpath[data-workspace] .lp-stage-heading h2 { font-size: 23px; margin-top: 3px; }
+.project-loadpath[data-workspace] .lp-stage-heading .lp-state { margin: 0; }
+.project-loadpath[data-workspace] .lp-stage { height: auto; min-height: 0; }
+.project-loadpath[data-workspace] .lp-stage-note { padding: 6px 10px; flex-direction: row; font-size: 14px; }
+.project-loadpath[data-workspace] .lp-dock { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 6px; min-width: 0; min-height: 0; }
+.project-loadpath[data-workspace] .lp-mobile-tabs { display: flex; margin: 0; gap: 4px; }
+.project-loadpath[data-workspace] .lp-mobile-tabs button { min-height: 36px; }
+.project-loadpath[data-workspace] .lp-mobile-tabs button[aria-selected="true"] { background: var(--lp-ink); color: white; }
+.project-loadpath[data-workspace] .lp-dock-panels { display: grid; min-width: 0; min-height: 0; }
+.project-loadpath[data-workspace] .lp-dock-panels > .workspace-pane { min-width: 0; min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; border: 1px solid var(--lp-rule); }
+.project-loadpath[data-workspace] .lp-edit-pane,
+.project-loadpath[data-workspace] .lp-results-pane { display: block; padding: 12px; max-height: none; border: 0; overflow: visible; }
+.project-loadpath[data-workspace] .lp-view-tools { padding: 12px; gap: 8px; }
+.project-loadpath[data-workspace] .lp-segment { flex-basis: 100%; margin: 0; }
+.project-loadpath[data-workspace] .lp-segment button { flex: 1; }
+.project-loadpath[data-workspace] .lp-camera-tools { margin-right: auto; }
+.project-loadpath[data-workspace] .lp-legend-tools { padding: 12px; grid-template-columns: 1fr; gap: 12px; }
+.project-loadpath[data-workspace] .lp-stage-help { padding: 8px 12px; flex-wrap: wrap; }
+.project-loadpath[data-workspace] .lp-stage-help p { font-size: 14px; }
+.project-loadpath[data-workspace] .lp-results-heading { flex-direction: column; align-items: start; gap: 10px; margin-bottom: 14px; }
+.project-loadpath[data-workspace] .lp-results-heading h2 { font-size: 24px; }
+.project-loadpath[data-workspace] .lp-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 16px; }
+.project-loadpath[data-workspace] .lp-metric { border: 0; padding: 12px 8px !important; }
+.project-loadpath[data-workspace] .lp-metric > strong { font-size: 28px; }
+.project-loadpath[data-workspace] .lp-result-columns { grid-template-columns: 1fr; gap: 22px; }
+.project-loadpath[data-workspace] .lp-detail summary span { float: none; display: block; margin-left: 17px; }
+.project-loadpath[data-workspace] .lp-nudge summary,
+.project-loadpath[data-workspace] .lp-force-row b { font-size: 14px; }
+.project-loadpath[data-workspace] .lp-status { min-height: 58px; max-height: 58px; overflow: auto; overscroll-behavior: contain; padding: 5px 64px 5px 8px; }
+.project-loadpath[data-workspace] .lp-files { margin: 0; padding: 14px 0; }
+.project-loadpath[data-workspace] .lp-edition { display: block; text-align: left; margin-bottom: 12px; }
+@media (max-width: 900px) {
+  .project-loadpath[data-workspace] .lp-workspace { grid-template-columns: minmax(0, 1fr) minmax(290px, 1fr); gap: 10px; }
+  .project-loadpath[data-workspace] .lp-controls { gap: 6px; }
+  .project-loadpath[data-workspace] .lp-study-field { width: 190px; }
+  .project-loadpath[data-workspace] .lp-case-field { width: 160px; }
+  .project-loadpath[data-workspace] .lp-stage-heading { flex-direction: column; gap: 5px; }
+  .project-loadpath[data-workspace] .lp-stage-note { flex-direction: column; gap: 2px; }
+}
+@media (max-width: 600px) {
+  .project-loadpath[data-workspace] { padding: 8px; gap: 5px; }
+  .project-loadpath[data-workspace] .lp-header { padding: 0 44px 5px 0; gap: 5px; }
+  .project-loadpath[data-workspace] .lp-brand { gap: 5px; }
+  .project-loadpath[data-workspace] .lp-brand svg { width: 24px; height: 28px; }
+  .project-loadpath[data-workspace] h1 { font-size: 21px; letter-spacing: .04em; }
+  .project-loadpath[data-workspace] h1 span { font-size: 10px; }
+  .project-loadpath[data-workspace] .lp-files-button { padding: 5px; min-height: 36px; max-width: 81px; }
+  .project-loadpath[data-workspace] .lp-controls { display: grid; grid-template-columns: 1fr 1fr; padding: 0; gap: 3px 6px; }
+  .project-loadpath[data-workspace] .lp-study-field,
+  .project-loadpath[data-workspace] .lp-case-field { width: auto; }
+  .project-loadpath[data-workspace] .lp-controls select { min-height: 34px; padding-block: 5px; }
+  .project-loadpath[data-workspace] .lp-controls .lp-check { min-height: 32px; }
+  .project-loadpath[data-workspace] .lp-history { gap: 2px; margin: 0; }
+  .project-loadpath[data-workspace] .lp-history button { min-height: 44px; padding: 4px; }
+  .project-loadpath[data-workspace] .lp-workspace { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(122px, .6fr) minmax(0, 1fr); gap: 6px; }
+  .project-loadpath[data-workspace][data-mobile-pane="structure"] .lp-workspace { grid-template-rows: minmax(122px, 1fr) minmax(0, 1fr); }
+  .project-loadpath[data-workspace] .lp-stage-heading { padding: 5px 8px 0; flex-direction: row; gap: 5px; }
+  .project-loadpath[data-workspace] .lp-stage-heading h2 { font-size: 15px; }
+  .project-loadpath[data-workspace] .lp-stage-heading .lp-eyebrow { font-size: 8px; letter-spacing: .02em; }
+  .project-loadpath[data-workspace] .lp-state { font-size: 10px; padding: 3px 4px; gap: 3px; }
+  .project-loadpath[data-workspace] .lp-stage-note { font-size: 10px; padding: 3px 6px; flex-direction: row; }
+  .project-loadpath[data-workspace] .lp-stage-note .lp-up { font-size: 9px; }
+  .project-loadpath[data-workspace] .lp-edit-pane,
+  .project-loadpath[data-workspace] .lp-results-pane { padding: 8px; }
+  .project-loadpath[data-workspace] .lp-panel-heading { margin-bottom: 8px; }
+  .project-loadpath[data-workspace] .lp-selection-tabs { margin-bottom: 8px; }
+  .project-loadpath[data-workspace] .lp-view-tools { padding: 6px; gap: 5px; }
+  .project-loadpath[data-workspace] .lp-view-tools button,
+  .project-loadpath[data-workspace] .lp-view-tools .lp-check { min-height: 34px; }
+  .project-loadpath[data-workspace] .lp-segment { flex: 1 0 100%; }
+  .project-loadpath[data-workspace] .lp-segment button { padding-inline: 5px; white-space: nowrap; }
+  .project-loadpath[data-workspace] .lp-amplification input { min-height: 34px; width: 65px; padding-block: 4px; }
+  .project-loadpath[data-workspace] .lp-status { padding: 3px 64px 3px 6px; line-height: 1.3; }
+}

@@ -417,8 +417,8 @@ test.describe('SECTION engine', () => {
   });
 });
 
-async function openSection(page: Page) {
-  await page.goto('/collections/projects/section/');
+async function openSection(page: Page, path = './projects/section/') {
+  await page.goto(path);
   await expect(page.locator('.project-section')).toHaveAttribute('data-ready', 'true');
   await settled(page);
 }
@@ -441,7 +441,7 @@ test.describe('SECTION browser', () => {
     test.setTimeout(90_000);
     const errors: string[] = [];
     page.on('pageerror', (error) => errors.push(error.message));
-    await page.setViewportSize({ width: 1440, height: 1080 });
+    await page.setViewportSize({ width: 1440, height: 900 });
     await openSection(page);
     await expect(page.locator('[data-project-preview]')).toBeVisible();
     await expect(page.locator('[data-solid] canvas')).toBeVisible();
@@ -456,6 +456,7 @@ test.describe('SECTION browser', () => {
     await expect(page.locator('[data-volume]')).toHaveText(initial ?? '');
     await page.getByRole('button', { name: 'Redo last edit' }).click(); await settled(page);
     await expect(page.locator('[data-field="radius"]')).toHaveValue('31');
+    await page.getByRole('button', { name: 'Files & guide', exact: true }).click();
     const [jsonDownload] = await Promise.all([page.waitForEvent('download'), page.locator('[data-action="save"]').click()]);
     const jsonPath = await jsonDownload.path();
     if (!jsonPath) throw new Error('Missing JSON download');
@@ -474,6 +475,8 @@ test.describe('SECTION browser', () => {
     expect(svg).toContain('fill-rule="evenodd"');
     expect(svg).toContain('<metadata>');
     expect(svg).not.toMatch(/(?:href|src)="https?:/);
+    await page.getByRole('button', { name: 'Close Construction files & guide', exact: true }).click();
+    await page.getByRole('tab', { name: 'Studies', exact: true }).click();
     await page.locator('[data-study="vessel"]').click(); await settled(page);
     await expect(page.locator('[data-topology]')).toContainText('2 islands / 2 holes');
     await page.getByRole('button', { name: 'Undo last edit' }).click(); await settled(page);
@@ -482,6 +485,7 @@ test.describe('SECTION browser', () => {
     await page.locator('[data-file]').setInputFiles({ name: 'roundtrip.json', mimeType: 'application/json', buffer: Buffer.from(serializeDocument(saved)) });
     await settled(page);
     await expect(page.locator('[data-field="radius"]')).toHaveValue('31');
+    await page.getByRole('tab', { name: 'Construction', exact: true }).click();
     await numericEdit(page, '[data-field="radius"]', '35');
     await page.locator('[data-action="reset"]').click(); await settled(page);
     await expect(page.locator('[data-field="radius"]')).toHaveValue('31');
@@ -522,6 +526,7 @@ test.describe('SECTION browser', () => {
   test('rapid plane changes cancel stale workers and keyboard gestures remain synchronized', async ({ page }) => {
     test.setTimeout(90_000);
     await openSection(page);
+    await page.getByRole('tab', { name: 'Studies', exact: true }).click();
     await page.locator('[data-study="vessel"]').click(); await settled(page);
     await page.locator('#section-offset').evaluate((element) => {
       if (!(element instanceof HTMLInputElement)) throw new Error('Missing range');
@@ -577,7 +582,7 @@ test.describe('SECTION browser', () => {
     await page.locator('[data-field="radius"]').press('Tab');
     const worker = await workerStarted;
     const workerClosed = new Promise<void>((resolve) => worker.once('close', () => resolve()));
-    await page.goto('/collections/');
+    await page.goto('./');
     await workerClosed;
     expect(errors).toEqual([]);
   });
@@ -616,7 +621,7 @@ test.describe('SECTION browser', () => {
         await route.fulfill(file);
       }
     });
-    await openSection(page);
+    await openSection(page, '/collections/projects/section/');
     await expect(page.locator('[data-volume]')).toHaveText('103,724.3');
     expect(workers.length).toBeGreaterThan(0);
     expect(workers.every((url) => url.startsWith('http://127.0.0.1:4173/collections/') && !url.includes('/src/'))).toBe(true);

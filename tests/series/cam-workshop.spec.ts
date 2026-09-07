@@ -374,15 +374,41 @@ test('375px workbench is visible early, readable, overflow-free, and responds to
   await expect(root).toHaveAttribute('data-motion', 'paused');
   await page.waitForTimeout(80);
   expect(await root.getAttribute('data-angle')).toBe(angle);
-  for (const selector of ['[data-cw-play]', '[data-cw-reset]', '[data-cw-back]', '[data-cw-forward]', '[data-cw-scrub]', '[data-cw-law]', '[data-cw-speed]', '[data-cw-timing="rise"]', '.cw-compare']) {
+  for (const selector of ['[data-cw-play]', '[data-cw-reset]', '[data-cw-back]', '[data-cw-forward]', '[data-cw-scrub]', '[data-cw-speed]']) {
     expect((await root.locator(selector).boundingBox())!.height, selector).toBeGreaterThanOrEqual(44);
   }
+  await root.getByRole('button', { name: 'Parameters', exact: true }).click();
+  for (const selector of ['[data-cw-law]', '[data-cw-timing="rise"]', '.cw-compare']) {
+    expect((await root.locator(selector).boundingBox())!.height, selector).toBeGreaterThanOrEqual(44);
+  }
+  await root.getByRole('button', { name: 'Close Cam instruments', exact: true }).click();
   const smallestLabel = await root.locator('label, .cw-annotation, .cw-eyebrow, .cw-hint').evaluateAll((nodes) =>
     Math.min(...nodes.map((node) => Number.parseFloat(getComputedStyle(node).fontSize))));
   expect(smallestLabel).toBeGreaterThanOrEqual(12);
   await setRange(page, '[data-cw-scrub]', OPENING_ANGLE);
   await page.evaluate(() => scrollTo(0, 0));
   await page.screenshot({ path: testInfo.outputPath('cam-workshop-mobile.png') });
+});
+
+test('cam dock and notebook keep draft timing and keyboard focus intact', async ({ page }) => {
+  const root = await openWorkshop(page);
+  const rise = root.locator('[data-cw-timing="rise"]');
+  await rise.fill('300');
+  await expect(rise).toBeFocused();
+  await expect(root).toHaveAttribute('data-timing-valid', 'false');
+  await root.getByRole('button', { name: 'Traces', exact: true }).click();
+  await expect(root.locator('[data-cw-plot="s"] canvas')).toBeVisible();
+  const notebook = root.getByRole('button', { name: 'Notebook', exact: true });
+  await notebook.click();
+  await root.getByRole('button', { name: 'Inspect Harmonic', exact: true }).click();
+  await expect(root).toHaveAttribute('data-law', 'harmonic');
+  await page.keyboard.press('Escape');
+  await expect(notebook).toBeFocused();
+  await root.getByRole('button', { name: 'Parameters', exact: true }).click();
+  await expect(rise).toHaveValue('300');
+  await expect(root).toHaveAttribute('data-timing-valid', 'false');
+  await root.getByRole('button', { name: 'Reset workshop', exact: true }).click();
+  await expect(root).toHaveAttribute('data-timing-valid', 'true');
 });
 
 test('abort/destroy release all loops and size observers; retained reset and playback methods are inert', async ({ page }) => {

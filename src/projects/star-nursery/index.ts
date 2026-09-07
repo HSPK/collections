@@ -1,5 +1,6 @@
 import './style.css';
 import { createProjectPage, query } from '../../core/page';
+import { createWorkspaceDialog } from '../../core/workspace';
 import { spatialExperiment } from '../../core/spatial';
 import type { ExperimentInstance, ProjectContext, ProjectInstance } from '../../core/types';
 import { DEFAULT_SEED, formationLabel, getPreset, PRESETS, windLabel } from './data';
@@ -13,6 +14,7 @@ const playIcon = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m6 3 11 7
 
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'star-nursery');
+  page.root.dataset.workspace = 'true';
   page.root.setAttribute('aria-labelledby', 'sn-title');
   page.root.innerHTML = `
     <header class="sn-masthead">
@@ -21,6 +23,7 @@ export function mount(context: ProjectContext): ProjectInstance {
         <div><p class="sn-eyebrow">Particle study / 041</p><h1 id="sn-title">Star Nursery<span aria-hidden="true">.</span></h1></div>
       </div>
       <div class="sn-intro"><p>A little matter. The possibility of light.</p><span>Generative astronomy-inspired art</span></div>
+      <button type="button" class="sn-explore" data-sn-explore aria-label="Structures and notes">Explore ↗</button>
     </header>
     <div class="sn-workspace" data-project-preview>
       <section class="sn-observation" aria-label="Interactive nebula">
@@ -30,7 +33,7 @@ export function mount(context: ProjectContext): ProjectInstance {
             <span class="sn-perspective">Perspective view</span>
           </div>
           <div class="sn-canvas-host" data-sn-canvas></div>
-          <div class="sn-fallback" data-sn-fallback hidden><div class="sn-fallback-mark">${starMark}</div><h2>A clear view needs WebGL 2.</h2><p>Try a browser with graphics acceleration enabled. You can still explore the formation notes below.</p></div>
+          <div class="sn-fallback" data-sn-fallback hidden><div class="sn-fallback-mark">${starMark}</div><h2>A clear view needs WebGL 2.</h2><p>Try a browser with graphics acceleration enabled. Explore still opens the formation notes.</p></div>
           <div class="sn-view-bottom" aria-hidden="true">
             <div><span class="sn-eyebrow">An imaginary sky</span><p data-sn-title>The quiet before the light.</p></div>
             <span class="sn-crosshair">+</span>
@@ -49,14 +52,17 @@ export function mount(context: ProjectContext): ProjectInstance {
         </fieldset>
         <fieldset class="sn-shaping">
           <legend>02 <span>Gather & release</span></legend>
+          <div class="sn-parameter">
           <div class="sn-range-heading"><label for="sn-formation">Formation</label><output for="sn-formation" data-sn-formation-output>34%</output></div>
           <input id="sn-formation" type="range" min="0" max="100" value="34" step="1" aria-describedby="sn-formation-help">
           <div class="sn-range-ends"><span>Loose dust</span><span>Stellar knots</span></div>
           <p id="sn-formation-help" class="sn-control-note">Pull dust into the stellar seeds.</p>
+          </div><div class="sn-parameter">
           <div class="sn-range-heading sn-wind-heading"><label for="sn-wind">Stellar wind</label><output for="sn-wind" data-sn-wind-output>18%</output></div>
           <input id="sn-wind" type="range" min="0" max="100" value="18" step="1" aria-describedby="sn-wind-help">
           <div class="sn-range-ends"><span>Sheltered</span><span>Dispersed</span></div>
           <p id="sn-wind-help" class="sn-control-note">Spread the cloud and its slow drift.</p>
+          </div>
         </fieldset>
         <div class="sn-playback">
           <button class="sn-play-button" type="button" data-sn-play aria-label="Pause animation">${pauseIcon}<span>Pause</span></button>
@@ -75,6 +81,22 @@ export function mount(context: ProjectContext): ProjectInstance {
     </section>
     <footer class="sn-footer"><span>${starMark} An observatory for imaginary skies</span><p>Made of points. Held in depth.</p></footer>`;
 
+  const guide = createWorkspaceDialog(page, {
+    id: 'sn-guide',
+    title: 'Structures and notes',
+    triggers: [query(page.root, '[data-sn-explore]')],
+    content: [
+      query(page.root, '.sn-intro'),
+      query(page.root, '.sn-inspector-heading'),
+      query(page.root, '.sn-presets'),
+      query(page.root, '[data-sn-reset]'),
+      query(page.root, '#sn-view-help'),
+      ...page.root.querySelectorAll<HTMLElement>('.sn-range-ends, .sn-control-note'),
+      query(page.root, '.sn-motion-note'),
+      query(page.root, '.sn-notes'),
+      query(page.root, '.sn-footer'),
+    ],
+  });
   const canvasHost = query<HTMLElement>(page.root, '[data-sn-canvas]');
   const inspector = query<HTMLElement>(page.root, '[data-sn-controls]');
   const play = query<HTMLButtonElement>(page.root, '[data-sn-play]');
@@ -155,7 +177,10 @@ export function mount(context: ProjectContext): ProjectInstance {
 
   play.addEventListener('click', () => setPaused(!paused), { signal: page.signal });
   page.root.querySelectorAll<HTMLButtonElement>('[data-sn-preset]').forEach((button) => {
-    button.addEventListener('click', () => selectPreset(button.dataset.snPreset as PresetId), { signal: page.signal });
+    button.addEventListener('click', () => {
+      selectPreset(button.dataset.snPreset as PresetId);
+      guide.close();
+    }, { signal: page.signal });
   });
   formation.addEventListener('input', () => {
     state.formation = Number(formation.value) / 100;
@@ -207,9 +232,11 @@ export function mount(context: ProjectContext): ProjectInstance {
     updateControls();
   } catch {
     query<HTMLElement>(page.root, '[data-sn-fallback]').hidden = false;
-    page.root.querySelectorAll<HTMLButtonElement | HTMLInputElement>('button, input').forEach((control) => { control.disabled = true; });
+    page.root.querySelectorAll<HTMLButtonElement | HTMLInputElement>(
+      '.sn-workspace button, .sn-workspace input, [data-sn-preset], [data-sn-reset]',
+    ).forEach((control) => { control.disabled = true; });
     setPaused(true);
-    report('The 3D view is unavailable in this browser. Formation notes are available below.');
+    report('The 3D view is unavailable in this browser. Open Explore for formation notes.');
   }
 
   return { destroy: page.destroy, setPaused, reset };

@@ -208,14 +208,38 @@ test('375px engine stays near the top with readable labels and generous working 
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   for (const locator of [
     root.locator('[data-play]'), root.locator('[data-reset]'),
-    root.locator('#er-cycle'), root.locator('#er-ratio'), root.locator('#er-speed'),
+    root.locator('#er-cycle'),
     root.getByRole('button', { name: 'Inspect compression', exact: true }),
   ]) expect((await locator.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  await root.getByRole('button', { name: 'Parameters', exact: true }).click();
+  for (const locator of [root.locator('#er-ratio'), root.locator('#er-speed')]) {
+    expect((await locator.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  }
+  await root.getByRole('button', { name: 'Close Engine instruments', exact: true }).click();
   const legendFonts = await root.locator('.er-parts, .er-port-legend, .er-cycle-scale, .er-help').evaluateAll((elements) =>
     elements.map((element) => Number.parseFloat(getComputedStyle(element).fontSize)));
   expect(Math.min(...legendFonts)).toBeGreaterThanOrEqual(12);
   await expect(root).toHaveAttribute('data-motion', 'paused');
   await page.screenshot({ path: testInfo.outputPath('engine-room-mobile.png') });
+});
+
+test('engine notebook and readout preserve the current pose and restore keyboard focus', async ({ page }) => {
+  const root = await openStudio(page);
+  await setRange(page, 'Cycle angle', 450);
+  await root.getByRole('button', { name: 'Readout', exact: true }).click();
+  await expect(root.locator('[data-stroke-title]')).toHaveText('Power');
+  await expect(root.locator('.er-chart')).toBeVisible();
+  const notebook = root.getByRole('button', { name: 'Notebook', exact: true });
+  await notebook.click();
+  await expect(root.getByRole('dialog', { name: 'Engine notebook', exact: true })).toBeVisible();
+  await expect(root.locator('.er-equation')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(notebook).toBeFocused();
+  await expect(root).toHaveAttribute('data-angle', '450.000');
+  await root.getByRole('button', { name: 'Parameters', exact: true }).click();
+  await root.locator('#er-ratio').focus();
+  await root.locator('#er-ratio').press('ArrowRight');
+  await expect(root.locator('#er-ratio')).toBeFocused();
 });
 
 test('abort cancels the engine loop and makes retained controls inert', async ({ page }) => {

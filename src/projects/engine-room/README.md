@@ -34,7 +34,9 @@ is `(0, r cos(theta) + sqrt(l^2 - r^2 sin(theta)^2))`. Model y points upward.
 The two points remain exactly l apart. Downward piston displacement is
 `l + r - wrist.y`; its full range is exactly `2r`.
 
-The SVG uses 48 pixels per unit. The crank rotates clockwise in screen
+The SVG uses 48 drawing units per model unit, scaled to the available stage.
+Numbered labels retain at least 14 CSS pixels through a lifecycle-owned resize
+observer. The crank rotates clockwise in screen
 coordinates. The piston wrist and connecting rod endpoints are transformed
 from the pure model, not independently animated. The numbered parts and
 port legend remain readable on a 375px viewport.
@@ -53,6 +55,25 @@ This is an educational mechanism, not manufacturing, fuel-tuning, wiring or
 safety-critical design guidance.
 
 ## Interaction and lifecycle
+
+Compact cycle sliders and desktop dock content leave 64px plus the right
+safe-area inset clear of the collection launcher. Preserve this local gap
+when extending transport or parameter controls; it is not a blank footer.
+
+The studio is a fixed-height viewport workspace. The cutaway, four stroke
+shortcuts and transport stay together; the **Parameters** / **Readout** dock
+holds geometry, speed, display toggles, valve states and the exact timeline.
+On narrow or short screens those buttons open the same live dock in a native
+dialog. **Notebook** contains all mechanism notes, equations, legends and
+keyboard guidance. Escape or Close returns focus to the opening control.
+Opening a pane never resets the engine or reconstructs a focused input.
+
+Workspace placement lives in `index.ts`; scoped grid rules in `style.css`
+reserve the remaining height for the SVG instead of imposing a stage minimum.
+Extend the dock using `createWorkspaceTabs` with wrapper panels (so named
+regions retain their roles); add supplementary material with
+`createWorkspaceDialog` and the engine paper theme. Bind new listeners to
+`page.signal` and dispose observers through `page.onCleanup`.
 
 Scrubbing, stepping and geometry edits pause the clock. Reset restores the
 default geometry, speed and display toggles at 0 degrees, paused. The cutaway

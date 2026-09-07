@@ -15,6 +15,14 @@ const reasonLabels: Record<FilterReason, string> = {
   zero: 'zero weight',
 };
 
+export function probabilityOverview(model: CountModel, distribution: Distribution, chosen: number | null): string {
+  return distribution.order.map(index => `<div class="dl-overview-row" data-overview-token="${escapeMarkup(model.vocabulary[index])}" data-chosen="${index === chosen}">
+    <code>${escapeMarkup(readableToken(model.vocabulary[index]))}</code>
+    <span class="dl-overview-bars" aria-hidden="true"><i style="width:${distribution.base[index] * 100}%"></i><b style="width:${distribution.final[index] * 100}%"></b></span>
+    <span>${escapeMarkup(percent(distribution.final[index]))}</span>
+  </div>`).join('');
+}
+
 export function probabilityTable(model: CountModel, distribution: Distribution, chosen: number | null): string {
   return `
     <table class="dl-probability-table" aria-label="${chosen === null ? 'Next-token' : 'Recorded token'} probability distribution">

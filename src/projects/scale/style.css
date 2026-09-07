@@ -416,3 +416,114 @@
   .project-scale *::before,
   .project-scale *::after { scroll-behavior: auto; animation: none; transition: none; }
 }
+
+.project-scale[data-workspace] {
+  --workspace-paper: var(--scale-paper);
+  height: 100dvh;
+  min-height: 0;
+  padding: 8px 18px 12px;
+  line-height: 1.4;
+}
+.project-scale .scale-site { height: 100%; display: flex; flex-direction: column; gap: 8px; }
+.project-scale .scale-header { flex: 0 0 auto; gap: 8px; padding-bottom: 8px; flex-wrap: nowrap; }
+.project-scale .scale-header h1 { font-size: 34px; margin: 0; }
+.project-scale .scale-header > button { flex: 0 0 auto; }
+.project-scale .workspace-tabs > button { background: var(--scale-wash); border-color: var(--scale-line); }
+.project-scale .scale-pane-stack, .project-scale .scale-atlas-pane { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.project-scale .scale-atlas-pane > section { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; margin: 0; }
+.project-scale .scale-compare-workspace { flex: 1; min-height: 0; align-items: center; grid-template-columns: minmax(0,1.25fr) minmax(0,1fr); gap: 24px; }
+.project-scale .scale-compare-workspace .scale-pair { gap: 10px; grid-template-columns: minmax(0,1fr) 84px minmax(0,1fr); }
+.project-scale .scale-compare-workspace .scale-swap { width: 84px; font-size: 14px; }
+.project-scale .scale-reference-side { min-width: 0; padding: 12px 0; }
+.project-scale .scale-reference-side > label { font-size: 14px; }
+.project-scale .scale-pair-art { width: 100%; max-width: 260px; height: clamp(80px,18vh,180px); display: grid; place-items: center; }
+.project-scale .scale-pair-art .scale-art { height: 100%; max-height: 100%; }
+.project-scale .scale-pair-value { font-size: 30px; }
+.project-scale .scale-pair-measure { font-size: 14px; }
+.project-scale .scale-ratio-sentence { font-size: 17px; line-height: 1.45; }
+.project-scale .scale-compare-workspace .scale-ratio { font-size: clamp(32px,4vw,56px); }
+.project-scale .scale-equations { gap: 8px; margin-top: 12px; padding-top: 10px; }
+.project-scale .scale-equations dt { font-size: 14px; }
+.project-scale .scale-equations dd { overflow-wrap: anywhere; }
+.project-scale .scale-verdict > .scale-help { margin-top: 10px; }
+.project-scale .scale-notebook-button { align-self: stretch; flex-shrink: 0; margin-right: 64px; background: var(--scale-ink); color: var(--scale-paper); }
+.project-scale .scale-explorer-controls { flex-shrink: 0; margin: 0; gap: 10px; }
+.project-scale .scale-log-panel { flex-shrink: 0; margin: 0; padding: 4px 0; }
+.project-scale .scale-log-heading label, .project-scale .scale-log-heading output { font-size: 14px; }
+.project-scale .scale-log-marks { margin-top: 4px; height: 20px; }
+.project-scale .scale-specimen { flex: 1; min-height: 0; gap: 16px; grid-template-columns: minmax(0,1fr) minmax(0,1fr); }
+.project-scale .scale-plate { min-height: 0; padding: 12px; }
+.project-scale .scale-plate-art { min-height: 0; padding: 4px 0; }
+.project-scale .scale-plate-art .scale-art { height: 100%; max-height: 100%; }
+.project-scale .scale-reference-reading { min-width: 0; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 4px 8px; scrollbar-gutter: stable; }
+.project-scale .scale-specimen-copy h3 { font-size: 32px; margin-top: 6px; }
+.project-scale .scale-specimen-value { font-size: 34px; margin-top: 6px; }
+.project-scale .scale-specimen-summary { font-size: 16px; margin-top: 8px; }
+.project-scale .scale-domain-links { grid-template-columns: 1fr; margin-top: 14px; }
+.project-scale .scale-domain-links button { flex-direction: row; border-bottom: 1px solid var(--scale-line); }
+.project-scale #scale-catalogue > .scale-section-heading { flex-shrink: 0; margin: 0; padding: 6px 0; }
+.project-scale #scale-catalogue .scale-section-number { margin: 0; }
+.project-scale #scale-catalogue h2 { font-size: 24px; }
+.project-scale #scale-catalogue .scale-section-heading > p:last-child { font-size: 14px; margin-top: 4px; }
+.project-scale .scale-filters { flex-shrink: 0; margin: 0; gap: 8px; }
+.project-scale .scale-catalogue-heading { flex-shrink: 0; margin: 0; padding-bottom: 4px; }
+.project-scale .scale-catalogue-list { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 0 8px; scrollbar-gutter: stable; }
+.project-scale :is(.scale-help,.scale-eyebrow,.scale-section-number,.scale-wordmark span,.scale-type-label,.scale-scientific,.scale-plate-heading,.scale-plate figcaption,.scale-log-labels,.scale-catalogue-heading,.scale-entry-number,.scale-catalogue-note > summary,.scale-field-note p.scale-help) { font-size: 14px; }
+.project-scale .workspace-dialog .scale-section { margin-top: 16px; }
+.project-scale .workspace-dialog .scale-model { margin: 0; }
+.project-scale :is(.scale-presets button,.scale-domain-links button,.scale-model-inputs label) { font-size: 14px; }
+.project-scale .workspace-dialog .scale-linear-ruler { padding: 12px 0; border-left: 0; }
+@media (max-width: 650px) {
+  .project-scale[data-workspace] { padding: 6px 10px 10px; }
+  .project-scale .scale-site { gap: 6px; }
+  .project-scale .scale-header { flex-wrap: wrap; padding-bottom: 4px; gap: 4px; }
+  .project-scale .scale-header h1 { font-size: 29px; width: 100%; }
+  .project-scale .scale-header > button { min-height: 34px; padding: 5px 10px; }
+  .project-scale .scale-compare-workspace { display: flex; flex-direction: column; align-items: stretch; gap: 8px; justify-content: center; }
+  .project-scale .scale-compare-workspace .scale-pair { grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 4px 10px; }
+  .project-scale .scale-reference-side { display: flex; flex-direction: column; gap: 3px; padding: 5px 0; }
+  .project-scale .scale-reference-side > label { margin: 0; gap: 5px; white-space: nowrap; font-size: 14px; }
+  .project-scale .scale-reference-side select { padding: 7px 20px 7px 5px; font-size: 14px; }
+  .project-scale .scale-letter { height: 24px; width: 24px; font-size: 17px; }
+  .project-scale .scale-pair-art { height: clamp(48px,9vh,80px); margin: 0; }
+  .project-scale .scale-pair-value { text-align: center; align-self: stretch; margin: 0; font-size: 24px; }
+  .project-scale .scale-pair-measure { text-align: center; margin: 0; min-height: 40px; }
+  .project-scale .scale-compare-workspace .scale-swap { grid-row: 2; grid-column: 1 / -1; width: 100%; flex-direction: row; gap: 8px; padding: 4px 8px; min-height: 44px; }
+  .project-scale .scale-swap > span { font-size: 23px; }
+  .project-scale .scale-compare-workspace .scale-comparison-result { padding: 0; border: 0; }
+  .project-scale .scale-compare-workspace .scale-ratio { font-size: 32px; margin: 0; }
+  .project-scale .scale-ratio-sentence { font-size: 14px; line-height: 1.35; margin-top: 4px; }
+  .project-scale .scale-verdict > .scale-eyebrow { font-size: 14px; }
+  .project-scale .scale-equations { margin-top: 6px; padding-top: 4px; }
+  .project-scale .scale-equations dd { font-size: 14px; margin: 0; }
+  .project-scale .scale-verdict > .scale-help { margin-top: 5px; font-size: 14px; line-height: 1.3; }
+  .project-scale .scale-notebook-button { min-height: 40px; padding: 7px 10px; font-size: 14px; }
+  .project-scale .scale-explorer-controls { grid-template-columns: minmax(0,1fr); gap: 4px; }
+  .project-scale .scale-explorer-controls label { gap: 3px; }
+  .project-scale .scale-step-controls button { min-height: 36px; padding: 5px; }
+  .project-scale .scale-log-labels { height: 40px; }
+  .project-scale .scale-log-labels > span:nth-child(even) { top: 20px; }
+  .project-scale .scale-specimen { display: flex; flex-direction: column; gap: 6px; }
+  .project-scale .scale-plate { flex: 0 0 135px; padding: 5px 8px; }
+  .project-scale .scale-plate-art { flex: 1; }
+  .project-scale .scale-plate figcaption { padding-top: 2px; font-size: 14px; }
+  .project-scale .scale-plate figcaption > span:last-child { max-width: 65%; font-size: 14px; line-height: 1.2; }
+  .project-scale .scale-plate-heading { font-size: 14px; }
+  .project-scale .scale-reference-reading { flex: 1; }
+  .project-scale .scale-filters { gap: 5px; }
+  .project-scale .scale-filters label { gap: 3px; }
+  .project-scale .scale-filters > button { grid-column: auto; }
+  .project-scale #scale-catalogue .scale-section-heading h2 { font-size: 21px; }
+}
+@media (min-width: 651px) and (max-height: 600px) {
+  .project-scale .scale-header h1 { font-size: 28px; }
+  .project-scale .scale-compare-workspace { gap: 14px; }
+  .project-scale .scale-compare-workspace .scale-pair { grid-template-columns: minmax(0,1fr) minmax(0,1fr); }
+  .project-scale .scale-compare-workspace .scale-swap { grid-column: 1 / -1; grid-row: 2; width: 100%; flex-direction: row; padding: 4px; min-height: 38px; }
+  .project-scale .scale-pair-art { height: 65px; }
+  .project-scale .scale-reference-side { padding: 4px 0; }
+  .project-scale .scale-reference-side > label { margin-bottom: 4px; }
+  .project-scale .scale-pair-value { font-size: 25px; }
+  .project-scale .scale-ratio-sentence { font-size: 14px; }
+  .project-scale .scale-verdict > .scale-help { font-size: 14px; }
+}

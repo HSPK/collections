@@ -7,11 +7,13 @@ import { extractFeatures, matchImage, parseDescriptor, rasterizePatch } from './
 import type { MatchResult, Patch, Pooling } from './types';
 import { drawMosaic, number, sceneMarkup } from './visuals';
 import { pageMarkup } from './view';
+import { createVisionWorkspace } from './workspace';
 
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'patchwork-vision');
   const { root, signal } = page;
   root.innerHTML = pageMarkup();
+  createVisionWorkspace(page);
   let scene = SCENES[0];
   let patches = scene.patches.map((patch) => ({ ...patch }));
   let selected = 0;
@@ -81,6 +83,7 @@ export function mount(context: ProjectContext): ProjectInstance {
       : 'Equal weight for every nonempty patch. Temperature has no effect in this mode.');
     text('[data-score-label]', pooling === 'attention' ? 'Attention-pooled cosine' : 'Mean-pooled cosine');
     text('[data-score]', number(current?.cosine ?? null));
+    text('[data-live-score]', number(current?.cosine ?? null));
     text('[data-mean-score]', number(current?.meanCosine ?? null));
     text('[data-entropy]', current ? `${number(current.entropy, 2)} bits` : 'n/a');
     text('[data-weight-sum]', current ? `${number(current.weights.reduce((sum, value) => sum + value, 0))} / ${current.activeCount}` : 'n/a');

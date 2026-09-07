@@ -4,13 +4,9 @@ const arrow = '<span aria-hidden="true">↗</span>';
 export function workbenchMarkup(): string {
   return `<div class="relay-shell">
     <header class="relay-header">
-      <a class="relay-brand" href="#relay-workbench" aria-label="Relay workbench"><span class="relay-brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>RELAY<span class="relay-brand-edition">OPEN COMPUTER / 001</span></a>
-      <nav aria-label="Relay navigation"><a href="#relay-workbench">Workbench</a><a href="#relay-programs">Programs</a><a href="#relay-manual">Field manual ${arrow}</a></nav>
+      <h1 class="relay-brand" id="relay-title">RELAY<span class="relay-brand-edition">8-BIT / OPEN COMPUTER</span></h1>
+      <nav aria-label="Relay resources"><button type="button" data-relay-resource="programs">Programs</button><button type="button" data-relay-resource="manual">Manual</button><button type="button" data-relay-resource="files">Files</button></nav>
     </header>
-    <section class="relay-intro" aria-labelledby="relay-title">
-      <div><p class="relay-eyebrow"><span class="relay-led" aria-hidden="true"></span> AN INSTRUMENT FOR UNDERSTANDING</p><h1 id="relay-title">A computer, <em>exposed.</em></h1></div>
-      <p>From a line of code to a bit of light.<br> Write it. Step through it. See everything.</p>
-    </section>
     <section class="relay-workbench" id="relay-workbench" data-project-preview aria-label="Relay computer workbench">
       <header class="relay-toolbar">
         <div class="relay-state"><i aria-hidden="true"></i><strong data-relay-status>Ready</strong><span>RELAY–8</span></div>
@@ -23,10 +19,13 @@ export function workbenchMarkup(): string {
         <div class="relay-speed"><label for="relay-speed">Clock</label><select id="relay-speed"><option value="2">2 Hz</option><option value="8" selected>8 Hz</option><option value="60">60 Hz</option><option value="2000">2 kHz</option></select></div>
         <div class="relay-cycles"><output data-relay-cycles>000000</output><span>CYCLES</span></div>
       </header>
-      <nav class="relay-mobile-tabs" aria-label="Workbench panes">
+      <nav class="relay-mobile-tabs" aria-label="Workbench panes" role="tablist">
         <button type="button" data-relay-pane="machine" aria-pressed="true">Computer</button>
         <button type="button" data-relay-pane="source" aria-pressed="false">Source</button>
         <button type="button" data-relay-pane="output" aria-pressed="false">Screen</button>
+        <button type="button" data-relay-pane="memory" aria-pressed="false">Memory</button>
+        <button type="button" data-relay-pane="trace" aria-pressed="false">Trace</button>
+        <button type="button" data-relay-pane="guide" aria-pressed="false">Guide</button>
       </nav>
       <div class="relay-main-grid" data-relay-active-pane="machine">
         <section class="relay-source-pane" aria-labelledby="relay-source-label">
@@ -47,7 +46,10 @@ export function workbenchMarkup(): string {
             <div class="relay-flags" aria-label="CPU flags">${[['z', 'Zero'], ['n', 'Negative'], ['c', 'Carry']].map(([key, label]) => `<div title="${label}" data-relay-flag="${key}"><span>${key.toUpperCase()}</span><output>0</output></div>`).join('')}</div>
           </div>
         </section>
-        <section class="relay-output-pane" aria-labelledby="relay-output-label">
+        <aside class="relay-tools-pane" aria-label="Machine inspectors">
+          <nav data-relay-inspector-tabs></nav>
+          <div class="relay-tool-panels">
+        <div data-relay-panel="output"><section class="relay-output-pane" aria-labelledby="relay-output-label">
           <header class="relay-pane-heading"><h2 id="relay-output-label"><span>03</span> Output</h2><span>16 × 16</span></header>
           <div class="relay-display-housing">
             <div class="relay-display-top"><span>MEMORY → LIGHT</span><span class="relay-screen-led" aria-hidden="true"></span></div>
@@ -57,31 +59,37 @@ export function workbenchMarkup(): string {
           <div class="relay-screen-address"><span>FRAMEBUFFER</span><code>E0 — FF</code></div>
           <div class="relay-observation"><p class="relay-eyebrow">THE LAST INSTRUCTION</p><h3 data-relay-event-title>Nothing moves<br>until you say so.</h3><p data-relay-event-description>The R is real video memory, initialized by .byte. Press Step to fetch your first instruction.</p></div>
           <button type="button" class="relay-guide-launch" data-relay-action="guide">New to assembly? <span>Take five small steps ${arrow}</span></button>
-        </section>
-      </div>
-      <div class="relay-message" data-relay-message role="status">Ready. “Hello, pixel.” is loaded. Step to see a subroutine turn memory into light.</div>
+        </section></div>
+        <div data-relay-panel="guide">
+          <div class="relay-guide-intro" data-relay-guide-intro><h2>Five small steps</h2><p>Load two numbers, add them, write a byte, and halt. Then reverse every instruction.</p><button type="button" class="relay-assemble" data-relay-action="guide-start">Start guided program</button></div>
       <section class="relay-guide" data-relay-guide hidden aria-label="Guided walkthrough">
         <div><p class="relay-eyebrow" data-relay-guide-progress>GUIDED TRACE / 1 OF 5</p><h3 data-relay-guide-title></h3><p data-relay-guide-description></p><p class="relay-guide-expected" data-relay-guide-expected></p></div>
         <div class="relay-guide-controls"><button type="button" class="relay-assemble" data-relay-action="guide-next">Execute this step →</button><button type="button" data-relay-action="guide-close">Close guide</button></div>
       </section>
-      <div class="relay-inspect-grid">
+        </div>
+        <div data-relay-panel="memory">
         <section class="relay-memory-pane" aria-label="Memory inspector">
           <header class="relay-inspect-heading"><div class="relay-inspect-tabs" role="tablist" aria-label="Memory space"><button type="button" id="relay-tab-ram" role="tab" aria-controls="relay-inspector" aria-selected="true" data-relay-memory="ram">Data RAM</button><button type="button" id="relay-tab-rom" role="tab" tabindex="-1" aria-controls="relay-inspector" aria-selected="false" data-relay-memory="rom">Program ROM</button><button type="button" id="relay-tab-stack" role="tab" tabindex="-1" aria-controls="relay-inspector" aria-selected="false" data-relay-memory="stack">Stack</button></div><span data-relay-memory-size>256 BYTES</span></header>
           <div class="relay-memory-controls" data-relay-memory-controls><label for="relay-memory-page">Address bank</label><select id="relay-memory-page"><option value="0">00–3F</option><option value="64">40–7F</option><option value="128">80–BF</option><option value="192" selected>C0–FF / SCREEN</option></select><label class="relay-follow"><input type="checkbox" data-relay-follow checked> Follow access</label></div>
           <div id="relay-inspector" class="relay-inspector" role="tabpanel" tabindex="0" aria-labelledby="relay-tab-ram" data-relay-inspector></div>
           <p class="relay-memory-note" data-relay-memory-note>Select a byte for decimal and binary. Vermilion marks the last access.</p>
         </section>
+        </div>
+        <div data-relay-panel="trace">
         <section class="relay-trace-pane" aria-label="Execution trace">
           <header class="relay-inspect-heading"><h2>Execution trace</h2><span data-relay-history>0 / 512 UNDO</span></header>
           <div class="relay-trace-head"><span>CYCLE</span><span>PC</span><span>INSTRUCTION / EFFECT</span></div>
           <ol class="relay-trace" data-relay-trace><li class="relay-trace-empty"><span aria-hidden="true">↳</span><p>A record of every decision.<br>Step or run to leave a trace.</p></li></ol>
         </section>
+        </div>
+          </div>
+        </aside>
       </div>
-      <footer class="relay-workbench-footer"><span><i aria-hidden="true"></i> LOCAL MACHINE · NO NETWORK · RUN IS OPT-IN</span><div><button type="button" data-relay-action="export-asm">Export .asm ${arrow}</button><button type="button" data-relay-action="save">Save project ${arrow}</button><button type="button" data-relay-action="import">Import JSON ${arrow}</button><input type="file" accept=".json,application/json" aria-label="Import Relay project file" data-relay-file hidden></div></footer>
+      <div class="relay-message" data-relay-message role="status">Ready. “Hello, pixel.” is loaded. Step to see a subroutine turn memory into light.</div>
     </section>
+    <footer class="relay-workbench-footer"><span><i aria-hidden="true"></i> LOCAL MACHINE · NO NETWORK · RUN IS OPT-IN</span><p>Save loaded source, draft, CPU, RAM, and breakpoints. Undo history is not included.</p><div><button type="button" data-relay-action="export-asm">Export .asm ${arrow}</button><button type="button" data-relay-action="save">Save project ${arrow}</button><button type="button" data-relay-action="import">Import JSON ${arrow}</button><input type="file" accept=".json,application/json" aria-label="Import Relay project file" data-relay-file hidden></div></footer>
     ${programLibrary()}
     ${fieldManual()}
-    <footer class="relay-footer"><a class="relay-brand" href="#relay-workbench">RELAY<span class="relay-brand-edition">A COMPUTER, EXPOSED.</span></a><span>FOUR REGISTERS. ENDLESS POSSIBILITIES.</span><a href="#relay-workbench">Back to the machine ↑</a></footer>
     <dialog class="relay-replace-dialog" aria-labelledby="relay-replace-title"><h2 id="relay-replace-title">Keep your work?</h2><p>Opening another program replaces this draft and the current machine. Save a project first if you want to return to it.</p><div><button type="button" data-relay-action="replace-cancel">Keep working</button><button type="button" data-relay-action="save">Save project</button><button type="button" class="relay-assemble" data-relay-action="replace-confirm">Replace program</button></div></dialog>
   </div>`;
 }

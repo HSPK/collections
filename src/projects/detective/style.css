@@ -17,6 +17,153 @@
   text-align: left;
 }
 
+/* The desk uses the remaining viewport; only its document panes scroll. */
+.project-detective[data-workspace="true"] {
+  --workspace-paper: var(--td-paper);
+  height: 100dvh;
+  min-height: 0;
+  padding: 0;
+}
+.project-detective[data-workspace] .td-shell {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 20px 76px;
+}
+.project-detective .td-workspace-heading {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 18px;
+  color: #fff2d9;
+  background: #352837;
+  box-shadow: 4px 4px 0 #c9b596;
+}
+.project-detective .td-workspace-heading h1 { font-size: 32px; letter-spacing: -.04em; }
+.project-detective .td-workspace-heading h1 em { color: #efc28e; }
+.project-detective .td-workspace-heading > div { display: flex; gap: 8px; }
+.project-detective[data-workspace] [data-case-view] { flex: 1; min-height: 0; }
+.project-detective[data-workspace] .td-case {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+.project-detective[data-workspace] .td-case-heading {
+  display: flex;
+  justify-content: space-between;
+  flex-shrink: 0;
+  gap: 12px;
+  padding: 12px 18px;
+}
+.project-detective[data-workspace] .td-case-heading h2 { margin: 2px 0 0; font-size: 27px; }
+.project-detective[data-workspace] .td-case-heading > button { flex-shrink: 0; }
+.project-detective[data-workspace] .workspace-tabs { padding: 0 12px; }
+.project-detective[data-workspace] .workspace-tabs > button {
+  color: var(--td-ink);
+  background: #eee3ce;
+  border: 1px solid #c8b797;
+  min-height: 44px;
+}
+.project-detective .td-pane-stack { flex: 1; min-height: 0; padding: 12px; }
+.project-detective[data-workspace] .td-pane-stack > .workspace-pane {
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  padding: 4px 8px;
+}
+.project-detective[data-workspace] .td-evidence-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 12px;
+  margin-top: 12px;
+}
+.project-detective[data-workspace] .td-exhibit-toggle { grid-template-columns: 46px minmax(0, 1fr) 20px; padding: 12px; gap: 8px; }
+.project-detective[data-workspace] .td-exhibit-icon { width: 46px; height: 46px; }
+.project-detective[data-workspace] .td-exhibit-title { font-size: 21px; }
+.project-detective[data-workspace] .td-exhibit-teaser { margin-top: 4px; }
+.project-detective[data-workspace] .td-section-label { margin-bottom: 3px; }
+.project-detective[data-workspace] .td-exhibits h3 { font-size: 25px; }
+.project-detective[data-workspace] .td-people { margin: 0; }
+.project-detective[data-workspace] .td-people-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 12px; }
+.project-detective[data-workspace] .td-sidebar { display: block; }
+.project-detective[data-workspace] .td-sidebar > * + * { margin-top: 16px; }
+.project-detective[data-workspace] .td-case-footer {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 6px;
+  padding: 10px 16px;
+  margin: 0;
+}
+.project-detective[data-workspace] .td-case-footer > div:first-of-type { width: 100%; }
+.project-detective .td-desk-actions, .project-detective[data-workspace] .td-footer-actions { display: flex; flex-direction: row; justify-content: space-between; gap: 8px; width: 100%; }
+.project-detective .td-desk-actions > button { flex: 1; }
+.project-detective[data-workspace] .td-case-footer > div:not(.td-desk-actions):not(.td-footer-actions) { display: none; }
+.project-detective[data-workspace] .td-footer-actions > button { min-height: 40px; padding: 4px 8px; }
+.project-detective[data-workspace] .td-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.project-detective[data-workspace] :is(.td-eyebrow, .td-section-label, .td-tab-number, .td-tab-status, .td-count, .td-exhibit-label, .td-exhibit-label > span, .td-small, .td-person dt, .td-person-heading p, .td-case-meta, .td-pencil-tag, .td-slot small, .td-footer, .td-edition, .td-masthead-bottom, .td-wordmark, .td-illustration-card > span) { font-size: 14px; }
+.project-detective[data-workspace] .td-case-library { margin: 0; }
+.project-detective[data-workspace] :is(.td-pencil-button, .td-text-button, .td-pinned-list > span, .td-resolved-order span) { font-size: 14px; }
+.project-detective[data-workspace] .workspace-dialog .td-illustration-card { max-width: 220px; margin: 20px auto; }
+.project-detective[data-workspace] .workspace-dialog .td-briefing { margin: 16px 0 0; }
+.project-detective[data-workspace] .workspace-dialog .td-verdict { margin: 0; padding: 18px; }
+.project-detective[data-workspace] .workspace-dialog .td-masthead h2 { font-size: 52px; }
+.project-detective[data-workspace] .workspace-dialog .td-footer { margin-top: 20px; }
+@media (max-width: 600px) {
+  .project-detective[data-workspace] .td-shell { padding: 8px 8px 70px; gap: 8px; }
+  .project-detective .td-workspace-heading { padding: 9px 10px; gap: 8px; flex-wrap: wrap; }
+  .project-detective .td-workspace-heading h1 { font-size: 27px; }
+  .project-detective .td-workspace-heading > div { width: 100%; }
+  .project-detective .td-workspace-heading button { flex: 1; min-height: 40px; padding: 4px 10px; }
+  .project-detective[data-workspace] .td-case-heading { padding: 8px 10px; align-items: start; gap: 6px; }
+  .project-detective[data-workspace] .td-case-heading h2 { font-size: 23px; }
+  .project-detective[data-workspace] .td-case-heading .td-eyebrow { font-size: 14px; line-height: 1.3; }
+  .project-detective[data-workspace] .td-case-heading > button { padding: 5px; width: 72px; min-height: 44px; font-size: 14px; }
+  .project-detective[data-workspace] .workspace-tabs { padding: 0 5px; }
+  .project-detective[data-workspace] .workspace-tabs > button { padding: 6px 3px; }
+  .project-detective .td-pane-stack { padding: 6px 3px; }
+  .project-detective[data-workspace] .td-pane-stack > .workspace-pane { padding: 3px 5px; }
+  .project-detective[data-workspace] .td-evidence-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 0; gap: 6px; }
+  .project-detective[data-workspace] .td-people-grid { grid-template-columns: minmax(0, 1fr); }
+  .project-detective[data-workspace] .td-exhibit-toggle { grid-template-columns: minmax(0, 1fr) 14px; align-items: start; padding: 8px; gap: 3px; }
+  .project-detective[data-workspace] .td-exhibit-icon { display: none; }
+  .project-detective[data-workspace] .td-exhibit-title { font-size: 18px; }
+  .project-detective[data-workspace] .td-exhibit-prefix { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .project-detective[data-workspace] .td-exhibit-label { gap: 4px; }
+  .project-detective[data-workspace] .td-exhibit.is-open { grid-column: 1 / -1; }
+  .project-detective[data-workspace] .td-exhibits h3 { font-size: 23px; }
+  .project-detective[data-workspace] .td-case-footer { padding: 6px; gap: 3px; }
+  .project-detective[data-workspace] .td-desk-actions > button { padding: 7px; min-height: 44px; font-size: 14px; line-height: 1.3; }
+  .project-detective[data-workspace] .td-footer-actions { gap: 3px; }
+  .project-detective[data-workspace] .td-footer-actions > button { font-size: 14px; line-height: 1.3; }
+  .project-detective[data-workspace] .workspace-dialog .td-case-library { grid-template-columns: minmax(0, 1fr); }
+  .project-detective[data-workspace] .workspace-dialog .td-briefing > div { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .project-detective[data-workspace] .workspace-dialog .td-verdict { padding: 12px; }
+}
+@media (max-height: 520px) and (min-width: 601px) {
+  .project-detective[data-workspace] .td-shell { padding-top: 6px; padding-bottom: 68px; gap: 5px; }
+  .project-detective .td-workspace-heading { padding-block: 5px; }
+  .project-detective[data-workspace] .td-case-heading { padding-block: 5px; }
+  .project-detective[data-workspace] .td-case-footer { flex-direction: row; }
+  .project-detective[data-workspace] .td-footer-actions { width: auto; }
+}
+
 .project-detective *,
 .project-detective *::before,
 .project-detective *::after {

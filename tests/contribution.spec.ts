@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { transpileModule, ModuleKind, ScriptTarget } from 'typescript';
 import { parseManifest } from '../src/core/manifest';
+import type { ProjectModule } from '../src/core/types';
 
 const generator = resolve('scripts/new-project.mjs');
 
@@ -67,6 +68,71 @@ test('The contributor command rejects unsafe ids, categories, and overwrites bef
     expect(work.run('reserved').status).toBe(1);
     expect(existsSync(resolve(work.directory, 'src/projects/reserved'))).toBe(false);
     expect(existsSync(resolve(work.directory, 'src/projects/bad-kind'))).toBe(false);
+  } finally { work.dispose(); }
+});
+
+test('Starters use a viewport workspace for interactions without constraining reading pages', () => {
+  const work = fixture();
+  try {
+    expect(work.run('small-tool', '--category', 'create').status).toBe(0);
+    expect(work.run('field-notes', '--category', 'read').status).toBe(0);
+    const source = (id: string) => readFileSync(resolve(work.directory, `src/projects/${id}/index.ts`), 'utf8');
+    expect(source('small-tool')).toContain("page.root.dataset.workspace = 'true'");
+    expect(source('field-notes')).not.toContain('dataset.workspace');
+    const spec = readFileSync(resolve(work.directory, 'tests/projects/small-tool.spec.ts'), 'utf8');
+    expect(spec).toContain('document.documentElement.scrollHeight');
+    expect(spec).toContain('width: 320, height: 640');
+    expect(readFileSync(resolve(work.directory, 'src/projects/small-tool/style.css'), 'utf8')).toContain('height: 100dvh; min-height: 0');
+  } finally { work.dispose(); }
+});
+
+test('a generated workspace actually renders and operates at narrow and short sizes (module fixture)', async ({ page, baseURL }) => {
+  const work = fixture();
+  try {
+    const title = 'A small independently generated interaction workspace with a deliberately long title';
+    const result = work.run('viewport-starter', '--title', title);
+    expect(result.status, result.stderr).toBe(0);
+    const folder = resolve(work.directory, 'src/projects/viewport-starter');
+    const compile = (file: string) => transpileModule(readFileSync(resolve(folder, file), 'utf8'), {
+      compilerOptions: { target: ScriptTarget.ES2022, module: ModuleKind.ESNext },
+    }).outputText;
+    const coreURL = new URL('./src/core/page.ts', baseURL).href;
+    const entry = compile('index.ts')
+      .replace("import './style.css';", '')
+      .replace("'../../core/page'", JSON.stringify(coreURL));
+    expect(entry).toContain(coreURL);
+    const entryURL = new URL('./__starter-fixture/index.js', baseURL).href;
+    await page.route('**/__starter-fixture/**', async route => {
+      const path = new URL(route.request().url()).pathname;
+      if (!path.endsWith('/index.js') && !path.endsWith('/data')) throw new Error(`Unknown starter fixture asset ${path}`);
+      await route.fulfill({ contentType: 'text/javascript', body: path.endsWith('/index.js') ? entry : compile('data.ts') });
+    });
+    await page.goto('./');
+    await expect(page.locator('[data-project-grid]')).toBeVisible();
+    await page.addStyleTag({ content: readFileSync(resolve(folder, 'style.css'), 'utf8') });
+    await page.evaluate(async url => {
+      const app = document.querySelector<HTMLElement>('#app');
+      if (!app) throw new Error('The collection fixture root is missing.');
+      document.body.classList.remove('library-mode');
+      app.className = 'standalone-root';
+      const host = document.createElement('main');
+      host.className = 'standalone-site';
+      app.replaceChildren(host);
+      const module: ProjectModule = await import(url);
+      await module.mount({ container: host, controls: document.createElement('div'), signal: new AbortController().signal,
+        reducedMotion: true, report: message => { throw new Error(message); } });
+    }, entryURL);
+    for (const size of [{ width: 375, height: 812 }, { width: 320, height: 640 }, { width: 768, height: 480 }]) {
+      await page.setViewportSize(size);
+      expect(await page.evaluate(() => ({
+        width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight,
+      }))).toEqual(size);
+      const button = page.getByRole('button', { name: 'Try the interaction', exact: true });
+      const before = await page.locator('[data-starter-status]').innerText();
+      await button.click();
+      await expect(page.locator('[data-starter-status]')).not.toHaveText(before);
+      expect(await page.evaluate(() => window.scrollY)).toBe(0);
+    }
   } finally { work.dispose(); }
 });
 

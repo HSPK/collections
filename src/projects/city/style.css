@@ -317,3 +317,122 @@
   .project-city .city-export-actions > button { font-size: 14px; padding: 12px; }
   .project-city .city-footer { padding-bottom: 20px; }
 }
+
+/* The worktable is sized by the viewport; only its optional reference/editor dialogs scroll. */
+.project-city[data-workspace] {
+  --workspace-paper: var(--city-paper);
+  height: 100dvh;
+  min-height: 0;
+  padding: 8px 20px;
+  line-height: 1.45;
+}
+.project-city[data-workspace] .city-sheet {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+}
+.project-city[data-workspace] .city-masthead { flex-wrap: nowrap; gap: 12px; padding: 0 0 8px; }
+.project-city[data-workspace] .city-introduction { display: block; min-width: 0; padding: 0; }
+.project-city[data-workspace] h1 { font-size: 30px; letter-spacing: -.04em; }
+.project-city[data-workspace] .city-nav { flex-wrap: nowrap; gap: 5px; width: auto; }
+.project-city[data-workspace] .city-nav button { min-height: 44px; padding: 8px 12px; }
+.project-city[data-workspace] .city-worktable {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+  padding-top: 8px;
+  border-top: 0;
+}
+.project-city[data-workspace] .city-worktable > .city-section-heading { margin-bottom: 8px; }
+.project-city[data-workspace] .city-worktable > .city-section-heading h2 { font-size: 24px; }
+.project-city[data-workspace] .city-studio {
+  grid-template-columns: minmax(0, 1fr) 280px;
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-areas: "map controls";
+  gap: 16px;
+  align-items: stretch;
+  min-height: 0;
+}
+.project-city[data-workspace] .city-map-frame {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 0;
+  overflow: visible;
+}
+.project-city[data-workspace] .city-map-tools { padding: 4px 10px; }
+.project-city[data-workspace] .city-art { min-height: 0; max-height: none; }
+.project-city[data-workspace] .city-art:not(.city-art-enlarged) { overflow: visible; }
+.project-city[data-workspace] .city-art:not(.city-art-enlarged) svg { width: 100%; height: 100%; max-height: none; }
+.project-city[data-workspace] .city-art-enlarged svg { width: max(100%, 930px); height: auto; }
+.project-city[data-workspace] figcaption { padding: 5px 10px; font-size: 14px; }
+.project-city[data-workspace] .city-live-controls {
+  grid-area: controls;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  min-width: 0;
+}
+.project-city[data-workspace] .city-brush-label { display: grid; gap: 3px; font-size: 14px; }
+.project-city[data-workspace] .city-address-fields,
+.project-city[data-workspace] .city-place-actions,
+.project-city[data-workspace] .city-history-actions { margin: 0; }
+.project-city[data-workspace] .city-address-fields label { font-size: 14px; }
+.project-city[data-workspace] .city-place-actions { grid-template-columns: minmax(0, 1fr); }
+.project-city[data-workspace] .city-place-actions button { min-height: 44px; font-size: 14px; }
+.project-city[data-workspace] .city-editor { display: block; padding: 0; border: 0; }
+.project-city[data-workspace] .city-preset-label { display: grid; gap: 5px; margin-bottom: 20px; }
+.project-city[data-workspace] .city-preset-label select { width: 100%; }
+.project-city[data-workspace] .city-recipes,
+.project-city[data-workspace] .city-fieldnotes,
+.project-city[data-workspace] .city-keep { margin: 0; border: 0; padding: 0; }
+.project-city[data-workspace] .city-keep { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+.project-city[data-workspace] .city-recipe-context { margin-top: 20px; }
+.project-city[data-workspace] .city-recipe-slip { transform: none; }
+.project-city[data-workspace] :is(.city-eyebrow, .city-small-button, .city-preset-label,
+  .city-ingredient-note, .city-tile-choice, .city-cell-note, .city-key-help, .city-history-note,
+  .city-status, .city-reset-actions button, .city-direction-buttons span,
+  .city-address-target div > span, .city-map-group-note, .city-map-legend p,
+  .city-metrics dt, .city-metrics > div > span, .city-frontage-addresses button,
+  .city-recipe-checks li, .city-catalog-item dt, .city-catalog-item dt small, .city-catalog-item .city-catalog-rule,
+  .city-name-form button, .city-export-actions button > span, .city-keep-controls > .city-small,
+  .city-footer, .city-footer a, .city-wordmark small) { font-size: 14px; }
+
+@media (max-width: 620px) {
+  .project-city[data-workspace] { padding: 6px 8px; }
+  .project-city[data-workspace] .city-masthead { flex-direction: column; align-items: stretch; gap: 5px; padding-bottom: 4px; }
+  .project-city[data-workspace] h1 { font-size: 25px; }
+  .project-city[data-workspace] .city-nav { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 3px; }
+  .project-city[data-workspace] .city-nav button { padding: 6px 2px; }
+  .project-city[data-workspace] .city-worktable { padding-top: 4px; }
+  .project-city[data-workspace] .city-worktable > .city-section-heading { margin-bottom: 5px; }
+  .project-city[data-workspace] .city-worktable > .city-section-heading h2 { font-size: 21px; }
+  .project-city[data-workspace] .city-studio {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-areas: "map" "controls";
+    gap: 6px;
+  }
+  .project-city[data-workspace] .city-live-controls {
+    display: grid;
+    grid-template-columns: minmax(0, .95fr) minmax(0, 1fr);
+    gap: 6px;
+  }
+  .project-city[data-workspace] .city-live-controls select { padding: 7px; min-width: 0; }
+  .project-city[data-workspace] .city-address-fields { gap: 5px; }
+  .project-city[data-workspace] .city-place-actions { grid-column: 1 / -1; grid-template-columns: minmax(0, 1fr) auto; }
+  .project-city[data-workspace] .city-history-actions { grid-column: 1 / -1; gap: 6px; padding-right: 64px; }
+  .project-city[data-workspace] .city-map-tools { padding: 1px 6px; }
+  .project-city[data-workspace] figcaption { padding: 3px 6px; }
+  .project-city[data-workspace] .city-recipe-grid,
+  .project-city[data-workspace] .city-reference-layout { grid-template-columns: minmax(0, 1fr); }
+  .project-city[data-workspace] .city-catalog-item { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (min-width: 621px) and (max-height: 540px) {
+  .project-city[data-workspace] .city-studio { grid-template-columns: minmax(0, 1fr) 255px; gap: 10px; }
+  .project-city[data-workspace] .city-live-controls { gap: 8px; }
+  .project-city[data-workspace] .city-place-actions { grid-template-columns: minmax(0, 1fr); gap: 5px; }
+  .project-city[data-workspace] .city-history-actions { padding-right: 64px; }
+}

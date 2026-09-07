@@ -11,6 +11,7 @@ import { RoomtoneAudio } from './audio';
 import { encodeWav } from './wav';
 import { calculateDesign, renderAnalysis, renderComparison, renderPaths, renderReadouts, studioMarkup, syncInputs } from './ui';
 import type { AcousticDesign } from './ui';
+import { createStudioWorkspace } from './workspace';
 
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'roomtone');
@@ -26,7 +27,7 @@ export function mount(context: ProjectContext): ProjectInstance {
   const downloadUrls = new Map<string, number>();
   const invalid = new Set<HTMLInputElement>();
   root.innerHTML = studioMarkup();
-  root.dataset.mobilePane = 'space';
+  createStudioWorkspace(page);
   root.dataset.audioState = 'off';
   const report = (message: string) => {
     if (!active) return;
@@ -243,11 +244,6 @@ export function mount(context: ProjectContext): ProjectInstance {
     const cameraActions: CameraAction[] = ['left', 'right', 'up', 'down', 'closer', 'further', 'home'];
     const cameraAction = cameraActions.find((item) => item === button.dataset.camera);
     if (cameraAction) scene.camera(cameraAction);
-    const pane = button.dataset.pane;
-    if (pane === 'space' || pane === 'edit' || pane === 'listen') {
-      root.dataset.mobilePane = pane;
-      root.querySelectorAll<HTMLButtonElement>('[data-pane]').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
-    }
   }, { signal });
   document.addEventListener('visibilitychange', () => { if (document.hidden) audio.stop(); }, { signal });
   window.addEventListener('pagehide', () => audio.stop(), { signal });

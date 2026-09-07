@@ -1,6 +1,7 @@
 import './style.css';
 import { observeSize } from '../../core/canvas';
 import { createProjectPage, escapeMarkup, query } from '../../core/page';
+import { createWorkspaceDialog, createWorkspaceTabs } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { linkFields, methodNotes, presets } from './data';
 import {
@@ -41,6 +42,7 @@ export function mount(context: ProjectContext): ProjectInstance {
   let stopObserving = () => {};
 
   page.root.setAttribute('aria-labelledby', 'linkage-title');
+  page.root.dataset.workspace = 'true';
   page.root.innerHTML = `
     <div class="la-sheet">
       <header class="la-header">
@@ -53,6 +55,11 @@ export function mount(context: ProjectContext): ProjectInstance {
           <span>MECHANICAL STUDIES</span><strong>059<span> / ∞</span></strong><span>POSITION, NOT FORCE</span>
         </div>
       </header>
+      <nav class="la-workspace-tools" aria-label="Workbench panels">
+        <button type="button" data-la-parameters>Parameters</button>
+        <button type="button" data-la-observations>Observations</button>
+        <button type="button" data-la-method>Method</button>
+      </nav>
 
       <section class="la-workbench" data-project-preview aria-label="Four-bar coupler-path workbench">
         <div class="la-drawing">
@@ -197,6 +204,59 @@ export function mount(context: ProjectContext): ProjectInstance {
 
   page.root.querySelectorAll('output').forEach((output) => output.setAttribute('aria-live', 'off'));
   const get = <T extends Element>(selector: string) => query<T>(page.root, selector);
+  const inspector = get<HTMLElement>('.la-inspector');
+  const geometryPanel = document.createElement('div');
+  const tracerPanel = document.createElement('div');
+  const readoutPanel = document.createElement('div');
+  tracerPanel.append(get('.la-coupler-controls'), get('.la-toggles'));
+  readoutPanel.append(get('.la-classification'), get('.la-readings'), get('.la-legend'), get('[data-status-detail]'));
+  geometryPanel.append(...inspector.childNodes);
+  const tabsHost = document.createElement('div');
+  const panels = document.createElement('div');
+  panels.id = 'la-instrument-panels';
+  panels.className = 'la-dock-panels';
+  panels.append(geometryPanel, tracerPanel, readoutPanel);
+  inspector.append(tabsHost, panels);
+  const tabs = createWorkspaceTabs(page, {
+    id: 'la-instruments', label: 'Linkage instruments', host: tabsHost,
+    panes: [
+      { id: 'geometry', label: 'Geometry', panel: geometryPanel },
+      { id: 'tracer', label: 'Tracer', panel: tracerPanel },
+      { id: 'readout', label: 'Readout', panel: readoutPanel },
+    ],
+  });
+  const guide = document.createElement('div');
+  guide.className = 'la-operating-notes';
+  guide.append(get('.la-deck'), get('.la-edition'), get('.la-transport > .la-help'), get('.la-transport > .la-range-ends'));
+  createWorkspaceDialog(page, {
+    id: 'la-observations-dialog', title: 'Study observations',
+    content: [get('.la-notebook')], triggers: [get('[data-la-observations]')],
+  });
+  createWorkspaceDialog(page, {
+    id: 'la-method-dialog', title: 'Construction and method',
+    content: [guide, get('.la-method'), get('.la-footer')], triggers: [get('[data-la-method]')],
+  });
+  const dock = createWorkspaceDialog(page, {
+    id: 'la-instruments-dialog', title: 'Linkage instruments', content: [inspector],
+  });
+  const compact = window.matchMedia('(max-width: 700px), (max-height: 540px)');
+  const parametersTrigger = get<HTMLButtonElement>('[data-la-parameters]');
+  function placeInspector() {
+    const focused = inspector.contains(document.activeElement);
+    dock.close();
+    (compact.matches ? query(dock.dialog, '.workspace-dialog-content') : get('.la-workbench')).append(inspector);
+    parametersTrigger.setAttribute('aria-controls', compact.matches ? dock.dialog.id : panels.id);
+    if (compact.matches) parametersTrigger.setAttribute('aria-haspopup', 'dialog');
+    else parametersTrigger.removeAttribute('aria-haspopup');
+    if (focused) parametersTrigger.focus({ preventScroll: true });
+  }
+  parametersTrigger.addEventListener('click', () => {
+    tabs.select('geometry');
+    if (compact.matches) dock.open();
+    else tabsHost.querySelector<HTMLButtonElement>('[aria-selected="true"]')!.focus({ preventScroll: true });
+  }, { signal: page.signal });
+  compact.addEventListener('change', placeInspector, { signal: page.signal });
+  placeInspector();
   const plot = get<HTMLElement>('[data-plot]');
   const scene = createScene(plot);
   const play = get<HTMLButtonElement>('[data-play]');

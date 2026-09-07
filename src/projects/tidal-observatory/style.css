@@ -159,3 +159,78 @@
   .project-tidal-observatory *::before,
   .project-tidal-observatory *::after { scroll-behavior: auto; }
 }
+
+.project-tidal-observatory[data-workspace] {
+  height: 100dvh; min-height: 0; padding-bottom: 14px;
+  display: grid; grid-template-rows: auto minmax(0, 1fr) 36px 44px;
+  --workspace-paper: var(--tidal-paper);
+}
+.project-tidal-observatory .tidal-masthead { min-height: 90px; width: 100%; margin: 0 auto; }
+.project-tidal-observatory .tidal-workbench {
+  width: 100%; min-height: 0; margin: 0 auto;
+  display: grid; grid-template-rows: minmax(0, 1fr) auto;
+}
+.project-tidal-observatory .tidal-scene { height: auto; min-height: 0; overflow: visible; }
+.project-tidal-observatory .tidal-instruments { padding: 12px 0; }
+.project-tidal-observatory .tidal-observation-line {
+  width: 100%; min-height: 0; margin: 0 auto; display: block;
+  overflow: auto; overscroll-behavior: contain;
+}
+.project-tidal-observatory .tidal-status { max-width: none; margin: 0; min-height: 0; text-align: left; }
+.project-tidal-observatory .tidal-workspace-actions { width: 100%; max-width: 1480px; margin: 0 auto; padding-right: 62px; }
+.project-tidal-observatory .tidal-workspace-actions > button {
+  min-height: 44px; padding: 6px 14px; font-size: 14px;
+  border: 1px solid #bfc9c8; background: #f9f6ef;
+}
+.project-tidal-observatory[data-workspace] .workspace-dialog-heading > button { min-height: 44px; }
+.project-tidal-observatory #tidal-camera-help { margin-bottom: 18px; font-size: 14px; }
+.project-tidal-observatory :is(
+  .tidal-eyebrow, .tidal-header-note span, .tidal-chart-label, .tidal-chart-coordinate,
+  .tidal-compass, .tidal-scene-caption, .tidal-camera-toolbar button, .tidal-view-number,
+  .tidal-instrument-heading, .tidal-instrument-heading output, .tidal-instrument-endpoints,
+  .tidal-play, .tidal-observation-line p, .tidal-notebook-title > span, .tidal-sounding
+) { font-size: 14px; }
+.project-tidal-observatory .tidal-zoom button { font-size: 23px; }
+@media (max-width: 1000px) {
+  .project-tidal-observatory .tidal-instruments { grid-template-columns: 1fr 1fr; gap: 8px 0; padding: 8px 0; }
+  .project-tidal-observatory .tidal-instrument { padding-inline: 12px; }
+  .project-tidal-observatory .tidal-time { padding-top: 6px; }
+}
+@media (max-width: 650px) {
+  .project-tidal-observatory[data-workspace] { padding: 0 10px 14px; }
+  .project-tidal-observatory .tidal-masthead { min-height: 82px; }
+  .project-tidal-observatory .tidal-identity { gap: 8px; }
+  .project-tidal-observatory .tidal-mark { width: 30px; height: 30px; flex-basis: 30px; }
+  .project-tidal-observatory .tidal-eyebrow { font-size: 14px; letter-spacing: 0; }
+  .project-tidal-observatory h1 { font-size: clamp(27px, 7.5vw, 34px); }
+  .project-tidal-observatory .tidal-chart-label { top: 10px; left: 10px; font-size: 14px; }
+  .project-tidal-observatory .tidal-chart-coordinate { font-size: 14px; }
+  .project-tidal-observatory .tidal-camera-toolbar { left: 6px; right: 6px; bottom: 8px; gap: 4px; }
+  .project-tidal-observatory .tidal-camera-toolbar button { padding: 5px 6px; font-size: 14px; }
+  .project-tidal-observatory .tidal-viewpoints, .project-tidal-observatory .tidal-zoom { padding: 2px; }
+  .project-tidal-observatory .tidal-zoom button { min-width: 36px; font-size: 23px; }
+  .project-tidal-observatory .tidal-scene-caption { left: 10px; bottom: 67px; font-size: 14px; }
+  .project-tidal-observatory .tidal-scene-caption > :last-child { display: none; }
+  .project-tidal-observatory .tidal-instruments { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4px 0; padding: 6px 0; }
+  .project-tidal-observatory .tidal-instrument { padding-inline: 9px; }
+  .project-tidal-observatory .tidal-instrument + .tidal-instrument { padding-top: 0; border-top: 0; border-left: 1px solid var(--tidal-rule); }
+  .project-tidal-observatory .tidal-instrument-heading { flex-wrap: wrap; gap: 0 5px; line-height: 1.35; }
+  .project-tidal-observatory .tidal-instrument-heading strong { margin-left: 3px; }
+  .project-tidal-observatory .tidal-tide .tidal-instrument-heading,
+  .project-tidal-observatory .tidal-daylight .tidal-instrument-heading { display: grid; min-height: 42px; }
+  .project-tidal-observatory .tidal-instrument-endpoints { display: none; }
+  .project-tidal-observatory .tidal-time { grid-column: 1 / -1; padding-top: 4px !important; border-top: 1px solid var(--tidal-rule) !important; }
+  .project-tidal-observatory .tidal-time .tidal-instrument-heading { justify-content: space-between; min-height: 22px; }
+  .project-tidal-observatory .tidal-transport { gap: 10px; }
+  .project-tidal-observatory .tidal-play { font-size: 14px; }
+}
+@media (min-width: 651px) and (max-height: 560px) {
+  .project-tidal-observatory .tidal-masthead { min-height: 64px; }
+  .project-tidal-observatory .tidal-masthead .tidal-eyebrow { display: none; }
+  .project-tidal-observatory .tidal-instruments { grid-template-columns: 1fr 1fr 1.3fr; padding: 8px 0; }
+  .project-tidal-observatory .tidal-time { grid-column: auto; border-top: 0; padding-top: 0; }
+  .project-tidal-observatory .tidal-instrument-heading { flex-wrap: wrap; gap: 0 4px; min-height: 40px; line-height: 1.3; }
+  .project-tidal-observatory .tidal-instrument-endpoints { display: none; }
+  .project-tidal-observatory .tidal-scene-caption { display: none; }
+  .project-tidal-observatory .tidal-camera-toolbar { bottom: 8px; left: 12px; right: 12px; }
+}

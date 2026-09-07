@@ -13,6 +13,8 @@ three honest endings, each retaining a different kind of memory.
   bounded ending reachability and validated version-1 serialization.
 - `map.ts`: local architectural SVG artwork and retained-DOM map updates.
 - `index.ts`: retained controls, folio, comparison, persistence and lifecycle.
+- `workspace.ts`: native folio/goals/map dialogs and retained reading, decision,
+  comparison and ending tabs; no story or save-state ownership.
 - `style.css`: namespaced warm-paper folio, mobile panels and reduced motion.
 
 Every option names exactly one rule. Rules may require all, any, or none of
@@ -77,12 +79,36 @@ Reset is a confirmed, undoable revision, not a deletion of the stored history.
 Pins are separate copies and do not move under undo/redo. Editing after undo
 replaces the redo path; the history panel explains this trade-off.
 
+## One-screen folio
+
+The page occupies the viewport rather than a scrolling document. The era rail,
+undo/redo, pin action and live city remain visible. Desktop pairs the city with
+Read / Decide / Compare / Ending panes; phones keep a compact city preview above
+the same one-tap panes. Long records, marginalia, decisions and comparisons scroll
+inside their allocated pane, without shortening any authored prose.
+
+**Full map** opens a larger interactive city. The named place selector provides
+the same selection without requiring precision on the compact map. **Goals**
+opens the complete ending requirements and causal hint tool. **Folio desk**
+contains import/export, confirmed reset, causal ledger, editorial history,
+all 28 records and the reading guide. Selecting a record from the index closes
+the desk, opens Read and focuses its heading. Completing a telling opens Ending;
+keeping it opens Compare. Pins, imports and history still use the original engine.
+
+Tabs retain pane dimensions and content; inactive panes are inert. Native dialogs
+provide modal keyboard behavior and return focus to their trigger. No body
+overflow masking or whole-page scaling is used.
+
+The record footer reserves 64px beside Next document for the floating collection
+menu. Other reading/editor panes retain bottom scroll clearance so their final
+actions can be brought above that corner without moving the document.
+
 ## Review and validation
 
 Run only the owned spec against the existing server:
 
 ```sh
-SITE_URL=http://127.0.0.1:4173 npx playwright test tests/projects/palinode.spec.ts
+SITE_URL=http://127.0.0.1:4173/ flock /home/hangxingwei/.copilot/session-state/23f8825b-223c-4cb6-95ec-3e7881d9e65f/files/viewport-browser.lock npm test -- tests/projects/palinode.spec.ts --reporter=dot
 ```
 
 Useful selectors:
@@ -93,6 +119,11 @@ Useful selectors:
 - `[data-main-map]`, `[data-pinned-map]`, `[data-revised-map]`
 - `#palinode-future-document`, `[data-pinned-text]`, `[data-revised-text]`
 - `[data-ledger-rule="old-circuit"]`, `[data-ending-panel]`
+- `[data-workspace="true"]`, `[data-workspace-tab="read"]`
+
+Workspace cases exercise 1440x900, 1280x720, 375x812, 320x640 and 768x480,
+including document bounds, internal reading, causal edits, undo/redo, history,
+hints, expanded maps and screenshots of reading and decision panes.
 
 One return path: 1891 **tidal steps / common trust**; 1932 **footbridge /
 kitchen copies**; 1976 **rehearsal room / listen**; 2026 **inheriting

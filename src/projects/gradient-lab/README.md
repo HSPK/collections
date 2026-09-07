@@ -26,6 +26,8 @@ history is involved. Open `/projects/gradient-lab/`.
 - `ui.ts` owns markup and readouts. Static data goes through `escapeMarkup`;
   dynamic feedback uses text content. Sample export uses core `downloadText`.
 - `style.css` is scoped entirely to `.project-gradient-lab`.
+- `workspace.ts` composes the existing live nodes into the viewport grid,
+  inspector tabs, and themed dialogs using the shared workspace lifecycle.
 
 ## Numerical conventions
 
@@ -94,6 +96,22 @@ each still-active method, so stopped methods can have different accepted t.
   Real neural training involves higher-dimensional, usually noisy objectives.
 
 ## Interaction and accessibility
+
+The inspector and feedback use a local 64px right-side clearance, plus the
+safe-area inset, so the floating collection menu cannot cover an input.
+Keep this clearance when extending the dock; no document footer is reserved.
+
+The `100dvh` workspace keeps the responsive landscape, method cards, and
+Step/Play/Reset transport together. Setup holds landscape and learning rate;
+Start holds coordinates and gradient visibility. Readout contains exact
+updates, memory, formulas and stopping reasons; History contains the loss
+plot, sample table and CSV export. On phones these are a bounded bottom dock,
+not content below the simulation. Feedback stays visible below the tabs.
+Experiments and Guide open native dialogs; choosing an experiment closes its
+dialog without replacing the controls or losing the trigger's focus.
+Long readouts and educational material scroll only inside their pane/dialog.
+Extend the pane list in `workspace.ts`; keep canvas hosts and input nodes
+mounted so resize observers, keyboard focus and model state remain intact.
 
 Manual Step pauses playback and attempts exactly one comparison round.
 Play is explicit, including under reduced motion. Either motion-preference

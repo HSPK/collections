@@ -256,6 +256,8 @@ test.describe('nonogram engine', () => {
 
 test.describe('nonogram browser', () => {
   test.beforeEach(async ({ page }) => {
+    // Other projects share this Vite server; their hot updates must not reset this attempt.
+    await page.routeWebSocket(url => url.searchParams.has('token'), () => {});
     await page.goto('./projects/nonogram/');
     await expect(page.getByRole('heading', { level: 1, name: 'Nonogram Club.' })).toBeVisible();
   });
@@ -266,8 +268,9 @@ test.describe('nonogram browser', () => {
     const preview = site.locator('[data-project-preview]');
     await expect(preview).toHaveCount(1);
     for (const puzzle of puzzles) {
+      await page.getByRole('button', { name: 'Puzzles & collection', exact: true }).click();
       await site.locator(`[data-puzzle="${puzzle.id}"]`).click();
-      await page.evaluate(() => window.scrollTo(0, 0));
+      expect(await page.evaluate(() => window.scrollY)).toBe(0);
       for (const selector of ['[data-board]', '.nc-paint-tools', '.nc-game-actions']) {
         const region = preview.locator(selector);
         const bounds = await region.boundingBox();
@@ -322,13 +325,17 @@ test.describe('nonogram browser', () => {
     await page.getByRole('button', { name: 'Check', exact: true }).click();
     await expect(page.locator('[data-cell][aria-invalid="true"]')).toHaveCount(1);
     await expect(page.locator('.project-nonogram [data-feedback]')).toContainText('Unfilled squares are not counted as mistakes');
+    await page.getByRole('button', { name: 'Close A little honest help', exact: true }).click();
     await page.getByRole('button', { name: 'One hint', exact: true }).click();
     await expect(page.locator('[data-cell="0"]')).toHaveAttribute('data-state', 'crossed');
     await expect(page.locator('[data-hints]')).toHaveText('1');
     await expect(page.locator('[data-cell][aria-invalid="true"]')).toHaveCount(0);
+    await page.getByRole('button', { name: 'Close A little honest help', exact: true }).click();
     await page.locator('[data-cell="9"]').click();
+    await page.getByRole('button', { name: 'Puzzles & collection', exact: true }).click();
     await page.getByRole('button', { name: /Puzzle 02: A little growth/ }).click();
     await page.locator('[data-cell="3"]').click();
+    await page.getByRole('button', { name: 'Puzzles & collection', exact: true }).click();
     await page.getByRole('button', { name: /Puzzle 01: Morning ritual/ }).click();
     await expect(page.locator('[data-cell="9"]')).toHaveAttribute('data-state', 'filled');
     await expect(page.locator('[data-cell="0"]')).toHaveAttribute('data-state', 'crossed');
@@ -344,6 +351,7 @@ test.describe('nonogram browser', () => {
     await expect(page.locator('[data-moves]')).toHaveText('0');
     await expect(page.locator('[data-hints]')).toHaveText('0');
     await expect(page.locator('[data-checks]')).toHaveText('0');
+    await page.getByRole('button', { name: 'Puzzles & collection', exact: true }).click();
     await page.getByRole('button', { name: /Puzzle 02: A little growth/ }).click();
     await expect(page.locator('[data-cell="3"]')).toHaveAttribute('data-state', 'filled');
     await expect(page.locator('[data-moves]')).toHaveText('1');
@@ -369,6 +377,7 @@ test.describe('nonogram browser', () => {
 
   test('the 10×10 board fits a 375px phone with usable cell buttons', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
+    await page.getByRole('button', { name: 'Puzzles & collection', exact: true }).click();
     await page.getByRole('button', { name: /Puzzle 03: Out of office/ }).click();
     await expect(page.getByRole('grid').locator('button')).toHaveCount(100);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
@@ -379,4 +388,90 @@ test.describe('nonogram browser', () => {
     await page.locator('[data-cell="0"]').click();
     await expect(page.locator('[data-cell="0"]')).toHaveAttribute('data-state', 'crossed');
   });
+
+  for (const viewport of [
+    { width: 1440, height: 900 }, { width: 1280, height: 720 },
+    { width: 375, height: 812 }, { width: 320, height: 640 }, { width: 768, height: 480 },
+  ]) {
+    test(`workspace ${viewport.width}×${viewport.height}: panes, focused painting, completion and replay`, async ({ page }, testInfo) => {
+      await page.setViewportSize(viewport);
+      const root = page.locator('.project-nonogram');
+      const assertScreen = async () => {
+        expect(await page.evaluate(() => ({
+          x: window.scrollX, y: window.scrollY,
+          width: document.documentElement.scrollWidth <= innerWidth,
+          height: document.documentElement.scrollHeight <= innerHeight + 1,
+        }))).toEqual({ x: 0, y: 0, width: true, height: true });
+      };
+      await expect(root).toHaveAttribute('data-workspace', 'true');
+      await page.screenshot({ path: testInfo.outputPath(`nonogram-${viewport.width}-desk.png`) });
+      for (const selector of ['.nc-board-wrap', '.nc-paint-tools', '.nc-game-actions', '.nc-feedback', '.nc-page-turn']) {
+        await expect(root.locator(selector)).toBeInViewport({ ratio: 1 });
+      }
+      await assertScreen();
+      await page.getByRole('link', { name: 'How to play' }).click();
+      await expect(page.getByRole('dialog', { name: 'The club handbook', exact: true })).toBeVisible();
+      await page.getByText('Keyboard, checking & a little honest help').click();
+      await expect(root.locator('.nc-help-columns')).toBeVisible();
+      await page.getByRole('button', { name: 'Close The club handbook' }).click();
+      await page.getByRole('button', { name: 'Puzzles & collection', exact: true }).click();
+      await page.getByRole('button', { name: /Puzzle 03: Out of office/ }).click();
+      await expect(root.locator('[data-puzzle-title]')).toHaveText('Out of office');
+      await assertScreen();
+      await page.getByRole('button', { name: 'Focus board', exact: true }).click();
+      const focus = page.getByRole('dialog', { name: 'Focused play · pan to explore', exact: true });
+      await expect(focus).toBeVisible();
+      const cell = focus.locator('[data-cell="0"]');
+      await expect(cell).toBeInViewport({ ratio: 1 });
+      const bounds = await cell.boundingBox();
+      expect(bounds!.width).toBeGreaterThanOrEqual(36);
+      expect(bounds!.height).toBeGreaterThanOrEqual(36);
+      expect(await focus.locator('[data-cell]').evaluateAll(buttons => buttons.every(button => {
+        const box = button.getBoundingClientRect();
+        const parent = button.parentElement!;
+        const style = getComputedStyle(parent);
+        const interior = parent.getBoundingClientRect().width - parseFloat(style.borderLeftWidth) - parseFloat(style.borderRightWidth);
+        return Math.abs(box.width - interior) < 1;
+      }))).toBe(true);
+      await page.mouse.click(bounds!.x + bounds!.width / 2, bounds!.y + bounds!.height / 2);
+      await expect(cell).toHaveAttribute('data-state', 'filled');
+      await cell.press('End');
+      await expect(focus.locator('[data-cell="9"]')).toBeFocused();
+      await expect(focus.locator('[data-cell="9"]')).toBeInViewport({ ratio: 1 });
+      await page.keyboard.press('x');
+      await expect(focus.locator('[data-cell="9"]')).toHaveAttribute('data-state', 'crossed');
+      await assertScreen();
+      await page.screenshot({ path: testInfo.outputPath(`nonogram-${viewport.width}-focused.png`) });
+      await page.getByRole('button', { name: 'Return to desk', exact: true }).click();
+      await page.getByRole('button', { name: 'Puzzles & collection', exact: true }).click();
+      await page.getByRole('button', { name: /Puzzle 01: Morning ritual/ }).click();
+      // The focused surface keeps touch cells usable; arrow navigation pans only that surface.
+      await page.getByRole('button', { name: 'Focus board', exact: true }).click();
+      await focus.locator('[data-cell="0"]').focus();
+      for (let index = 0; index < 64; index += 1) {
+        if (puzzles[0].solution.flat()[index]) await page.keyboard.press('f');
+        if (index === 63) break;
+        if (index % 8 === 7) {
+          await page.keyboard.press('ArrowDown');
+          await page.keyboard.press('Home');
+        } else await page.keyboard.press('ArrowRight');
+      }
+      const result = page.getByRole('dialog', { name: 'Picture found', exact: true });
+      await expect(result).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'The Sunday cup', exact: true })).toBeFocused();
+      await assertScreen();
+      await page.screenshot({ path: testInfo.outputPath(`nonogram-${viewport.width}-completed.png`) });
+      await page.getByRole('button', { name: 'Play this one again', exact: true }).click();
+      await expect(root.locator('[data-moves]')).toHaveText('0');
+      await expect(root.locator('[data-collected-count]')).toHaveText('1');
+      await expect(focus.locator('[data-cell="0"]')).toBeFocused();
+      await focus.locator('[data-cell="0"]').press('f');
+      await page.getByRole('button', { name: 'Reset', exact: true }).click();
+      await expect(page.getByRole('dialog', { name: 'A fresh sheet?', exact: true })).toBeVisible();
+      await page.getByRole('button', { name: 'Clear this puzzle', exact: true }).click();
+      await expect(root.locator('[data-cell][data-state="empty"]')).toHaveCount(64);
+      await page.getByRole('button', { name: 'Return to desk', exact: true }).click();
+      await assertScreen();
+    });
+  }
 });

@@ -1,6 +1,7 @@
 import './style.css';
 import { copyText, createProjectPage, downloadText, escapeMarkup, query, readLocalData, writeLocalData } from '../../core/page';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
+import { createWorkspaceDialog, createWorkspaceTabs } from '../../core/workspace';
 import { HARMONY_INFO, RECIPES, ROLE_INFO } from './data';
 import {
   contrastGrade, contrastRatio, cookPalette, createKitchenState, editPigment, HARMONIES, isHarmony,
@@ -14,6 +15,7 @@ const PANTRY_KEY = 'palette-kitchen-pantry-v1';
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'palette');
   const { root, signal } = page;
+  root.dataset.workspace = 'true';
   let state = createKitchenState(RECIPES[0].settings);
   let selected: Role = 'base';
   let foreground: Role = 'ink';
@@ -160,11 +162,80 @@ export function mount(context: ProjectContext): ProjectInstance {
       <footer class="pk-footer"><span>Palette Kitchen / a small-batch color laboratory</span><span>Local mixing. No accounts. Nothing sent away.</span></footer>
     </div>`;
 
+  const take = (selector: string) => query<HTMLElement>(root, selector);
+  const makeButton = (label: string) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = label;
+    return button;
+  };
+  const header = take('.pk-header');
+  const notesButton = makeButton('Notes');
+  const recipesButton = makeButton('Recipes');
+  const notes = [
+    take('.pk-wordmark'), take('.pk-intro'), take('.pk-caption'),
+    take('.pk-recipe-controls .pk-card-heading'), take('[data-harmony-note]'),
+    take('[data-pigment-note]'), take('[data-pin-note]'),
+    take('.pk-contrast-guide'), take('.pk-export > h3'), take('.pk-export > p'),
+    take('.pk-pantry > .pk-card-heading'), take('.pk-pantry > p'), take('.pk-footer'),
+  ];
+  createWorkspaceDialog(page, { id: 'pk-notes', title: 'Kitchen notes', content: notes, triggers: [notesButton] });
+  const recipeDialog = createWorkspaceDialog(page, {
+    id: 'pk-recipes', title: 'Recipe notebook', triggers: [recipesButton],
+    content: [take('.pk-presets-heading'), take('.pk-presets-heading + p'), take('.pk-recipes')],
+  });
+  header.replaceChildren(take('h1'), recipesButton, notesButton);
+  take('.pk-hero').remove();
+
+  const shelfButton = makeButton('Open pantry');
+  const cssButton = makeButton('View / copy CSS');
+  createWorkspaceDialog(page, {
+    id: 'pk-pantry', title: 'Saved recipe pantry', triggers: [shelfButton], content: [take('[data-shelf]')],
+  });
+  createWorkspaceDialog(page, {
+    id: 'pk-code', title: 'Your CSS', triggers: [cssButton],
+    content: [take('.pk-code-label'), take('[data-css]'), take('[data-copy-css]')],
+  });
+  take('.pk-pantry').append(shelfButton);
+  take('.pk-export-buttons').append(cssButton);
+
+  const matrixButton = makeButton('Open the full pairing table');
+  const matrix = take('.pk-matrix-details');
+  const matrixDialog = createWorkspaceDialog(page, {
+    id: 'pk-pairs', title: 'All 25 contrast pairings', triggers: [matrixButton], content: [matrix],
+  });
+  (matrix as HTMLDetailsElement).open = true;
+  take('.pk-specimen-actions').append(matrixButton);
+  const bench = take('.pk-workbench');
+  const mix = take('.pk-recipe-controls');
+  const pigment = take('.pk-pigment-editor');
+  const tasting = take('.pk-tasting');
+  const keeping = take('.pk-keeping');
+  const tabsHost = document.createElement('div');
+  bench.before(tabsHost);
+  bench.replaceChildren(mix, pigment, tasting, keeping);
+  const tabs = createWorkspaceTabs(page, {
+    id: 'pk-work', label: 'Palette workspace', host: tabsHost,
+    onSelect: (id) => { root.dataset.pane = id; },
+    panes: [
+      { id: 'mix', label: 'Mix', panel: mix },
+      { id: 'pigment', label: 'Pigment', panel: pigment },
+      { id: 'taste', label: 'Taste', panel: tasting },
+      { id: 'keep', label: 'Keep', panel: keeping },
+    ],
+  });
   const status = query<HTMLElement>(root, '[data-status]');
+  const dialogStatus = document.createElement('p');
+  dialogStatus.className = 'pk-dialog-status';
+  dialogStatus.setAttribute('role', 'status');
   const announce = (message: string) => {
     if (signal.aborted) return;
     status.textContent = message;
-    page.report(message);
+    const openDialog = root.querySelector('dialog[open] .workspace-dialog-content');
+    if (openDialog) {
+      dialogStatus.textContent = message;
+      openDialog.prepend(dialogStatus);
+    }
   };
   const baseInput = query<HTMLInputElement>(root, '[data-base]');
   const basePicker = query<HTMLInputElement>(root, '[data-base-picker]');
@@ -181,6 +252,14 @@ export function mount(context: ProjectContext): ProjectInstance {
   const nameInput = query<HTMLInputElement>(root, '[data-recipe-name]');
   const saveError = query<HTMLElement>(root, '[data-save-error]');
   const shelf = query<HTMLElement>(root, '[data-shelf]');
+  const errors = [baseError, pigmentError, saveError];
+  const errorDialog = createWorkspaceDialog(page, {
+    id: 'pk-error', title: 'Check this recipe', content: errors,
+  });
+  function showError(error: HTMLElement) {
+    for (const message of errors) message.hidden = message !== error;
+    errorDialog.open();
+  }
 
   function clearColorErrors() {
     baseError.textContent = '';
@@ -285,8 +364,9 @@ export function mount(context: ProjectContext): ProjectInstance {
       const input = source === 'base' ? baseInput : pigmentInput;
       error.textContent = 'Use 3 or 6 hex digits, for example #b74732. Your palette has not changed.';
       input.setAttribute('aria-invalid', 'true');
-      announce('That color is not a valid hex value. Your last valid palette is still on the counter.');
       input.focus();
+      showError(error);
+      announce('That color is not a valid hex value. Your last valid palette is still on the counter.');
       return;
     }
     state = editPigment(state, role, hex);
@@ -343,6 +423,7 @@ export function mount(context: ProjectContext): ProjectInstance {
       if (!role || !isRole(role)) throw new Error('Unknown pigment.');
       selected = role;
       render();
+      tabs.select('pigment');
     }
     const recipeButton = event.target.closest<HTMLButtonElement>('[data-recipe]');
     if (recipeButton) {
@@ -352,6 +433,7 @@ export function mount(context: ProjectContext): ProjectInstance {
       nameInput.value = recipe.name;
       render();
       announce(`${recipe.name} is on the counter. Any pinned pigments were preserved.`);
+      recipeDialog.close();
     }
     const pair = event.target.closest<HTMLButtonElement>('[data-pair-fg]');
     if (pair) {
@@ -361,6 +443,8 @@ export function mount(context: ProjectContext): ProjectInstance {
       foreground = fg;
       background = bg;
       renderPair();
+      matrixDialog.close();
+      tabs.select('taste');
       announce(`Tasting ${ROLE_INFO[fg].short.toLowerCase()} text on ${ROLE_INFO[bg].short.toLowerCase()}.`);
     }
   }, { signal });
@@ -405,7 +489,9 @@ export function mount(context: ProjectContext): ProjectInstance {
     if (nameInput.value.trim() && !isRecipeName(nameInput.value.trim())) {
       saveError.textContent = 'Use a recipe name of up to 48 printable characters before exporting.';
       nameInput.setAttribute('aria-invalid', 'true');
+      tabs.select('keep');
       nameInput.focus();
+      showError(saveError);
       announce('The recipe name contains unsupported characters. Edit it before exporting the SVG.');
       return;
     }
@@ -420,19 +506,27 @@ export function mount(context: ProjectContext): ProjectInstance {
       saveError.textContent = 'Give this recipe a name between 1 and 48 printable characters.';
       nameInput.setAttribute('aria-invalid', 'true');
       nameInput.focus();
+      showError(saveError);
       announce('Add a recipe name before saving it to the pantry.');
       return;
     }
     if (pantry.length >= 8) {
       saveError.textContent = 'The pantry holds eight recipes. Remove a jar to make room, or download this recipe instead.';
+      showError(saveError);
       announce('The pantry is full. Download this recipe or remove an older saved mix.');
       return;
     }
     saveError.textContent = '';
     nameInput.removeAttribute('aria-invalid');
-    pantry = [...pantry, { id: crypto.randomUUID(), name, state: structuredClone(state) }];
-    renderShelf();
-    if (writeLocalData(PANTRY_KEY, pantry, announce)) announce(`${name} saved in this browser's recipe pantry.`);
+    const nextPantry = [...pantry, { id: crypto.randomUUID(), name, state: structuredClone(state) }];
+    if (writeLocalData(PANTRY_KEY, nextPantry, announce)) {
+      pantry = nextPantry;
+      renderShelf();
+      announce(`${name} saved in this browser's recipe pantry.`);
+    } else {
+      saveError.textContent = 'This recipe was not saved. Download it instead; your current palette is unchanged.';
+      showError(saveError);
+    }
   }, { signal });
   shelf.addEventListener('click', (event) => {
     if (!(event.target instanceof Element)) return;
@@ -447,11 +541,14 @@ export function mount(context: ProjectContext): ProjectInstance {
       render();
       announce(`${recipe.name} is back on the counter, pins and all.`);
     } else {
-      pantry = pantry.filter((item) => item.id !== recipe.id);
-      renderShelf();
-      saveError.textContent = '';
-      if (writeLocalData(PANTRY_KEY, pantry, announce)) announce(`${recipe.name} removed from the pantry. Your current palette is unchanged.`);
-      query<HTMLButtonElement>(root, '[data-save-form] button').focus();
+      const nextPantry = pantry.filter((item) => item.id !== recipe.id);
+      if (writeLocalData(PANTRY_KEY, nextPantry, announce)) {
+        pantry = nextPantry;
+        renderShelf();
+        saveError.textContent = '';
+        announce(`${recipe.name} removed from the pantry. Your current palette is unchanged.`);
+        query<HTMLButtonElement>(root, '#pk-pantry .workspace-dialog-heading button').focus();
+      }
     }
   }, { signal });
 

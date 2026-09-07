@@ -460,6 +460,32 @@ async function ready(page: Page): Promise<void> {
   await expect(page.locator('.roomtone-canvas')).toHaveAttribute('data-camera', /,/);
   await expect(page.locator('[data-project-preview]')).toBeVisible();
 }
+async function selectSound(page: Page, label: string, value: string): Promise<void> {
+  await page.getByRole('button', { name: 'Sound', exact: true }).click();
+  await page.getByLabel(label, { exact: true }).selectOption(value);
+  await page.getByRole('button', { name: 'Close Sound settings', exact: true }).click();
+}
+async function pane(page: Page, name: string): Promise<void> {
+  await page.getByRole('tab', { name, exact: true }).click();
+}
+async function fitsViewport(page: Page): Promise<void> {
+  const size = await page.evaluate(() => ({
+    width: innerWidth, height: innerHeight,
+    document: [document.documentElement.scrollWidth, document.documentElement.scrollHeight],
+    body: [document.body.scrollWidth, document.body.scrollHeight],
+    offset: [scrollX, scrollY],
+    bodyOverflow: getComputedStyle(document.body).overflow,
+    rootOverflow: getComputedStyle(document.documentElement).overflow,
+  }));
+  expect(size.document).toEqual([size.width, size.height]);
+  expect(size.body).toEqual([size.width, size.height]);
+  expect(size.offset).toEqual([0, 0]);
+  expect(size.bodyOverflow).not.toMatch(/hidden|clip/);
+  expect(size.rootOverflow).not.toMatch(/hidden|clip/);
+  await expect(page.locator('.project-roomtone')).toHaveAttribute('data-workspace', 'true');
+  await expect(page.getByRole('button', { name: 'Play once', exact: false })).toBeInViewport();
+  await expect(page.getByRole('button', { name: 'Stop', exact: true })).toBeInViewport();
+}
 async function silent(page: Page): Promise<void> {
   await expect.poll(() => page.evaluate(() => window.__roomtoneAudioAudit.contexts.every((context) => context.state === 'closed'))).toBe(true);
   expect(await page.evaluate(() => window.__roomtoneAudioAudit.nodes.every((record) => record.disconnected))).toBe(true);
@@ -502,19 +528,31 @@ function responseAt(samples: readonly number[] | Float32Array, rate: number, fre
 
 test.describe('Roomtone software WebGL workbench', () => {
   test.setTimeout(90_000);
+  test.beforeEach(async ({ page }) => {
+    // Other workspaces share this dev server; their edits must not navigate this fixture.
+    await page.routeWebSocket(url => url.pathname === '/' && url.searchParams.has('token'), socket => {
+      const server = socket.connectToServer();
+      server.onMessage(message => {
+        if (typeof message !== 'string' || !/"type"\s*:\s*"full-reload"/.test(message)) socket.send(message);
+      });
+    });
+  });
 
   test('desktop geometry, real reflection inspection, camera and keyboard/drag positions', async ({ page }, info) => {
     const errors: string[] = [];
     page.on('pageerror', (error) => errors.push(error.message));
-    await page.setViewportSize({ width: 1440, height: 1100 });
+    await page.setViewportSize({ width: 1440, height: 900 });
     await observeAudio(page);
     await ready(page);
     await page.screenshot({ path: info.outputPath('roomtone-desktop.png') });
+    await fitsViewport(page);
     expect(await page.evaluate(() => window.__roomtoneAudioAudit.contexts.length)).toBe(0);
+    await pane(page, 'Response');
     await page.getByLabel('Reflection path', { exact: true }).selectOption('1,0,0');
     await expect(page.locator('[data-path-route]')).toHaveText('Source → East wall → Listener');
     await expect(page.locator('.roomtone-canvas')).toHaveAttribute('data-path-vertices', '3');
     const originalDelay = await page.locator('[data-path-delay]').innerText();
+    await pane(page, 'Edit room');
     await page.getByLabel('Width', { exact: true }).fill('11.2');
     await page.getByLabel('Width', { exact: true }).press('Tab');
     await expect(page.locator('.project-roomtone')).toHaveAttribute('data-volume', String(11.2 * 7.2 * 3.8));
@@ -611,16 +649,18 @@ test.describe('Roomtone software WebGL workbench', () => {
   test('surface edits, pinned comparison, frequency analysis and exact WAV export', async ({ page }, info) => {
     const errors: string[] = [];
     page.on('pageerror', (error) => errors.push(error.message));
-    await page.setViewportSize({ width: 1440, height: 1050 });
+    await page.setViewportSize({ width: 1440, height: 900 });
     await observeAudio(page);
     await ready(page);
     await page.getByRole('button', { name: 'Pin reference', exact: false }).click();
     await expect(page.locator('[data-comparison-delta]')).toContainText('+0.00 dB');
     const before = Number(await page.locator('[data-rt60]').innerText());
+    await pane(page, 'Surfaces');
     for (const wall of WALLS) await page.locator(`[data-material="${wall}"]`).selectOption('absorber');
     expect(Number(await page.locator('[data-rt60]').innerText())).toBeLessThan(before);
     await expect(page.locator('[data-comparison-delta]')).toContainText('Current IR energy: -');
     await expect(page.locator('[data-comparison] tbody tr').first()).toContainText('262.7');
+    await pane(page, 'Response');
     await page.getByLabel('Analysis octave band').selectOption('0');
     await expect(page.locator('[data-decay-note]')).toContainText('125 Hz');
     await expect(page.locator('[data-absorption="west"]')).toHaveText('30%');
@@ -640,11 +680,13 @@ test.describe('Roomtone software WebGL workbench', () => {
       return { length: buffer.length, rate: buffer.sampleRate, channels: buffer.numberOfChannels };
     }, [...bytes]);
     expect(decoded).toEqual({ length: expected.samples.length, rate: 44100, channels: 1 });
-    await page.locator('.roomtone-analysis').scrollIntoViewIfNeeded();
+    await fitsViewport(page);
     await page.screenshot({ path: info.outputPath('roomtone-response.png') });
+    await pane(page, 'Edit room');
     await page.getByLabel('Reflection order', { exact: true }).selectOption('0');
     await expect(page.locator('[data-path] option')).toHaveCount(1);
     await expect(page.locator('[data-path-route]')).toHaveText('Source → Listener');
+    await pane(page, 'Compare');
     await page.getByRole('button', { name: 'Clear B', exact: true }).click();
     await expect(page.locator('[data-audition] option[value="reference"]')).toHaveJSProperty('disabled', true);
     expect(await page.evaluate(() => window.__roomtoneAudioAudit.contexts.length)).toBe(0);
@@ -657,7 +699,7 @@ test.describe('Roomtone software WebGL workbench', () => {
     await observeAudio(page);
     await ready(page);
     expect(await page.evaluate(() => window.__roomtoneAudioAudit.contexts.length)).toBe(0);
-    await page.getByLabel('Audition sound').selectOption('chord');
+    await selectSound(page, 'Audition sound', 'chord');
     await page.getByRole('button', { name: 'Play once', exact: false }).click();
     await expect(page.locator('.project-roomtone')).toHaveAttribute('data-audio-state', 'playing');
     const audit = await page.evaluate(() => {
@@ -690,7 +732,7 @@ test.describe('Roomtone software WebGL workbench', () => {
     const referenceEnergy = Number(await page.locator('.project-roomtone').getAttribute('data-ir-energy'));
     await page.getByRole('button', { name: 'Pin reference', exact: false }).click();
     await page.getByLabel('Room preset').selectOption('studio');
-    await page.getByLabel('Audition design').selectOption('reference');
+    await selectSound(page, 'Audition design', 'reference');
     await page.getByRole('button', { name: 'Play once', exact: false }).click();
     await expect(page.locator('.project-roomtone')).toHaveAttribute('data-audio-state', 'playing');
     const energy = await page.evaluate(() => window.__roomtoneAudioAudit.convolvers[0].buffer!.getChannelData(0).reduce((sum, value) => sum + value * value, 0));
@@ -698,14 +740,16 @@ test.describe('Roomtone software WebGL workbench', () => {
     await expect(page.locator('.project-roomtone')).toHaveAttribute('data-audio-state', 'off');
     await silent(page);
     expect(await page.evaluate(() => window.__roomtoneAudioAudit.sources.length)).toBe(1);
-    await page.getByLabel('Audition design').selectOption('dry');
+    await selectSound(page, 'Audition design', 'dry');
     await page.getByRole('button', { name: 'Play once', exact: false }).click();
     await expect(page.locator('.project-roomtone')).toHaveAttribute('data-audio-state', 'playing');
     const gain = await page.evaluate(() => window.__roomtoneAudioAudit.nodes.filter((record) => record.node instanceof GainNode).slice(-3).map((record) => (record.node as GainNode).gain.value));
     expect(gain[0]).toBe(1);
     expect(gain[1]).toBe(0);
     expect(gain[2]).toBeLessThanOrEqual(MAX_OUTPUT_GAIN);
+    await page.getByRole('button', { name: 'Sound', exact: true }).click();
     await page.getByLabel('Wet mix', { exact: true }).press('ArrowLeft');
+    await page.getByRole('button', { name: 'Close Sound settings', exact: true }).click();
     await expect(page.locator('.project-roomtone')).toHaveAttribute('data-audio-state', 'off');
     await silent(page);
     expect(await page.evaluate(() => window.__roomtoneAudioAudit.sources.length)).toBe(2);
@@ -718,7 +762,7 @@ test.describe('Roomtone software WebGL workbench', () => {
       await observeAudio(page, { defaultRate: rate });
       await ready(page);
       expect(await page.evaluate(() => window.__roomtoneAudioAudit.contexts.length)).toBe(0);
-      await page.getByLabel('Audition sound').selectOption('chord');
+      await selectSound(page, 'Audition sound', 'chord');
       await page.getByRole('button', { name: 'Play once', exact: false }).click();
       await expect(page.locator('.project-roomtone')).toHaveAttribute('data-audio-state', 'playing');
       const result = await page.evaluate(() => ({
@@ -748,10 +792,10 @@ test.describe('Roomtone software WebGL workbench', () => {
       await ready(page);
       await page.getByRole('button', { name: 'Pin reference', exact: false }).click();
       await page.getByLabel('Room preset').selectOption('studio');
-      await page.getByLabel('Audition sound').selectOption('chord');
+      await selectSound(page, 'Audition sound', 'chord');
       const gains: number[] = [];
       for (const mode of ['current', 'reference'] as const) {
-        await page.getByLabel('Audition design').selectOption(mode);
+        await selectSound(page, 'Audition design', mode);
         await page.getByRole('button', { name: 'Play once', exact: false }).click();
         await expect(page.locator('.project-roomtone')).toHaveAttribute('data-audio-state', 'playing');
         const result = await page.evaluate(() => {
@@ -998,16 +1042,57 @@ test.describe('Roomtone software WebGL workbench', () => {
     expect(errors).toEqual([]);
   });
 
+  test('fixed workspace fits desktop, phone and short landscape viewports with real bounded panes', async ({ page }, info) => {
+    await observeAudio(page);
+    await ready(page);
+    for (const [width, height] of [[1440, 900], [1280, 720], [375, 812], [320, 640], [768, 480]]) {
+      await page.setViewportSize({ width, height });
+      if (width <= 760) await pane(page, 'Space');
+      await fitsViewport(page);
+      await expect(page.locator('.roomtone-canvas')).toBeInViewport();
+      await page.screenshot({ path: info.outputPath(`roomtone-workspace-${width}x${height}.png`) });
+      const canvas = (await page.locator('.roomtone-canvas').boundingBox())!;
+      expect(canvas.height).toBeGreaterThan(75);
+      const camera = await page.locator('.roomtone-canvas').getAttribute('data-camera');
+      await page.locator('.roomtone-canvas').focus();
+      await page.keyboard.press('ArrowLeft');
+      await expect(page.locator('.roomtone-canvas')).not.toHaveAttribute('data-camera', camera!);
+      await pane(page, 'Edit room');
+      await pane(page, 'Geometry');
+      await page.getByLabel('Width', { exact: true }).fill('10');
+      await page.getByLabel('Width', { exact: true }).press('Tab');
+      await expect(page.locator('.project-roomtone')).toHaveAttribute('data-volume', String(10 * 7.2 * 3.8));
+      await pane(page, 'Surfaces');
+      await page.getByLabel('Reflection order', { exact: true }).selectOption('6');
+      await expect(page.locator('.roomtone-canvas')).toHaveAttribute('data-path-count', '377');
+      await fitsViewport(page);
+      await pane(page, 'Response');
+      await page.getByLabel('Reflection path', { exact: true }).selectOption('1,0,0');
+      await expect(page.locator('[data-path-route]')).toHaveText('Source → East wall → Listener');
+      const scroll = await page.locator('.roomtone-panel-listen').evaluate(element => ({
+        height: element.clientHeight, content: element.scrollHeight,
+        overflow: getComputedStyle(element).overflowY,
+      }));
+      expect(scroll.content).toBeGreaterThan(scroll.height);
+      expect(scroll.overflow).toBe('auto');
+      await fitsViewport(page);
+      await page.getByRole('button', { name: 'Reset', exact: true }).click();
+      await expect(page.getByLabel('Width', { exact: true })).toHaveValue('9.6');
+      expect(await page.evaluate(() => window.__roomtoneAudioAudit.contexts.length)).toBe(0);
+    }
+  });
+
   test('reduced-motion resize has no implicit layout transitions or horizontal overflow', async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 780 });
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await ready(page);
     expect(await page.locator('.roomtone-shell').evaluate((element) => getComputedStyle(element).transitionProperty)).toBe('none');
-    for (const pane of ['Space', 'Edit room', 'Listen & measure']) {
-      await page.getByRole('button', { name: pane, exact: true }).click();
+    for (const name of ['Space', 'Edit room', 'Response', 'Compare']) {
+      await pane(page, name);
       for (const width of [1440, 320, 1440, 375, 320]) {
         await page.setViewportSize({ width, height: 780 });
         expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
+        await fitsViewport(page);
       }
     }
   });
@@ -1016,22 +1101,24 @@ test.describe('Roomtone software WebGL workbench', () => {
     test(`${width}px workbench switches useful panes without overflow or exceptions`, async ({ page }, info) => {
       const errors: string[] = [];
       page.on('pageerror', (error) => errors.push(error.message));
-      await page.setViewportSize({ width, height: 900 });
+      await page.setViewportSize({ width, height: width === 375 ? 812 : 640 });
       await page.emulateMedia({ reducedMotion: 'reduce' });
+      await observeAudio(page);
       await ready(page);
       await page.screenshot({ path: info.outputPath(`roomtone-mobile-${width}.png`) });
-      const overflow = () => page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+      const overflow = () => page.evaluate(() => document.documentElement.scrollWidth > innerWidth || document.documentElement.scrollHeight > innerHeight);
       expect(await overflow()).toBe(false);
-      await page.getByRole('button', { name: 'Edit room', exact: true }).click();
+      await fitsViewport(page);
+      await pane(page, 'Edit room');
       await expect(page.getByLabel('Width', { exact: true })).toBeVisible();
       await page.getByLabel('Depth', { exact: true }).fill('8.4');
       await page.getByLabel('Depth', { exact: true }).press('Tab');
       await page.getByLabel('Listener height', { exact: true }).fill('1.4');
       await page.getByLabel('Listener height', { exact: true }).press('Tab');
       expect(await overflow()).toBe(false);
-      await page.evaluate(() => window.scrollTo(0, 0));
+      await fitsViewport(page);
       await page.screenshot({ path: info.outputPath(`roomtone-mobile-edit-${width}.png`) });
-      await page.getByRole('button', { name: 'Listen & measure', exact: true }).click();
+      await pane(page, 'Response');
       await expect(page.locator('[data-ir-plot] svg')).toBeVisible();
       await page.getByLabel('Reflection path', { exact: true }).selectOption('0,0,1');
       await expect(page.locator('[data-path-route]')).toHaveText('Source → Ceiling → Listener');
@@ -1043,6 +1130,35 @@ test.describe('Roomtone software WebGL workbench', () => {
       }));
       expect(Math.min(...fontSizes)).toBeGreaterThanOrEqual(13.99);
       await page.screenshot({ path: info.outputPath(`roomtone-mobile-listen-${width}.png`) });
+      await fitsViewport(page);
+      await page.getByRole('button', { name: 'Pin reference', exact: false }).click();
+      await pane(page, 'Compare');
+      await expect(page.locator('[data-comparison-delta]')).toContainText('+0.00 dB');
+      await pane(page, 'Edit room');
+      await pane(page, 'Surfaces');
+      const originalEnergy = await page.locator('.project-roomtone').getAttribute('data-ir-energy');
+      await page.getByLabel('West wall material', { exact: true }).selectOption('absorber');
+      await expect(page.locator('.project-roomtone')).not.toHaveAttribute('data-ir-energy', originalEnergy!);
+      await pane(page, 'Compare');
+      await expect(page.locator('[data-comparison-delta]')).toContainText('Current IR energy: -');
+      await fitsViewport(page);
+      await page.getByRole('link', { name: 'Model notes', exact: false }).click();
+      await expect(page.getByRole('dialog', { name: 'Model notes', exact: true })).toBeVisible();
+      await page.getByText('Equations & export details', { exact: true }).click();
+      await expect(page.getByText('WAV export is unnormalized, mono 32-bit IEEE float', { exact: false })).toBeVisible();
+      await page.keyboard.press('Escape');
+      await expect(page.getByRole('link', { name: 'Model notes', exact: false })).toBeFocused();
+      expect(await page.evaluate(() => window.__roomtoneAudioAudit.contexts.length)).toBe(0);
+      await selectSound(page, 'Audition sound', 'chord');
+      await selectSound(page, 'Audition design', 'reference');
+      await page.getByRole('button', { name: 'Play once', exact: false }).click();
+      await expect(page.locator('.project-roomtone')).toHaveAttribute('data-audio-state', 'playing');
+      await fitsViewport(page);
+      await page.getByRole('button', { name: 'Stop', exact: true }).click();
+      await silent(page);
+      await pane(page, 'Space');
+      await expect(page.locator('.roomtone-canvas')).toHaveAttribute('data-selected-path', '0,0,1');
+      await fitsViewport(page);
       expect(errors).toEqual([]);
     });
   }

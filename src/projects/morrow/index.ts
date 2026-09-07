@@ -1,6 +1,7 @@
 import './style.css';
 import { Vector3 } from 'three';
 import { createLoop } from '../../core/loop';
+import { createWorkspaceDialog, createWorkspaceTabs } from '../../core/workspace';
 import { createProjectPage, downloadText, query } from '../../core/page';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import {
@@ -25,11 +26,46 @@ export async function mount(context: ProjectContext): Promise<ProjectInstance> {
   const id = `morrow-${++instances}`;
   page.root.setAttribute('aria-labelledby', `${id}-title`);
   page.root.innerHTML = markup(id);
-  page.root.dataset.mobileView = 'cell';
+  page.root.dataset.workspace = 'true';
   const get = <T extends Element>(selector: string) => query<T>(page.root, selector);
   const all = <T extends Element>(selector: string) => [...page.root.querySelectorAll<T>(selector)];
   const text = (selector: string, value: string) => { get<HTMLElement>(selector).textContent = value; };
   const button = (name: string) => get<HTMLButtonElement>(`[data-morrow-${name}]`);
+  const workspace = get<HTMLElement>('.morrow-workspace');
+  const dock = document.createElement('div'); dock.className = 'morrow-dock';
+  const cell = document.createElement('section'); cell.className = 'morrow-cell-controls';
+  const studyNotes = document.createElement('div'); studyNotes.className = 'morrow-study-notes';
+  studyNotes.append(get('[data-morrow-task-title]'), get('[data-morrow-task-description]'));
+  cell.append(studyNotes, get('.morrow-camera-bar'), get('.morrow-interaction-hint'), get('.morrow-live-strip'));
+  const desk = get<HTMLElement>('.morrow-desk');
+  const inspector = document.createElement('div'); inspector.className = 'morrow-inspector-panel';
+  const inspectorScroll = document.createElement('div'); inspectorScroll.className = 'morrow-inspector-scroll';
+  const actions = document.createElement('div'); actions.className = 'morrow-desk-actions';
+  actions.append(get('.morrow-main-actions'), get('.morrow-grip-actions'));
+  inspectorScroll.append(...desk.children); desk.append(inspectorScroll, actions);
+  inspector.append(desk);
+  const motion = document.createElement('div'); motion.className = 'morrow-motion-panel';
+  motion.append(get('.morrow-execution'));
+  dock.append(cell, inspector, motion); workspace.append(dock);
+  page.root.dataset.mobileView = 'inspector';
+  createWorkspaceTabs(page, { id: `${id}-views`, label: 'Workbench views', host: get('.morrow-mobile-views'),
+    initial: 'inspector', panes: [{ id: 'cell', label: 'Workcell', panel: cell },
+      { id: 'inspector', label: 'Inspector', panel: inspector }, { id: 'motion', label: 'Motion', panel: motion }],
+    onSelect: selected => {
+      page.root.dataset.mobileView = selected;
+      for (const tab of all<HTMLButtonElement>('[data-morrow-view]')) {
+        tab.setAttribute('aria-pressed', String(tab.dataset.morrowView === selected));
+      }
+    } });
+  for (const tab of all<HTMLButtonElement>('[data-workspace-tab]')) {
+    tab.dataset.morrowView = tab.dataset.workspaceTab;
+    tab.setAttribute('aria-pressed', String(tab.dataset.morrowView === 'inspector'));
+  }
+  const files = document.createElement('button');
+  files.type = 'button'; files.dataset.morrowFiles = ''; files.textContent = 'Files / guide';
+  get('.morrow-mast').append(files);
+  createWorkspaceDialog(page, { id: `${id}-files`, title: 'Files and model guide', triggers: [files],
+    content: [get('.morrow-footer'), get('.morrow-edition')] });
   let state = createState();
   let preview: IKResult | null = null, trajectory: Trajectory | null = null;
   let time = 0, inspectTime: number | null = null, direction = 1, paused = true, busy = false, invalid = false;
@@ -363,12 +399,6 @@ export async function mount(context: ProjectContext): Promise<ProjectInstance> {
     }, { signal: page.signal });
   }
   const tabs = all<HTMLButtonElement>('[data-morrow-tab]');
-  all<HTMLButtonElement>('[data-morrow-view]').forEach(view => {
-    view.addEventListener('click', () => {
-      page.root.dataset.mobileView = view.dataset.morrowView;
-      all<HTMLButtonElement>('[data-morrow-view]').forEach(other => other.setAttribute('aria-pressed', String(view === other)));
-    }, { signal: page.signal });
-  });
   function showTab(selected: HTMLButtonElement) {
     for (const tab of tabs) {
       const active = tab === selected;

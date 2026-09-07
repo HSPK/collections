@@ -101,6 +101,51 @@ test('wheel focus, keyboard travel, four coherent scenes, back, and reset all op
   expect(errors).toEqual([]);
 });
 
+test('atlas stories, notes, and guide leave recursive travel in a fixed viewport', async ({ page }) => {
+    await page.routeWebSocket('**', () => {});
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('./projects/worlds-within/');
+    const site = page.locator('.project-worlds-within');
+    const canvas = site.getByRole('application', { name: 'Recursive world explorer' });
+    for (const viewport of [
+      { width: 1440, height: 900 }, { width: 1280, height: 720 }, { width: 375, height: 812 },
+      { width: 320, height: 640 }, { width: 768, height: 480 },
+    ]) {
+      await page.setViewportSize(viewport);
+      await expect(site).toHaveAttribute('data-workspace', 'true');
+      await expect.poll(async () => (await site.boundingBox())!.height).toBe(viewport.height);
+      await expect.poll(async () => canvas.evaluate(element => Math.abs(
+        (element as HTMLCanvasElement).width - element.getBoundingClientRect().width * Math.min(devicePixelRatio, 2),
+      ))).toBeLessThanOrEqual(1);
+      await site.getByRole('button', { name: 'Return to the first desk', exact: true }).click();
+      const bounds = (await canvas.boundingBox())!;
+      expect(bounds.height).toBeGreaterThan(140);
+      for (const control of await site.locator('[data-back], [data-in], [data-out], [data-reset], [data-enter]').all()) {
+        const box = (await control.boundingBox())!;
+        expect(box.y).toBeGreaterThanOrEqual(0);
+        expect(box.y + box.height).toBeLessThanOrEqual(viewport.height);
+      }
+      await site.getByRole('tab', { name: 'Field notes', exact: true }).click();
+      await expect(site.getByRole('list')).toBeVisible();
+      await site.locator('.ww-mechanics summary').click();
+      expect((await canvas.boundingBox())!).toEqual(bounds);
+      await site.getByRole('button', { name: 'Enter the blue postcard', exact: true }).click();
+      await expect(site).toHaveAttribute('data-depth', '1');
+      await expect(site.getByRole('status')).toContainText('postcard city');
+      await site.getByRole('tab', { name: 'Story', exact: true }).click();
+      await expect(site.locator('[data-story]')).toHaveText(worlds[1].story);
+      await site.getByRole('button', { name: 'Atlas guide', exact: true }).click();
+      await expect(site.getByRole('dialog', { name: 'Atlas guide', exact: true })).toBeVisible();
+      await page.keyboard.press('Escape');
+      await expect(site.getByRole('button', { name: 'Atlas guide', exact: true })).toBeFocused();
+      expect(await page.evaluate(() => ({
+        width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight,
+        x: window.scrollX, y: window.scrollY,
+      }))).toEqual({ ...viewport, x: 0, y: 0 });
+      await page.screenshot({ path: test.info().outputPath(`atlas-workspace-${viewport.width}x${viewport.height}.png`), fullPage: true });
+    }
+});
+
 test('375px touch pinch preserves the midpoint and tapping a picture enters its actual frame', async ({ browser, baseURL }) => {
   const context = await browser.newContext({
     baseURL, viewport: { width: 375, height: 812 }, hasTouch: true, isMobile: true, reducedMotion: 'reduce',

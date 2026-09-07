@@ -80,6 +80,29 @@ canvas resize observer is disposed by `page.onCleanup`. Patch buttons
 support arrow keys and Home/End, and select controls are equivalent to
 pointer editing. No storage or persistence is implicit.
 
+## Viewport controls
+
+The inspector reserves a 64px right-side clearance plus the safe-area inset.
+This keeps descriptor buttons and pane controls clear of the collection
+launcher without reducing the visible image or adding a footer.
+
+The root is a fixed-height workspace. The square mosaic, scene/reset controls,
+paint selectors, and current image cosine stay together at desktop and phone
+sizes. The inspector sits beside the mosaic or in a lower dock. **Match** holds
+the descriptor, vocabulary builder, pooling and temperature controls, and score
+details. **Image** keeps Undo, Flip, Clear, overlays, and JSON export. **Token**
+contains the actual selected features and full patch ledger; **Scenes** retains
+all comparison cards, and **Notes** preserves the assumptions and experiments.
+Each pane scrolls independently without scrolling the page. Left/Right/Home/End
+operate tabs; the existing patch-grid keyboard shortcuts are unchanged.
+
+`workspace.ts` moves existing regions into wrapper panels without replacing
+their interactive nodes or named-region semantics. Extend that composition for
+new inspectors. The image frame uses both available dimensions to size a square;
+the existing canvas resize observer redraws it, and the HTML patch grid shares
+the same bounds, so pointer and keyboard selection stay aligned after resize.
+No positive fixed stage minimum or body overflow suppression is used.
+
 Focused cases live in `tests/series/patchwork-vision.spec.ts`:
 
 ```sh

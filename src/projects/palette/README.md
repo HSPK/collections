@@ -26,7 +26,8 @@ network service or implicit autosave.
 - `export.ts`: safe SVG serialization and CSS variables. SVG titles are escaped;
   colors are normalized hex. No fonts or assets are fetched.
 - `index.ts`: local UI state and signal-scoped event wiring. All controls belong
-  to the site; navigation anchors are safe on standalone project pages.
+  to the site; native workspace tabs retain the selected pigment and all input
+  state while switching views.
 - `style.css`: scoped paper/paint visual identity and narrow-screen layouts.
 - `tests/projects/palette.spec.ts`: known contrast cases, generation and pin
   semantics, saved-data validation, export escaping and focused interactions.
@@ -35,5 +36,24 @@ All primary controls are native keyboard-operable buttons, fields and selectors.
 Copy buttons use the browser clipboard with explicit failure feedback; the CSS
 textarea is also selectable. Downloads do not depend on clipboard permission.
 
-The compact header leads directly to the palette. `data-project-preview` marks
-the mixing counter so collection covers capture the colors and real controls.
+## One-screen kitchen
+
+The live five-color palette stays above the **Mix**, **Pigment**, **Taste**, and
+**Keep** tabs. The workspace uses the remaining viewport height, including on
+320×640 phones and short landscape screens; the document does not scroll.
+Tap a swatch to open its pigment editor. Small screens show readable pigment
+names on the compact swatches and the exact hex in the selected pigment field.
+
+**Recipes** opens the six-recipe notebook without changing the selected pigment.
+**Notes** holds the original explanations, current harmony/pigment notes,
+grayscale caveat and WCAG guide. Taste opens the full contrast table in a native
+dialog; choosing a cell returns to the specimen. Keep provides save/download
+actions, with separate **Open pantry** and **View / copy CSS** dialogs.
+Dialogs can scroll long material, support Escape and return focus on close.
+Status feedback stays on the counter and is repeated inside an open dialog.
+Failed storage writes leave the saved shelf unchanged and show an explicit
+unsaved error; the live recipe is never discarded. Invalid colors and recipe
+names open a visible error dialog instead of stretching the controls off-screen.
+
+`data-project-preview` marks the mixing counter so collection covers capture
+the colors and real controls. The floating collection menu remains available.

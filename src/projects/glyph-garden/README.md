@@ -11,7 +11,7 @@ AI services, recordings, or saved personal data. A refresh begins a new garden.
 - Draw a **zigzag** (down, up, down) to cycle still, gentle, and lively air.
 - Draw anywhere in the picture; new growth goes in the selected patch. Tap the
   garden to select its nearest patch, or use the three labeled patch buttons.
-- The illustrated guide has native buttons for the exact same commands. With the
+- The **Grow** pane has native buttons for the exact same commands. With the
   canvas focused, `F`, `T`, and `W` invoke them; left/right or `1`/`2`/`3` select
   a patch. Escape cancels an unfinished mark. Button activation is standard
   Enter/Space. Undo also supports Ctrl/Command+Z when focus is inside this site.
@@ -43,7 +43,8 @@ AI services, recordings, or saved personal data. A refresh begins a new garden.
   matching. Template sets are capped at 32 strokes and validated before preparation.
   There is no fallback that executes the “closest” command.
 - `art.ts`: original greenhouse, foliage, pond, mushrooms, snail, starbells, and
-  ribbonwood drawings. Asset placement responds to actual canvas dimensions.
+  ribbonwood drawings. Asset placement and plant scale respond to actual canvas
+  dimensions, including short landscape and compact mobile previews.
 - `index.ts`: pointer capture and cancellation, accessible controls, honest match
   feedback, bounded world history, and the core canvas/loop/page lifecycle.
 - `style.css`: the scoped, responsive paper-and-botanical field-guide layout.
@@ -55,9 +56,28 @@ Keep the bounded point count, rejection path, and non-animation render requests.
 
 ## Validation
 
-`npx playwright test tests/series/glyph-garden.spec.ts`
+`SITE_URL=http://127.0.0.1:4173/ npm test -- tests/series/glyph-garden.spec.ts`
 
 The focused tests cover deterministic shape matching and rejection, actual
 draw-to-garden changes, native keyboard/Undo behavior, touch input, paused commands,
 reduced motion, and a 375px layout. No shared test or configuration files are owned
 by this project.
+
+## Viewport workspace
+
+The `data-workspace="true"` root occupies the viewport. A flex-sized live garden
+and patch selector stay visible beside the dock on wide screens and above it on
+phones. **Grow** keeps equivalent command buttons and Undo/Reset available while
+the longer feedback/census area scrolls independently. **Field guide** holds the
+original drawings and instructions; drawing from that pane returns to Grow with
+the result. Tabs never replace or resize the canvas.
+
+**Garden notes** opens a native dialog with recognition theory, keyboard help,
+and local-state details. The dialog does not intercept the browser's Escape
+behavior, and garden shortcuts do not mutate the scene from inside it. Shared
+workspace helpers own tab focus/inert state and dialog lifecycle. The footer
+reserves space for the floating collection menu.
+
+Viewport regression coverage includes 1440×900, 1280×720, 375×812, 320×640, and
+768×480, with screenshots, no-document-scroll assertions, primary-control bounds,
+real shape recognition after resizing, and native-dialog focus restoration.

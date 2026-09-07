@@ -2,6 +2,7 @@ import './style.css';
 import { createLoop } from '../../core/loop';
 import { clamp } from '../../core/math';
 import { createProjectPage, escapeMarkup, query } from '../../core/page';
+import { createWorkspaceDialog } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { DURATION, SPEEDS, STAGES } from './data';
 import { createMachineScene } from './scene';
@@ -26,6 +27,7 @@ export function mount(context: ProjectContext): ProjectInstance {
   let previousButton = '';
 
   root.tabIndex = 0;
+  root.dataset.workspace = 'true';
   root.setAttribute('aria-labelledby', `${id}-title`);
   root.innerHTML = `
     <div class="cr-shell">
@@ -82,7 +84,7 @@ export function mount(context: ProjectContext): ProjectInstance {
         <p class="cr-feedback" data-feedback role="status" aria-live="polite" aria-atomic="true"></p>
         <p id="${id}-timeline-help" class="cr-timeline-help">Drag either way. <kbd>Space</kbd> plays / pauses when the page is focused.</p>
       </div>
-      <p class="cr-motion-note" data-motion-note hidden>Reduced motion is on. Nothing moves until you choose Play; every stage can also be explored while paused.</p>
+      <p class="cr-motion-note" data-motion-note hidden>Reduced motion · still until you choose Play.</p>
 
       <section class="cr-inspector" aria-labelledby="${id}-stages-title">
         <div class="cr-section-heading">
@@ -119,7 +121,24 @@ export function mount(context: ProjectContext): ProjectInstance {
         </div>
       </section>
       <footer class="cr-footer"><span>Built for the pleasure of the next thing.</span><span>Original SVG · One reversible clock · Quiet by design</span></footer>
-    </div>`;
+      <nav class="cr-workspace-actions" aria-label="Machine workspace">
+        <button type="button" data-open-stages>Inspect stages</button>
+        <button type="button" data-open-notes>Behind the motion</button>
+      </nav>
+    </div>
+    <p class="sr-only" data-cr-announcement role="status" aria-live="polite"></p>`;
+
+  createWorkspaceDialog(page, {
+    id: `${id}-stages`, title: 'Follow the hand-off',
+    triggers: [query(root, '[data-open-stages]')],
+    content: [query(root, '.cr-inspector')],
+  });
+  createWorkspaceDialog(page, {
+    id: `${id}-choreography`, title: 'Behind the motion',
+    triggers: [query(root, '[data-open-notes]'), query(root, '.cr-header-note a')],
+    content: [query(root, '.cr-notes'), query(root, '.cr-under-machine'), query(root, '.cr-footer')],
+  });
+  query(root, '.cr-workspace-actions').append(query(root, '[data-motion-note]'));
 
   const play = query<HTMLButtonElement>(root, '[data-play]');
   const replay = query<HTMLButtonElement>(root, '[data-replay]');
@@ -127,6 +146,7 @@ export function mount(context: ProjectContext): ProjectInstance {
   const speedSelect = query<HTMLSelectElement>(root, `#${id}-speed`);
   const clock = query<HTMLOutputElement>(root, '[data-clock]');
   const feedback = query<HTMLElement>(root, '[data-feedback]');
+  const announcement = query<HTMLElement>(root, '[data-cr-announcement]');
   const motionNote = query<HTMLElement>(root, '[data-motion-note]');
   const machineStatus = query<HTMLElement>(root, '[data-machine-status]');
   const detailNumber = query<HTMLElement>(root, '[data-detail-number]');
@@ -142,6 +162,7 @@ export function mount(context: ProjectContext): ProjectInstance {
   function announce(message: string, report = false) {
     if (signal.aborted) return;
     feedback.textContent = message;
+    announcement.textContent = feedback.closest('dialog')?.open ? '' : message;
     if (report) page.report(message);
   }
 
@@ -250,7 +271,7 @@ export function mount(context: ProjectContext): ProjectInstance {
     setPaused(true);
     announce(reducedMotion
       ? 'Reduced motion is now on. The machine is paused; inspect a stage or choose Play when you want to.'
-      : 'Reduced motion is now off. The machine stays paused until you choose Play.', true);
+      : 'Reduced motion is now off. The machine stays paused until you choose Play.');
   }, { signal });
 
   render();

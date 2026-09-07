@@ -1,5 +1,6 @@
 import './style.css';
 import { createProjectPage, query } from '../../core/page';
+import { createWorkspaceDialog, createWorkspaceTabs } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { History, deserialize, resultsCSV, serialize } from './document';
 import type { ResetOrigin } from './document';
@@ -16,9 +17,45 @@ import type { Reference } from './ui';
 export async function mount(context: ProjectContext): Promise<ProjectInstance> {
   const page = createProjectPage(context, 'loadpath');
   const { root, signal } = page;
+  root.dataset.workspace = 'true';
   root.innerHTML = workbenchMarkup();
   root.dataset.mobilePane = 'structure';
   root.dataset.motion = 'on-demand';
+  const filesButton = document.createElement('button');
+  filesButton.className = 'lp-files-button';
+  filesButton.textContent = 'Files & notes';
+  query(root, '.lp-header').append(filesButton);
+  createWorkspaceDialog(page, {
+    id: 'lp-files', title: 'Design files & notes', triggers: [filesButton],
+    content: [query(root, '.lp-edition'), query(root, '.lp-files'), query(root, '.lp-footer')],
+  });
+  const dock = document.createElement('div');
+  dock.className = 'lp-dock';
+  const panels = document.createElement('div');
+  panels.className = 'lp-dock-panels';
+  const viewTools = document.createElement('section');
+  viewTools.className = 'lp-view-pane';
+  viewTools.setAttribute('aria-label', 'Structure controls');
+  viewTools.append(...['.lp-view-tools', '.lp-legend-tools', '.lp-stage-help', '.lp-invalid-banner'].map(selector => query(root, selector)));
+  const panes = [
+    { id: 'structure', label: 'Structure', content: viewTools },
+    { id: 'edit', label: 'Edit', content: query<HTMLElement>(root, '.lp-edit-pane') },
+    { id: 'results', label: 'Results', content: query<HTMLElement>(root, '.lp-results-pane') },
+  ].map(({ id, label, content }) => {
+    const panel = document.createElement('div');
+    panel.append(content);
+    panels.append(panel);
+    return { id, label, panel };
+  });
+  dock.append(query(root, '.lp-mobile-tabs'), panels);
+  query(root, '.lp-workspace').append(dock);
+  const workspaceTabs = createWorkspaceTabs(page, {
+    id: 'lp-workbench', label: 'Workbench panes', host: query(root, '.lp-mobile-tabs'), panes,
+    initial: 'structure', onSelect: id => { root.dataset.mobilePane = id; },
+  });
+  root.querySelectorAll<HTMLButtonElement>('[data-workspace-tab]').forEach(button => {
+    button.dataset.lpPane = button.dataset.workspaceTab;
+  });
   const history = new History(STUDIES[0].model, { baseline: STUDIES[0].model, presetId: STUDIES[0].id });
   let model = history.model;
   let result = analyze(model);
@@ -271,8 +308,7 @@ export async function mount(context: ProjectContext): Promise<ProjectInstance> {
     if (!button || button.disabled) return;
     const pane = button.dataset.lpPane;
     if (pane) {
-      root.dataset.mobilePane = pane;
-      root.querySelectorAll<HTMLButtonElement>('[data-lp-pane]').forEach((tab) => tab.setAttribute('aria-pressed', String(tab.dataset.lpPane === pane)));
+      workspaceTabs.select(pane);
       return;
     }
     const view = button.dataset.lpView;
@@ -288,7 +324,7 @@ export async function mount(context: ProjectContext): Promise<ProjectInstance> {
     if (button.dataset.lpInspectMember || button.dataset.lpInspectNode) {
       selected = button.dataset.lpInspectMember ? { kind: 'member', id: button.dataset.lpInspectMember } : { kind: 'node', id: button.dataset.lpInspectNode! };
       refresh();
-      if (window.matchMedia('(max-width: 760px)').matches) query<HTMLButtonElement>(root, '[data-lp-pane="edit"]').click();
+      workspaceTabs.select('edit');
       query<HTMLElement>(root, '[data-lp-selection]').focus({ preventScroll: true });
       return;
     }

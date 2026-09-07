@@ -51,6 +51,28 @@ arrows to move the pen, Space to place corners, Backspace to undo, Enter to
 trace, and Escape to cancel. Native form controls retain their keyboard behavior.
 The main canvas allows touch scrolling outside drawing mode.
 
+## One-screen workspace
+
+The `data-workspace="true"` root uses the dynamic viewport without clipping root
+overflow or scaling the page. The plot, playback/reset/speed, full timeline,
+harmonic range and shortcuts, measured RMS error, and **Draw a path** stay
+together. Wide screens use a side inspector; phones use a compact lower dock
+with a reserved collection-menu corner. Essential control and canvas text is
+at least 14px.
+
+**Signal & notes** (`[data-signal]`, accessible name **Signal and notes**) opens
+the native `#ep-signal-dialog`. Presets and their explanations, fixed mean/DC,
+visibility toggles, the six-coefficient spectrum, legend, keyboard help,
+feedback, and Fourier theory are retained there. Only this secondary content
+scrolls; Close/Escape restores trigger focus, and **Back to the drawing** closes
+the dialog and focuses the canvas without scrolling the document.
+
+Drawing mode swaps the inactive transport/inspector for sketch actions in the
+same viewport, rather than pushing the plot offscreen. The existing size observer
+refits the canvas on mode changes and live resizing. Pointer conversion still
+uses the renderer's current `plotView`; neither resizing nor dialogs advances
+a paused phase or discards a custom drawing.
+
 `createProjectPage` scopes events and teardown. Its cleanup releases pointer
 capture, destroys `createLoop`, disconnects the Canvas2D resize observer, and
 removes the canvas. There is no independent wall-clock animation or CSS loop.
@@ -58,3 +80,7 @@ removes the canvas. There is no independent wall-clock animation or CSS loop.
 Focused coverage is in `tests/series/epicycle-studio.spec.ts`: known signed
 signals and DC, sample reconstruction and resampling, timeline endpoints,
 browser controls and sketch input, mobile/reduced-motion behavior, and cleanup.
+Workspace tests cover 1440×900, 1280×720, 375×812, 320×640, and 768×480, including
+exact document bounds, unobstructed primary controls, real series/trace changes,
+secondary spectrum/theory workflows, native focus return, pointer sketches, and
+state-preserving viewport resizing. Screenshots use per-test `outputPath()`.

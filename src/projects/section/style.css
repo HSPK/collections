@@ -242,3 +242,115 @@
   .project-section .section-method summary > span { display: block; float: none; margin: 6px 0 0 19px; }
   .project-section .section-footer { flex-direction: column; gap: 6px; }
 }
+
+.project-section[data-workspace] {
+  --workspace-paper: var(--section-paper);
+  height: 100dvh;
+  min-height: 0;
+}
+.project-section[data-workspace] .section-wrap {
+  height: 100%;
+  min-height: 0;
+  padding: 10px 20px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 8px;
+}
+.project-section[data-workspace] .section-masthead { min-height: 0; padding: 0 0 8px; flex-wrap: nowrap; }
+.project-section[data-workspace] h1 { font-size: 32px; letter-spacing: -1.8px; }
+.project-section[data-workspace] h1 span { display: inline; font-size: 16px; margin-left: 20px; }
+.project-section[data-workspace] .section-wordmark > svg { width: 36px; height: 36px; }
+.project-section[data-workspace] .section-masthead > button { flex: none; }
+.project-section[data-workspace] .section-workbench { min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr); }
+.project-section[data-workspace] .section-work-heading { padding: 8px 14px; flex-wrap: nowrap; gap: 8px; }
+.project-section[data-workspace] .section-work-heading h2 { font-size: 26px; }
+.project-section[data-workspace] .section-work-heading .section-eyebrow { display: none; }
+.project-section[data-workspace] .section-history { width: auto; flex: none; }
+.project-section[data-workspace] .section-history button:last-child { margin: 0; }
+.project-section[data-workspace] .section-main { min-height: 0; grid-template-columns: minmax(0, 1fr) 310px; }
+.project-section[data-workspace] .section-drafting { display: grid; min-height: 0; grid-template-rows: minmax(0, 1fr) auto; }
+.project-section[data-workspace] .section-views { min-height: 0; }
+.project-section[data-workspace] .section-view-panel { display: flex; min-width: 0; min-height: 0; }
+.project-section[data-workspace] .section-view-panel > section { flex: 1; }
+.project-section[data-workspace] .section-solid-pane,
+.project-section[data-workspace] .section-slice-pane { min-height: 0; }
+.project-section[data-workspace] .section-solid,
+.project-section[data-workspace] .section-drawing { height: auto; min-height: 0; flex: 1; }
+.project-section[data-workspace] .section-drawing { position: relative; }
+.project-section[data-workspace] .section-drawing svg { position: absolute; inset: 0; width: 100%; height: 100%; max-height: none; }
+.project-section[data-workspace] .section-pane-heading { flex: none; height: 40px; padding: 0 10px; }
+.project-section[data-workspace] .section-view-tools { flex: none; padding: 4px 8px; flex-wrap: nowrap; }
+.project-section[data-workspace] .section-view-foot { min-height: 0; padding: 4px 10px 8px; flex: none; }
+.project-section[data-workspace] .section-topology { min-height: 0; padding: 4px 10px; flex: none; }
+.project-section[data-workspace] .section-slice-foot { padding: 4px 10px; flex: none; }
+.project-section[data-workspace] .section-cut-rail { min-height: 0; padding: 6px 10px; gap: 6px; grid-template-columns: auto 28px minmax(0, 1fr) 28px 92px; }
+.project-section[data-workspace] .section-cut-rail > label:first-child { font-size: 14px; grid-column: auto; margin: 0; }
+.project-section[data-workspace] .section-cut-rail > label:first-child span { display: none; }
+.project-section[data-workspace] .section-inspector { padding: 0; min-height: 0; max-height: none; overflow: visible; display: grid; grid-template-rows: auto minmax(0, 1fr); border-top: 0; }
+.project-section[data-workspace] .section-inspector-tabs { display: grid; grid-template-columns: 1fr 1fr; position: static; padding: 0; margin: 0; gap: 0; }
+.project-section[data-workspace] .section-inspector-tabs button { padding: 6px; min-height: 36px; white-space: nowrap; }
+.project-section[data-workspace] .section-inspector-tabs button[aria-selected="true"] { background: #e4eaf8; border-bottom-color: var(--section-blue); }
+.project-section[data-workspace] .section-inspector-scroll { min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-gutter: stable; padding: 12px; position: relative; }
+.project-section[data-workspace] [data-construction] { display: block; }
+.project-section[data-workspace] .section-object-inspector { border-top: 1px solid var(--section-line); padding-top: 18px; }
+.project-section[data-workspace] .section-metrics { grid-template-columns: minmax(0, 1fr); padding: 12px; gap: 16px; }
+.project-section[data-workspace] .section-metrics > div,
+.project-section[data-workspace] .section-metrics .section-bounds-metric { grid-column: auto; border: 0; padding: 0; }
+.project-section[data-workspace] .section-metrics strong,
+.project-section[data-workspace] .section-metrics .section-bounds-metric strong { font-size: 24px; white-space: normal; overflow-wrap: anywhere; }
+.project-section[data-workspace] .section-studies { grid-template-columns: minmax(0, 1fr); margin: 0; gap: 12px; }
+.project-section[data-workspace] .section-studies button { border: 1px solid var(--section-line); padding: 10px; font-size: 16px; }
+.project-section[data-workspace] .section-studies button:first-child,
+.project-section[data-workspace] .section-studies button:nth-child(3) { padding: 10px; border: 1px solid var(--section-line); }
+.project-section[data-workspace] .section-studies button[aria-pressed="true"] { background: #e4eaf8; border-color: var(--section-blue); }
+.project-section[data-workspace] .section-studies button::after { display: none; }
+.project-section[data-workspace] .section-studies small { font-size: 14px; }
+.project-section[data-workspace] .section-study-note { padding: 16px 0 0; }
+.project-section[data-workspace] .section-status-row { min-height: 58px; max-height: 58px; overflow: auto; overscroll-behavior: contain; padding: 2px 64px 2px 0; display: block; }
+.project-section[data-workspace] .section-local { display: none; }
+.project-section[data-workspace] .section-error { padding: 6px 8px; margin: 0; font-size: 14px; }
+.project-section[data-workspace] .section-file-actions { width: auto; display: flex; margin-bottom: 18px; }
+.project-section[data-workspace] .section-method-columns { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 18px 0; }
+.project-section[data-workspace] .section-method summary > span { float: none; display: block; margin: 4px 0; }
+.project-section[data-workspace] .section-footer { flex-wrap: wrap; padding: 12px 0; }
+@media (min-width: 601px) and (max-width: 1000px) {
+  .project-section[data-workspace] .section-main { grid-template-columns: minmax(0, 1fr) 270px; }
+  .project-section[data-workspace] .section-views { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .project-section[data-workspace] .section-view-tools { flex-wrap: wrap; }
+  .project-section[data-workspace] .section-unit { display: none; }
+  .project-section[data-workspace] .section-cut-rail { grid-template-columns: 24px minmax(0, 1fr) 24px 82px; }
+  .project-section[data-workspace] .section-cut-rail > label:first-child { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+}
+@media (max-width: 600px) {
+  .project-section[data-workspace] .section-wrap { padding: 8px; gap: 6px; }
+  .project-section[data-workspace] .section-masthead { gap: 8px; padding-bottom: 6px; }
+  .project-section[data-workspace] .section-wordmark { gap: 6px; }
+  .project-section[data-workspace] .section-wordmark > svg { width: 25px; height: 30px; }
+  .project-section[data-workspace] h1 { font-size: 26px; letter-spacing: -1.4px; }
+  .project-section[data-workspace] h1 span { display: none; }
+  .project-section[data-workspace] .section-masthead > button { padding: 5px 7px; }
+  .project-section[data-workspace] .section-work-heading { padding: 5px 6px; }
+  .project-section[data-workspace] .section-work-heading h2 { font-size: 19px; letter-spacing: -.3px; overflow-wrap: anywhere; max-height: 46px; overflow: auto; }
+  .project-section[data-workspace] .section-history { gap: 3px; }
+  .project-section[data-workspace] .section-history button { padding: 4px; min-width: 30px; }
+  .project-section[data-workspace] .section-history button:last-child { width: 52px; line-height: 1.1; }
+  .project-section[data-workspace] .section-main { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(230px, 1.2fr) minmax(130px, 1fr); }
+  .project-section[data-workspace] .section-drafting { grid-template-rows: auto minmax(0, 1fr) auto; }
+  .project-section[data-workspace] .section-mobile-tabs { display: grid; }
+  .project-section[data-workspace] .section-mobile-tabs button { min-height: 34px; padding: 4px; font-size: 14px; }
+  .project-section[data-workspace] .section-views { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .project-section[data-workspace] .section-view-panel { grid-area: 1 / 1; }
+  .project-section[data-workspace] .section-view-panel[aria-hidden="true"] { visibility: hidden; pointer-events: none; }
+  .project-section[data-workspace] .section-views[data-mobile-view="solid"] .section-slice-pane,
+  .project-section[data-workspace] .section-views[data-mobile-view="slice"] .section-solid-pane { display: flex; visibility: hidden; pointer-events: none; }
+  .project-section[data-workspace] .section-pane-heading { display: none; }
+  .project-section[data-workspace] .section-view-stamp { display: none; }
+  .project-section[data-workspace] .section-view-foot { padding: 2px 8px 4px; }
+  .project-section[data-workspace] .section-slice-foot > span { display: none; }
+  .project-section[data-workspace] .section-cut-rail { grid-template-columns: 24px minmax(0, 1fr) 24px 78px; gap: 2px; padding: 4px 6px; }
+  .project-section[data-workspace] .section-cut-rail > label:first-child { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .project-section[data-workspace] .section-inspector { border-left: 0; border-top: 1px solid var(--section-line); }
+  .project-section[data-workspace] .section-inspector-tabs { grid-template-columns: 1.5fr 1.1fr 1fr 1fr; }
+  .project-section[data-workspace] .section-inspector-tabs button { padding: 5px 2px; }
+  .project-section[data-workspace] .section-inspector-scroll { padding: 10px; }
+}

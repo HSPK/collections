@@ -5,6 +5,28 @@ Open `projects/radio/`. The page has its own receiver, station directory, storie
 sound recipes, fixed imaginary program guides, keeper notes, and navigation.
 Reading never requires audio. Nothing is downloaded from an audio service.
 
+## Viewport workspace
+
+The `data-workspace="true"` root fills the viewport without document scrolling.
+The **Receiver**, **Stations**, **Notebook**, and **Guide** tabs keep secondary
+reading in bounded, internally scrolling panes. All four original stories,
+recipes, fixed program guides, keeper notes, illustrations, and guide entries
+remain available. Selecting a directory card opens its notebook; Receiver is
+always one tap away. Tab-list arrow keys apply only while a tab has focus, not
+while tuning or adjusting volume.
+
+The receiver keeps its tuning controls, Listen/Stop, volume, dial, and station
+sketch together even on mobile. The smallest layout uses a compact sketch, with
+its full caption, illustration, and invitation also available in the notebook.
+On small screens audio-error details take the sketch's place in the receiver.
+Verified
+sizes are 1440 × 900, 1280 × 720, 375 × 812, 320 × 640, and 768 × 480. The floating
+collection menu remains accessible. Changing workspace panes never creates,
+resumes, stops, or replaces an audio context.
+The receiver's bottom action row reserves 64px at the right on wide and short
+layouts, so Copy station link stays clear of the floating collection menu.
+Phone layouts place that action on the left beneath the receiver notice.
+
 ## Files and responsibilities
 
 - `index.ts`: `mount(context)`, page markup, accessible controls, station/history
@@ -64,7 +86,8 @@ Web Audio is absent or blocked.
 or tuning control pushes a same-document history entry without jumping the
 viewport. Hash entry and browser back/forward select content silently; if sound
 was playing, station history navigation stops it. No route handler calls
-`listen()`. Section anchors do not change the selected station.
+`listen()`. Receiver links select the workspace pane without changing the
+station hash or adding history entries.
 
 ## The four sound graphs
 
@@ -164,18 +187,23 @@ audio preference. CSS movement respects reduced motion.
 Use the existing project Playwright configuration:
 
 ```sh
-npx playwright test tests/projects/radio.spec.ts
+flock "$BROWSER_LOCK" npm test -- tests/projects/radio.spec.ts --reporter=dot
 ```
 
 Against a server already managed elsewhere, prevent the config from starting
 one by supplying its URL:
 
 ```sh
-SITE_URL=http://127.0.0.1:4173/ npx playwright test tests/projects/radio.spec.ts
+SITE_URL=http://127.0.0.1:4173/ flock "$BROWSER_LOCK" npm test -- tests/projects/radio.spec.ts --reporter=dot
 ```
+
+Set `BROWSER_LOCK` to your review session's shared renderer-lock path, and use
+the same exclusive lock for every browser test or screenshot run.
 
 The spec covers original station content, silent navigation and deep links,
 explicit listening, retuning, volume/mute, bounded source/interval ownership,
 legacy gain automation, unavailable/blocked audio, delayed resume races,
-visibility/exit cleanup, return without autoplay, and a 375 px keyboard layout.
-It does not capture screenshots or use remote audio.
+visibility/exit cleanup, return without autoplay, all five viewport sizes,
+internal secondary-pane scrolling, menu/slider focus, and audio continuity
+across pane changes. Screenshots are saved in each run's artifact directory.
+Tests never use remote audio.

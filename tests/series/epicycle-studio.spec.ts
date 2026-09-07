@@ -6,6 +6,7 @@ import {
   fitPath, makeDrawing, reconstruct, reconstructionPath, relativeError, resampleClosedPath, selectHarmonics,
 } from '../../src/projects/epicycle-studio/engine';
 import { CYCLE_SECONDS, OPENING_PHASE, advancePhase, seekPhase } from '../../src/projects/epicycle-studio/timeline';
+import { expectWorkspaceViewport, visibleControlProblems } from '../helpers/workspace';
 
 test('Fourier engine preserves DC, signed frequencies, Nyquist, and complex phase', () => {
   const samples = Array.from({ length: 16 }, (_, index) => {
@@ -134,12 +135,14 @@ test('studio controls change the actual series and reverse seeking reproduces th
   await expect(root).toHaveAttribute('data-harmonics', '0');
   await expect(root.locator('[data-error]')).toHaveText('100.00');
   await page.getByRole('button', { name: 'Use 18 harmonics', exact: true }).click();
+  await page.getByRole('button', { name: 'Signal and notes', exact: true }).click();
   await page.getByLabel('Choose a closed path').selectOption('paper-kite');
   await expect(root).toHaveAttribute('data-source', 'paper-kite');
   await expect(root.locator('[data-source-note]')).toContainText('sharp corners');
   await page.getByText('The six largest turns', { exact: true }).click();
   await expect(root.locator('[data-spectrum] li')).toHaveCount(6);
   await expect(root.locator('[data-spectrum]')).toContainText('-');
+  await page.getByRole('button', { name: 'Close Signal and notes', exact: true }).click();
   await setRange(page, 'Cycle position', 0.372);
   const pose = await canvas.evaluate((element) => (element as HTMLCanvasElement).toDataURL());
   await setRange(page, 'Cycle position', 1);
@@ -153,10 +156,12 @@ test('studio controls change the actual series and reverse seeking reproduces th
   await expect(root).toHaveAttribute('data-phase', '0.373000');
   await slider.press('Space');
   await expect(root).toHaveAttribute('data-motion', 'paused');
+  await page.getByRole('button', { name: 'Signal and notes', exact: true }).click();
   await page.getByLabel('Show circles', { exact: true }).uncheck();
   const noCircles = await canvas.evaluate((element) => (element as HTMLCanvasElement).toDataURL());
   expect(noCircles === pose).toBe(false);
   await page.getByLabel('Show circles', { exact: true }).check();
+  await page.getByRole('button', { name: 'Close Signal and notes', exact: true }).click();
   await page.getByLabel('Speed', { exact: true }).selectOption('2');
   await expect(root).toHaveAttribute('data-speed', '2');
   await page.getByRole('button', { name: 'Play drawing', exact: true }).click();
@@ -170,9 +175,11 @@ test('studio controls change the actual series and reverse seeking reproduces th
   await canvas.focus();
   await canvas.press('End');
   await expect(root).toHaveAttribute('data-phase', '1.000000');
+  await page.getByRole('button', { name: 'Signal and notes', exact: true }).click();
   await page.getByLabel('Choose a closed path').selectOption('orbit-flower');
-  await setRange(page, 'Cycle position', OPENING_PHASE);
   await page.getByText('The six largest turns', { exact: true }).click();
+  await page.getByRole('button', { name: 'Close Signal and notes', exact: true }).click();
+  await setRange(page, 'Cycle position', OPENING_PHASE);
   await page.evaluate(() => scrollTo(0, 0));
   await page.screenshot({ path: testInfo.outputPath('epicycle-desktop.png') });
   expect(errors).toEqual([]);
@@ -196,13 +203,19 @@ test('a pointer or keyboard sketch is resampled, retained when switching presets
   await root.getByRole('button', { name: 'Trace sketch', exact: true }).click();
   await expect(root).toHaveAttribute('data-source', 'custom');
   await expect(root).toHaveAttribute('data-phase', '1.000000');
+  await expect.poll(() => canvas.evaluate(element => {
+    const node = element as HTMLCanvasElement;
+    return Math.abs(node.width / Math.min(devicePixelRatio, 2) - node.getBoundingClientRect().width);
+  })).toBeLessThan(1);
   const custom = await canvas.evaluate((element) => (element as HTMLCanvasElement).toDataURL());
+  await page.getByRole('button', { name: 'Signal and notes', exact: true }).click();
   await page.getByLabel('Choose a closed path').selectOption('tidal-loop');
   await expect(root).toHaveAttribute('data-source', 'tidal-loop');
   await page.getByLabel('Choose a closed path').selectOption('custom');
   await expect(root).toHaveAttribute('data-source', 'custom');
   expect(await canvas.evaluate((element) => (element as HTMLCanvasElement).toDataURL()) === custom,
     'The stored sketch must render identically after switching presets.').toBe(true);
+  await page.getByRole('button', { name: 'Close Signal and notes', exact: true }).click();
   await root.getByRole('button', { name: '+ Draw a path', exact: true }).click();
   await canvas.press('Space');
   await canvas.press('Shift+ArrowUp');
@@ -229,7 +242,7 @@ test('a pointer or keyboard sketch is resampled, retained when switching presets
   await expect(root.locator('[data-error]')).toHaveText('0.00');
 });
 
-test('375px studio is immediately visible, scrollable, and still when reduced motion changes', async ({ page }, testInfo) => {
+test('375px studio is immediately visible, viewport-sized, and still when reduced motion changes', async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 375, height: 812 });
   const root = await openStudio(page, 'no-preference');
   const canvas = root.locator('canvas');
@@ -251,6 +264,97 @@ test('375px studio is immediately visible, scrollable, and still when reduced mo
   }
   await page.screenshot({ path: testInfo.outputPath('epicycle-mobile.png') });
 });
+
+for (const [width, height] of [[1440, 900], [1280, 720], [375, 812], [320, 640], [768, 480]]) {
+  test(`epicycle workspace ${width}x${height}: scrub, harmonics, signal notes and sketch stay together`, async ({ page }) => {
+    await page.setViewportSize({ width, height });
+    const root = await openStudio(page);
+    const canvas = root.locator('canvas');
+    const bitmap = () => canvas.evaluate(node => (node as HTMLCanvasElement).toDataURL());
+    await expect(root).toHaveAttribute('data-workspace', 'true');
+    await expectWorkspaceViewport(page, width, height);
+    expect(await visibleControlProblems(root)).toEqual([]);
+    const menu = (await page.getByRole('button', { name: 'Collection menu', exact: true }).boundingBox())!;
+    expect(await root.locator('button:visible, input:visible, select:visible').evaluateAll((controls, corner) =>
+      controls.filter(control => {
+        const box = control.getBoundingClientRect();
+        return box.left < corner.x + corner.width && box.right > corner.x &&
+          box.top < corner.y + corner.height && box.bottom > corner.y;
+      }).map(control => control.getAttribute('aria-label') || control.id || control.textContent), menu)).toEqual([]);
+    for (const selector of ['[data-play]', '[data-reset]', '#epicycle-time', '#epicycle-harmonics', '[data-draw]']) {
+      await expect(root.locator(selector)).toBeInViewport({ ratio: 1 });
+    }
+    await page.screenshot({ path: test.info().outputPath(`epicycle-${width}x${height}.png`) });
+    const initial = await bitmap();
+    await page.getByRole('button', { name: 'Use 4 harmonics', exact: true }).click();
+    await expect(root).toHaveAttribute('data-harmonics', '4');
+    await expect.poll(bitmap).not.toBe(initial);
+    const error = Number(await root.locator('[data-error]').textContent());
+    await page.getByRole('button', { name: 'Use all 127 harmonics', exact: true }).click();
+    await expect(root.locator('[data-error]')).toHaveText('0.00');
+    expect(error).toBeGreaterThan(0);
+    const slider = page.getByRole('slider', { name: 'Cycle position', exact: true });
+    await slider.focus();
+    await slider.press('Home');
+    await expect(root).toHaveAttribute('data-phase', '0.000000');
+    const atStart = await bitmap();
+    await slider.press('ArrowRight');
+    await expect(root).toHaveAttribute('data-phase', '0.001000');
+    await expect.poll(bitmap).not.toBe(atStart);
+    await slider.press('End');
+    await expect(root).toHaveAttribute('data-phase', '1.000000');
+    const trigger = page.getByRole('button', { name: 'Signal and notes', exact: true });
+    await trigger.click();
+    const dialog = page.getByRole('dialog', { name: 'Signal and notes', exact: true });
+    await expect(dialog).toBeVisible();
+    await page.getByLabel('Choose a closed path').selectOption('paper-kite');
+    await expect(root).toHaveAttribute('data-source', 'paper-kite');
+    await page.getByText('The six largest turns', { exact: true }).click();
+    await expect(root.locator('[data-spectrum] li')).toHaveCount(6);
+    const circles = await bitmap();
+    await page.getByLabel('Show circles', { exact: true }).uncheck();
+    await expect.poll(bitmap).not.toBe(circles);
+    await page.getByLabel('Show circles', { exact: true }).check();
+    await root.locator('.ep-equation').scrollIntoViewIfNeeded();
+    await expectWorkspaceViewport(page, width, height);
+    if (width === 320) await page.screenshot({ path: test.info().outputPath('epicycle-signal-dialog.png') });
+    await page.keyboard.press('Escape');
+    await expect(dialog).not.toBeVisible();
+    await expect(trigger).toBeFocused();
+    await page.getByRole('button', { name: '+ Draw a path', exact: true }).click();
+    await expect(root).toHaveAttribute('data-input-mode', 'draw');
+    await expectWorkspaceViewport(page, width, height);
+    expect(await visibleControlProblems(root)).toEqual([]);
+    if (width === 320) await page.screenshot({ path: test.info().outputPath('epicycle-sketch-workspace.png') });
+    await expect(page.getByRole('button', { name: 'Trace sketch', exact: true })).toBeInViewport({ ratio: 1 });
+    const bounds = (await canvas.boundingBox())!;
+    await page.mouse.move(bounds.x + bounds.width * 0.3, bounds.y + bounds.height * 0.65);
+    await page.mouse.down();
+    await page.mouse.move(bounds.x + bounds.width * 0.5, bounds.y + bounds.height * 0.3, { steps: 6 });
+    await page.mouse.move(bounds.x + bounds.width * 0.7, bounds.y + bounds.height * 0.65, { steps: 6 });
+    await page.mouse.up();
+    await page.getByRole('button', { name: 'Trace sketch', exact: true }).click();
+    await expect(root).toHaveAttribute('data-source', 'custom');
+    await expect(root).toHaveAttribute('data-input-mode', 'view');
+    await expect(root.locator('[data-error]')).toHaveText('0.00');
+    await page.getByRole('button', { name: 'Play drawing', exact: true }).click();
+    await expect.poll(async () => Number(await root.getAttribute('data-phase'))).toBeLessThan(1);
+    await page.getByRole('button', { name: 'Pause drawing', exact: true }).click();
+    await expectWorkspaceViewport(page, width, height);
+    expect(await visibleControlProblems(root)).toEqual([]);
+    const phase = await root.getAttribute('data-phase');
+    const next = width === 375 ? { width: 1280, height: 720 } : { width: 375, height: 812 };
+    await page.setViewportSize(next);
+    await expect.poll(() => canvas.evaluate(node => {
+      const element = node as HTMLCanvasElement;
+      const rect = element.getBoundingClientRect(), dpr = Math.min(devicePixelRatio, 2);
+      return Math.max(Math.abs(element.width - rect.width * dpr), Math.abs(element.height - rect.height * dpr));
+    })).toBeLessThanOrEqual(1);
+    await expect(root).toHaveAttribute('data-source', 'custom');
+    await expect(root).toHaveAttribute('data-phase', phase!);
+    await expectWorkspaceViewport(page, next.width, next.height);
+  });
+}
 
 test('aborting the studio removes frames, resize observers, and all live controls', async ({ page }) => {
   await openStudio(page);

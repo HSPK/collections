@@ -27,11 +27,20 @@ leaderboards, or stored performance claims.
   log, route cards, and dictionary for phones.
 - **`manifest.json`** registers the independent page with the collection.
 
-The desktop console places word entry and counters beside the circuit, with
-backtrack/reset/next controls immediately beneath the letters. On phones, entry
-follows the circuit before secondary counters and reference material.
-`data-project-preview` marks `.wc-workbench`, so captures include the playable
-console and its route log rather than the introductory header.
+The page opts into the collection workspace contract with `data-workspace="true"`.
+Its `100dvh` shell and `min-height: 0` flex/grid children allocate the actual
+remaining space; document overflow is not hidden. Desktop word entry and counters
+sit beside the circuit, with a separately scrolling route log. Phones show the
+current/destination letters, entry, counters, live feedback, hint, backtrack,
+reset, and next controls together; **Route log** opens the ladder in one tap.
+The collection floating menu is preserved.
+
+**Choose a route**, **How to play**, and **Browse dictionary** open named native
+dialogs. All original introduction, rules, wire explanation, route descriptions,
+dictionary meanings, and footer notes remain available. Hint explanations,
+invalid submissions, and completed results also open immediately in accessible
+dialogs instead of extending the page. `data-project-preview` marks the single
+`.wc-workbench` containing the playable console and the desktop log.
 
 ## Adding words
 
@@ -76,7 +85,7 @@ tests if the number of authored puzzles changes.
   assistance and do not count as next-word hints. Consequently, zero hints is
   never described as “unassisted.”
 - Completion requires the actual current word to equal the destination.
-  The completed log remains visible and is compared to the real starting minimum.
+  The completed log remains available and is compared to the real starting minimum.
   No results persist after a reset, route change, page reload, or unmount.
 - Lit wires indicate matching positions only, not percent completion or optimality.
   Matching letters may be changed again.
@@ -88,21 +97,25 @@ one move; earlier log stops rewind directly. “Reset route,” “Next puzzle,�
 route cards remain available inside the page. Selecting the already-selected card
 does not discard the attempt.
 
-The dictionary can be opened using “Browse dictionary,” its native disclosure,
-or “Browse valid next words.” Search includes words and meanings. Available
+The dictionary can be opened using “Browse dictionary” or “Browse valid next
+words” in the log; its original native disclosure remains inside the pane.
+Search includes words and meanings. Available
 dictionary entries offer “Use word,” which only fills and focuses the input;
 the user must still submit. No global shortcuts interfere with typing.
 
 Input labels, live validation/status messages, `aria-invalid`, ordered route
 history, named letter diagrams, pressed route cards, keyboard focus outlines,
-minimum 44px touch targets, and a reduced-width single-column console are built in.
+readable 14px-or-larger controls, and a reduced-width single-column console are built in.
 Focus remains in the input for normal submissions; finishing focuses the completion
 heading. Reset, rewind, dictionary fills, and route changes intentionally return
-focus to the input. Dictionary opening focuses its search field.
+focus to the input. Dictionary opening focuses its search field. Dialogs support
+Escape/Close and trap focus natively. Route changes and dictionary fills close
+their pane without document scrolling. Resizing moves the same log nodes between
+the desktop sidebar and phone dialog, without discarding the active attempt.
 
 ## Focused verification
 
-The assigned spec is `tests/projects/word-circuit.spec.ts`. Its pure tests cover
+The focused spec is `tests/projects/word-circuit.spec.ts`. Its pure tests cover
 all words and puzzle pairs, exact graph edges, deterministic shortest routes,
 blocked vertices, malformed input, unlisted English words, duplicates, immutable
 move counts, resets/rewinds, restored words, solved outcomes, detours, and truthful
@@ -112,8 +125,13 @@ hint accounting.
 SITE_URL=http://127.0.0.1:4173 npm test -- tests/projects/word-circuit.spec.ts --grep engine
 ```
 
-This command does not start a development server or browser. The same spec has a
-separately named browser integration test for a complete route, errors, input
-focus, backtracking, reset, puzzle selection, dictionary search, and 375px overflow.
-Run browser integration only against a coordinated running site; collection-wide
-type checking/building and shared-layout integration belong to the parent task.
+This command does not start a development server or browser. The same spec has
+browser workflows at 1440×900, 1280×720, 375×812, 320×640, and 768×480. They assert
+document dimensions and visible controls before playing, then exercise hints,
+errors, dictionary filtering/fill, ladder rewinds, actual completion, reset,
+puzzle selection, and resizing with a stable attempt. Desk/result screenshots
+are written to each test's `testInfo.outputPath`.
+Browser setup intercepts Vite's token-bearing development WebSocket so unrelated
+project edits cannot reload an active route on the shared server.
+Coordinate browser runs when sharing a development server. Collection-wide type
+checking and building run from the repository root.

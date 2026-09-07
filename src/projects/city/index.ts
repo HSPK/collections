@@ -1,5 +1,6 @@
 import './style.css';
 import { createProjectPage, downloadText, escapeMarkup, query } from '../../core/page';
+import { createWorkspaceDialog } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { fieldNotes, presets, recipes, tileById, tiles } from './data';
 import type { RecipeRule, TileId } from './data';
@@ -15,6 +16,7 @@ const e = escapeMarkup;
 
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'city');
+  page.root.dataset.workspace = 'true';
   let history = createHistory(planFromPreset(presets[0]));
   let metrics = analyzePlan(history.present);
   let selected = 27;
@@ -32,7 +34,11 @@ export function mount(context: ProjectContext): ProjectInstance {
           <span>The neighborhood press<small>Small places, made by you.</small></span>
         </a>
         <nav class="city-nav" aria-label="Recipe for a City">
-          <a href="#city-worktable">Worktable</a><a href="#city-recipes">Recipes</a><a href="#city-fieldnotes">Field notes</a>
+          <button type="button" data-city-panel="tools">Tools</button>
+          <button type="button" data-city-panel="notes">Notes</button>
+          <button type="button" data-city-panel="recipes">Recipes</button>
+          <button type="button" data-city-panel="guide">Guide</button>
+          <button type="button" data-city-panel="save">Save</button>
         </nav>
       </header>
 
@@ -65,7 +71,7 @@ export function mount(context: ProjectContext): ProjectInstance {
             </div>
             <div class="city-art" data-city-art></div>
             <figcaption>
-              <strong data-city-map-selection></strong>
+              <strong data-city-map-selection role="status" aria-live="polite"></strong>
               <span>Original illustration · not to scale</span>
             </figcaption>
             <div class="city-map-legend">
@@ -234,7 +240,49 @@ export function mount(context: ProjectContext): ProjectInstance {
       <footer class="city-footer"><p>Recipe for a City · A toy model, not real urban planning advice.</p><a href="#city-top">Back to the rooftops ↑</a></footer>
     </div>`;
 
+  const element = (selector: string) => query<HTMLElement>(page.root, selector);
+  const tools = element('.city-editor');
+  const notes = element('.city-observations');
+  const recipesPanel = element('.city-recipes');
+  const guide = element('.city-fieldnotes');
+  const save = element('.city-keep');
+  const introduction = element('.city-introduction');
+  const masthead = element('.city-masthead');
+  guide.prepend(element('.city-wordmark'));
+  recipesPanel.prepend(element('.city-introduction > .city-lede'));
+  guide.prepend(element('.city-introduction .city-eyebrow'));
+  masthead.prepend(introduction);
+  tools.prepend(element('.city-preset-label'));
+  tools.append(element('.city-worktable > .city-section-heading .city-eyebrow'));
+  guide.append(element('.city-footer'));
+
+  const controls = document.createElement('div');
+  controls.className = 'city-live-controls';
+  controls.setAttribute('aria-label', 'Live plan controls');
+  controls.innerHTML = `<label class="city-brush-label">Ingredient
+    <select data-city-brush aria-label="Ingredient">${tiles.map(tile => `<option value="${tile.id}"${tile.id === ingredient ? ' selected' : ''}>${e(tile.name)}</option>`).join('')}</select>
+    </label>`;
+  controls.append(element('.city-address-fields'), element('.city-place-actions'), element('.city-history-actions'));
+  element('.city-studio').append(controls);
+  tools.append(element('.city-map-legend p'), element('[data-city-group-note]'));
+  tools.append(element('[data-city-dimensions]'));
+  element('.city-map-tools').append(element('.city-check-label'));
+  tools.append(element('.city-map-legend'));
+  tools.append(element('.city-map-frame figcaption > span'));
+
+  const panels = new Map([
+    ['tools', createWorkspaceDialog(page, { id: 'city-tools-dialog', title: 'Ingredients & editing tools', content: [tools], triggers: [element('[data-city-panel="tools"]')] })],
+    ['notes', createWorkspaceDialog(page, { id: 'city-notes-dialog', title: 'Notes from this plan', content: [notes], triggers: [element('[data-city-panel="notes"]')] })],
+    ['recipes', createWorkspaceDialog(page, { id: 'city-recipes-dialog', title: 'Three small recipes', content: [recipesPanel], triggers: [element('[data-city-panel="recipes"]')] })],
+    ['guide', createWorkspaceDialog(page, { id: 'city-guide-dialog', title: 'The field guide', content: [guide], triggers: [element('[data-city-panel="guide"]')] })],
+    ['save', createWorkspaceDialog(page, { id: 'city-save-dialog', title: 'Keep your neighborhood', content: [save], triggers: [element('[data-city-panel="save"]')] })],
+  ]);
+  function closePanels(): void {
+    for (const panel of panels.values()) panel.close();
+  }
+
   const art = query<HTMLDivElement>(page.root, '[data-city-art]');
+  const brushControl = query<HTMLSelectElement>(page.root, '[data-city-brush]');
   const columnControl = query<HTMLSelectElement>(page.root, '[data-city-column]');
   const rowControl = query<HTMLSelectElement>(page.root, '[data-city-row]');
   const navigator = query<HTMLDivElement>(page.root, '[data-city-navigator]');
@@ -285,6 +333,7 @@ export function mount(context: ProjectContext): ProjectInstance {
     for (const button of page.root.querySelectorAll<HTMLButtonElement>('[data-city-tile]')) {
       button.setAttribute('aria-pressed', String(button.dataset.cityTile === ingredient));
     }
+    brushControl.value = ingredient;
     query<HTMLElement>(page.root, '[data-city-ingredient-note]').innerHTML = `<strong>${e(brush.name)}.</strong> ${e(brush.rule)}`;
     const column = selected % plan.width;
     const row = Math.floor(selected / plan.width);
@@ -409,6 +458,18 @@ export function mount(context: ProjectContext): ProjectInstance {
 
   page.root.addEventListener('click', (event) => {
     if (!(event.target instanceof Element)) return;
+    const anchor = event.target.closest<HTMLAnchorElement>('a[href^="#city-"]');
+    if (anchor) {
+      event.preventDefault();
+      closePanels();
+      if (anchor.hash === '#city-graph-rules') {
+        panels.get('guide')!.open();
+        element('#city-graph-rules').scrollIntoView({ block: 'start' });
+      } else {
+        query<HTMLElement>(page.root, '[data-city-plan-name]').focus({ preventScroll: true });
+      }
+      return;
+    }
     const cell = event.target.closest<SVGGElement>('[data-city-cell]');
     if (cell) {
       selectPlot(Number(cell.dataset.cityCell));
@@ -428,12 +489,13 @@ export function mount(context: ProjectContext): ProjectInstance {
     }
     if (button.dataset.citySelectAddress !== undefined) {
       selectPlot(Number(button.dataset.citySelectAddress));
-      navigator.focus({ preventScroll: false });
+      closePanels();
+      columnControl.focus({ preventScroll: true });
       return;
     }
     if (button.dataset.cityLoadPreset) {
       loadPreset(button.dataset.cityLoadPreset);
-      query<HTMLElement>(page.root, '#city-worktable').scrollIntoView({ block: 'start' });
+      closePanels();
       query<HTMLElement>(page.root, '[data-city-plan-name]').focus({ preventScroll: true });
       return;
     }
@@ -462,6 +524,10 @@ export function mount(context: ProjectContext): ProjectInstance {
   page.root.addEventListener('change', (event) => {
     if (event.target === columnControl || event.target === rowControl) {
       selectPlot(Number(rowControl.value) * history.present.width + Number(columnControl.value));
+    } else if (event.target === brushControl && isTileId(brushControl.value)) {
+      ingredient = brushControl.value;
+      renderSelection();
+      announce(`${tileById[ingredient].name} selected. Choose an address, then use Place.`);
     } else if (event.target === presetControl && presetControl.value) {
       loadPreset(presetControl.value);
     } else if (event.target instanceof HTMLInputElement && event.target.matches('[data-city-groups]')) {

@@ -191,7 +191,9 @@ test('phase loss, zero field, traces, rotor constraint, and torque sign stay con
   await expect(root.locator('[data-mfl-wave="a"]')).toHaveAttribute('d', /^M 0\.0000 20\.0000 /);
   await expect(root.locator('[data-mfl-wave="b"]')).toHaveAttribute('d', /L 280\.0000 20\.0000/);
   await expect(root.locator('[data-mfl-wave="c"]')).toHaveAttribute('d', /L 560\.0000 20\.0000/);
+  await root.getByRole('button', { name: 'Experiments', exact: true }).click();
   await root.locator('[data-mfl-preset="missing-phase"]').click();
+  await root.getByRole('button', { name: 'Close Bench experiments' }).click();
   await expectResultant(root, input({ electricalAngle: 0, commandLag: 0, enabled: [true, false, true] }));
   await expect(root.locator('[data-mfl-current="b"]')).toHaveText('0.000');
   await expect(root.locator('[data-mfl-wave="b"]')).toHaveAttribute('d', 'M 0 84 L 840 84');
@@ -219,12 +221,16 @@ test('phase loss, zero field, traces, rotor constraint, and torque sign stay con
   await expect(root.locator('[data-mfl-observation]')).toContainText('Zero field has no direction');
 
   for (const preset of PRESETS) {
+    await root.getByRole('button', { name: 'Experiments', exact: true }).click();
     await root.locator(`[data-mfl-preset="${preset.id}"]`).click();
+    await root.getByRole('button', { name: 'Close Bench experiments' }).click();
     await expect(root).toHaveAttribute('data-motion', 'paused');
     await expect(root.locator(`[data-mfl-preset="${preset.id}"]`)).toHaveAttribute('aria-pressed', 'true');
     await expectResultant(root, input(preset));
   }
+  await root.getByRole('button', { name: 'Experiments', exact: true }).click();
   await root.locator('[data-mfl-preset="balanced"]').click();
+  await root.getByRole('button', { name: 'Close Bench experiments' }).click();
   const rotorBeforeMode = await root.getAttribute('data-rotor-angle');
   await root.getByRole('combobox', { name: 'Rotor constraint' }).selectOption('hold');
   await expect(root).toHaveAttribute('data-rotor-angle', rotorBeforeMode!);
@@ -308,9 +314,61 @@ test('375px workbench is early, legible, reduced-motion safe, and never overflow
   await page.screenshot({ path: testInfo.outputPath('motor-field-lab-mobile.png'), fullPage: true });
   await root.getByRole('button', { name: 'Step forward 15 degrees' }).click();
   await expectResultant(root, input({ electricalAngle: 45 }));
+  await root.getByRole('button', { name: 'Experiments', exact: true }).click();
   await root.locator('[data-mfl-preset="no-field"]').click();
+  await root.getByRole('button', { name: 'Close Bench experiments' }).click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
+
+for (const viewport of [
+  { width: 1440, height: 900 }, { width: 1280, height: 720 },
+  { width: 375, height: 812 }, { width: 320, height: 640 }, { width: 768, height: 480 },
+]) {
+  test(`motor workspace keeps simulation, transport and inspectable panels at ${viewport.width}×${viewport.height}`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    const root = await openLab(page);
+    await expect(root).toHaveAttribute('data-workspace', 'true');
+    const layout = await root.evaluate((element) => ({
+      top: element.getBoundingClientRect().top,
+      height: element.getBoundingClientRect().height,
+      documentHeight: document.documentElement.scrollHeight,
+      documentWidth: document.documentElement.scrollWidth,
+      stage: element.querySelector('.mfl-motor-svg')!.getBoundingClientRect().toJSON(),
+      transport: element.querySelector('.mfl-drive-controls')!.getBoundingClientRect().toJSON(),
+    }));
+    expect(layout.top).toBe(0);
+    expect(layout.height).toBe(viewport.height);
+    expect(layout.documentHeight).toBeLessThanOrEqual(viewport.height);
+    expect(layout.documentWidth).toBeLessThanOrEqual(viewport.width);
+    expect(layout.stage.height).toBeGreaterThan(100);
+    expect(layout.stage.bottom).toBeLessThanOrEqual(viewport.height);
+    expect(layout.transport.bottom).toBeLessThanOrEqual(viewport.height);
+    await root.getByRole('button', { name: 'Parameters', exact: true }).click();
+    const phase = root.getByRole('button', { name: 'Phase B', exact: true });
+    await phase.click();
+    await expect(phase).toBeFocused();
+    await expect(phase).toHaveAttribute('aria-pressed', 'false');
+    const parameters = root.getByRole('tab', { name: 'Parameters', exact: true });
+    await parameters.focus();
+    await parameters.press('ArrowRight');
+    await expect(root.getByRole('tab', { name: 'Readout', exact: true })).toBeFocused();
+    await expect(root.locator('[data-mfl-magnitude]')).toBeVisible();
+    await root.getByRole('tab', { name: 'Traces', exact: true }).click();
+    await expect(root.getByRole('region', { name: '03 Current traces' })).toBeVisible();
+    if (viewport.width <= 700 || viewport.height <= 540) {
+      await page.keyboard.press('Escape');
+      await expect(root.getByRole('button', { name: 'Parameters', exact: true })).toBeFocused();
+    }
+    await root.getByRole('button', { name: 'Notebook', exact: true }).click();
+    const notebook = root.getByRole('dialog', { name: 'Field notebook & equations' });
+    await expect(notebook).toBeVisible();
+    await expect(notebook.getByRole('heading', { name: 'Prescribed kinematics' })).toBeVisible();
+    expect(await notebook.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe('rgb(12, 25, 30)');
+    await page.keyboard.press('Escape');
+    await expect(root.getByRole('button', { name: 'Notebook', exact: true })).toBeFocused();
+    await expect(root).toHaveAttribute('data-electrical-angle', '30.000000');
+  });
+}
 
 test('abort disposes frames and listeners, and stale controls and instance methods are inert', async ({ page }) => {
   await openLab(page);

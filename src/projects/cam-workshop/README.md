@@ -16,7 +16,7 @@ services, or added dependencies are used.
 - `index.ts`: the `mount(ProjectContext): ProjectInstance` lifecycle, native
   controls, validation feedback, keyboard interactions, and reduced-motion state.
 - `style.css`: all selectors are scoped to `.project-cam-workshop`. Essential
-  diagram labels are HTML; canvas labels are drawn at 12 CSS pixels, never scaled
+  diagram labels are HTML; canvas labels are drawn at 14 CSS pixels, never scaled
   down with an SVG viewBox.
 - `manifest.json`: collection discovery only. No shared registry edit is needed.
 
@@ -80,6 +80,26 @@ pressure-angle, curvature, undercut, material, stress, or tolerance analysis.
 Smooth derivatives do not establish manufacturability or safety.
 
 ## Lifecycle and controls
+
+Transport and desktop instruments reserve a local 64px right-side gap plus
+the safe-area inset. On phones the playback row spans the workbench while
+the lower scrub/speed row leaves the launcher corner clear; no footer is added.
+
+The full-height workspace keeps the cam, phase shortcuts and transport together.
+**Parameters** opens/focuses the timing, motion-law, comparison and geometry dock;
+**Traces** opens the three live analytic graphs. On narrow or short viewports
+both triggers open the same instrument dock in a native dialog. **Notebook**
+contains detailed peaks, experiments, every law and derivative, coordinate
+assumptions, limitations and keyboard guidance. Close/Escape returns focus.
+
+`index.ts` assembles these existing nodes without re-rendering controls.
+The dock uses wrapper tab panels with `preserveLayout`: both are stacked in
+the same zero-minimum grid area so hidden graphs retain their measured size
+without adding page height. Extend those panels rather than changing the
+semantic roles of the named sections. Native dialogs inherit the plum paper
+through `--workspace-paper`; new listeners and observers must use `page.signal`
+and `page.onCleanup`. The SVG fills the remaining stage height, and canvases
+redraw at their actual resized CSS size.
 
 - Play/pause, ±5° steps, reversible 0–360° scrub, rpm, and full reset work locally.
 - Reset restores the default cycloidal setup, 8 rpm, all comparisons, and a

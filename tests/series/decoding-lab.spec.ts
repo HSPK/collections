@@ -133,6 +133,7 @@ test('decoding browser: real distributions and tokens, inspection, replay, reset
   await page.setViewportSize({ width: 1280, height: 1000 });
   await page.goto('./projects/decoding-lab/');
   const root = page.locator('.project-decoding-lab');
+  const panel = (name: string) => root.getByRole('tab', { name, exact: true });
   const step = root.getByRole('button', { name: 'Print 1 token', exact: true });
   const backtrack = root.getByRole('button', { name: 'Backtrack', exact: true });
   const reset = root.getByRole('button', { name: 'Reset run', exact: true });
@@ -146,7 +147,7 @@ test('decoding browser: real distributions and tokens, inspection, replay, reset
   await expect(root.locator('[data-inventory] code')).toHaveCount(11);
   await expect(root.locator('[data-count-token="press"] td').first()).toHaveText('4');
   const previewBox = (await root.locator('[data-project-preview]').boundingBox())!;
-  expect(previewBox.y).toBeGreaterThan(180);
+  expect(previewBox.y).toBeGreaterThan(0);
   expect(previewBox.y).toBeLessThan(300);
   const rows = root.locator('[data-distribution] [data-token]');
   const probabilities = await rows.evaluateAll((elements) => elements.map((row) => ({
@@ -173,7 +174,9 @@ test('decoding browser: real distributions and tokens, inspection, replay, reset
   expect(Number(await root.locator('[data-chosen-probability]').getAttribute('data-value'))).toBeCloseTo(9 / 35, 14);
   const firstRng = await root.getAttribute('data-rng-state');
   const firstReceipt = await root.locator('[data-choice-record]').innerHTML();
+  await panel('History').click();
   await root.getByRole('button', { name: 'Inspect step 1: ink', exact: true }).press('Enter');
+  await expect(root.getByRole('button', { name: 'Inspect step 1: ink', exact: true })).toBeFocused();
   await expect(root).toHaveAttribute('data-preview-context', 'the');
   await expect(root).toHaveAttribute('data-preview-kind', 'recorded');
   await expect(root).toHaveAttribute('data-context', 'ink');
@@ -189,6 +192,9 @@ test('decoding browser: real distributions and tokens, inspection, replay, reset
   expect(await root.locator('[data-choice-record]').innerHTML()).toBe(firstReceipt);
   await expect(root).toHaveAttribute('data-rng-state', firstRng!);
   await root.getByRole('button', { name: 'Pin run for comparison', exact: false }).click();
+  await expect(panel('Experiments')).toHaveAttribute('aria-selected', 'true');
+  await expect(root.locator('[data-proof]')).toBeVisible();
+  await panel('Settings').click();
   await root.getByLabel('Random seed', { exact: false }).fill('99');
   await root.getByLabel('Random seed', { exact: false }).press('Tab');
   await expect(root).toHaveAttribute('data-steps', '0');
@@ -227,15 +233,16 @@ test('decoding browser: real distributions and tokens, inspection, replay, reset
   await root.locator('.dl-presets [data-preset="narrow"]').click();
   await page.evaluate(() => window.scrollTo(0, 0));
   const narrowPreview = (await root.locator('[data-project-preview]').boundingBox())!;
-  expect(narrowPreview.y).toBeGreaterThan(180);
+  expect(narrowPreview.y).toBeGreaterThan(0);
   expect(narrowPreview.y).toBeLessThan(300);
-  expect((await rows.first().boundingBox())!.y).toBeLessThan(755);
+  expect((await root.locator('[data-overview-token]').first().boundingBox())!.y).toBeLessThan(755);
   await step.focus();
   await step.press('Space');
   await expect(root).toHaveAttribute('data-context', 'ink');
   const temperature = root.getByRole('slider', { name: /Temperature/ });
   await temperature.focus();
   await temperature.press('ArrowRight');
+  await expect(temperature).toBeFocused();
   await expect(temperature).toHaveValue('1.05');
   await expect(root).toHaveAttribute('data-steps', '0');
   await expect(root).toHaveAttribute('data-rng-state', '42');
@@ -248,9 +255,11 @@ test('decoding browser: real distributions and tokens, inspection, replay, reset
   for (const probability of await rows.evaluateAll((elements) => elements.map((row) => Number(row.getAttribute('data-base'))))) {
     expect(probability).toBeCloseTo(1 / 11, 14);
   }
+  await panel('Model').click();
   await root.getByRole('combobox', { name: 'Inspect fitted context', exact: true }).selectOption('the');
   await expect(root.locator('[data-count-token="bell"] td').first()).toHaveText('3');
   await expect(root).toHaveAttribute('data-context', 'buoy');
+  await panel('Settings').click();
   await root.getByRole('combobox', { name: 'Selection policy', exact: true }).selectOption('greedy');
   await expect(temperature).toBeDisabled();
   await expect(root.getByRole('slider', { name: /Top-p/ })).toBeDisabled();

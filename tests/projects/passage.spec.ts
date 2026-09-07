@@ -366,15 +366,72 @@ async function open(page: Page) {
 async function panel(page: Page, name: string) {
   await page.locator(`[data-passage-pane="${name}"]`).click();
 }
+async function keep(page: Page) {
+  await page.locator('[data-passage-keep]').click();
+  await expect(page.getByRole('dialog', { name: 'Keep this study' })).toBeVisible();
+}
+async function closeKeep(page: Page) {
+  await page.getByRole('button', { name: 'Close Keep this study', exact: true }).click();
+}
 test.describe('PASSAGE / browser workbench', () => {
   test.setTimeout(90_000);
+  test('viewport workspace keeps live views, edits, route data and local files reachable across resizing', async ({ page }, testInfo) => {
+    const errors: string[] = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await open(page);
+    await expect(page.locator(root)).toHaveAttribute('data-workspace', 'true');
+    for (const [width, height] of [[1440, 900], [1280, 720], [375, 812], [320, 640], [768, 480]]) {
+      await page.setViewportSize({ width, height });
+      for (const name of ['space', 'plan', 'route', 'edit']) {
+        await panel(page, name);
+        await expect(page.locator(`[data-passage-pane="${name}"]`)).toHaveAttribute('aria-selected', 'true');
+        await expect.poll(() => page.evaluate(() => ({
+          width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight,
+          viewportWidth: innerWidth, viewportHeight: innerHeight, scrollY,
+        }))).toEqual({ width, height, viewportWidth: width, viewportHeight: height, scrollY: 0 });
+        const preview = page.locator(name === 'plan' ? '[data-passage-plan] svg' : '[data-passage-space] canvas');
+        await expect(preview).toBeInViewport({ ratio: 1 });
+        const box = await preview.boundingBox();
+        expect(box!.height).toBeGreaterThan(50);
+        const fonts = await page.locator(`${root} button, ${root} input, ${root} select`).evaluateAll(elements =>
+          elements.filter(element => element.getClientRects().length > 0).map(element => parseFloat(getComputedStyle(element).fontSize)));
+        expect(Math.min(...fonts)).toBeGreaterThanOrEqual(14);
+      }
+      const door = page.locator('[data-passage-door="g-door-1"]');
+      await door.uncheck(); await ready(page);
+      await expect(page.locator(root)).toHaveAttribute('data-route-status', 'unreachable');
+      await page.getByRole('button', { name: 'Dismiss message', exact: true }).click();
+      await expect(page.locator('[data-passage-space] canvas')).toBeInViewport();
+      await page.locator('[data-passage-undo]').click(); await ready(page);
+      await expect(door).toBeChecked();
+      if (width === 320) await page.screenshot({ path: testInfo.outputPath('passage-workspace-mobile-edit.png') });
+      await panel(page, 'route');
+      await page.locator('[data-passage-step]').click();
+      await expect(page.locator(root)).toHaveAttribute('data-walk-time', '1.000');
+      await page.screenshot({ path: testInfo.outputPath(`passage-workspace-${width}x${height}.png`) });
+      await page.locator('[data-passage-reset]').click(); await ready(page);
+      await expect(page.locator(root)).toHaveAttribute('data-walk-time', '0.000');
+      expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(height);
+    }
+    await keep(page);
+    await page.getByText('What this model knows', { exact: true }).click();
+    await expect(page.locator('.passage-method')).toContainText('No headroom');
+    const download = page.waitForEvent('download');
+    await page.locator('[data-passage-export]').click();
+    expect(deserialize(await readFile((await (await download).path())!, 'utf8'))).toEqual(makeLayout());
+    await page.keyboard.press('Escape');
+    await expect(page.locator('[data-passage-keep]')).toBeFocused();
+    expect(errors).toEqual([]);
+  });
   test('desktop atlas is ready, route is real, and explicit walking stops on a door edit without losing focus', async ({ page }, testInfo) => {
     const errors: string[] = []; page.on('pageerror', (error) => errors.push(error.message));
     await open(page);
     await expect(page.locator(root)).toHaveAttribute('data-route-status', 'found');
     await expect(page.locator('[data-passage-space] canvas')).toBeVisible();
+    await panel(page, 'plan');
     await expect(page.locator('[data-passage-plan] svg')).toBeVisible();
     await page.screenshot({ path: testInfo.outputPath('passage-desktop.png'), fullPage: true });
+    await panel(page, 'route');
     await page.locator('[data-passage-walk]').click();
     await expect(page.locator(root)).toHaveAttribute('data-walk-state', 'walking');
     await expect.poll(async () => Number(await page.locator(root).getAttribute('data-walk-time'))).toBeGreaterThan(.1);
@@ -400,10 +457,12 @@ test.describe('PASSAGE / browser workbench', () => {
     await page.locator('[data-passage-portal="lift-m-u"]').uncheck(); await ready(page);
     await expect(page.locator(root)).toHaveAttribute('data-route-status', 'unreachable');
     await expect(page.locator('[data-passage-status]')).toContainText('closed');
+    await page.getByRole('button', { name: 'Dismiss message', exact: true }).click();
     await panel(page, 'route');
     await expect(page.locator('[data-passage-walk]')).toBeDisabled();
     await page.locator('[data-passage-open-portals]').click(); await ready(page);
     await expect(page.locator(root)).toHaveAttribute('data-route-status', 'found');
+    await panel(page, 'space');
     await page.locator('[data-passage-profile]').selectOption('walker'); await ready(page);
     await panel(page, 'edit');
     await page.locator('[data-passage-portal="lift-g-m"]').uncheck(); await ready(page);
@@ -416,7 +475,7 @@ test.describe('PASSAGE / browser workbench', () => {
     await page.screenshot({ path: testInfo.outputPath('passage-stairs.png'), fullPage: true });
   });
   test('solid geometry changes invalidate endpoints; undo/redo and local snapshots preserve actual dimensions', async ({ page }) => {
-    await open(page); await page.locator('[data-passage-save]').click(); await panel(page, 'edit');
+    await open(page); await keep(page); await page.locator('[data-passage-save]').click(); await closeKeep(page); await panel(page, 'edit');
     await page.locator('[data-passage-object]').selectOption('g-shelf-b');
     for (const [name, value] of [['x', '2'], ['z', '14'], ['w', '4'], ['d', '2']]) await page.locator(`[data-passage-object-${name}]`).fill(value);
     await page.locator('[data-passage-apply-object]').click(); await ready(page);
@@ -426,7 +485,7 @@ test.describe('PASSAGE / browser workbench', () => {
     await expect(page.locator(root)).toHaveAttribute('data-route-status', 'found');
     await page.locator('[data-passage-redo]').click(); await ready(page);
     await expect(page.locator(root)).toHaveAttribute('data-route-status', 'invalid');
-    await page.locator('[data-passage-restore]').click(); await ready(page);
+    await keep(page); await page.locator('[data-passage-restore]').click(); await ready(page); await closeKeep(page);
     await expect(page.locator(root)).toHaveAttribute('data-route-status', 'found');
     await expect(page.locator('[data-passage-object-z]')).toHaveValue('17');
   });
@@ -451,6 +510,7 @@ test.describe('PASSAGE / browser workbench', () => {
   });
   test('JSON import/export and SVG export retain real openings; bad imports cannot replace a working layout', async ({ page }) => {
     await open(page);
+    await keep(page);
     const downloadPromise = page.waitForEvent('download');
     await page.locator('[data-passage-export]').click();
     const download = await downloadPromise, path = await download.path();
@@ -461,15 +521,18 @@ test.describe('PASSAGE / browser workbench', () => {
     await page.locator('[data-passage-file]').setInputFiles({ name: 'bad.json', mimeType: 'application/json', buffer: Buffer.from(bad) });
     await expect(page.locator('[data-passage-status]')).toContainText('missing wall');
     await expect(page.locator(root)).toHaveAttribute('data-route-status', 'found');
+    await closeKeep(page);
     await page.locator('[data-passage-preset]').selectOption('offline'); await ready(page);
     await page.locator('[data-passage-file]').setInputFiles({ name: 'roundtrip.json', mimeType: 'application/json', buffer: Buffer.from(json) });
     await ready(page); await expect(page.locator(root)).toHaveAttribute('data-route-status', 'found');
+    await keep(page);
     const svgPromise = page.waitForEvent('download'); await page.locator('[data-passage-svg]').click();
     const svg = await svgPromise;
     const markup = await readFile((await svg.path())!, 'utf8');
     expect(markup).toContain('viewBox="-1 -1 28 22"');
     expect(markup).toContain('Entrance hall door: 1.80 m, open');
     expect(markup).toContain('polyline');
+    await closeKeep(page);
   });
   for (const width of [320, 375]) test(`mobile ${width}px panes, resized plan picking, keyboard alternative, and reduced-motion startup`, async ({ page }, testInfo) => {
     await page.setViewportSize({ width, height: 844 }); await page.emulateMedia({ reducedMotion: 'reduce' }); await open(page);

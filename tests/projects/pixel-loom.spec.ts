@@ -203,7 +203,7 @@ test.describe('Pixel Loom engine', () => {
 });
 
 async function openEditor(page: Page) {
-  await page.goto('projects/pixel-loom/');
+  await page.goto('./projects/pixel-loom/');
   await expect(page.locator('.project-pixel-loom h1')).toHaveText('Pixel Loom✳');
   await expect(page.locator('[data-canvas]')).toBeVisible();
 }
@@ -226,6 +226,144 @@ function rgbaForGrid(pixels: PixelGrid) {
 }
 
 test.describe('Pixel Loom website', () => {
+  test.beforeEach(async ({ page }) => {
+    // Keep unrelated Vite updates from resetting this in-memory drawing mid-test.
+    await page.routeWebSocket(url => url.searchParams.has('token'), () => {});
+  });
+
+  test('zoomed keyboard drawing reveals every active pixel and keeps strokes visible', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 812 });
+    await openEditor(page);
+    await clearCanvas(page);
+    const canvas = page.locator('[data-canvas]');
+    async function visibleCursor(x: number, y: number) {
+      const bounds = await canvas.evaluate((element, point) => {
+        const clip = document.querySelector<HTMLElement>('.pl-stage-wrap')!;
+        const frame = clip.getBoundingClientRect(), rect = element.getBoundingClientRect();
+        return {
+          left: rect.left + point.x * rect.width / 16,
+          right: rect.left + (point.x + 1) * rect.width / 16,
+          top: rect.top + point.y * rect.height / 16,
+          bottom: rect.top + (point.y + 1) * rect.height / 16,
+          minX: frame.left + clip.clientLeft, maxX: frame.left + clip.clientLeft + clip.clientWidth,
+          minY: frame.top + clip.clientTop, maxY: frame.top + clip.clientTop + clip.clientHeight,
+        };
+      }, { x, y });
+      expect(bounds.left).toBeGreaterThanOrEqual(bounds.minX - 1);
+      expect(bounds.right).toBeLessThanOrEqual(bounds.maxX + 1);
+      expect(bounds.top).toBeGreaterThanOrEqual(bounds.minY - 1);
+      expect(bounds.bottom).toBeLessThanOrEqual(bounds.maxY + 1);
+      expect(await page.evaluate(() => [scrollX, scrollY])).toEqual([0, 0]);
+    }
+    await page.getByRole('button', { name: 'Zoom 2×', exact: true }).click();
+    await canvas.focus();
+    await page.keyboard.press('End');
+    await visibleCursor(15, 15);
+    await page.keyboard.press('Space');
+    const expected = emptyGrid();
+    expected[255] = FOREST;
+    expect(await actualPixels(page)).toEqual(rgbaForGrid(expected));
+    await page.keyboard.down('Space');
+    await page.keyboard.press('Home');
+    await visibleCursor(0, 0);
+    await page.keyboard.press('ArrowRight');
+    await visibleCursor(1, 0);
+    await page.keyboard.up('Space');
+    for (let i = 0; i < 16; i++) expected[i * 17] = FOREST;
+    expected[1] = FOREST;
+    expect(await actualPixels(page)).toEqual(rgbaForGrid(expected));
+    await expect(canvas).toBeFocused();
+    await page.getByRole('button', { name: 'Fit canvas', exact: true }).click();
+    await canvas.focus();
+    await page.keyboard.press('End');
+    await page.setViewportSize({ width: 320, height: 640 });
+    await page.getByRole('button', { name: 'Zoom 2×', exact: true }).click();
+    await visibleCursor(15, 15);
+    await canvas.focus();
+    await page.keyboard.press('Home');
+    await visibleCursor(0, 0);
+  });
+
+  test('single-screen pointer mapping survives five viewport sizes, zoom, export and reset', async ({ page }, testInfo) => {
+    await openEditor(page);
+    for (const viewport of [
+      { width: 1440, height: 900 }, { width: 1280, height: 720 },
+      { width: 375, height: 812 }, { width: 320, height: 640 }, { width: 768, height: 480 },
+    ]) {
+      await page.setViewportSize(viewport);
+      const canvas = page.locator('[data-canvas]');
+      const fits = async () => {
+        expect(await page.evaluate(() => ({
+          x: scrollX, y: scrollY,
+          width: document.documentElement.scrollWidth - innerWidth,
+          height: document.documentElement.scrollHeight - innerHeight,
+        }))).toEqual({ x: 0, y: 0, width: 0, height: 0 });
+        for (const selector of ['[data-canvas]', '.pl-toolbar', '.pl-history', '[data-status]', '.pl-workspace-nav']) {
+          const bounds = (await page.locator(selector).boundingBox())!;
+          expect(bounds.x).toBeGreaterThanOrEqual(0);
+          expect(bounds.y).toBeGreaterThanOrEqual(0);
+          expect(bounds.x + bounds.width).toBeLessThanOrEqual(viewport.width + 1);
+          expect(bounds.y + bounds.height).toBeLessThanOrEqual(viewport.height + 1);
+        }
+      };
+      await expect(page.locator('.project-pixel-loom')).toHaveAttribute('data-workspace', 'true');
+      await page.screenshot({ path: testInfo.outputPath(`pixel-loom-${viewport.width}-draw.png`) });
+      await fits();
+      await page.getByRole('button', { name: 'Threads', exact: true }).click();
+      const mirrorBounds = (await page.getByLabel('Mirror as you draw', { exact: true }).boundingBox())!;
+      expect(mirrorBounds.y + mirrorBounds.height).toBeLessThanOrEqual(viewport.height);
+      await page.screenshot({ path: testInfo.outputPath(`pixel-loom-${viewport.width}-threads.png`) });
+      await page.getByLabel('Mirror as you draw', { exact: true }).selectOption('none');
+      await page.getByRole('button', { name: 'Close Threads & drawing options', exact: true }).click();
+      await clearCanvas(page);
+      const bounds = (await canvas.boundingBox())!;
+      expect(bounds.width).toBeGreaterThanOrEqual(170);
+      expect(Math.abs(bounds.width - bounds.height)).toBeLessThan(1);
+      await page.mouse.click(bounds.x + bounds.width * 15.5 / 16, bounds.y + bounds.height * 15.5 / 16);
+      const onePixel = emptyGrid();
+      onePixel[255] = FOREST;
+      expect(await actualPixels(page)).toEqual(rgbaForGrid(onePixel));
+      await page.getByRole('button', { name: 'Undo', exact: true }).click();
+      expect(await actualPixels(page)).toEqual(rgbaForGrid(emptyGrid()));
+      await page.getByRole('button', { name: 'Redo', exact: true }).click();
+      await page.getByRole('button', { name: 'Finish', exact: true }).click();
+      const exportBounds = (await page.getByRole('button', { name: 'Download PNG' }).boundingBox())!;
+      expect(exportBounds.y + exportBounds.height).toBeLessThanOrEqual(viewport.height);
+      await page.screenshot({ path: testInfo.outputPath(`pixel-loom-${viewport.width}-finish.png`) });
+      await page.getByRole('button', { name: 'Repeat', exact: true }).click();
+      await page.getByLabel('PNG size', { exact: true }).selectOption('1');
+      const download = page.waitForEvent('download');
+      await page.getByRole('button', { name: 'Download PNG' }).click();
+      expect((await download).suggestedFilename()).toBe('pixel-loom-16.png');
+      await page.getByRole('button', { name: 'Close Preview, transform & export', exact: true }).click();
+      await fits();
+      if (viewport.width === 320) {
+        await page.getByRole('button', { name: 'Zoom 2×', exact: true }).click();
+        await page.screenshot({ path: testInfo.outputPath('pixel-loom-320-zoom.png') });
+        for (let step = 0; step < 4; step++) {
+          await page.getByRole('button', { name: 'Pan canvas left', exact: true }).click();
+          await page.getByRole('button', { name: 'Pan canvas up', exact: true }).click();
+        }
+        const zoomed = (await canvas.boundingBox())!;
+        expect(zoomed.width).toBeGreaterThan(600);
+        expect(zoomed.x).toBeGreaterThanOrEqual(0);
+        await page.mouse.click(zoomed.x + zoomed.width * 1.5 / 16, zoomed.y + zoomed.height * 1.5 / 16);
+        onePixel[17] = FOREST;
+        expect(await actualPixels(page)).toEqual(rgbaForGrid(onePixel));
+        await page.getByRole('button', { name: 'Pan canvas right', exact: true }).click();
+        expect(await page.locator('.pl-stage-wrap').evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
+        const panned = (await canvas.boundingBox())!;
+        await page.mouse.click(panned.x + panned.width * 6.5 / 16, panned.y + panned.height * 1.5 / 16);
+        onePixel[22] = FOREST;
+        expect(await actualPixels(page)).toEqual(rgbaForGrid(onePixel));
+        await page.getByRole('button', { name: 'Fit canvas', exact: true }).click();
+        await fits();
+      }
+      await page.getByRole('button', { name: 'Patterns', exact: true }).click();
+      await page.getByRole('button', { name: 'Load Pocket garden starter', exact: true }).click();
+    }
+  });
+
   test('maker content density: the board leads the page and marks its preview', async ({ page }) => {
     for (const viewport of [{ width: 1322, height: 1160 }, { width: 375, height: 812 }]) {
       await page.setViewportSize(viewport);
@@ -244,11 +382,14 @@ test.describe('Pixel Loom website', () => {
     await openEditor(page);
     expect(await actualPixels(page)).toEqual(rgbaForGrid(STARTERS[0].pixels));
     await expect(page.getByRole('button', { name: 'Undo', exact: true })).toBeDisabled();
+    await page.getByRole('button', { name: 'Patterns', exact: true }).click();
     await page.getByRole('button', { name: 'Load Moon moth starter' }).click();
     expect(await actualPixels(page)).toEqual(rgbaForGrid(STARTERS[1].pixels));
     await page.getByRole('button', { name: 'Undo', exact: true }).click();
     expect(await actualPixels(page)).toEqual(rgbaForGrid(STARTERS[0].pixels));
+    await page.getByRole('button', { name: 'Finish', exact: true }).click();
     await page.getByRole('button', { name: 'Rotate artwork 90 degrees clockwise' }).click();
+    await page.getByRole('button', { name: 'Close Preview, transform & export', exact: true }).click();
     expect(await actualPixels(page)).toEqual(rgbaForGrid(transformGrid(STARTERS[0].pixels, 'rotate-right')));
     await page.getByRole('button', { name: 'Clear canvas', exact: true }).click();
     await page.getByRole('button', { name: 'Keep drawing', exact: true }).click();
@@ -263,7 +404,7 @@ test.describe('Pixel Loom website', () => {
     await openEditor(page);
     await clearCanvas(page);
     const canvas = page.locator('[data-canvas]');
-    await canvas.scrollIntoViewIfNeeded();
+    await expect(canvas).toBeInViewport({ ratio: 1 });
     const bounds = (await canvas.boundingBox())!;
     const y = bounds.y + bounds.height * 7.5 / 16;
     await page.mouse.move(bounds.x + bounds.width * .5 / 16, y);
@@ -286,6 +427,14 @@ test.describe('Pixel Loom website', () => {
     await expect(page.locator('[data-status]')).toContainText('Stroke canceled');
     await page.getByRole('button', { name: 'Redo', exact: true }).click();
     await expect(page.locator('[data-stats]')).toHaveText('16 / 256 painted · 1 color');
+    const beforeResize = await actualPixels(page);
+    await page.mouse.move(bounds.x + bounds.width * 3.5 / 16, bounds.y + bounds.height * 3.5 / 16);
+    await page.mouse.down();
+    await page.setViewportSize({ width: 320, height: 640 });
+    await expect(page.locator('[data-status]')).toContainText('Stroke canceled');
+    await page.mouse.up();
+    expect(await actualPixels(page)).toEqual(beforeResize);
+    await expect(canvas).toBeInViewport({ ratio: 1 });
   });
 
   test('supports keyboard strokes, mirrored fill, erasing, and transparent eyedropping', async ({ page }) => {
@@ -301,7 +450,9 @@ test.describe('Pixel Loom website', () => {
     await expect(page.locator('[data-stats]')).toHaveText('4 / 256 painted · 1 color');
     await canvas.press('Control+z');
     await expect(page.locator('[data-stats]')).toHaveText('0 / 256 painted · 0 colors');
+    await page.getByRole('button', { name: 'Threads', exact: true }).click();
     await page.getByLabel('Mirror as you draw', { exact: true }).selectOption('both');
+    await page.getByRole('button', { name: 'Close Threads & drawing options', exact: true }).click();
     await canvas.focus();
     await canvas.press('Home');
     await canvas.press('Space');
@@ -327,7 +478,7 @@ test.describe('Pixel Loom website', () => {
     const cdp = await page.context().newCDPSession(page);
     try {
       await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 2 });
-      await canvas.scrollIntoViewIfNeeded();
+      await expect(canvas).toBeInViewport({ ratio: 1 });
       let bounds = (await canvas.boundingBox())!;
       const scroll = await page.evaluate(() => window.scrollY);
       const left = { x: bounds.x + bounds.width * .5 / 16, y: bounds.y + bounds.height * 7.5 / 16, id: 1 };
@@ -339,7 +490,7 @@ test.describe('Pixel Loom website', () => {
       expect(await page.evaluate(() => window.scrollY)).toBe(scroll);
       await canvas.press('Control+z');
       await expect(page.locator('[data-stats]')).toHaveText('0 / 256 painted · 0 colors');
-      await canvas.scrollIntoViewIfNeeded();
+      await expect(canvas).toBeInViewport({ ratio: 1 });
       bounds = (await canvas.boundingBox())!;
       const start = { x: bounds.x + bounds.width * 1.5 / 16, y: bounds.y + bounds.height * 1.5 / 16, id: 2 };
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] });
@@ -361,6 +512,7 @@ test.describe('Pixel Loom website', () => {
     const canvas = page.locator('[data-canvas]');
     await canvas.press('Home');
     await canvas.press('Space');
+    await page.getByRole('button', { name: 'Finish', exact: true }).click();
     await page.getByLabel('PNG size', { exact: true }).selectOption('4');
     const downloadPromise = page.waitForEvent('download');
     await page.getByRole('button', { name: 'Download PNG' }).click();
@@ -400,9 +552,12 @@ test.describe('Pixel Loom website', () => {
     await page.evaluate(() => {
       HTMLCanvasElement.prototype.toBlob = function (callback) { callback(null); };
     });
+    await page.getByRole('button', { name: 'Finish', exact: true }).click();
     await page.getByRole('button', { name: 'Download PNG' }).click();
     await expect(page.locator('[data-status]')).toHaveAttribute('data-tone', 'error');
     await expect(page.locator('[data-status]')).toContainText('could not encode this PNG');
+    await expect(page.getByRole('dialog', { name: 'Studio message', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Close Studio message', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Download PNG' })).toBeEnabled();
     expect(await actualPixels(page)).toEqual(rgbaForGrid(STARTERS[0].pixels));
   });
@@ -413,11 +568,15 @@ test.describe('Pixel Loom website', () => {
     const overflow = await page.locator('.project-pixel-loom').evaluate((root) => root.scrollWidth > root.clientWidth);
     expect(overflow).toBe(false);
     const targetSizes = await page.locator('.project-pixel-loom button').evaluateAll((buttons) =>
-      buttons.filter((button) => !button.closest('[hidden]')).map((button) => button.getBoundingClientRect().height));
+      buttons.filter((button) => button.checkVisibility()).map((button) => button.getBoundingClientRect().height));
     expect(targetSizes.every((height) => height >= 44)).toBe(true);
+    await page.getByRole('button', { name: 'Threads', exact: true }).click();
     await page.getByLabel('Color palette', { exact: true }).focus();
     await page.keyboard.press('e');
     await expect(page.getByRole('button', { name: 'Paint (B)', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('dialog', { name: 'Threads & drawing options', exact: true })).not.toBeVisible();
+    await expect(page.getByRole('button', { name: 'Threads', exact: true })).toBeFocused();
     const lifecycle = await page.evaluate(async () => {
       const moduleUrl = new URL('src/projects/pixel-loom/index.ts', document.querySelector<HTMLMetaElement>('meta[name="odd-index-base"]')
         ? new URL(document.querySelector<HTMLMetaElement>('meta[name="odd-index-base"]')!.content, location.href)

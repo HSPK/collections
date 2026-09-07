@@ -224,14 +224,18 @@ test('gearbox browser presets and selectors render the same signed model and act
   const root = await openLab(page);
   await expect(root).toHaveAttribute('data-motion', 'paused');
   for (const experiment of EXPERIMENTS) {
+    await root.getByRole('button', { name: 'Experiments', exact: true }).click();
     await root.getByRole('button', { name: experiment.name, exact: true }).click();
+    await root.getByRole('button', { name: 'Close Gearbox experiments' }).click();
     await scrub(page, 1.25);
     await expectModel(root, solveGearbox({ gearset: GEARSETS[0], ...experiment, speed: DEFAULT_SPEED }), 1.25);
-    await expect(root.getByRole('button', { name: experiment.name, exact: true })).toHaveAttribute('aria-pressed', 'true');
+    await expect(root.getByRole('button', { name: experiment.name, exact: true, includeHidden: true })).toHaveAttribute('aria-pressed', 'true');
   }
   for (const gearset of GEARSETS) {
     await root.getByRole('combobox', { name: 'Tooth family' }).selectOption(gearset.id);
+    await root.getByRole('button', { name: 'Experiments', exact: true }).click();
     await root.getByRole('button', { name: 'Overdrive', exact: true }).click();
+    await root.getByRole('button', { name: 'Close Gearbox experiments' }).click();
     await root.getByRole('combobox', { name: 'Input direction' }).selectOption('-1');
     await setRange(root.getByRole('slider', { name: 'Input speed' }), 0.5);
     await scrub(page, 0.63);
@@ -324,7 +328,9 @@ test('gearbox pause, history-free scrub, keyboard steps, end stop and reset oper
   await expect(root).toHaveAttribute('data-motion', 'playing');
   expect(Number(await root.getAttribute('data-time'))).toBeLessThan(1);
   await root.getByRole('button', { name: 'Pause mechanism' }).click();
+  await root.getByRole('button', { name: 'Experiments', exact: true }).click();
   await root.getByRole('button', { name: 'Reverse', exact: true }).click();
+  await root.getByRole('button', { name: 'Close Gearbox experiments' }).click();
   await root.getByRole('combobox', { name: 'Tooth family' }).selectOption(GEARSETS[2].id);
   await root.getByRole('combobox', { name: 'Input direction' }).selectOption('-1');
   await setRange(root.getByRole('slider', { name: 'Input speed' }), 0.8);
@@ -349,16 +355,28 @@ test('gearbox 375px workbench stays near the top with readable controls and redu
   await expect(root).toHaveAttribute('data-motion', 'paused');
   await page.waitForTimeout(120);
   await expect(root).toHaveAttribute('data-time', '0.000000');
-  const layout = await root.evaluate((element) => ({
-    width: document.documentElement.scrollWidth,
-    viewport: window.innerWidth,
-    controls: [...element.querySelectorAll('button, select, input')].map((control) => {
-      const target = control.matches('[type="checkbox"]') ? control.closest('label')! : control;
+  const controls: { height: number; left: number; right: number; font: number }[] = [];
+  for (const control of await root.locator('button, select, input').all()) {
+    const dialogId = await control.evaluate((element) => element.closest('dialog')?.id);
+    const opened = root.locator('dialog[open]');
+    if (await opened.count() && await opened.getAttribute('id') !== dialogId) await page.keyboard.press('Escape');
+    if (dialogId && !await root.locator(`#${dialogId}`).evaluate((dialog: HTMLDialogElement) => dialog.open)) {
+      await root.locator(`button[aria-controls="${dialogId}"]`).first().click();
+    }
+    const panelId = await control.evaluate((element) => element.closest('[role="tabpanel"]')?.id);
+    if (panelId) await root.locator(`button[aria-controls="${panelId}"]`).click();
+    controls.push(await control.evaluate((element) => {
+      const target = element.matches('[type="checkbox"]') ? element.closest('label')! : element;
       const rect = target.getBoundingClientRect();
       return { height: rect.height, left: rect.left, right: rect.right, font: Number.parseFloat(getComputedStyle(target).fontSize) };
-    }),
+    }));
+  }
+  if (await root.locator('dialog[open]').count()) await page.keyboard.press('Escape');
+  const layout = { ...await root.evaluate((element) => ({
+    width: document.documentElement.scrollWidth,
+    viewport: window.innerWidth,
     labelFonts: [...element.querySelectorAll('label, .gb-legend span span, .gb-drawing-caption, .gb-small')].map((label) => Number.parseFloat(getComputedStyle(label).fontSize)),
-  }));
+  })), controls };
   expect(layout.width).toBeLessThanOrEqual(layout.viewport);
   expect(layout.controls.every((control) => control.left >= 0 && control.right <= 375 && control.height >= 44 && control.font >= 12)).toBe(true);
   expect(layout.labelFonts.every((size) => size >= 12)).toBe(true);
@@ -379,6 +397,54 @@ test('gearbox 375px workbench stays near the top with readable controls and redu
   await scrub(page, 4.75);
   await expect(root).toHaveAttribute('data-time', '4.750000');
 });
+
+for (const viewport of [
+  { width: 1440, height: 900 }, { width: 1280, height: 720 },
+  { width: 375, height: 812 }, { width: 320, height: 640 }, { width: 768, height: 480 },
+]) {
+  test(`gearbox workspace keeps simulation, transport and inspectable panels at ${viewport.width}×${viewport.height}`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    const root = await openLab(page);
+    await expect(root).toHaveAttribute('data-workspace', 'true');
+    const layout = await root.evaluate((element) => ({
+      top: element.getBoundingClientRect().top,
+      height: element.getBoundingClientRect().height,
+      documentHeight: document.documentElement.scrollHeight,
+      documentWidth: document.documentElement.scrollWidth,
+      stage: element.querySelector('[data-gearbox-scene]')!.getBoundingClientRect().toJSON(),
+      transport: element.querySelector('.gb-transport')!.getBoundingClientRect().toJSON(),
+    }));
+    expect(layout.top).toBe(0);
+    expect(layout.height).toBe(viewport.height);
+    expect(layout.documentHeight).toBeLessThanOrEqual(viewport.height);
+    expect(layout.documentWidth).toBeLessThanOrEqual(viewport.width);
+    expect(layout.stage.height).toBeGreaterThan(100);
+    expect(layout.stage.bottom).toBeLessThanOrEqual(viewport.height);
+    expect(layout.transport.bottom).toBeLessThanOrEqual(viewport.height);
+    await root.getByRole('button', { name: 'Parameters', exact: true }).click();
+    const speed = root.getByRole('slider', { name: 'Input speed' });
+    await speed.focus();
+    await speed.press('ArrowRight');
+    await expect(speed).toBeFocused();
+    await expect(speed).toHaveValue('0.2');
+    await root.getByRole('tab', { name: 'Parameters', exact: true }).focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(root.getByRole('tab', { name: 'Readout', exact: true })).toBeFocused();
+    await expect(root.getByRole('region', { name: 'Output Carrier' })).toBeVisible();
+    if (viewport.width <= 700 || viewport.height <= 540) {
+      await page.keyboard.press('Escape');
+      await expect(root.getByRole('button', { name: 'Parameters', exact: true })).toBeFocused();
+    }
+    await root.getByRole('button', { name: 'Notebook', exact: true }).click();
+    const notebook = root.getByRole('dialog', { name: 'Gearbox notebook & equations' });
+    await expect(notebook).toBeVisible();
+    await expect(notebook.getByRole('region', { name: 'Geometry and mesh checks' })).toBeVisible();
+    expect(await notebook.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe('rgb(247, 243, 232)');
+    await page.keyboard.press('Escape');
+    await expect(root.getByRole('button', { name: 'Notebook', exact: true })).toBeFocused();
+    await expect(root).toHaveAttribute('data-time', '0.000000');
+  });
+}
 
 test('gearbox abort and destroy cancel RAF, detach listeners, and make returned controls inert', async ({ page }) => {
   await openLab(page);

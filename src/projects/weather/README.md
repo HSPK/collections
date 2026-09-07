@@ -13,14 +13,17 @@ clock to choose a forecast.
   units, and the 24 authored forecast records.
 - `diagrams.ts` draws the expedition map and six different landscape sections.
   Drawings are deterministic SVG strings, not images or gradient presets.
-- `style.css` scopes every selector to `.project-weather`. The layout is a
-  natural-height editorial page; at narrow widths the selected station appears
-  before the full destination index.
+- `style.css` scopes every selector to `.project-weather`. The
+  `data-workspace="true"` root is a bounded viewport desk: station selection,
+  the four watches, condition, primary reading, and live landscape stay together.
 - `manifest.json` registers this page with the collection. No central catalog,
   router, or build configuration needs an entry.
 
 The entrypoint uses `createProjectPage(context, 'weather')` and returns only
 `{ destroy: page.destroy }`. There is no playback or animation state.
+Back/Forward routes also reconcile the active dialog. Returning to a
+sectionless station or watch route closes an obsolete panel even when the
+station is unchanged, retaining checklists and focus already inside the station.
 
 ## Content model and stable timeline
 
@@ -121,13 +124,16 @@ Canonical route shape:
 ```
 
 An optional fourth segment can be `index`, `station`, `notes`, `packing`, or
-`units`; it focuses and scrolls to that page section. A destination-only link
+`units`; it opens the matching native dialog (or the live desk for `station`).
+The dialog's long content scrolls internally, never the document. A destination-only link
 such as `#weather/glass-orchard` selects Dawn. Invalid atlas routes fall back to
 Pelagic Stair at Dawn with an accessible announcement. Unrelated fragments are
 left alone for the enclosing page's anchors.
 
-The six visible index links, glossary links, and other-watch notebook links are
-ordinary anchors. The current watch is retained when choosing another place.
+The Stations dialog retains all six index links and the original expedition
+map. Those links, glossary links, and other-watch notebook links remain ordinary
+anchors. A native station select is also always available on the live desk.
+The current watch is retained when choosing another place.
 Hash changes are separate history entries, so browser Back/Forward works.
 Selecting a place moves focus to its station; changing a radio watch keeps
 keyboard focus on that native radio control. The native radio group supports
@@ -168,18 +174,28 @@ observers, animation frames, audio nodes, or object URLs. If adding any, registe
 their disposal with `page.onCleanup`. There is no motion to disable for reduced
 motion users, and section navigation scrolls without animation.
 
-The fictional-service notice stays visible while scrolling. Essential text is
-at least 12px; prose is 15–18px. Selection is communicated by native checked
-state or `aria-current`, not color alone. The layout has no fixed-height art
-container and no page-wide horizontal scrolling at 375px.
+The fictional-service notice stays visible on the desk. Essential text is at
+least 14px; prose is 15–18px. Selection is communicated by native checked state
+or `aria-current`, not color alone. Bounded flex/grid tracks with `min-height: 0`
+fit 1440×900, 1280×720, 375×812, 320×640, and 768×480 without document scrolling,
+clipped controls, or page scaling. SVGs retain their viewBox and aspect ratio.
+
+Notebook contains the current diagram key, secondary instruments, unit reminder,
+synopsis, route advice, geography, approach, observatory log, and expandable
+other-watch archive. Packing and Units have their own one-tap dialogs. Original
+nodes remain mounted, including persistent checklists; all forecast-dependent
+content updates together on station/watch changes. Close/Escape restores opener
+focus, and a notebook forecast or index link returns to the live desk. The
+floating collection menu remains available.
 
 Focused browser coverage lives in `tests/projects/weather.spec.ts`:
 
 ```sh
-npx playwright test tests/projects/weather.spec.ts --workers=1
+npm test -- tests/projects/weather.spec.ts --workers=1 --reporter=dot
 ```
 
 Use the existing Playwright runner (port 4173, or its `SITE_URL` override). The
 spec exercises destination browsing, coherent watch updates, deep links,
 history, keyboard controls, checklist persistence and failure handling, and
-the narrow layout. No snapshot or screenshot updates are required.
+all five bounded layouts, internal reference scrolling, and the collection menu.
+Workspace tests save screenshots into the runner's per-test artifact directory.

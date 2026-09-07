@@ -144,3 +144,93 @@
   .project-crystal-cavern .cavern-specimens dd { margin-top: 0; }
   .project-crystal-cavern .cavern-specimens dt { font-size: 23px; }
 }
+
+.project-crystal-cavern[data-workspace] {
+  --workspace-paper: #102a2c;
+  box-sizing: border-box;
+  height: 100dvh;
+  min-height: 0;
+  padding: 0 20px;
+  display: grid;
+  grid-template-rows: 90px minmax(0, 1fr) 196px 64px;
+}
+.project-crystal-cavern .cavern-masthead { min-height: 0; margin: 0; gap: 16px; }
+.project-crystal-cavern h1 { font-size: 44px; margin-top: 2px; }
+.project-crystal-cavern .cavern-header-note { padding: 0; }
+.project-crystal-cavern .cavern-exhibit { min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) 48px; }
+.project-crystal-cavern .cavern-environment { min-height: 0; height: auto; }
+.project-crystal-cavern .cavern-environment canvas { touch-action: none; }
+.project-crystal-cavern .cavern-caption { display: flex; gap: 16px; padding: 1px 12px; }
+.project-crystal-cavern .cavern-caption > span:first-of-type { display: none; }
+.project-crystal-cavern .cavern-caption > button { margin-left: auto; min-height: 44px; padding: 6px 12px; border: 1px solid #587067; background: #1c3838; font-size: 14px; }
+.project-crystal-cavern .cavern-transport { margin: 0; gap: 14px; }
+.project-crystal-cavern .cavern-transport button { min-width: 100px; }
+.project-crystal-cavern .cavern-console {
+  display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: 44px minmax(0, 1fr);
+  gap: 0; margin: 0; padding: 0; min-height: 0;
+}
+.project-crystal-cavern .workspace-tabs { gap: 0; }
+.project-crystal-cavern .workspace-tabs > button { min-height: 44px; border: 1px solid var(--cavern-line); background: #173334; color: inherit; }
+.project-crystal-cavern .workspace-tabs > button[aria-selected="true"] { background: #2a443e; color: #e4e9cb; }
+.project-crystal-cavern .workspace-pane { min-height: 0; min-width: 0; padding: 10px 12px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.project-crystal-cavern .cavern-console h3 { display: none; }
+.project-crystal-cavern .cavern-view-buttons { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.project-crystal-cavern .cavern-view-buttons button { min-height: 44px; border-color: var(--cavern-line); text-align: center; }
+.project-crystal-cavern [data-view-caption] { margin-top: 9px; font-size: 15px; }
+.project-crystal-cavern .cavern-light-settings { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 24px; }
+.project-crystal-cavern .cavern-select-label { grid-column: 1; margin: 0; }
+.project-crystal-cavern .cavern-light-settings .cavern-range-label { grid-column: 2; grid-row: 1; margin: 0; }
+.project-crystal-cavern #cavern-mineral { grid-column: 1; grid-row: 2; }
+.project-crystal-cavern #cavern-intensity { grid-column: 2; grid-row: 2; }
+.project-crystal-cavern .cavern-reading { padding: 6px 0 0; margin-top: 6px; font-size: 15px; }
+.project-crystal-cavern .cavern-time-settings { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 24px; }
+.project-crystal-cavern .cavern-time-settings label[for='cavern-phase'] { grid-column: 1; grid-row: 1; margin: 0; }
+.project-crystal-cavern .cavern-time-settings #cavern-phase { grid-column: 1; grid-row: 2; }
+.project-crystal-cavern .cavern-time-settings label[for='cavern-mist'] { grid-column: 2; grid-row: 1; margin: 0; }
+.project-crystal-cavern .cavern-time-settings #cavern-mist { grid-column: 2; grid-row: 2; }
+.project-crystal-cavern [data-cavern-status] { min-height: 0; padding: 7px 64px 5px 0; overflow-y: auto; overscroll-behavior: contain; font-size: 14px; }
+.project-crystal-cavern :is(.cavern-eyebrow, .cavern-header-note > span, .cavern-survey,
+  .cavern-contour span, .cavern-view-label div > span, .cavern-navigation, .cavern-live,
+  .cavern-console-title > span, .cavern-view-buttons button, .cavern-view-buttons button span,
+  .cavern-select-label, select, .cavern-range-label, .cavern-range-label :is(output, span),
+  .cavern-transport button, .cavern-transport > span, .cavern-fieldbook-intro .cavern-eyebrow,
+  .cavern-specimens small, .cavern-footer) { font-size: 14px; }
+.project-crystal-cavern .cavern-fieldbook { display: block; padding: 18px 0; }
+.project-crystal-cavern .cavern-specimens { gap: 20px; }
+.project-crystal-cavern .workspace-dialog .cavern-console-title h2 { font: 29px Georgia, serif; margin: 0 0 12px; }
+@media (max-width: 640px) {
+  .project-crystal-cavern[data-workspace] { padding: 0 10px; grid-template-rows: 74px minmax(0, 1fr) 192px 64px; }
+  .project-crystal-cavern h1 { font-size: 35px; }
+  .project-crystal-cavern .cavern-eyebrow { font-size: 14px; letter-spacing: 0; gap: 6px; }
+  .project-crystal-cavern .cavern-mark { font-size: 17px; }
+  .project-crystal-cavern .cavern-caption { gap: 8px; padding-inline: 7px; }
+  .project-crystal-cavern .cavern-live { display: none; }
+  .project-crystal-cavern .cavern-transport { gap: 8px; }
+  .project-crystal-cavern .cavern-transport button { min-width: 88px; gap: 12px; }
+  .project-crystal-cavern .cavern-caption > button { padding-inline: 8px; }
+  .project-crystal-cavern .workspace-pane { padding: 7px; }
+  .project-crystal-cavern .cavern-view-buttons { gap: 4px; }
+  .project-crystal-cavern .cavern-view-buttons button { padding: 4px; min-height: 52px; }
+  .project-crystal-cavern .cavern-view-buttons button span { display: none; }
+  .project-crystal-cavern [data-view-caption] { margin-top: 6px; line-height: 1.4; }
+  .project-crystal-cavern .cavern-light-settings, .project-crystal-cavern .cavern-time-settings { gap: 0 12px; }
+  .project-crystal-cavern .cavern-time-settings label[for='cavern-phase'] > span { display: none; }
+  .project-crystal-cavern .cavern-range-label { gap: 4px; flex-wrap: wrap; }
+  .project-crystal-cavern .cavern-survey--top { padding: 10px; font-size: 14px; }
+  .project-crystal-cavern .cavern-survey--top > span:last-child { display: none; }
+  .project-crystal-cavern .cavern-contour { display: none; }
+  .project-crystal-cavern .cavern-view-label { bottom: 46px; }
+  .project-crystal-cavern .cavern-navigation { padding: 14px 12px 10px; line-height: 1.3; }
+}
+@media (max-height: 540px) and (min-width: 641px) {
+  .project-crystal-cavern[data-workspace] { grid-template-columns: minmax(0, 1fr) 290px; grid-template-rows: 70px minmax(0, 1fr) 64px; gap: 0 12px; padding-inline: 12px; }
+  .project-crystal-cavern .cavern-masthead { grid-column: 1 / -1; }
+  .project-crystal-cavern .cavern-header-note { display: none; }
+  .project-crystal-cavern h1 { font-size: 34px; }
+  .project-crystal-cavern .cavern-console { grid-column: 2; grid-row: 2; }
+  .project-crystal-cavern [data-cavern-status] { grid-column: 1 / -1; }
+  .project-crystal-cavern .cavern-view-buttons { grid-template-columns: minmax(0, 1fr); }
+  .project-crystal-cavern .cavern-view-buttons button span { display: none; }
+  .project-crystal-cavern .cavern-live, .project-crystal-cavern .cavern-contour,
+  .project-crystal-cavern .cavern-survey--top > span:last-child { display: none; }
+}

@@ -10,8 +10,8 @@ intersecting line candidates, without guessing.
 - `index.ts` mounts the complete club page with `createProjectPage`, including
   its selector, board, instructions, help, counters, and solved-picture reveals.
 - `style.css` provides the paper-and-green-ink design. All selectors are scoped
-  to `.project-nonogram`; the board scales down to a phone without horizontal
-  document scrolling.
+  to `.project-nonogram`; the board has its own pan surface, never horizontal
+  document scrolling or whole-page scaling.
 - `data.ts` holds original drawings and editorial copy. Picture titles are
   revealed only after completing their puzzle.
 - `engine.ts` contains DOM-free, immutable game operations, clue generation,
@@ -20,12 +20,26 @@ intersecting line candidates, without guessing.
 - `../../../tests/projects/nonogram.spec.ts` covers clues, uniqueness, rules,
   hint accounting, and the browser interaction contract.
 
-The desktop paper places the painting tools, checks, hints, and counters beside
-the board, rather than below it. The compact heading and 376px maximum board
-keep the first puzzle playable within a laptop viewport. Narrow screens retain
-the original stacked controls and readable cell sizes. `data-project-preview`
-marks `.nc-paper`, including both the board and its controls, for collection
-captures; keep this marker on one visible gameplay region.
+The page opts into the collection workspace contract with `data-workspace="true"`.
+A `100dvh` shell gives its flex/grid children the real remaining height with
+`min-height: 0`; it does not hide document overflow. Desktop tools sit beside the
+board. Phones keep painting, Check, One hint, Reset, feedback, counters, and puzzle
+navigation on the same screen. The collection floating menu remains available.
+
+**Puzzles & collection** opens the original shelf and collected stamps in a native
+dialog. **How to play** retains the introduction, invitation, clue explanation,
+keyboard handbook, editorial notes, and footer. Choosing a puzzle closes its pane
+and restores that puzzle's board position instead of scrolling to a shelf.
+Check/hint explanations, reset confirmation, and completed pictures use named
+native dialogs with Escape, Close, and focus restoration.
+
+Cells are at least **32 CSS pixels**, with a ResizeObserver fitting larger cells
+when space allows. Dense grids pan inside the board, with sticky row/column clues.
+**Focus board** moves the same paper and controls into a nearly full-screen native
+dialog, using cells of at least **36px**. **Return to desk** restores the same nodes,
+listeners, marks, and selected tool. Keyboard navigation pans only the board to
+keep its focused cell visible. `data-project-preview` stays on the single
+`.nc-paper` gameplay region, including while focused.
 
 ## Rules and honest feedback
 
@@ -69,11 +83,12 @@ There is no local storage, account, timer, network request, or sound.
   Shortcuts only run while a board cell is focused and ignore modifier chords.
 - Each cell's accessible name includes its row, column, state, both clues,
   and any checked mistake. Solved cells remain keyboard-readable.
-- Help feedback is a local polite live region. Completion reveals and focuses
-  the actual picture result. Reset confirmation can be dismissed with
+- Help feedback is a local polite live region with a **Details** button to reopen
+  its complete explanation (or a completed picture). Completion immediately opens
+  and focuses the actual picture result. Reset confirmation can be dismissed with
   **Escape**, restoring focus to Reset.
-- All event listeners use the page's abort signal. Mounting creates no global
-  listeners, timers, observers, or other background resources.
+- All event listeners use the page's abort signal. The board ResizeObserver is
+  disconnected on cleanup; native dialogs close and are removed on unmount.
 
 ## Extending the edition
 
@@ -96,3 +111,12 @@ original picture is one legal reconstruction, enumerate up to two whole-grid
 solutions to prove uniqueness, and require all current pictures to solve
 without branching. They also test ambiguity and impossible clues so uniqueness
 is not assumed. The command above does not start or use a development server.
+
+The browser cases exercise 1440×900, 1280×720, 375×812, 320×640, and 768×480.
+They assert document dimensions and visible primary controls before interaction,
+paint using actual pointer coordinates, pan with keyboard focus, open reference
+panes, complete a real puzzle, replay, and confirm reset. Desktop/mobile desk,
+focused-board, and completed-picture screenshots use `testInfo.outputPath`.
+Run browser checks against the coordinated server under its shared browser lock.
+The specs intercept only Vite's token-bearing development WebSocket, preventing
+unrelated project edits from reloading an active attempt during a workflow.

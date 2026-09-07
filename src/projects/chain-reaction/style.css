@@ -1,4 +1,5 @@
 .project-chain-reaction {
+  --workspace-paper: #eff4f0;
   --cr-paper: #eff4f0;
   --cr-blue: #d4e7e9;
   --cr-ink: #294b50;
@@ -235,4 +236,64 @@
   .project-chain-reaction .cr-footer { display: block; padding-bottom: 40px; }
   .project-chain-reaction .cr-footer > span { display: block; }
   .project-chain-reaction .cr-footer > span + span { margin-top: 5px; }
+}
+
+.project-chain-reaction[data-workspace="true"] { position: relative; height: 100dvh; min-height: 0; }
+.project-chain-reaction [data-cr-announcement] { top: 0; left: 0; }
+.project-chain-reaction .cr-shell {
+  height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 12px; padding: 16px clamp(10px, 2.5vw, 36px);
+}
+.project-chain-reaction .cr-header { margin: 0; }
+.project-chain-reaction .cr-machine { min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+.project-chain-reaction .cr-scene-host { height: 100%; min-height: 0; }
+.project-chain-reaction .cr-scene { height: 100%; width: 100%; }
+.project-chain-reaction .cr-machine-topline { padding: 8px 16px; }
+.project-chain-reaction .cr-machine-status,
+.project-chain-reaction .cr-scrubber-heading,
+.project-chain-reaction .cr-scrubber-heading output,
+.project-chain-reaction .cr-speed,
+.project-chain-reaction .cr-stage-number,
+.project-chain-reaction .cr-stage-time,
+.project-chain-reaction .cr-handoff,
+.project-chain-reaction .cr-feedback,
+.project-chain-reaction .cr-timeline-help,
+.project-chain-reaction .cr-materials,
+.project-chain-reaction .cr-footer { font-size: 14px; }
+.project-chain-reaction .cr-transport { padding: 10px 16px; gap: 18px; }
+.project-chain-reaction .cr-workspace-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding-right: 56px; }
+.project-chain-reaction .cr-workspace-actions button {
+  min-height: 44px; padding: 8px 16px; border: 1px solid var(--cr-line);
+  border-radius: 6px; background: #e5eddf; font-size: 14px;
+}
+.project-chain-reaction .cr-workspace-actions button:hover { background: #d7e6d6; }
+.project-chain-reaction .cr-motion-note { margin: 0 0 0 auto; padding: 3px 10px; font-size: 14px; }
+.project-chain-reaction .workspace-dialog-heading > button { min-height: 44px; }
+.project-chain-reaction .workspace-dialog .cr-inspector { margin: 0; }
+.project-chain-reaction .workspace-dialog .cr-notes { padding: 0; }
+.project-chain-reaction .workspace-dialog .cr-footer { margin-top: 16px; padding-bottom: 0; }
+@media (max-width: 680px) {
+  .project-chain-reaction .cr-shell { padding: 10px; gap: 8px; }
+  .project-chain-reaction .cr-header { margin: 0; }
+  .project-chain-reaction h1 { font-size: 29px; }
+  .project-chain-reaction .cr-identity > p { font-size: 14px; }
+  .project-chain-reaction .cr-machine { display: grid; }
+  .project-chain-reaction .cr-machine-topline { min-height: 0; padding: 5px 12px; }
+  .project-chain-reaction .cr-machine-status::before { content: none; }
+  .project-chain-reaction .cr-machine-status > span { margin-left: 0; }
+  .project-chain-reaction .cr-transport { grid-template-columns: minmax(0, 1fr) 127px; padding: 8px 10px 2px; gap: 5px 8px; }
+  .project-chain-reaction .cr-transport .cr-play { min-width: 88px; }
+  .project-chain-reaction .cr-scrubber-heading { gap: 4px; }
+  .project-chain-reaction .cr-workspace-actions { gap: 4px 8px; align-items: stretch; }
+  .project-chain-reaction .cr-workspace-actions button { flex: 1; padding: 6px 8px; line-height: 1.2; }
+  .project-chain-reaction .cr-motion-note { flex-basis: 100%; margin: 0; padding: 0; border: 0; background: none; line-height: 1.3; }
+  .project-chain-reaction .workspace-dialog .cr-stages { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .project-chain-reaction .workspace-dialog .cr-stages button { border-right: 1px solid var(--cr-line); border-bottom: 1px solid var(--cr-line); }
+  .project-chain-reaction .workspace-dialog .cr-stages button:nth-child(2n) { border-right: 0; }
+  .project-chain-reaction .workspace-dialog .cr-stages button:last-child { grid-column: 1 / -1; border: 0; }
+}
+@media (max-height: 520px) and (min-width: 681px) {
+  .project-chain-reaction .cr-shell { padding-block: 8px; gap: 6px; }
+  .project-chain-reaction h1 { font-size: 29px; }
+  .project-chain-reaction .cr-transport { padding-block: 4px; }
 }

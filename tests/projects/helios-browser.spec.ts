@@ -50,6 +50,40 @@ function pixels(png: Buffer) {
   return { width, height, at, gold, bright, nonBlack, raw: result };
 }
 const root = (page: Page) => page.locator('.project-helios');
+async function desk(page: Page, panel: 'observer' | 'eclipse' | 'moon' | 'journeys') {
+  if (await page.locator(`[data-h-instrument="${panel}"]`).isVisible()) return;
+  if (await page.locator('[data-h-dock]').isVisible()) await page.locator(`[data-h-panel="${panel}"]`).click();
+  else await page.locator(`.h-instrument-launchers [data-h-open="${panel}"]`).click();
+}
+async function closeDesk(page: Page) {
+  const done = page.locator('[data-h-action=close-dock]');
+  if (await done.isVisible()) await done.click();
+}
+async function timeSettings(page: Page) {
+  await closeDesk(page);
+  if (!await page.locator('[data-h-time-dialog]').isVisible()) await page.locator('.h-time-readout').click();
+}
+async function closeTime(page: Page) { await page.getByRole('button', { name: 'Close time settings', exact: true }).click(); }
+async function setUTC(page: Page, value: string) {
+  await timeSettings(page); await page.locator('#h-utc').fill(value); await page.locator('[data-h-action=set-time]').click();
+}
+async function resetObservation(page: Page) {
+  await timeSettings(page); await page.locator('[data-h-action=reset]').click();
+}
+async function oneScreen(page: Page) {
+  const actual = await page.evaluate(() => ({
+    width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight,
+    viewportWidth: innerWidth, viewportHeight: innerHeight, x: scrollX, y: scrollY,
+    stage: document.querySelector('[data-h-host]')!.getBoundingClientRect().toJSON(),
+    transport: document.querySelector('.h-time-dock')!.getBoundingClientRect().toJSON(),
+  }));
+  expect(actual.width).toBe(actual.viewportWidth);
+  expect(actual.height).toBe(actual.viewportHeight);
+  expect([actual.x, actual.y]).toEqual([0, 0]);
+  expect(actual.stage.width).toBeGreaterThan(150); expect(actual.stage.height).toBeGreaterThan(130);
+  expect(actual.stage.top).toBeGreaterThanOrEqual(0);
+  expect(actual.transport.bottom).toBeLessThanOrEqual(actual.viewportHeight);
+}
 async function ready(page: Page) {
   await page.goto('./projects/helios/');
   await expect(root(page)).toHaveAttribute('data-ready', 'true');
@@ -60,7 +94,8 @@ async function painted(page: Page) {
 }
 async function screenshot(page: Page, info: TestInfo, name: string) {
   await painted(page);
-  const buffer = await page.screenshot({ path: info.outputPath(`${name}.png`), fullPage: true });
+  await oneScreen(page);
+  const buffer = await page.screenshot({ path: info.outputPath(`${name}.png`) });
   await info.attach(name, { body: buffer, contentType: 'image/png' });
 }
 async function canvasPixels(page: Page) {
@@ -96,10 +131,10 @@ test.describe('HELIOS actual software-WebGL observatory', () => {
     expect((await canvasPixels(page)).gold).toBe(0);
     await expect(page.locator('[data-h-event-description]')).toContainText('this UTC date');
 
-    await page.locator('[data-h-study=dallas]').click();
+    await desk(page, 'journeys'); await page.locator('[data-h-study=dallas]').click();
     await expect(page.locator('[data-h-event-kind]')).toContainText('Total event · Dallas');
     await expect(page.locator('[data-h-instant]')).toHaveText('Total eclipse');
-    await page.locator('[data-h-study=annular]').click();
+    await desk(page, 'journeys'); await page.locator('[data-h-study=annular]').click();
     await expect(page.locator('[data-h-event-kind]')).toContainText('Annular event');
     await expect(page.locator('[data-h-instant]')).toHaveText('Annular eclipse');
     const ring = await canvasPixels(page);
@@ -107,12 +142,11 @@ test.describe('HELIOS actual software-WebGL observatory', () => {
     expect(ring.at(ring.width / 2, ring.height / 2).reduce((a, b) => a + b, 0)).toBeLessThan(12);
     await screenshot(page, info, 'helios-annular-desktop');
 
-    await page.locator('#h-utc').fill('2024-04-17T18:00');
-    await page.locator('[data-h-action=set-time]').click();
+    await setUTC(page, '2024-04-17T18:00');
     await expect(root(page)).toHaveAttribute('data-time', String(Date.UTC(2024, 3, 17, 18)));
     await expect(page.locator('[data-h-instant]')).toHaveText('No solar overlap');
     await expect(page.locator('[data-h-event-kind]')).toHaveText('No local event returned');
-    await page.locator('[data-h-action=moon-study]').click();
+    await desk(page, 'moon'); await page.locator('[data-h-action=moon-study]').click();
     await expect(page.locator('[data-h-instant]')).toHaveText('Waxing gibbous');
     await expect(page.locator('[data-h-instant-detail]')).toContainText('above the horizon');
     const southAngle = await page.locator('[data-h-limb-angle]').innerText();
@@ -125,7 +159,7 @@ test.describe('HELIOS actual software-WebGL observatory', () => {
     const north = await canvasPixels(page);
     expect(north.raw.equals(south.raw)).toBe(false);
     expect(north.bright).toBeGreaterThan(1500);
-    await page.locator('#h-phase').selectOption('180');
+    await desk(page, 'moon'); await page.locator('#h-phase').selectOption('180');
     await page.locator('[data-h-action=phase-next]').click();
     await expect(page.locator('[data-h-phase-name]')).toHaveText('Full Moon');
     await expect(page.locator('[data-h-phase-fraction]')).toHaveText(/99\.9%|100\.0%/);
@@ -161,10 +195,10 @@ test.describe('HELIOS actual software-WebGL observatory', () => {
       if (name === 'Saturn') await screenshot(page, info, 'helios-saturn-desktop');
     }
     expect(targets.size).toBe(8); expect(images.size).toBe(8);
-    await page.locator('[data-h-camera=ride]').click();
+    await page.locator('#h-camera-select').selectOption('ride');
     await expect(page.locator('[data-h-host] canvas')).toHaveAttribute('data-frame', /Compressed/);
     const target = await page.locator('[data-h-host] canvas').getAttribute('data-target');
-    await page.locator('#h-step').selectOption('86400');
+    await timeSettings(page); await page.locator('#h-step').selectOption('86400'); await closeTime(page);
     await page.locator('[data-h-action=step-forward]').click();
     await painted(page);
     expect(await page.locator('[data-h-host] canvas').getAttribute('data-target')).not.toBe(target);
@@ -176,7 +210,7 @@ test.describe('HELIOS actual software-WebGL observatory', () => {
     await page.locator('[data-h-action=download]').click();
     expect((await download).suggestedFilename()).toMatch(/^helios-.*\.json$/);
     await page.getByRole('button', { name: 'Close observation record', exact: true }).click();
-    await page.locator('[data-h-action=reset]').click();
+    await resetObservation(page);
     await expect(page.locator('[data-h-instant]')).toHaveText('Total eclipse');
     await page.locator('[data-h-action=keep]').click();
     await page.locator('#h-record').fill(json);
@@ -186,7 +220,7 @@ test.describe('HELIOS actual software-WebGL observatory', () => {
     await page.goto(link);
     await expect(root(page)).toHaveAttribute('data-ready', 'true');
     await expect(page.locator('[data-h-title]')).toHaveText('Neptune');
-    await page.locator('[data-h-action=reset]').click();
+    await resetObservation(page);
     await expect(page.locator('[data-h-title]')).toHaveText('Nazas, Mexico');
     const heldTime = await root(page).getAttribute('data-time');
     await page.waitForTimeout(250);
@@ -196,14 +230,14 @@ test.describe('HELIOS actual software-WebGL observatory', () => {
     expect(errors).toEqual([]);
   });
 
-  test('strict UTC, single-pointer map, horizon pointing, atomic invalid import, and stale file ownership', async ({ browser }, info) => {
-    const context = await browser.newContext({ viewport: { width: 1280, height: 1000 }, timezoneId: 'Pacific/Honolulu' });
+  test('strict UTC, single-pointer map, horizon pointing, atomic invalid import, and stale file ownership', async ({ browser, baseURL }, info) => {
+    const context = await browser.newContext({ baseURL, viewport: { width: 1280, height: 1000 }, timezoneId: 'Pacific/Honolulu' });
     const page = await context.newPage();
     await ready(page);
-    await page.locator('#h-utc').fill('2024-04-17T18:00');
-    await page.locator('[data-h-action=set-time]').click();
+    await setUTC(page, '2024-04-17T18:00');
     await expect(root(page)).toHaveAttribute('data-time', String(Date.UTC(2024, 3, 17, 18)));
-    const map = page.locator('[data-h-map]'), box = (await map.locator('svg').boundingBox())!;
+    await desk(page, 'observer');
+    const map = page.locator('[data-h-map-canvas]'), box = (await map.boundingBox())!;
     const x = Math.round(box.x + box.width * .75), y = Math.round(box.y + box.height * .25);
     const expectedLat = 90 - (y - box.y) / box.height * 180, expectedLon = (x - box.x) / box.width * 360 - 180;
     await page.mouse.click(x, y);
@@ -211,6 +245,7 @@ test.describe('HELIOS actual software-WebGL observatory', () => {
     expect(Number(await page.locator('#h-longitude').inputValue())).toBeCloseTo(expectedLon, 3);
     await map.focus(); await page.keyboard.press('ArrowLeft');
     expect(Number(await page.locator('#h-longitude').inputValue())).toBeCloseTo(expectedLon - 1, 3);
+    await page.locator('.h-optics-fields summary').click();
     await page.locator('[data-h-track=horizon]').click();
     await page.locator('#h-azimuth').fill('0'); await page.locator('#h-altitude').fill('0');
     await page.locator('[data-h-action=point]').click();
@@ -242,8 +277,8 @@ test.describe('HELIOS actual software-WebGL observatory', () => {
   });
 
   for (const width of [375, 320]) {
-    test(`mobile ${width}px controls and rendered sky remain practical`, async ({ browser }, info) => {
-      const context = await browser.newContext({ viewport: { width, height: 812 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
+    test(`mobile ${width}px controls and rendered sky remain practical`, async ({ browser, baseURL }, info) => {
+      const context = await browser.newContext({ baseURL, viewport: { width, height: 812 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
       const page = await context.newPage();
       await ready(page);
       await expect(root(page)).toHaveAttribute('data-playing', 'false');
@@ -251,20 +286,19 @@ test.describe('HELIOS actual software-WebGL observatory', () => {
       const visual = await canvasPixels(page);
       expect(visual.bright).toBeGreaterThan(300);
       await screenshot(page, info, `helios-totality-mobile-${width}`);
-      await page.locator('[data-h-action=observe-pane]').click();
+      await oneScreen(page);
       await expect(page.locator('#h-site')).toBeVisible();
       await page.locator('#h-site').selectOption('6');
       await page.locator('[data-h-view=sky]').click();
       await expect(page.locator('[data-h-instant]')).toHaveText('Below the horizon');
       await page.locator('[data-h-view=planet]').click();
-      await page.locator('[data-h-action=observe-pane]').click();
       await page.locator('#h-body').selectOption('Saturn');
       await expect(page.locator('[data-h-title]')).toHaveText('Saturn');
       await screenshot(page, info, `helios-planet-mobile-${width}`);
-      await page.locator('[data-h-action=observe-pane]').click();
-      await expect(page.locator('#h-body')).toBeVisible();
+      await desk(page, 'observer');
+      await expect(page.locator('[data-h-body-deck]')).toBeVisible();
       await screenshot(page, info, `helios-observe-mobile-${width}`);
-      await page.locator('[data-h-action=reset]').click();
+      await resetObservation(page);
       await expect(page.locator('[data-h-instant]')).toHaveText('Total eclipse');
       await page.locator('[data-h-action=keep]').click();
       await expect(page.locator('[data-h-keep-dialog]')).toBeVisible();
@@ -296,11 +330,10 @@ test.describe('HELIOS actual software-WebGL observatory', () => {
       { site: '2', from: '2012-05-20T12:00', day: '2012-05-21', peak: '2012-05-21T01:35:53Z', kind: 'Annular eclipse', geometry: 'annular', visible: true },
     ]) {
       await page.locator('#h-site').selectOption(example.site);
-      await page.locator('#h-utc').fill(example.from);
-      await page.locator('[data-h-action=set-time]').click();
+      await setUTC(page, example.from);
       await expect(page.locator('[data-h-event-day]')).toHaveText(example.from.slice(0, 10));
       await expect(page.locator('[data-h-event-kind]')).not.toHaveText('Current-date circumstances');
-      await page.locator('[data-h-action=next-eclipse]').click();
+      await desk(page, 'eclipse'); await page.locator('[data-h-action=next-eclipse]').click();
       await expect(page.locator('[data-h-event-day]')).toHaveText(example.day);
       await expect(page.locator('[data-h-instant]')).toHaveText(example.kind);
       await expect(root(page)).toHaveAttribute('data-eclipse', example.geometry);
@@ -311,13 +344,13 @@ test.describe('HELIOS actual software-WebGL observatory', () => {
       } else {
         await expect(root(page)).toHaveAttribute('data-visibility', 'below');
         expect((await canvasPixels(page)).gold).toBe(0);
-        await page.locator('[data-h-contact=C1]').click();
+        await desk(page, 'eclipse'); await page.locator('[data-h-contact=C1]').click();
         await page.locator('[data-h-action=step-forward]').click();
         await expect(page.locator('[data-h-instant]')).toHaveText('Partial eclipse');
         await expect(page.locator('[data-h-measure-one]')).toHaveText('Sun ALT 11.17°');
         expect((await canvasPixels(page)).gold).toBeGreaterThan(800);
         const heldTime = await root(page).getAttribute('data-time');
-        await page.locator('[data-h-action=next-eclipse]').click();
+        await desk(page, 'eclipse'); await page.locator('[data-h-action=next-eclipse]').click();
         await expect(page.locator('[data-h-status]')).toContainText('within the next five years');
         await expect(root(page)).toHaveAttribute('data-time', heldTime!);
         await expect(page.locator('[data-h-event-day]')).toHaveText(example.day);
@@ -353,10 +386,9 @@ test.describe('HELIOS actual software-WebGL observatory', () => {
       window.Worker = DelayedWorker;
     });
     const selectedTime = Date.UTC(2023, 9, 14, 18);
-    await page.locator('#h-utc').fill('2023-10-14T18:00');
-    await page.locator('[data-h-action=set-time]').click();
+    await setUTC(page, '2023-10-14T18:00');
     await expect(page.locator('html')).toHaveAttribute('data-h-pending-workers', '1');
-    await page.locator('[data-h-action=next-eclipse]').click();
+    await desk(page, 'eclipse'); await page.locator('[data-h-action=next-eclipse]').click();
     await page.locator('[data-h-view=system]').click();
     await expect(page.locator('html')).toHaveAttribute('data-h-pending-workers', '0');
     await expect(root(page)).toHaveAttribute('data-time', String(selectedTime));
@@ -429,7 +461,7 @@ test.describe('HELIOS actual software-WebGL observatory', () => {
     await page.locator('[data-h-action=center]').click();
     await expect(page.locator('#h-fov')).toHaveValue('1.6');
     const start = Number(await root(page).getAttribute('data-time'));
-    await page.locator('#h-rate').selectOption('30');
+    await timeSettings(page); await page.locator('#h-rate').selectOption('30'); await closeTime(page);
     await page.getByRole('button', { name: 'Run time', exact: true }).click();
     await expect.poll(async () => Number(await root(page).getAttribute('data-time'))).toBeGreaterThan(start + 1000);
     await page.evaluate(() => {
@@ -441,7 +473,7 @@ test.describe('HELIOS actual software-WebGL observatory', () => {
     const held = await root(page).getAttribute('data-time');
     await page.waitForTimeout(250);
     await expect(root(page)).toHaveAttribute('data-time', held!);
-    await page.locator('[data-h-action=reset]').click();
+    await resetObservation(page);
     await expect(page.locator('[data-h-instant]')).toHaveText('Total eclipse');
     const initialPeak = Number(await root(page).getAttribute('data-time'));
     await page.locator('[data-h-action=next-eclipse]').click();

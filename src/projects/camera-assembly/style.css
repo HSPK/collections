@@ -1,4 +1,5 @@
 .project-camera-assembly {
+  --workspace-paper: #f2ece0;
   --ca-plum: #291f30;
   --ca-paper: #f2ece0;
   --ca-ink: #322839;
@@ -240,4 +241,77 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .project-camera-assembly * { scroll-behavior: auto; }
+}
+
+.project-camera-assembly[data-workspace="true"] {
+  height: 100dvh; min-height: 0; padding: 12px clamp(10px, 2.5vw, 36px);
+  display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 10px;
+}
+.project-camera-assembly .ca-header { width: 100%; margin: 0 auto; }
+.project-camera-assembly .ca-exhibit { grid-template-columns: minmax(0, 1fr); width: 100%; min-height: 0; }
+.project-camera-assembly .ca-viewer { min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto auto; }
+.project-camera-assembly .ca-viewport { height: 100%; min-height: 0; }
+.project-camera-assembly .ca-views { padding: 2px 16px; gap: 6px; }
+.project-camera-assembly .ca-views button { min-height: 44px; font-size: 14px; }
+.project-camera-assembly .ca-timeline { padding: 8px 16px 2px; }
+.project-camera-assembly .ca-transport { margin-bottom: 4px; }
+.project-camera-assembly .ca-scrub-label,
+.project-camera-assembly .ca-speed,
+.project-camera-assembly .ca-time,
+.project-camera-assembly .ca-scene-foot,
+.project-camera-assembly .ca-view-name,
+.project-camera-assembly .ca-phase-title,
+.project-camera-assembly .ca-stage-note,
+.project-camera-assembly .ca-status,
+.project-camera-assembly .ca-material,
+.project-camera-assembly .ca-materials,
+.project-camera-assembly .ca-clear,
+.project-camera-assembly .ca-footer { font-size: 14px; }
+.project-camera-assembly .ca-workspace-actions { width: 100%; max-width: 1510px; margin: 0 auto; display: flex; gap: 8px; padding-right: 56px; }
+.project-camera-assembly .ca-workspace-actions button {
+  min-height: 44px; padding: 8px 18px; border: 1px solid #b5a291; border-radius: 3px;
+  background: #f8f3e9; color: var(--ca-ink); font-size: 14px;
+}
+.project-camera-assembly .ca-workspace-actions button:hover { background: #e8ddce; }
+.project-camera-assembly .workspace-dialog-heading > button { min-height: 44px; }
+.project-camera-assembly .workspace-dialog .ca-index { padding: 0; display: block; }
+.project-camera-assembly .workspace-dialog .ca-parts button { min-height: 64px; font-size: 14px; }
+.project-camera-assembly .workspace-dialog .ca-part-detail { min-height: 0; margin-top: 16px; }
+.project-camera-assembly .workspace-dialog .ca-chapters { margin: 0; }
+.project-camera-assembly .workspace-dialog .ca-chapters button { min-height: 54px; color: var(--ca-ink); font-size: 14px; }
+.project-camera-assembly .workspace-dialog .ca-chapters button span { color: #80664e; }
+.project-camera-assembly .workspace-dialog .ca-chapters button[aria-current] { background: #e8d4b0; }
+.project-camera-assembly .workspace-dialog .ca-stage-note { color: #665563; margin-block: 16px; }
+.project-camera-assembly .workspace-dialog .ca-intro { margin-top: 16px; }
+.project-camera-assembly .workspace-dialog .ca-footer { display: block; }
+.project-camera-assembly .workspace-dialog .ca-footer > p:last-child { text-align: left; margin-top: 12px; max-width: none; }
+@media (max-width: 540px) {
+  .project-camera-assembly[data-workspace="true"] { padding: 8px 10px; gap: 8px; }
+  .project-camera-assembly h1 { font-size: 31px; }
+  .project-camera-assembly .ca-identity .ca-eyebrow { margin-bottom: 3px; }
+  .project-camera-assembly .ca-scene-heading { top: 12px; left: 12px; }
+  .project-camera-assembly .ca-scene-foot { bottom: 8px; left: 12px; right: 12px; }
+  .project-camera-assembly .ca-views { padding: 0 6px; gap: 1px; }
+  .project-camera-assembly .ca-views button { padding-inline: 6px; }
+  .project-camera-assembly .ca-timeline { padding: 6px 8px 0; }
+  .project-camera-assembly .ca-transport { gap: 4px; }
+  .project-camera-assembly .ca-play { min-width: 74px; }
+  .project-camera-assembly .ca-transport button { padding-inline: 8px; }
+  .project-camera-assembly .ca-speed { gap: 4px; }
+  .project-camera-assembly .ca-speed select { width: 68px; min-width: 68px; }
+  .project-camera-assembly .ca-workspace-actions button { flex: 1; padding-inline: 8px; }
+  .project-camera-assembly .workspace-dialog .ca-chapters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-height: 520px) and (min-width: 541px) {
+  .project-camera-assembly[data-workspace="true"] { padding-block: 6px; gap: 4px; }
+  .project-camera-assembly .ca-identity .ca-eyebrow { margin-bottom: 0; }
+  .project-camera-assembly h1 { font-size: 29px; }
+  .project-camera-assembly .ca-scene-heading { top: 8px; left: 14px; }
+  .project-camera-assembly .ca-scene-foot { bottom: 6px; left: 14px; }
+  .project-camera-assembly .ca-timeline { padding-top: 4px; }
+}
+
+@media (max-width: 540px), (max-height: 520px) {
+  .project-camera-assembly .ca-scrub-label { padding-right: 56px; }
+  .project-camera-assembly [data-ca-progress] { width: calc(100% - 56px); }
 }

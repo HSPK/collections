@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { expectWorkspaceViewport, visibleControlProblems } from '../helpers/workspace';
 import type { ProjectContext, ProjectInstance } from '../../src/core/types';
 import { BRUSH_MODES, CORE_RATIO, MAX_PATCHES, OBJECTS } from '../../src/projects/time-brush/data';
 import { fieldDistance, motionAt, patchWeight, sampleField, TimeScene, wrap } from '../../src/projects/time-brush/engine';
@@ -96,6 +97,7 @@ test('Time Brush edits while paused, rewinds below zero, groups pointer strokes,
   await expect(count).toHaveAttribute('data-count', '3');
   await root.getByRole('button', { name: 'Clear patches', exact: true }).click();
   await expect(count).toHaveAttribute('data-count', '0');
+  await root.getByRole('tab', { name: 'Clock', exact: true }).click();
   await root.getByLabel('Watch an object', { exact: true }).selectOption('spindle');
   await root.getByRole('button', { name: 'Aim at this object', exact: true }).click();
   await canvas.focus();
@@ -120,6 +122,7 @@ test('Time Brush edits while paused, rewinds below zero, groups pointer strokes,
   const negativeTime = await clock.getAttribute('data-value');
   await root.getByRole('button', { name: 'Freeze brush', exact: true }).click();
   await root.getByRole('button', { name: 'Aim at this object', exact: true }).click();
+  await root.getByRole('tab', { name: 'Brush', exact: true }).click();
   await root.getByRole('button', { name: 'Stamp Freeze patch', exact: true }).click();
   await expect(rate).toHaveAttribute('data-value', '0');
   await expect(clock).toHaveAttribute('data-value', negativeTime!);
@@ -146,12 +149,14 @@ test('Time Brush edits while paused, rewinds below zero, groups pointer strokes,
   await page.mouse.up();
   await expect(count).toHaveAttribute('data-count', afterCancel!);
   await expect(root).not.toHaveClass(/tb-painting/);
+  await root.getByRole('tab', { name: 'Clock', exact: true }).click();
   await root.getByLabel('Watch an object', { exact: true }).selectOption('spindle');
   await expect(clock).toHaveAttribute('data-value', negativeTime!);
   await root.getByRole('button', { name: 'Reset scene', exact: true }).click();
   await expect(root).toHaveAttribute('data-paused', 'true');
   await expect(count).toHaveAttribute('data-count', '3');
   await expect(clock).toHaveAttribute('data-value', '0');
+  await root.getByRole('tab', { name: 'Brush', exact: true }).click();
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: test.info().outputPath('time-brush-desktop.png'), fullPage: true });
 
@@ -252,6 +257,7 @@ test('Time Brush fits a 375px touch screen and provides native aim-and-stamp con
     await root.getByLabel('Brush diameter', { exact: true }).press('End');
     await expect(root.locator('[data-brush-size]')).toHaveText('48%');
 
+    await root.getByRole('tab', { name: 'Discover', exact: true }).click();
     await root.getByRole('button', { name: /Send a train backward/ }).click();
     await expect(root).toHaveAttribute('data-watch', 'train-1');
     await expect(root.locator('[data-watch-rate]')).toHaveAttribute('data-value', '-1');
@@ -259,10 +265,50 @@ test('Time Brush fits a 375px touch screen and provides native aim-and-stamp con
     await root.getByRole('button', { name: 'Reset scene', exact: true }).click();
     await expect(count).toHaveAttribute('data-count', '3');
     await expect(root).toHaveAttribute('data-paused', 'true');
+    await root.getByRole('tab', { name: 'Brush', exact: true }).click();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.screenshot({ path: test.info().outputPath('time-brush-mobile.png'), fullPage: true });
   } finally {
     await context.close();
+  }
+});
+
+test('Time Brush keeps the field and dock inside each viewport without resetting clocks', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('./projects/time-brush/');
+  const root = page.locator('.project-time-brush');
+  for (const [width, height] of [[1440, 900], [1280, 720], [375, 812], [320, 640], [768, 480]]) {
+    await page.setViewportSize({ width, height });
+    await expect(root).toHaveAttribute('data-workspace', 'true');
+    await expect.poll(() => root.evaluate(element => Math.round(element.getBoundingClientRect().height))).toBe(height);
+    await root.getByRole('tab', { name: 'Clock', exact: true }).click();
+    await expect(root.getByLabel('Watch an object', { exact: true })).toBeVisible();
+    await root.getByRole('tab', { name: 'Discover', exact: true }).click();
+    await root.getByRole('button', { name: /Send a train backward/ }).click();
+    await expect(root.locator('[data-watch-rate]')).toHaveAttribute('data-value', '-1');
+    await expect(root.getByRole('tab', { name: 'Clock', exact: true })).toHaveAttribute('aria-selected', 'true');
+    await root.getByRole('tab', { name: 'Brush', exact: true }).click();
+    await root.getByRole('button', { name: 'Reset scene', exact: true }).click();
+    const layout = await root.evaluate(element => {
+      const canvas = element.querySelector('canvas')!;
+      const box = canvas.getBoundingClientRect();
+      return {
+        documentHeight: document.documentElement.scrollHeight,
+        documentWidth: document.documentElement.scrollWidth,
+        rootBottom: element.getBoundingClientRect().bottom,
+        canvasHeight: box.height,
+        bitmapWidth: canvas.width,
+        expectedBitmapWidth: Math.round(box.width * Math.min(devicePixelRatio, 2)),
+      };
+    });
+    expect(layout.documentHeight).toBeLessThanOrEqual(height);
+    expect(layout.documentWidth).toBeLessThanOrEqual(width);
+    expect(layout.rootBottom).toBeLessThanOrEqual(height);
+    expect(layout.canvasHeight).toBeGreaterThan(120);
+    expect(layout.bitmapWidth).toBe(layout.expectedBitmapWidth);
+    await expectWorkspaceViewport(page, width, height);
+    expect(await visibleControlProblems(root)).toEqual([]);
+    await page.screenshot({ path: test.info().outputPath(`time-brush-${width}x${height}.png`) });
   }
 });

@@ -157,6 +157,10 @@ async function openRadio(page: Page, hash = ''): Promise<void> {
   await expect(page.getByRole('heading', { name: 'Radio 404', exact: true })).toBeVisible();
 }
 
+async function radioPane(page: Page, name: 'Receiver' | 'Stations' | 'Notebook' | 'Guide'): Promise<void> {
+  await page.getByRole('tab', { name, exact: true }).click();
+}
+
 test('Radio 404 opens substantial station notebooks and history without creating audio', async ({ page }) => {
   await probeAudio(page);
   await openRadio(page);
@@ -170,6 +174,7 @@ test('Radio 404 opens substantial station notebooks and history without creating
     { id: 'orchard', name: 'Salt Orchard', title: 'A windbreak made of patient trees.', program: 'Brushwork', note: 'Bell making' },
   ];
   for (const station of expected) {
+    await radioPane(page, 'Stations');
     await page.locator(`[data-radio-station="${station.id}"]`).click();
     await expect(page.locator('[data-radio-name]')).toHaveText(station.name);
     await expect(page.locator(`[data-radio-station="${station.id}"]`)).toHaveAttribute('aria-pressed', 'true');
@@ -189,6 +194,7 @@ test('Radio 404 opens substantial station notebooks and history without creating
   await expect(page.locator('[data-radio-name]')).toHaveText('Low Orbit Shipping');
   await page.goForward();
   await expect(page.locator('[data-radio-name]')).toHaveText('Salt Orchard');
+  await radioPane(page, 'Receiver');
   await page.getByRole('button', { name: 'Next station', exact: true }).click();
   await expect(page.locator('[data-radio-name]')).toHaveText('Midnight Laundromat');
   await page.getByRole('button', { name: 'Previous station', exact: true }).click();
@@ -223,17 +229,21 @@ for (const legacy of [false, true]) {
     await expect.poll(() => page.evaluate(() => window.__radioProbe.masterValues[0])).toBeGreaterThan(0.24);
     expect((await page.evaluate(() => window.__radioProbe)).masterValues[0]).toBeLessThanOrEqual(0.28001);
 
+    await radioPane(page, 'Stations');
     await page.locator('[data-radio-station="orbit"]').click();
     await expect(page.locator('[data-radio-status]')).toContainText('Low Orbit Shipping');
     await expect.poll(() => page.evaluate(() => window.__radioProbe.activeNoise)).toBe(0);
     expect((await page.evaluate(() => window.__radioProbe)).activeTones).toContain(86);
+    await radioPane(page, 'Stations');
     await page.locator('[data-radio-station="library"]').click();
     await expect.poll(() => page.evaluate(() => window.__radioProbe.activeTones.some((frequency) => Math.abs(frequency - 174.6) < 0.01))).toBe(true);
     await expect.poll(() => page.evaluate(() => window.__radioProbe.activeNoise)).toBeGreaterThan(0);
+    await radioPane(page, 'Stations');
     await page.locator('[data-radio-station="orchard"]').click();
     await expect(page.locator('[data-radio-status]')).toContainText('Salt Orchard');
     await expect.poll(() => page.evaluate(() => window.__radioProbe.activeNoise)).toBeGreaterThan(0);
 
+    await radioPane(page, 'Receiver');
     for (let index = 0; index < 12; index++) await page.getByRole('button', { name: 'Next station', exact: true }).click();
     const retuned = await page.evaluate(() => window.__radioProbe);
     expect(retuned.states).toEqual(['running']);
@@ -293,13 +303,21 @@ test('Radio 404 stops on hiding, closes on exit, and never resumes itself after 
   expect(await page.evaluate(() => Number(sessionStorage.getItem('radio-test-closes')))).toBeGreaterThanOrEqual(2);
 });
 
-test('Radio 404 keeps its notebook usable when Web Audio is unavailable', async ({ page }) => {
+test('Radio 404 keeps its notebook usable when Web Audio is unavailable', async ({ page }, testInfo) => {
+  await page.setViewportSize({ width: 320, height: 640 });
   await probeAudio(page, { unavailable: true });
   await openRadio(page);
   await expect(page.locator('[data-radio-error]')).toContainText('Web Audio is unavailable');
   await expect(page.getByRole('button', { name: 'Listen', exact: true })).toBeDisabled();
+  const tuner = (await page.locator('.radio-tuner').boundingBox())!;
+  const footer = (await page.locator('.radio-receiver-footer').boundingBox())!;
+  expect(tuner.y + tuner.height).toBeLessThanOrEqual(footer.y);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(640);
+  await page.screenshot({ path: testInfo.outputPath('radio-unavailable-mobile.png'), fullPage: true });
+  await radioPane(page, 'Stations');
   await page.locator('[data-radio-station="orchard"]').click();
   await expect(page.getByRole('heading', { name: 'A windbreak made of patient trees.', exact: true })).toBeVisible();
+  await expect(page.locator('.radio-notebook-sketch')).toBeVisible();
   await expect(page.locator('.radio-programs li')).toHaveCount(3);
   expect((await page.evaluate(() => window.__radioProbe)).states).toEqual([]);
 });
@@ -311,6 +329,7 @@ test('Radio 404 reports a blocked audio start instead of claiming to play', asyn
   await expect(page.locator('[data-radio-error]')).toContainText('The audio output was blocked for this test.');
   await expect(page.locator('.project-radio')).toHaveAttribute('data-radio-mode', 'error');
   await expect(page.getByRole('button', { name: 'Listen', exact: true })).toBeEnabled();
+  await radioPane(page, 'Stations');
   await page.locator('[data-radio-station="library"]').click();
   await expect(page.getByRole('heading', { name: 'Please return the tide table.', exact: true })).toBeVisible();
   expect((await page.evaluate(() => window.__radioProbe)).starts).toBe(0);
@@ -334,6 +353,7 @@ test('Radio 404 watches interruptions after replacing a closed audio device', as
   await expect(page.locator('[data-radio-status]')).toContainText('Audio was interrupted');
   expect((await page.evaluate(() => window.__radioProbe)).activeSources).toBe(0);
   expect((await page.evaluate(() => window.__radioProbe)).schedulers).toBe(0);
+  await radioPane(page, 'Stations');
   await page.locator('[data-radio-station="library"]').click();
   expect((await page.evaluate(() => window.__radioProbe)).states).toEqual(['closed', 'suspended']);
 });
@@ -367,10 +387,12 @@ test('Radio 404 cancels delayed resumes after Stop and close without releasing l
   expect((await page.evaluate(() => window.__radioProbe)).schedulers).toBe(0);
   await page.getByRole('button', { name: 'Listen', exact: true }).click();
   await expect.poll(() => page.evaluate(() => window.__radioResumeGate.length)).toBe(1);
+  await radioPane(page, 'Stations');
   await page.locator('[data-radio-station="orbit"]').click();
   await page.evaluate(() => { for (const release of window.__radioResumeGate.splice(0)) release(); });
   await expect(page.locator('.project-radio')).toHaveAttribute('data-radio-mode', 'playing');
   await expect(page.locator('[data-radio-status]')).toContainText('Low Orbit Shipping');
+  await radioPane(page, 'Receiver');
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
   await expect(page.locator('.project-radio')).toHaveAttribute('data-radio-mode', 'off');
   expect((await page.evaluate(() => window.__radioProbe)).activeSources).toBe(0);
@@ -406,4 +428,77 @@ test('Radio 404 fits 375px and its sliders and audio controls work from the keyb
   await expect(page.locator('.project-radio')).toHaveAttribute('data-radio-mode', 'off');
   expect((await page.evaluate(() => window.__radioProbe)).activeSources).toBe(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
+for (const viewport of [
+  { width: 1440, height: 900 }, { width: 1280, height: 720 },
+  { width: 375, height: 812 }, { width: 320, height: 640 }, { width: 768, height: 480 },
+]) {
+  test(`Radio 404 bounded workspace ${viewport.width}x${viewport.height}`, async ({ page }, testInfo) => {
+    await page.setViewportSize(viewport);
+    await probeAudio(page);
+    await openRadio(page);
+    await expect(page.locator('.project-radio')).toHaveAttribute('data-workspace', 'true');
+    const noDocumentScroll = async () => {
+      expect(await page.evaluate(() => ({
+        width: document.documentElement.scrollWidth,
+        height: document.documentElement.scrollHeight,
+        x: window.scrollX, y: window.scrollY,
+      }))).toEqual({ ...viewport, x: 0, y: 0 });
+    };
+    await noDocumentScroll();
+    for (const selector of ['[data-radio-listen]', '[data-radio-stop]', '[data-radio-tuning]', '[data-radio-volume]', '[data-radio-copy]', '.radio-receiver .radio-scene']) {
+      const bounds = (await page.locator(selector).boundingBox())!;
+      expect(bounds.y, selector).toBeGreaterThanOrEqual(0);
+      expect(bounds.y + bounds.height, selector).toBeLessThanOrEqual(viewport.height);
+    }
+    const receiverTop = (await page.locator('.radio-receiver-top').boundingBox())!;
+    const tuner = (await page.locator('.radio-tuner').boundingBox())!;
+    const scene = (await page.locator('.radio-receiver .radio-scene').boundingBox())!;
+    const footer = (await page.locator('.radio-receiver-footer').boundingBox())!;
+    expect(tuner.y).toBeGreaterThanOrEqual(receiverTop.y + receiverTop.height);
+    expect(tuner.y + tuner.height).toBeLessThanOrEqual(footer.y);
+    expect(scene.y + scene.height).toBeLessThanOrEqual(footer.y);
+    await page.screenshot({ path: testInfo.outputPath(`radio-${viewport.width}x${viewport.height}.png`), fullPage: true });
+    await radioPane(page, 'Stations');
+    await page.locator('[data-radio-station="library"]').click();
+    await expect(page.getByRole('tab', { name: 'Notebook', exact: true })).toHaveAttribute('aria-selected', 'true');
+    await expect(page.getByRole('heading', { name: 'Please return the tide table.', exact: true })).toBeVisible();
+    await page.getByRole('heading', { name: 'Humidity ledger', exact: true }).scrollIntoViewIfNeeded();
+    await noDocumentScroll();
+    if (viewport.width === 320) await page.screenshot({ path: testInfo.outputPath('radio-notebook-mobile.png'), fullPage: true });
+    await radioPane(page, 'Guide');
+    await expect(page.getByRole('heading', { name: 'Nothing is coming down the antenna.', exact: true })).toBeVisible();
+    await noDocumentScroll();
+    expect((await page.evaluate(() => window.__radioProbe)).states).toEqual([]);
+  });
+}
+
+test('Radio 404 keeps listening through notebook panes, slider keys and the floating menu', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 640 });
+  await probeAudio(page);
+  await openRadio(page);
+  await page.getByRole('button', { name: 'Listen', exact: true }).click();
+  await expect(page.locator('.project-radio')).toHaveAttribute('data-radio-mode', 'playing');
+  const resumes = (await page.evaluate(() => window.__radioProbe)).resumes;
+  await radioPane(page, 'Notebook');
+  await radioPane(page, 'Guide');
+  await radioPane(page, 'Receiver');
+  await page.getByRole('slider', { name: 'Tune a station', exact: false }).focus();
+  await page.keyboard.press('End');
+  await expect(page.locator('[data-radio-name]')).toHaveText('Salt Orchard');
+  await expect(page.getByRole('tab', { name: 'Receiver', exact: true })).toHaveAttribute('aria-selected', 'true');
+  await page.getByRole('slider', { name: 'Volume', exact: true }).focus();
+  await page.keyboard.press('Home');
+  await expect(page.locator('[data-radio-volume-output]')).toHaveText('Muted');
+  await page.getByRole('button', { name: 'Collection menu', exact: true }).click();
+  await expect(page.getByRole('link', { name: 'Back to index', exact: true })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('button', { name: 'Collection menu', exact: true })).toBeFocused();
+  await expect(page.locator('.project-radio')).toHaveAttribute('data-radio-mode', 'playing');
+  expect((await page.evaluate(() => window.__radioProbe)).resumes).toBe(resumes);
+  expect((await page.evaluate(() => window.__radioProbe)).states).toEqual(['running']);
+  await page.getByRole('button', { name: 'Stop', exact: true }).click();
+  await expect.poll(() => page.evaluate(() => window.__radioProbe.activeSources)).toBe(0);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(640);
 });

@@ -585,6 +585,7 @@ test.describe('RELAY pure model: useful executable presets', () => {
   });
 
   async function editAndLoad(page: Page, source: string): Promise<void> {
+    if (await page.locator('.relay-mobile-tabs').isVisible()) await page.locator('[data-relay-pane="source"]').click();
     await page.locator('#relay-source').fill(source);
     await expect(page.locator('[data-relay-sync]')).toHaveText('DRAFT / NOT LOADED');
     await page.locator('[data-relay-action="assemble"]').click();
@@ -596,12 +597,42 @@ test.describe('RELAY pure model: useful executable presets', () => {
     for (let index = 0; index < count; index += 1) await page.locator('[data-relay-action="step"]').click();
   }
 
+  async function openInspector(page: Page, pane: 'output' | 'memory' | 'trace' | 'guide'): Promise<void> {
+    await page.locator(await page.locator('.relay-mobile-tabs').isVisible()
+      ? `[data-relay-pane="${pane}"]` : `[data-relay-inspector-tabs] [data-workspace-tab="${pane}"]`).click();
+  }
+
+  async function expectViewport(page: Page): Promise<void> {
+    const sizes = await page.evaluate(() => {
+      const root = document.querySelector<HTMLElement>('.project-relay')!;
+      return {
+        width: innerWidth, height: innerHeight,
+        documentWidth: document.documentElement.scrollWidth, documentHeight: document.documentElement.scrollHeight,
+        bodyWidth: document.body.scrollWidth, bodyHeight: document.body.scrollHeight,
+        rootWidth: root.scrollWidth, rootHeight: root.scrollHeight,
+        bodyOverflow: getComputedStyle(document.body).overflow,
+        scrollX, scrollY,
+      };
+    });
+    expect(sizes.documentWidth).toBeLessThanOrEqual(sizes.width);
+    expect(sizes.documentHeight).toBeLessThanOrEqual(sizes.height);
+    expect(sizes.bodyWidth).toBeLessThanOrEqual(sizes.width);
+    expect(sizes.bodyHeight).toBeLessThanOrEqual(sizes.height);
+    expect(sizes.rootWidth).toBeLessThanOrEqual(sizes.width);
+    expect(sizes.rootHeight).toBeLessThanOrEqual(sizes.height);
+    expect(sizes.bodyOverflow).not.toMatch(/hidden|clip/);
+    expect([sizes.scrollX, sizes.scrollY]).toEqual([0, 0]);
+    for (const selector of ['.relay-transport', '[data-relay-cycles]', '.relay-message']) {
+      await expect(page.locator(selector)).toBeInViewport({ ratio: 1 });
+    }
+  }
+
   test.describe('RELAY browser workbench', () => {
     let errors: string[];
     test.beforeEach(async ({ page }) => {
       errors = [];
       page.on('pageerror', (error) => errors.push(error.message));
-      await page.goto('/projects/relay/');
+      await page.goto('./projects/relay/');
       await expect(page.locator('[data-project-preview]')).toBeVisible();
       await expect(page.locator('[data-relay-status]')).toHaveText('Ready');
     });
@@ -619,6 +650,7 @@ test.describe('RELAY pure model: useful executable presets', () => {
       await steps(page, 1);
       await expect(page.locator('[data-relay-event-title]')).toHaveText('CALL 0x02');
       await expect(page.locator('[data-relay-pc]')).toHaveText('0002');
+      await openInspector(page, 'memory');
       await page.getByRole('tab', { name: 'Stack', exact: true }).click();
       await expect(page.locator('.relay-stack-list')).toContainText('0001');
       await steps(page, 5);
@@ -685,6 +717,7 @@ test.describe('RELAY pure model: useful executable presets', () => {
       await expect(page.locator('[data-relay-status]')).toHaveText('Breakpoint');
       await expect(page.locator('[data-relay-cycles]')).toHaveText('000003');
       await expect(page.locator('[data-relay-reg-hex="0"]')).toHaveText('02');
+      await openInspector(page, 'memory');
       await page.getByRole('tab', { name: 'Program ROM', exact: true }).click();
       const romBreakpoint = page.getByRole('button', { name: 'Remove breakpoint at PC 0001', exact: true });
       await expect(romBreakpoint).toHaveAttribute('aria-pressed', 'true');
@@ -754,10 +787,12 @@ test.describe('RELAY pure model: useful executable presets', () => {
       await page.locator('[data-relay-action="reverse"]').click();
       await expect(page.locator('[data-relay-byte="64"]')).toHaveText('00');
       await page.locator('#relay-source').fill('; keep this draft\nMOV R0, 99');
+      await page.locator('[data-relay-resource="programs"]').click();
       await page.locator('[data-relay-load="fibonacci"]').click();
       await expect(page.locator('.relay-replace-dialog')).toBeVisible();
       await page.locator('[data-relay-action="replace-cancel"]').click();
       await expect(page.locator('#relay-source')).toHaveValue('; keep this draft\nMOV R0, 99');
+      await page.locator('[data-relay-resource="programs"]').click();
       await page.locator('[data-relay-load="fibonacci"]').click();
       await page.locator('[data-relay-action="replace-confirm"]').click();
       await expect(page.locator('#relay-source')).toHaveValue(presets[1].source);
@@ -774,6 +809,7 @@ test.describe('RELAY pure model: useful executable presets', () => {
       await steps(page, 2);
       await page.getByRole('button', { name: 'Set breakpoint at line 3', exact: true }).click();
       await page.locator('#relay-source').fill('; unsaved draft\nMOV R0, 17\nHALT');
+      await page.locator('[data-relay-resource="files"]').click();
       const assemblyDownload = page.waitForEvent('download');
       await page.locator('[data-relay-action="export-asm"]').click();
       const assembly = await assemblyDownload;
@@ -794,6 +830,7 @@ test.describe('RELAY pure model: useful executable presets', () => {
       expect(imported.machine.cpu.ram[224]).toBe(128);
       expect(imported.machine.breakpoints).toEqual([2]);
       expect(imported.draftSource).toBe('; unsaved draft\nMOV R0, 17\nHALT');
+      await page.getByRole('button', { name: 'Close Project files', exact: true }).click();
       await page.locator('[data-relay-action="reset"]').click();
       await page.locator('[data-relay-file]').setInputFiles({ name: 'restored.json', mimeType: 'application/json', buffer: Buffer.from(exported) });
       await expect(page.locator('[data-relay-message]')).toContainText('Project imported at cycle 2');
@@ -801,6 +838,7 @@ test.describe('RELAY pure model: useful executable presets', () => {
       await expect(page.locator('[data-relay-sync]')).toHaveText('DRAFT / NOT LOADED');
       await expect(page.locator('.relay-pixel-on')).toHaveCount(1);
       await expect(page.locator('[data-relay-action="reverse"]')).toBeDisabled();
+      await openInspector(page, 'memory');
       await page.getByRole('tab', { name: 'Program ROM', exact: true }).click();
       await expect(page.getByRole('button', { name: 'Remove breakpoint at PC 0002', exact: true })).toHaveAttribute('aria-pressed', 'true');
       await page.locator('[data-relay-file]').setInputFiles({ name: 'invalid.json', mimeType: 'application/json', buffer: Buffer.from(exported.replace('"relay-8-v1"', '"unsupported-isa"')) });
@@ -821,6 +859,7 @@ test.describe('RELAY pure model: useful executable presets', () => {
       await expect(page.locator('[data-relay-cycles]')).toHaveText('000001');
       await page.keyboard.press('ArrowLeft');
       await expect(page.locator('[data-relay-cycles]')).toHaveText('000000');
+      await openInspector(page, 'memory');
       await page.getByRole('tab', { name: 'Data RAM', exact: true }).focus();
       await page.keyboard.press('ArrowRight');
       await expect(page.getByRole('tab', { name: 'Program ROM', exact: true })).toBeFocused();
@@ -831,7 +870,7 @@ test.describe('RELAY pure model: useful executable presets', () => {
     });
 
     test('desktop visual review: loaded instrument, genuine bus activity, no page overflow', async ({ page }, testInfo) => {
-      await page.setViewportSize({ width: 1440, height: 1120 });
+      await page.setViewportSize({ width: 1440, height: 900 });
       await page.evaluate(() => window.scrollTo(0, 0));
       await page.screenshot({ path: testInfo.outputPath('relay-desktop-arrival.png') });
       await steps(page, 7);
@@ -839,9 +878,12 @@ test.describe('RELAY pure model: useful executable presets', () => {
       await expect(page.locator('.relay-wire-active')).not.toHaveCount(0);
       await expect(page.locator('.relay-register-written')).toHaveCount(0);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+      await expectViewport(page);
       await page.evaluate(() => window.scrollTo(0, 0));
       await page.screenshot({ path: testInfo.outputPath('relay-desktop-store.png') });
-      await page.locator('.relay-library').screenshot({ path: testInfo.outputPath('relay-program-library.png') });
+      await page.locator('[data-relay-resource="programs"]').click();
+      await page.screenshot({ path: testInfo.outputPath('relay-program-library.png') });
+      await page.getByRole('button', { name: 'Close Program library', exact: true }).click();
       for (const selector of ['#relay-source', '.relay-gutter button', '.relay-transport button', '.relay-byte', '.relay-pane-heading h2', '.relay-register > span:first-child']) {
         expect(await page.locator(selector).first().evaluate((element) => parseFloat(getComputedStyle(element).fontSize)), selector).toBeGreaterThanOrEqual(14);
       }
@@ -873,11 +915,80 @@ test.describe('RELAY pure model: useful executable presets', () => {
       for (const width of [320, 390, 700, 768, 1024, 1440]) {
         await page.setViewportSize({ width, height: 844 });
         for (const pane of ['machine', 'source', 'output']) {
-          if (width <= 700) await page.locator(`[data-relay-pane="${pane}"]`).click();
+          if (width < 1000) await page.locator(`[data-relay-pane="${pane}"]`).click();
           expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), `${width}px / ${pane}`).toBe(true);
+          await expectViewport(page);
         }
       }
     });
+
+    for (const viewport of [
+      { width: 1440, height: 900 }, { width: 1280, height: 720 },
+      { width: 375, height: 812 }, { width: 320, height: 640 }, { width: 768, height: 480 },
+    ]) {
+      test(`fixed workspace ${viewport.width}x${viewport.height}: edit, inspect, reverse and resources`, async ({ page }, testInfo) => {
+        await page.setViewportSize(viewport);
+        await expect(page.locator('.project-relay')).toHaveAttribute('data-workspace', 'true');
+        await expectViewport(page);
+        await page.screenshot({ path: testInfo.outputPath(`relay-${viewport.width}x${viewport.height}-arrival.png`) });
+        await editAndLoad(page, 'MOV R0, 129\nSTORE [0xE0], R0\nHALT');
+        await page.locator('#relay-source').press('End');
+        await page.locator('#relay-source').press('Space');
+        await page.locator('#relay-source').press('ArrowLeft');
+        await expect(page.locator('[data-relay-cycles]')).toHaveText('000000');
+        await expectViewport(page);
+        await page.screenshot({ path: testInfo.outputPath(`relay-${viewport.width}x${viewport.height}-source.png`) });
+        await steps(page, 2);
+        await openInspector(page, 'output');
+        await expect(page.locator('[data-relay-screen]')).toBeInViewport({ ratio: 1 });
+        await expect(page.locator('.relay-pixel-on')).toHaveCount(2);
+        await expectViewport(page);
+        await openInspector(page, 'memory');
+        await page.getByRole('tab', { name: 'Data RAM', exact: true }).click();
+        await page.locator('[data-relay-byte="224"]').click();
+        await expect(page.locator('[data-relay-memory-note]')).toContainText('129 decimal = 10000001 binary');
+        await expectViewport(page);
+        await page.screenshot({ path: testInfo.outputPath(`relay-${viewport.width}x${viewport.height}-memory.png`) });
+        await page.locator('[data-relay-action="reverse"]').click();
+        await expect(page.locator('[data-relay-byte="224"]')).toHaveText('00');
+        await expect(page.locator('[data-relay-cycles]')).toHaveText('000001');
+        await openInspector(page, 'trace');
+        await expect(page.locator('[data-relay-trace]')).toContainText('MOV R0, 0x81');
+        await expect(page.locator('[data-relay-trace] > li')).toHaveCount(1);
+        await expectViewport(page);
+        await page.locator('[data-relay-action="reverse"]').click();
+        await expect(page.locator('[data-relay-reg-hex="0"]')).toHaveText('00');
+        await expect(page.locator('[data-relay-cycles]')).toHaveText('000000');
+        await openInspector(page, 'guide');
+        await expect(page.locator('[data-relay-action="guide-start"]')).toBeVisible();
+        await expectViewport(page);
+        await page.locator('[data-relay-resource="manual"]').click();
+        await expect(page.getByRole('dialog', { name: 'Field manual', exact: true })).toBeVisible();
+        await page.getByText('Encoding & operating limits', { exact: true }).click();
+        await expect(page.getByRole('heading', { name: 'A word, taken apart.' })).toBeVisible();
+        await expectViewport(page);
+        await page.keyboard.press('Escape');
+        await expect(page.locator('[data-relay-resource="manual"]')).toBeFocused();
+        await page.locator('[data-relay-resource="files"]').click();
+        await expect(page.getByRole('button', { name: /Export .asm/ })).toBeVisible();
+        await expect(page.getByRole('button', { name: /Import JSON/ })).toBeVisible();
+        await expectViewport(page);
+        await page.keyboard.press('Escape');
+        await expect(page.locator('[data-relay-resource="files"]')).toBeFocused();
+        await page.locator('[data-relay-resource="programs"]').click();
+        await expect(page.locator('[data-relay-load="fibonacci"]')).toBeVisible();
+        await expectViewport(page);
+        await page.keyboard.press('Escape');
+        if (viewport.width < 1000) {
+          await page.locator('[data-relay-pane="machine"]').click();
+          await page.keyboard.press('ArrowRight');
+          await expect(page.locator('[data-relay-pane="source"]')).toBeFocused();
+          await expect(page.locator('#relay-source')).toBeVisible();
+          await expect(page.locator('.relay-machine-pane')).toHaveAttribute('inert', '');
+        }
+        await expectViewport(page);
+      });
+    }
 
     test('navigation destroys running loops and mounts a clean, paused machine on return', async ({ page }) => {
       await editAndLoad(page, 'loop: INC R0\nJMP loop');
@@ -886,7 +997,7 @@ test.describe('RELAY pure model: useful executable presets', () => {
       await expect.poll(async () => Number(await page.locator('[data-relay-cycles]').textContent())).toBeGreaterThan(10);
       await page.goto('/');
       await expect(page.locator('.project-relay')).toHaveCount(0);
-      await page.goto('/projects/relay/');
+      await page.goto('./projects/relay/');
       await expect(page.locator('[data-relay-status]')).toHaveText('Ready');
       await expect(page.locator('[data-relay-cycles]')).toHaveText('000000');
       await expect(page.locator('#relay-source')).toHaveValue(defaultPreset.source);

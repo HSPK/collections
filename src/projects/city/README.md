@@ -3,12 +3,15 @@
 An independent, local-only neighborhood toy at `/projects/city/`. The site owns
 its navigation, heading, worktable, recipes, field guide, and downloads.
 `mount(context)` uses `createProjectPage(context, 'city')` and returns its
-idempotent `destroy`. The `.project-city` root grows with its content.
+idempotent `destroy`. The `.project-city[data-workspace="true"]` root fits the
+viewport without document scrolling.
 
 The compact masthead opens directly onto the city worktable. The illustrated
-map frame is marked `data-project-preview`; the decorative recipe slip and
-longer introduction remain below the tool. Desktop ingredient buttons are
-compact, and placement actions sit directly after the address controls.
+map frame is marked `data-project-preview`. A native ingredient selector,
+address menus, Place/Remove, and Undo/Redo remain beside the live drawing on
+desktop and immediately beneath it on phones. Tools, Notes, Recipes, Guide,
+and Save open native dialogs; the original editor, recipe slip, checklists,
+reference, title editor, and file controls remain mounted rather than copied.
 
 ## Files and responsibilities
 
@@ -42,11 +45,20 @@ Nothing is autosaved. A JSON file restores the name and tiles, not the history.
 Opening a file is undoable and validates the complete file before changing the
 current plan. JSON imports are limited to 100 KB and dimensions 1–16 per axis.
 
-The 375px layout stacks the map, touch editor, and observations. The drawing
-can be enlarged inside its own scroll area without widening the document.
-Editing controls do not move into that area. Road overlays use numbers as well
-as colors. All essential control text is at least 12px, native text inputs are
-16px, and actions have 44px minimum touch targets.
+Bounded grid tracks and `min-height: 0` keep the map and primary editing controls
+together at 1440×900, 1280×720, 375×812, 320×640, and 768×480. Long editor and
+reference content scrolls only inside dialogs. The drawing can still be enlarged
+and panned inside its own frame without widening the document; the SVG
+projection and hit targets are unchanged. Road overlays use numbers as well as
+colors. Essential control text is at least 14px, native text inputs are 16px,
+and project actions have 44px minimum touch targets. Mobile history controls
+reserve room for the floating collection menu.
+
+Dialog Close/Escape returns to the opener. Loading a recipe or choosing a
+frontage address closes its notebook and focuses the live worktable. The exact
+counting-rules link opens the Guide and scrolls that dialog, not the document.
+Tools retains the full illustrated palette, keyboard address pad, movement
+buttons, presets, reset/clear, selection explanation, and operation feedback.
 
 All listeners use `page.signal`. The single asynchronous file read checks the
 signal and an import revision before touching the page; cleanup invalidates
@@ -121,14 +133,15 @@ browser mounting tests in `tests/projects/city.spec.ts`. Browser tests intercept
 an in-memory fixture document and import this project's entrypoint through Vite;
 they do not rely on shared collection markup or styles. They cover keyboard and
 touch alternatives, undo/reset/clear, portable exports/imports, lifecycle
-cleanup, and the 375px layout. No screenshots or full-suite run are needed.
+cleanup, all five workspace sizes, real pointer selection, visible control
+effects, dialog reference workflows, and the floating collection menu. Workspace
+tests save screenshots into the runner's per-test artifact directory.
 
 ```sh
-./node_modules/.bin/playwright test tests/projects/city.spec.ts \
-  --output=src/projects/city/.validation/test-results
+npm test -- tests/projects/city.spec.ts --reporter=dot
 ```
 
 Use the existing runner's `SITE_URL` option when a Vite development server is
 already available. A static production server cannot serve the isolated
 fixture's TypeScript module imports. Keep validation artifacts in the owned
-project directory and remove them afterwards.
+project or runner output directory.

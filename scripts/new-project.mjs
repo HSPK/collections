@@ -119,12 +119,13 @@ function main() {
     '',
     'export function mount(context: ProjectContext): ProjectInstance {',
     `  const page = createProjectPage(context, '${id}');`,
+    ...(values.category === 'read' ? [] : ["  page.root.dataset.workspace = 'true';"]),
     '  let position = 0;',
     '  page.root.innerHTML = `',
     '    <div class="starter-shell" data-project-preview>',
     '      <p class="starter-kicker">Community project starter</p>',
     '      <h1>${escapeMarkup(title)}</h1>',
-    '      <p>Your website owns this page. Start small, make it useful or surprising, and give it a point of view.</p>',
+    '      <p class="starter-intro">Your website owns this page. Start small, make it useful or surprising, and give it a point of view.</p>',
     '      <button class="app-button" type="button" data-starter-action>Try the interaction</button>',
     '      <p class="starter-status" role="status" aria-live="polite" data-starter-status>${ideas[0]}</p>',
     '    </div>`;',
@@ -157,6 +158,14 @@ export const colors = ['#315f48', '#79537b', '#b75e32'] as const;
 .project-${id} h1 { font-size: clamp(36px, 6vw, 72px); overflow-wrap: anywhere; margin: 20px 0; }
 .project-${id} p { max-width: 62ch; font-size: 17px; line-height: 1.7; }
 .project-${id} .starter-status { border-left: 3px solid var(--starter-accent); padding: 18px; margin-top: 28px; }
+.project-${id}[data-workspace] { height: 100dvh; min-height: 0; }
+.project-${id}[data-workspace] .starter-shell { box-sizing: border-box; height: 100%; min-height: 0; display: flex; flex-direction: column; gap: clamp(8px, 2dvh, 20px); padding: clamp(16px, 3dvh, 32px) clamp(20px, 4vw, 60px); }
+.project-${id}[data-workspace] .starter-shell > * { flex-shrink: 0; margin: 0; }
+.project-${id}[data-workspace] h1 { font-size: clamp(28px, 6vw, 56px); line-height: 1.1; }
+.project-${id}[data-workspace] p { font-size: 16px; line-height: 1.5; }
+.project-${id}[data-workspace] .starter-intro { flex: 1; min-height: 0; overflow: auto; scrollbar-width: thin; }
+.project-${id}[data-workspace] .app-button { align-self: flex-start; min-height: 44px; }
+.project-${id}[data-workspace] .starter-status { padding: 12px 64px 12px 16px; }
 `;
   const notes = `# ${markdownTitle(title)}
 
@@ -173,6 +182,9 @@ Independent URL: \`/projects/${id}/\`.
 Replace this starter with substantive content and real behavior before opening
 a PR. Keep readable controls, mobile support, explicit media consent, and cleanup.
 Add pure engine/model files when your idea needs them.
+Interaction-led sites use a viewport workspace: keep primary controls and results
+together, and put secondary content in bounded panels or dialogs. Reading sites
+can use normal document flow. See core/workspace.ts for optional UI primitives.
 
 Run \`npm run build\` and your focused browser spec. For a real screenshot cover,
 remove the custom \`preview\` field and run
@@ -196,11 +208,18 @@ See the repository CONTRIBUTING.md and src/projects/README.md for the full guide
     "import { expect, test } from '@playwright/test';",
     '',
     `test(${JSON.stringify(`${id}: the independent page and starter interaction work`)}, async ({ page }) => {`,
+    '  await page.setViewportSize({ width: 375, height: 812 });',
     `  await page.goto('./projects/${id}/');`,
     `  await expect(page.locator('.project-${id}')).toBeVisible();`,
     `  await expect(page.getByRole('heading', { name: ${JSON.stringify(title)}, exact: true })).toBeVisible();`,
     "  await page.getByRole('button', { name: 'Try the interaction', exact: true }).click();",
     "  await expect(page.locator('[data-starter-status]')).toHaveText('Make something people can actually explore.');",
+    ...(values.category === 'read' ? [] : [
+      `  await expect(page.locator('.project-${id}')).toHaveAttribute('data-workspace', 'true');`,
+      '  expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(812);',
+      '  await page.setViewportSize({ width: 320, height: 640 });',
+      '  expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(640);',
+    ]),
     '});',
     '',
   ].join('\n');

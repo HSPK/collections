@@ -172,7 +172,7 @@ export function createSpace(options: SpaceOptions) {
   }
   let destroyed = false, renders = 0, contextLost = false;
   const loop = createLoop(() => {
-    if (destroyed || contextLost || options.host.clientWidth === 0) return;
+    if (destroyed || contextLost || options.host.clientWidth < 1 || options.host.clientHeight < 1) return;
     const fittedDistance = distance * Math.max(1, 0.72 / camera.aspect);
     camera.position.set(lookTarget.x + fittedDistance * Math.cos(elevation) * Math.sin(yaw), lookTarget.y + fittedDistance * Math.sin(elevation), lookTarget.z + fittedDistance * Math.cos(elevation) * Math.cos(yaw));
     camera.lookAt(lookTarget);

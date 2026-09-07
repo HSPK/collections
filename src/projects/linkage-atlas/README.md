@@ -13,6 +13,9 @@ No assets, fonts, services, or additional packages are required.
   path sampling, chord deviation, and boundary-aware input advancement.
 - `scene.ts`: original SVG drafting geometry. The view box follows the CSS
   viewport, so 12–14 px labels remain that size on a 375 px screen.
+  Autofit uses the valid model's extent without an absolute pixels-per-unit
+  floor; large accepted lengths remain visible. Zero-sized viewports are not
+  drawn rather than distorting the geometry to impose a minimum scale.
 - `index.ts`: the independently mounted page, controls, readouts, and lifecycle.
 - `style.css`: rules scoped to `.project-linkage-atlas`.
 - `manifest.json`: discovery metadata; register after the implementation.
@@ -113,6 +116,26 @@ segments. Other lesson types should introduce honest, model-derived measurements
 rather than reuse a misleading chord-deviation label.
 
 ## Interaction and lifecycle
+
+The desktop dock keeps a local 64px clearance plus the right safe-area inset
+for the collection launcher. Compact transport places the speed select on
+the left, keeping the corner free without a footer.
+
+The viewport-sized workspace keeps the live plot, closure state, angle,
+speed and transport together. **Parameters** opens/focuses the instrument
+dock: **Geometry** holds the study, lengths and assembly, **Tracer** holds
+point coordinates and guides, and **Readout** holds classification, numeric
+measurements and the complete legend. On narrow or short screens the same
+dock opens as a native dialog. **Observations** opens the selected study's
+experiment and reachable-angle notes; **Method** contains equations,
+classification guidance and keyboard help. Close/Escape restores focus.
+
+Extend the `createWorkspaceTabs` wrapper panels in `index.ts`, not the roles
+of their named child sections. The shared dialog helper is themed with
+`--workspace-paper`; all workspace listeners use the page lifecycle.
+`style.css` allocates remaining height with zero-minimum grid tracks.
+`scene.ts` fits each resized plot and converts pointers through the current
+SVG screen matrix, including letterboxing during a resize.
 
 All numeric lengths, ranges, selects, and buttons are keyboard accessible.
 Pin B also has a 44 px pointer target with arrow-key, Shift+arrow, Home, and End

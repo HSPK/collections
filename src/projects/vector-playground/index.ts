@@ -8,6 +8,7 @@ import type { DiagramState, HandleId, LabMode } from './diagram';
 import { analyzeMatrix, eigenDirections, formatNumber, formatVector, project, projectionMatrix, transform } from './engine';
 import type { EigenAnalysis, Mat2, Vec2 } from './engine';
 import { playgroundMarkup } from './view';
+import { createVectorWorkspace } from './workspace';
 
 const initialState = (): DiagramState => ({
   mode: 'transform',
@@ -53,6 +54,7 @@ export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'vector-playground');
   page.root.setAttribute('aria-labelledby', 'vp-title');
   page.root.innerHTML = playgroundMarkup();
+  const workspace = createVectorWorkspace(page);
   let state = initialState();
   let matrixPreset = MATRIX_PRESETS[0].id;
   let dotPreset = 'acute';
@@ -117,7 +119,10 @@ export function mount(context: ProjectContext): ProjectInstance {
     page.signal,
     moveHandle,
     page.report,
-    (id) => inputFor(id === 'basis-x' ? 'a' : id === 'basis-y' ? 'b' : `${id}-x`).focus(),
+    (id) => {
+      workspace.select('parameters');
+      inputFor(id === 'basis-x' ? 'a' : id === 'basis-y' ? 'b' : `${id}-x`).focus({ preventScroll: true });
+    },
   );
   page.onCleanup(diagram.destroy);
 
@@ -145,6 +150,9 @@ export function mount(context: ProjectContext): ProjectInstance {
     show('[data-vp-projection-legend]', !isMatrix);
     show('[data-vp-eigen-panel]', isMatrix);
     show('[data-vp-projection-panel]', !isMatrix);
+    for (const detail of page.root.querySelectorAll<HTMLElement>('[data-vp-mode-detail]')) {
+      detail.hidden = detail.dataset.vpModeDetail !== state.mode;
+    }
     selectPreset.value = matrixPreset;
     selectDotPreset.value = dotPreset;
     eigenToggle.checked = state.showEigen;
@@ -238,6 +246,7 @@ export function mount(context: ProjectContext): ProjectInstance {
   for (const button of modeButtons) {
     button.addEventListener('click', () => {
       state = { ...state, mode: button.dataset.vpMode as LabMode };
+      workspace.select('parameters');
       render();
     }, { signal: page.signal });
   }
@@ -280,7 +289,7 @@ export function mount(context: ProjectContext): ProjectInstance {
     challengeActive = true;
     customNote = 'Challenge: make both columns land on the same line, with at least one column nonzero. Watch for determinant 0 and rank 1.';
     render(true);
-    query<HTMLElement>(page.root, '[data-project-preview]').scrollIntoView({ behavior: 'auto', block: 'start' });
+    workspace.select('parameters');
     inputFor('d').focus({ preventScroll: true });
     page.report(customNote);
   }, { signal: page.signal });

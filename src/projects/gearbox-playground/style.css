@@ -223,3 +223,135 @@
   .project-gearbox-playground .gb-equation-panel { padding: 26px 0; }
   .project-gearbox-playground .gb-equation-intro h2 { font-size: 28px; }
 }
+
+.project-gearbox-playground[data-workspace="true"] {
+  --workspace-paper: var(--gb-paper);
+  box-sizing: border-box;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  padding: 12px;
+  overflow: clip;
+}
+.project-gearbox-playground .gb-shell {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: 8px;
+}
+.project-gearbox-playground .gb-header { display: block; margin: 0; }
+.project-gearbox-playground .gb-header > div { display: flex; justify-content: space-between; align-items: center; gap: 18px; }
+.project-gearbox-playground .gb-eyebrow { font-size: 14px; margin: 0; letter-spacing: .02em; }
+.project-gearbox-playground h1 { max-width: none; font-size: clamp(28px, 3vw, 38px); }
+.project-gearbox-playground .gb-workspace-tools { display: flex; gap: 6px; }
+.project-gearbox-playground .gb-workspace-tools button { min-height: 44px; padding: 7px 12px; }
+.project-gearbox-playground .gb-workbench {
+  min-height: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 350px);
+  grid-template-rows: minmax(0, 1fr);
+}
+.project-gearbox-playground .gb-drawing-panel {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+}
+.project-gearbox-playground .gb-panel-heading { min-height: 44px; padding: 8px 12px; }
+.project-gearbox-playground .gb-panel-heading h2,
+.project-gearbox-playground .gb-motion { font-size: 14px; }
+.project-gearbox-playground .gb-stage { min-height: 0; min-width: 0; padding: 0 6px; }
+.project-gearbox-playground .gb-stage svg { width: 100%; height: 100%; max-height: none; }
+.project-gearbox-playground .gb-drawing-caption { min-height: 0; padding: 4px 12px; font-size: 14px; }
+.project-gearbox-playground .gb-transport { min-width: 0; padding: 8px 12px; }
+.project-gearbox-playground .gb-transport-buttons { grid-template-columns: 1.2fr 1fr 1fr 1.3fr; gap: 6px; margin: 3px 0 0; }
+.project-gearbox-playground .gb-transport-buttons button { min-height: 44px; font-size: 14px; padding-inline: 6px; }
+.project-gearbox-playground .gb-transport-buttons [data-reset] { grid-column: auto; }
+.project-gearbox-playground .gb-controls {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  border-top: 0;
+}
+.project-gearbox-playground .workspace-tabs { padding: 5px; }
+.project-gearbox-playground[data-workspace="true"] .workspace-tabs > button { min-height: 44px; }
+.project-gearbox-playground .gb-dock-body { min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr); }
+.project-gearbox-playground .gb-dock-body > .workspace-pane {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.project-gearbox-playground .gb-control-body { padding: 0 12px 12px; }
+.project-gearbox-playground .gb-field { margin-top: 10px; }
+.project-gearbox-playground .gb-paired { gap: 8px; }
+.project-gearbox-playground .gb-paired label { font-size: 14px; }
+.project-gearbox-playground .gb-result { padding: 14px; margin: 0; }
+.project-gearbox-playground .gb-rate-list { display: block; }
+.project-gearbox-playground .gb-rate-row { display: grid; }
+.project-gearbox-playground .gb-legend { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 12px; gap: 8px; }
+.project-gearbox-playground .gb-small,
+.project-gearbox-playground .gb-check,
+.project-gearbox-playground .gb-legend strong,
+.project-gearbox-playground .gb-legend span span,
+.project-gearbox-playground .gb-timeline-heading output,
+.project-gearbox-playground .gb-label-row output,
+.project-gearbox-playground .gb-field > label span,
+.project-gearbox-playground .gb-experiments button,
+.project-gearbox-playground .gb-result-label h3,
+.project-gearbox-playground .gb-result-label > span,
+.project-gearbox-playground .gb-output-direction,
+.project-gearbox-playground .gb-ratio-value,
+.project-gearbox-playground .gb-rate-row > span:first-child,
+.project-gearbox-playground .gb-rate-row small,
+.project-gearbox-playground .gb-rate-row > strong,
+.project-gearbox-playground .gb-rate-direction { font-size: 14px; }
+.project-gearbox-playground .gb-local-status {
+  min-height: 0;
+  max-height: 44px;
+  overflow: auto;
+  padding: 0 2px;
+  border: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.project-gearbox-playground .gb-controls-dialog .workspace-dialog-content {
+  height: min(650px, calc(100dvh - 112px));
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  padding: 0;
+}
+.project-gearbox-playground .gb-controls-dialog .gb-controls { border: 0; }
+.project-gearbox-playground[data-workspace="true"] .workspace-dialog-heading > button { min-height: 44px; }
+.project-gearbox-playground .gb-notebook-intro { display: grid; gap: 12px; }
+.project-gearbox-playground .workspace-dialog .gb-deck { max-width: none; margin: 0; }
+.project-gearbox-playground .workspace-dialog .gb-experiment-note { min-height: 0; }
+.project-gearbox-playground .workspace-dialog .gb-equation-panel { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+@media (max-width: 700px), (max-height: 540px) {
+  .project-gearbox-playground .gb-workbench { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 700px) {
+  .project-gearbox-playground[data-workspace="true"] { padding: 8px; }
+  .project-gearbox-playground .gb-header > div { display: grid; gap: 2px; }
+  .project-gearbox-playground .gb-eyebrow { line-height: 18px; }
+  .project-gearbox-playground .gb-eyebrow svg { width: 18px; height: 18px; }
+  .project-gearbox-playground .gb-workspace-tools button { flex: 1; padding-inline: 5px; }
+  .project-gearbox-playground .gb-transport { padding-inline: 8px; }
+  .project-gearbox-playground .gb-transport-buttons { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .project-gearbox-playground .gb-drawing-caption { padding-inline: 8px; }
+}
+@media (min-width: 600px) and (max-height: 540px) {
+  .project-gearbox-playground .gb-drawing-panel {
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+  .project-gearbox-playground .gb-panel-heading { grid-column: 1 / -1; }
+  .project-gearbox-playground .gb-transport { grid-column: 2; grid-row: 2 / 4; align-self: center; }
+  .project-gearbox-playground .gb-drawing-caption { grid-column: 1; font-size: 14px; }
+  .project-gearbox-playground .gb-transport-buttons { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .project-gearbox-playground .gb-local-status { max-height: 22px; }
+}
+.project-gearbox-playground .gb-workbench .gb-dock-body > .workspace-pane { padding-inline-end: calc(64px + env(safe-area-inset-right, 0px)); }
+@media (max-width: 700px), (max-height: 540px) {
+  .project-gearbox-playground .gb-transport { padding-inline-end: calc(64px + env(safe-area-inset-right, 0px)); }
+}

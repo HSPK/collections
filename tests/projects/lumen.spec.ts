@@ -399,8 +399,69 @@ async function openLumen(page: Page): Promise<string[]> {
   return errors;
 }
 
+test('Lumen browser: editable optics in fixed viewport panes preserve detector and notebook', async ({ page }, testInfo) => {
+  const errors = await openLumen(page);
+  const site = page.locator('.project-lumen');
+  await expect(site).toHaveAttribute('data-workspace', 'true');
+  const fits = async () => {
+    const sizes = await page.evaluate(() => ({
+      width: innerWidth, height: innerHeight,
+      documentWidth: document.documentElement.scrollWidth,
+      documentHeight: document.documentElement.scrollHeight,
+      bodyWidth: document.body.scrollWidth, bodyHeight: document.body.scrollHeight,
+      x: scrollX, y: scrollY,
+    }));
+    expect(sizes.documentWidth).toBeLessThanOrEqual(sizes.width);
+    expect(sizes.documentHeight).toBeLessThanOrEqual(sizes.height);
+    expect(sizes.bodyWidth).toBeLessThanOrEqual(sizes.width);
+    expect(sizes.bodyHeight).toBeLessThanOrEqual(sizes.height);
+    expect([sizes.x, sizes.y]).toEqual([0, 0]);
+  };
+  for (const [width, height] of [[1440, 900], [1280, 720], [375, 812], [320, 640], [768, 480]]) {
+    await page.setViewportSize({ width, height });
+    await site.locator('[data-study]').selectOption('dispersion');
+    await site.locator('[data-panel="inspector"]').click();
+    await fits();
+    for (const selector of ['[data-bench]', '[data-action="add"]', '[data-action="undo"]', '[data-action="redo"]', '[data-study]']) {
+      await expect(site.locator(selector)).toBeInViewport({ ratio: 1 });
+    }
+    await expect(site.locator('[data-bench]')).toHaveAttribute('viewBox', '0 0 1000 600');
+    const before = await site.locator('[data-power]').getAttribute('data-power');
+    await page.screenshot({ path: testInfo.outputPath(`lumen-workspace-${width}x${height}.png`) });
+    await site.locator('[data-field="material"]').selectOption('crown');
+    expect(await site.locator('[data-power]').getAttribute('data-power')).not.toBe(before);
+    await site.locator('[data-action="undo"]').click();
+    await expect(site.locator('[data-power]')).toHaveAttribute('data-power', before!);
+    await site.locator('[data-panel="detector"]').click();
+    await expect(site.locator('[data-power]')).toBeVisible();
+    if (await site.locator('.lumen-energy').getAttribute('open') === null) await site.locator('.lumen-energy summary').click();
+    await expect(site.locator('[data-energy]')).toBeVisible();
+    await expect(site.locator('[data-energy]')).toContainText('Detected');
+    await fits();
+    await site.locator('[data-panel="notebook"]').click();
+    await site.locator('[data-notes]').fill(`Viewport ${width}: observation`);
+    await site.locator('[data-notes]').press('Tab');
+    await site.locator('[data-action="record"]').click();
+    await expect(site.locator('[data-notes]')).toHaveValue(/observation[\s\S]*mW.*captured/);
+    await fits();
+    await site.locator('[data-lumen-files]').click();
+    await expect(site.getByRole('dialog')).toBeVisible();
+    await site.locator('[data-view="normals"]').check();
+    await fits();
+    await page.keyboard.press('Escape');
+    await expect(site.getByRole('dialog')).toBeHidden();
+    await expect(site.locator('[data-lumen-files]')).toBeFocused();
+    await site.locator('[data-panel="inspector"]').click();
+    const tinyControls = await site.locator('button, input, select, label').evaluateAll(elements =>
+      elements.filter(element => element.getClientRects().length && getComputedStyle(element).visibility !== 'hidden' &&
+        parseFloat(getComputedStyle(element).fontSize) < 14).map(element => element.textContent));
+    expect(tinyControls).toEqual([]);
+  }
+  expect(errors).toEqual([]);
+});
+
 test('Lumen browser: editable optics, measured change, keyboard and atomic drag undo', async ({ page }, testInfo) => {
-  await page.setViewportSize({ width: 1440, height: 1060 });
+  await page.setViewportSize({ width: 1440, height: 900 });
   const errors = await openLumen(page);
   const site = page.locator('.project-lumen');
   const initialPower = await site.locator('[data-power]').getAttribute('data-power');
@@ -415,8 +476,10 @@ test('Lumen browser: editable optics, measured change, keyboard and atomic drag 
   await expect(site.locator('[data-separation]')).toHaveAttribute('data-separation', initialSeparation ?? '');
   const box = await site.locator('[data-bench]').boundingBox();
   if (!box) throw new Error('Missing bench');
-  const startX = box.x + box.width * 0.47;
-  const startY = box.y + box.height * 0.5;
+  const { x: startX, y: startY } = await site.locator('[data-bench]').evaluate((element) => {
+    const point = new DOMPoint(470, 300).matrixTransform((element as SVGSVGElement).getScreenCTM()!);
+    return { x: point.x, y: point.y };
+  });
   await page.mouse.move(startX, startY);
   await page.mouse.down();
   await page.mouse.move(startX + 64, startY + 28, { steps: 12 });
@@ -451,6 +514,7 @@ test('Lumen browser: notebook, real SVG and JSON files, safe import and reversib
   await site.locator('[data-title]').press('Tab');
   await site.locator('[data-action="record"]').click();
   await expect(site.locator('[data-notes]')).toHaveValue(/mW.*captured.*centroid/);
+  await site.locator('[data-lumen-files]').click();
   const jsonEvent = page.waitForEvent('download');
   await site.locator('[data-action="save"]').click();
   const jsonDownload = await jsonEvent;
@@ -467,7 +531,8 @@ test('Lumen browser: notebook, real SVG and JSON files, safe import and reversib
   const svg = await readFile(svgPath, 'utf8');
   expect(svg).toContain('Prism &amp; &lt;light&gt;');
   expect(await page.evaluate((markup) => new DOMParser().parseFromString(markup, 'image/svg+xml').querySelector('parsererror')?.textContent ?? null, svg)).toBeNull();
-  await site.locator('[data-preset="focus"]').click();
+  await site.getByRole('button', { name: 'Close Experiments & field guide', exact: true }).click();
+  await site.locator('[data-study]').selectOption('focus');
   await expect(site.locator('[data-scene-title]')).toHaveText('The shape of a focus');
   await site.locator('[data-import]').setInputFiles({ name: 'experiment.json', mimeType: 'application/json', buffer: Buffer.from(saved) });
   await expect(site.locator('[data-scene-title]')).toHaveText('Prism & <light>');
@@ -482,6 +547,61 @@ test('Lumen browser: notebook, real SVG and JSON files, safe import and reversib
   await expect(site.locator('[data-preset="focus"]')).toHaveAttribute('aria-pressed', 'true');
   await site.locator('[data-action="redo"]').click();
   await expect(site.locator('[data-scene-title]')).toHaveText('Prism & <light>');
+  expect(errors).toEqual([]);
+});
+
+for (const key of ['Delete', 'ArrowRight', 'ControlOrMeta+z', 'ControlOrMeta+Shift+z', 'ControlOrMeta+y']) {
+  test(`Lumen file dialog protects the live experiment from ${key}`, async ({ page }) => {
+    const errors = await openLumen(page);
+    const site = page.locator('.project-lumen');
+    await site.locator('[data-study]').selectOption('dispersion');
+    await site.locator('[data-panel="inspector"]').click();
+    await site.locator('[data-field="material"]').selectOption('crown');
+    await expect(site.locator('[data-action="remove"]')).toBeEnabled();
+    await expect(site.locator('[data-action="undo"]')).toBeEnabled();
+    if (key.includes('Shift') || key.endsWith('+y')) {
+      await site.locator('[data-action="undo"]').click();
+      await expect(site.locator('[data-action="redo"]')).toBeEnabled();
+    }
+    const snapshot = () => site.locator('[data-selection] option, input[data-field], select[data-field]').evaluateAll(elements =>
+      elements.map(element => element instanceof HTMLInputElement || element instanceof HTMLSelectElement ?
+        `${element.getAttribute('data-field')}:${element.value}` : `${element.getAttribute('value')}:${element.textContent}`));
+    const before = await snapshot();
+    await site.locator('[data-lumen-files]').click();
+    const dialog = site.getByRole('dialog', { name: 'Experiments & field guide', exact: true });
+    await dialog.getByRole('button', { name: 'Close Experiments & field guide', exact: true }).focus();
+    await page.keyboard.press(key);
+    expect(await snapshot()).toEqual(before);
+    await expect(dialog).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(site.locator('[data-lumen-files]')).toBeFocused();
+    if (key.startsWith('ControlOrMeta')) {
+      await site.locator('[data-bench]').focus();
+      await page.keyboard.press(key);
+      expect(await snapshot()).not.toEqual(before);
+    }
+    expect(errors).toEqual([]);
+  });
+}
+
+test('Lumen invalid imports are visibly explained inside the active file dialog', async ({ page }) => {
+  const errors = await openLumen(page);
+  const site = page.locator('.project-lumen');
+  const title = await site.locator('[data-scene-title]').innerText();
+  const power = await site.locator('[data-power]').getAttribute('data-power');
+  await site.locator('[data-lumen-files]').click();
+  const dialog = site.getByRole('dialog', { name: 'Experiments & field guide', exact: true });
+  const chooser = page.waitForEvent('filechooser');
+  await site.locator('[data-action="open"]').click();
+  await (await chooser).setFiles({ name: 'invalid.json', mimeType: 'application/json', buffer: Buffer.from('{"version":-1}') });
+  await expect(site.locator('[data-file-error]')).not.toHaveText('');
+  await expect(dialog.locator('[data-file-error]')).toBeVisible();
+  await expect(dialog.locator('[data-file-error]')).toBeInViewport({ ratio: 1 });
+  await page.setViewportSize({ width: 320, height: 640 });
+  await expect(dialog.locator('[data-file-error]')).toBeInViewport({ ratio: 1 });
+  await expect(dialog.getByRole('alert')).not.toHaveText('');
+  await expect(site.locator('[data-scene-title]')).toHaveText(title);
+  await expect(site.locator('[data-power]')).toHaveAttribute('data-power', power!);
   expect(errors).toEqual([]);
 });
 
@@ -500,7 +620,7 @@ test('Lumen browser: source, detector, add/remove and all four studies work with
   await site.locator('[data-field="rotation"]').fill('0');
   await site.locator('[data-field="rotation"]').press('Tab');
   expect(await site.locator('[data-bench] [data-ray="620"]').evaluateAll((rays) => rays.map((ray) => ray.getAttribute('d')))).not.toEqual(aimedGeometry);
-  await site.locator('[data-preset="mirrors"]').click();
+  await site.locator('[data-study]').selectOption('mirrors');
   expect(Number(await site.locator('[data-power]').getAttribute('data-power'))).toBeCloseTo(0.9216, 8);
   await site.locator('[data-selection]').selectOption('detector-1');
   await site.locator('[data-field="y"]').fill('100');
@@ -516,7 +636,7 @@ test('Lumen browser: source, detector, add/remove and all four studies work with
   await site.locator('[data-action="remove"]').click();
   await expect(site.locator('[data-optic-id]')).toHaveCount(4);
   for (const preset of PRESETS) {
-    await site.locator(`[data-preset="${preset.id}"]`).click();
+    await site.locator('[data-study]').selectOption(preset.id);
     await expect(site.locator('[data-scene-title]')).toHaveText(preset.scene.title);
     await expect(site.locator('[data-bench] path[data-ray]')).not.toHaveCount(0);
   }
@@ -581,7 +701,11 @@ test('Lumen browser: drag cancellation, rotation handles and escaped imported la
   const site = page.locator('.project-lumen');
   const box = await site.locator('[data-bench]').boundingBox();
   if (!box) throw new Error('Missing bench');
-  await page.mouse.move(box.x + box.width * 0.47, box.y + box.height * 0.5);
+  const start = await site.locator('[data-bench]').evaluate((element) => {
+    const point = new DOMPoint(470, 300).matrixTransform((element as SVGSVGElement).getScreenCTM()!);
+    return { x: point.x, y: point.y };
+  });
+  await page.mouse.move(start.x, start.y);
   await page.mouse.down();
   await page.mouse.move(box.x + box.width * 0.6, box.y + box.height * 0.6, { steps: 6 });
   await page.keyboard.press('Escape');

@@ -53,12 +53,31 @@ signal. `page.onCleanup` disposes the loop and scene; external abort and repeate
 `destroy()` calls are safe. SVG scales natively and needs no resize observer,
 canvas, external assets, or network requests.
 
+## One-screen workspace
+
+The root declares `data-workspace="true"` and uses a `100dvh` grid. Its SVG
+receives the remaining height between the identity and playback dock; the
+entire drawing remains in its viewBox without changing the timeline geometry.
+The authored narrow composition still switches at 680px. Transport, the native
+scrubber, and speed never scroll away from the machine. Motion-preference changes
+pause and announce through the project status without covering transport with a
+collection toast; the action dock leaves the menu's corner clear.
+
+**Inspect stages** opens the native “Follow the hand-off” dialog with all five
+stage buttons, causal explanations, and the current stage detail.
+**Behind the motion** opens choreography, keyboard help, feedback, and credits.
+Only these secondary dialogs scroll. Escape/Close returns focus to the opener;
+closing a dialog does not reset time or speed. Reduced-motion state stays in the
+main dock. Dialogs use the project’s green paper palette.
+
 ## Targeted validation
 
 ```sh
-SITE_URL=http://127.0.0.1:4173 ./node_modules/.bin/playwright test tests/series/chain-reaction.spec.ts
+SITE_URL=http://127.0.0.1:4173/ flock /home/hangxingwei/.copilot/session-state/23f8825b-223c-4cb6-95ec-3e7881d9e65f/files/viewport-browser.lock npm test -- tests/series/chain-reaction.spec.ts --reporter=dot
 ```
 
 Tests cover timeline endpoints, causal contact order, cam tangency, reverse
 determinism, real transport and keyboard controls, reduced-motion changes,
-375px layout, and cancellation of frames/listeners on external abort.
+375px layout, and cancellation of frames/listeners on external abort. Workspace
+checks cover 1440×900, 1280×720, 375×812, 320×640, and 768×480: no document scroll,
+real flower/wheel responses, playback, modal focus return, and per-test screenshots.

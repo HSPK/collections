@@ -21,6 +21,23 @@ not engineering documentation or repair instructions.
   Canvas 2D drawing generated entirely in the browser. No camera access,
   sound, network assets, imported models, or persistence are used.
 
+## One-screen workspace
+
+The root declares `data-workspace="true"`. A `100dvh` grid keeps the flexible
+WebGL exhibit, all four viewpoints, transport, speed, and assembly scrubber on
+the same screen, including short landscape viewports. The compact scrubber and
+action dock leave local right clearance for the collection menu, including the
+slider's end hit target; no full-width blank footer is required.
+
+**Inspect parts** opens the native “Camera parts inspector” dialog with all nine
+groups, material descriptions, clear-highlight action, and feedback.
+**Stages & notes** opens the five chapter shortcuts, current chapter note,
+design-fiction explanation, and keyboard help. Secondary dialogs alone scroll;
+Close/Escape restores opener focus. Inspecting or changing chapters still
+updates the same live model while the dialog is open. Closing does not recreate
+the camera or discard orbit/selection/timeline state. Dialogs use the cream paper
+palette.
+
 ## Modules and extension points
 
 - `data.ts`: part identities, descriptions, exploded/assembled poses, ordered
@@ -51,6 +68,11 @@ orbit controls. Scrubbing, inspection, and preset changes explicitly invalidate
 the paused scene. Only playback advances progress; lighting and geometry never
 use wall-clock randomness.
 
+The viewport is never hidden or reparented when a dialog opens. Its existing
+size observer updates renderer dimensions and camera aspect/FOV after layout
+changes, and invalidates paused frames. Orbit pointer coordinates continue to
+come from the canvas bounds; responsive sizing does not scale the page.
+
 Pixel ratio is capped at **1.5**. One directional light casts a **512²** shadow.
 Repeated grip ribs, flash bars, dial knurling, and index marks are instanced;
 curves have moderate segment counts. The only transmissive surface is the
@@ -66,7 +88,7 @@ its own signal and registers `artwork.destroy` with `page.onCleanup`.
 ## Focused checks
 
 ```sh
-SITE_URL=http://127.0.0.1:4173 ./node_modules/.bin/playwright test tests/series/camera-assembly.spec.ts
+SITE_URL=http://127.0.0.1:4173/ flock /home/hangxingwei/.copilot/session-state/23f8825b-223c-4cb6-95ec-3e7881d9e65f/files/viewport-browser.lock npm test -- tests/series/camera-assembly.spec.ts --reporter=dot
 ```
 
 The tests cover every part’s endpoints and staged order, exact reverse
@@ -76,3 +98,6 @@ mount/abort with observed WebGL buffer, texture, program, and context disposal.
 The isolated lifecycle test imports the entrypoint through the Vite dev server.
 Browser checks filter Vite update/reload messages so concurrent sibling edits
 cannot remount the page in the middle of a control or resource assertion.
+Workspace checks additionally cover 1440×900, 1280×720, 375×812, 320×640, and
+768×480: no document scroll, slider-to-print changes, pointer orbit, modal
+inspection/chapter workflows, rendering aspect, focus return, and screenshots.

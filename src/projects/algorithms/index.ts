@@ -2,6 +2,7 @@ import './style.css';
 import { createLoop } from '../../core/loop';
 import { clamp } from '../../core/math';
 import { createProjectPage, escapeMarkup, query } from '../../core/page';
+import { createWorkspaceDialog, createWorkspaceTabs } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { algorithmOrder, algorithms, countingRules, presets, readingNotes } from './data';
 import { buildTrace, itemLabel, validateInput } from './engine';
@@ -23,6 +24,7 @@ function recordAll(values: readonly number[]): ReadonlyMap<AlgorithmId, SortingT
 
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'algorithms');
+  page.root.dataset.workspace = 'true';
   const opening = presets[0];
   let selected: AlgorithmId = 'insertion';
   let appliedValues: readonly number[] = opening.values;
@@ -41,9 +43,8 @@ export function mount(context: ProjectContext): ProjectInstance {
           <span>Algorithm Theatre<small>An interactive field manual</small></span>
         </a>
         <nav aria-label="Algorithm Theatre navigation">
-          <a href="#algorithms-stage">The stage</a>
-          <a href="#algorithms-notes">Field notes</a>
-          <a href="#algorithms-counting">Counting rules</a>
+          <button class="at-button at-button-quiet" type="button" data-field-notes>Field notes</button>
+          <button class="at-button at-button-quiet" type="button" data-counting-rules>Counting rules</button>
         </nav>
       </header>
 
@@ -121,9 +122,9 @@ export function mount(context: ProjectContext): ProjectInstance {
               <div class="at-method-grid">
                 ${algorithmOrder.map((id) => `
                   <label class="at-method">
-                    <input type="radio" name="at-method" value="${id}" ${id === selected ? 'checked' : ''}>
+                    <input type="radio" name="at-method" value="${id}" aria-label="${escapeMarkup(algorithms[id].name)}" ${id === selected ? 'checked' : ''}>
                     <span class="at-method-content">
-                      <span class="at-method-top"><span>${algorithms[id].number}</span><strong>${escapeMarkup(algorithms[id].name)}</strong></span>
+                      <span class="at-method-top"><span>${algorithms[id].number}</span><strong class="at-method-name-full">${escapeMarkup(algorithms[id].name)}</strong><strong class="at-method-name-short" aria-hidden="true">${escapeMarkup(algorithms[id].name.replace(' sort', ''))}</strong></span>
                     </span>
                   </label>
                 `).join('')}
@@ -136,7 +137,7 @@ export function mount(context: ProjectContext): ProjectInstance {
                   <input id="algorithms-array" name="array" type="text" value="${escapeMarkup(appliedText)}"
                     maxlength="256" autocomplete="off" spellcheck="false"
                     aria-describedby="algorithms-array-help algorithms-input-note algorithms-input-error">
-                  <button type="submit" class="at-button at-button-light">Apply array</button>
+                  <button type="submit" class="at-button at-button-light" aria-label="Apply array">Apply</button>
                 </div>
                 <p class="at-help" id="algorithms-array-help">2–12 whole numbers, −99 to 99. Commas or spaces. Duplicates welcome.</p>
                 <p class="at-input-note" id="algorithms-input-note" data-input-note></p>
@@ -262,6 +263,64 @@ export function mount(context: ProjectContext): ProjectInstance {
     </div>
   `;
 
+  const root = page.root;
+  const notes = query<HTMLElement>(root, '.at-field-notes');
+  notes.prepend(query<HTMLElement>(root, '.at-wordmark'));
+  query<HTMLElement>(root, '.at-site-header').prepend(query<HTMLElement>(root, '#algorithms-title'));
+  notes.prepend(query<HTMLElement>(root, '.at-hero'), query<HTMLElement>(root, '.at-workbench > .at-section-heading'));
+  const sidebar = document.createElement('div');
+  sidebar.className = 'at-inspector';
+  const tabHost = document.createElement('div');
+  sidebar.append(tabHost);
+  query<HTMLElement>(root, '.at-live-grid').append(sidebar);
+  const stepDetails = document.createElement('div');
+  stepDetails.className = 'at-step-details';
+  stepDetails.append(...[
+    '.at-operation', '.at-focus-readout', '.at-region-note', '.at-counter-note',
+    '.at-tempo-row', '#algorithms-keyboard-help', '.at-motion-note', '.at-chart-note',
+    '.at-stage-caption', '.at-legend',
+  ].map(selector => query<HTMLElement>(root, selector)));
+  const deltas = document.createElement('dl');
+  deltas.className = 'at-step-deltas';
+  for (const key of ['comparisons', 'swaps', 'writes']) {
+    const row = document.createElement('div');
+    const label = document.createElement('dt');
+    label.textContent = key === 'writes' ? 'Slot writes' : key[0].toUpperCase() + key.slice(1);
+    const value = document.createElement('dd');
+    value.append(query<HTMLElement>(root, `[data-delta="${key}"]`));
+    row.append(label, value);
+    deltas.append(row);
+  }
+  stepDetails.prepend(deltas);
+  const panes = [
+    { id: 'array', label: 'Array', content: query<HTMLElement>(root, '.at-setup') },
+    { id: 'trace', label: 'Trace', content: stepDetails },
+    { id: 'script', label: 'Script', content: query<HTMLElement>(root, '.at-script') },
+    { id: 'totals', label: 'Totals', content: query<HTMLElement>(root, '.at-scorecard') },
+  ].map(({ id, label, content }) => {
+    const panel = document.createElement('div');
+    panel.className = 'at-inspector-pane';
+    panel.append(content);
+    sidebar.append(panel);
+    return { id, label, panel };
+  });
+  const inspectorTabs = createWorkspaceTabs(page, { id: 'algorithms-inspector', label: 'Rehearsal tools', host: tabHost, panes });
+  const fieldNotes = createWorkspaceDialog(page, {
+    id: 'algorithms-field-notes', title: 'Field notes', triggers: [query(root, '[data-field-notes]')],
+    content: [query(root, '.at-programme-disclosure'), notes, query(root, '.at-stability-lesson'), query(root, '.at-footer')],
+  });
+  createWorkspaceDialog(page, {
+    id: 'algorithms-counting-rules', title: 'Counting rules', triggers: [query(root, '[data-counting-rules]')],
+    content: [query(root, '.at-counting-room')],
+  });
+  root.querySelectorAll<HTMLAnchorElement>('a[href="#algorithms-stage"], a[href="#algorithms-top"]').forEach(link => {
+    link.addEventListener('click', event => {
+      event.preventDefault();
+      fieldNotes.close();
+      query<HTMLElement>(root, '[data-stage]').focus({ preventScroll: true });
+    }, { signal: page.signal });
+  });
+
   const elements = {
     form: query<HTMLFormElement>(page.root, '[data-array-form]'),
     input: query<HTMLInputElement>(page.root, '#algorithms-array'),
@@ -385,7 +444,7 @@ export function mount(context: ProjectContext): ProjectInstance {
         </div>
         <strong class="at-slot-value">${item.value}</strong>
         <span class="at-origin">ID ${letter}</span>
-        <span class="at-slot-state">${state}</span>
+        <span class="at-slot-state" title="${state}"><span class="at-state-full">${state}</span><span class="at-state-short" aria-hidden="true">${active ? 'Act' : ordered ? 'Ord' : 'Wait'}</span></span>
       </li>`;
     }).join('');
     elements.currentArray.textContent = `[${step.items.map((item) => item.value).join(', ')}]`;
@@ -581,8 +640,9 @@ export function mount(context: ProjectContext): ProjectInstance {
     elements.datasetNote.textContent = preset.note;
     selectAlgorithm('selection');
     applyValues(preset.values);
+    fieldNotes.close();
+    inspectorTabs.select('array');
     elements.stage.focus({ preventScroll: true });
-    elements.stage.scrollIntoView({ block: 'start', behavior: 'instant' });
   }, events);
 
   renderDefinition();

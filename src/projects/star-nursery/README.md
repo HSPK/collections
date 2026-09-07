@@ -85,8 +85,28 @@ absorption and color are intentionally approximate.
 Reduced-motion visitors receive a fully composed, initially still scene.
 Live media-query changes update playback. Explicit Play remains available.
 Touch targets are at least 40 px, range inputs are native and labeled,
-essential text is at least 12 px, and structure buttons expose
+essential control text is at least 14 px, and structure buttons expose
 `aria-pressed`. The notes explain the illustration without relying on color.
+
+## One-screen observatory
+
+The root declares `data-workspace="true"` and uses a bounded `100dvh` grid.
+The sky, Formation, Stellar wind, playback, reseeding, live status, and Reset view
+stay together. On phones the shaping controls form a two-column desk below the
+sky; landscape retains the side desk. The document never needs to scroll between
+the drawing and its controls. Local right clearance on the mobile status line
+keeps the collection menu clear without creating a blank footer. Workspace sizing
+applies equally with and without reduced motion; only playback follows that
+preference.
+
+**Explore** (accessible name **Structures and notes**) opens the native
+`#sn-guide` dialog. It contains all three presets, Return to the first cloud,
+camera/parameter guidance, motion details, and the complete interpretation notes.
+Choosing a structure closes the dialog so the new geometry is immediately visible.
+Escape or **Close Structures and notes** returns focus to Explore. Only long
+guide content scrolls; opening it does not hide, resize, or recreate the renderer.
+The existing resize observer continues to update camera aspect, focal sizing,
+and the backing buffer when the viewport changes, including while paused.
 
 ## Lifecycle and failure behavior
 
@@ -108,7 +128,11 @@ interactive surface.
 SITE_URL=http://127.0.0.1:4173 npm test -- tests/series/star-nursery.spec.ts
 ```
 
-The three tests cover finite/deep and deterministic geometry, distinct
+The focused tests cover finite/deep and deterministic geometry, distinct
 structures, formation/wind displacement, count/time bounds, real canvas
 changes and frozen frames, controls, keyboard camera movement, a 375 px
-touch/reduced-motion layout, and repeated/abort-driven teardown.
+touch/reduced-motion layout, and repeated/abort-driven teardown. Five viewport
+workflows additionally verify document dimensions, visible controls, real shader
+and camera effects, structure selection, native-dialog focus restoration, and
+internally scrollable notes at 1440×900, 1280×720, 375×812, 320×640, and 768×480.
+Each workflow saves a screenshot through Playwright's `test.info().outputPath()`.

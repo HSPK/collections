@@ -141,3 +141,73 @@
   .project-neon-rain .nr-footer { display: block; padding-right: 50px; }
   .project-neon-rain .nr-footer > p { line-height: 1.6; padding: 6px 0 8px; }
 }
+
+.project-neon-rain[data-workspace] {
+  --workspace-paper: #171c1b;
+  height: 100dvh;
+  min-height: 0;
+  padding: 0 18px;
+}
+.project-neon-rain .nr-shell {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: 78px minmax(0, 1fr) auto 64px;
+}
+.project-neon-rain .nr-masthead { min-height: 0; padding: 10px 0; gap: 14px; }
+.project-neon-rain .nr-edition { margin-left: auto; }
+.project-neon-rain .nr-directory-toggle {
+  min-height: 44px; padding: 8px 12px; border: 1px solid var(--nr-line);
+  background: #202623; font-size: 14px;
+}
+.project-neon-rain .nr-screen { display: grid; grid-template-rows: minmax(0, 1fr) auto; min-height: 0; }
+.project-neon-rain .nr-scene { height: auto; min-height: 0; }
+.project-neon-rain .nr-camera-strip { min-height: 48px; padding: 2px 12px; }
+.project-neon-rain .nr-console { padding: 10px 0; gap: 20px; grid-template-columns: .8fr 1fr 1fr 1fr; }
+.project-neon-rain .nr-transport { gap: 3px; padding-right: 20px; }
+.project-neon-rain .nr-transport > .nr-eyebrow { display: none; }
+.project-neon-rain .nr-setting input[type="range"] { margin: 0; }
+.project-neon-rain .nr-under-console { display: block; padding: 6px 64px 6px 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.project-neon-rain :is(.nr-eyebrow, .nr-edition span, .nr-scene-top, .nr-time,
+  .nr-scene-caption .nr-eyebrow, .nr-caption-note, .nr-frame-mark, .nr-camera-label,
+  .nr-views button, .nr-views button > span, .nr-view-location, .nr-motion-label,
+  .nr-setting label, .nr-setting output, .nr-setting-note, .nr-under-console p,
+  .nr-section-heading > span, .nr-address-number, .nr-addresses h3, .nr-footer > p,
+  .nr-footer summary) { font-size: 14px; }
+.project-neon-rain .nr-setting-note { margin: 8px 0; }
+.project-neon-rain[data-workspace] .workspace-dialog button { min-height: 44px; }
+.project-neon-rain .nr-footer { padding-right: 0; }
+@media (max-width: 640px) {
+  .project-neon-rain[data-workspace] { padding: 0 10px; }
+  .project-neon-rain .nr-shell { grid-template-rows: 74px minmax(0, 1fr) auto 64px; }
+  .project-neon-rain .nr-brand { gap: 7px; }
+  .project-neon-rain .nr-brand .nr-eyebrow { display: none; }
+  .project-neon-rain .nr-mark { width: 30px; height: 30px; }
+  .project-neon-rain h1 { font-size: 25px; letter-spacing: -1px; }
+  .project-neon-rain h1 span { display: none; }
+  .project-neon-rain .nr-directory-toggle { margin-left: auto; padding-inline: 9px; }
+  .project-neon-rain .nr-camera-strip { padding: 2px; }
+  .project-neon-rain .nr-camera-label { display: none; }
+  .project-neon-rain .nr-views { gap: 0; }
+  .project-neon-rain .nr-views button { gap: 5px; padding: 6px 3px; }
+  .project-neon-rain .nr-views button > span { display: none; }
+  .project-neon-rain .nr-console { grid-template-columns: 1fr 1fr; gap: 4px 16px; padding: 8px 0; }
+  .project-neon-rain .nr-transport { padding: 0; align-content: center; }
+  .project-neon-rain .nr-play { min-height: 44px; }
+  .project-neon-rain .nr-motion-label { display: none; }
+  .project-neon-rain .nr-setting label { gap: 3px; }
+  .project-neon-rain .nr-scene-top { inset: 10px 12px auto; }
+  .project-neon-rain .nr-time { display: none; }
+  .project-neon-rain .nr-scene-caption { left: 16px; bottom: 18px; }
+  .project-neon-rain .nr-scene-caption .nr-eyebrow { display: none; }
+  .project-neon-rain .nr-scene-caption h2 { font-size: 34px; }
+  .project-neon-rain .nr-frame-mark { display: none; }
+}
+@media (max-height: 540px) and (min-width: 641px) {
+  .project-neon-rain .nr-shell { grid-template-rows: 64px minmax(0, 1fr) auto 64px; }
+  .project-neon-rain .nr-brand .nr-eyebrow, .project-neon-rain .nr-edition,
+  .project-neon-rain .nr-scene-caption .nr-eyebrow, .project-neon-rain .nr-caption-note { display: none; }
+  .project-neon-rain .nr-scene-caption h2 { font-size: 32px; }
+  .project-neon-rain .nr-scene-caption { bottom: 12px; }
+  .project-neon-rain .nr-scene-top { inset: 10px 16px auto; }
+}

@@ -4,6 +4,7 @@ import { createLoop } from '../../core/loop';
 import { clamp } from '../../core/math';
 import { createProjectPage, query } from '../../core/page';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
+import { createWorkspaceDialog } from '../../core/workspace';
 import { DEFAULT_STRENGTH, plants } from './data';
 import { advanceGarden, createGarden, fullyOpened, LoudnessEnvelope, paperOpened, unfoldStep } from './engine';
 import { drawGarden } from './illustration';
@@ -13,6 +14,7 @@ import type { MicrophoneState, MicrophoneStatus } from './microphone';
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'breath-garden');
   const { root, signal } = page;
+  root.dataset.workspace = 'true';
   let garden = createGarden();
   let paused = context.reducedMotion;
   let direction: -1 | 1 = 1;
@@ -76,7 +78,22 @@ export function mount(context: ProjectContext): ProjectInstance {
       </section>
       <details class="bg-specimens"><summary>Meet the nine paper specimens</summary><p>${plants.map((plant) => plant.name).join(' / ')}. These are names for original paper constructions, not botanical species. Everything resets when you leave.</p></details>
       <footer class="bg-footer"><span>A garden that listens only when invited.</span><span>Original folds / No. 35</span></footer>
+      <nav class="bg-workspace-actions" aria-label="Garden information">
+        <button type="button" data-open-microphone>Microphone · off</button>
+        <button type="button" data-open-notes>Field notes</button>
+      </nav>
     </div>`;
+
+  createWorkspaceDialog(page, {
+    id: 'bg-microphone-dialog', title: 'Optional microphone',
+    content: [query<HTMLElement>(root, '.bg-microphone')],
+    triggers: [query<HTMLElement>(root, '[data-open-microphone]')],
+  });
+  createWorkspaceDialog(page, {
+    id: 'bg-notes-dialog', title: 'Field notes',
+    content: ['.bg-wind-help', '.bg-paper-notes', '.bg-specimens', '.bg-footer'].map(selector => query<HTMLElement>(root, selector)),
+    triggers: [query<HTMLElement>(root, '[data-open-notes]')],
+  });
 
   const stage = canvas2D(query<HTMLDivElement>(root, '[data-stage]'), 'A coastal paper garden of coral cups, blue fans, and folded pinwheel flowers.');
   page.onCleanup(stage.dispose);
@@ -161,6 +178,7 @@ export function mount(context: ProjectContext): ProjectInstance {
       denied: 'Permission not granted', unavailable: 'Microphone unavailable', error: 'Microphone stopped',
     };
     micLabel.textContent = labels[status.state];
+    query<HTMLElement>(root, '[data-open-microphone]').textContent = `Microphone · ${status.state === 'requesting' ? 'pending' : status.state}`;
     micMessage.textContent = status.message;
     micButton.textContent = status.state === 'requesting' ? 'Cancel request' : status.state === 'live' ? 'Disable microphone' : 'Enable microphone';
     calibrateButton.disabled = status.state !== 'live';
@@ -294,7 +312,7 @@ export function mount(context: ProjectContext): ProjectInstance {
   window.addEventListener('keydown', (event) => {
     if (event.code !== 'Space' || event.ctrlKey || event.metaKey || event.altKey) return;
     const target = event.target;
-    if (target instanceof Element && target.closest('button, input, select, textarea, a, summary, [contenteditable="true"], [role="dialog"]')) return;
+    if (target instanceof Element && target.closest('button, input, select, textarea, a, summary, dialog, [contenteditable="true"], [role="dialog"]')) return;
     event.preventDefault();
     if (!event.repeat) beginBreeze('keyboard');
   }, { signal });

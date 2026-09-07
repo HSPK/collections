@@ -302,3 +302,139 @@
 @media (prefers-reduced-motion: reduce) {
   .project-zine .zine-starter { transition: none; }
 }
+
+.project-zine .zine-print-output { display: none; }
+
+@media screen {
+  .project-zine[data-workspace] {
+    --workspace-paper: var(--zine-white);
+    height: 100dvh;
+    min-height: 0;
+    padding: 10px clamp(10px, 2vw, 28px) 10px;
+    display: flex;
+    flex-direction: column;
+  }
+  .project-zine .zine-shell { width: 100%; height: 100%; min-height: 0; padding: 0; display: flex; flex-direction: column; }
+  .project-zine .zine-masthead { padding: 0 0 9px; flex-shrink: 0; }
+  .project-zine h1 { font-size: 34px; margin-top: 2px; }
+  .project-zine .zine-masthead-name { font-size: 14px; }
+  .project-zine .zine-masthead nav { gap: 16px; }
+  .project-zine .zine-masthead nav button { background: var(--zine-red); color: var(--zine-white); border: 1px solid var(--zine-red); min-height: 40px; padding: 7px 12px; font-size: 14px; font-weight: 700; }
+  .project-zine .zine-worktable { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  .project-zine .zine-worktable-top { flex: 0 0 auto; padding: 4px 12px; }
+  .project-zine .zine-worktable-top button { font-size: 14px; min-height: 36px; }
+  .project-zine .zine-shared-navigation { display: flex; align-items: center; justify-content: space-between; padding: 0 12px; gap: 16px; flex-shrink: 0; border-bottom: 1px solid var(--zine-line); }
+  .project-zine .zine-shared-navigation > button { border: 0; border-left: 1px solid var(--zine-line); background: transparent; min-height: 40px; padding: 4px 12px; font-size: 14px; }
+  .project-zine .zine-page-navigation { flex: 1; max-width: 500px; margin: 0; }
+  .project-zine .zine-page-navigation button { min-height: 38px; }
+  .project-zine .zine-page-navigation button span { display: inline; font-size: 14px; }
+  .project-zine .zine-page-announcement { font-size: 14px; }
+  .project-zine .zine-workspace { flex: 1; min-height: 0; grid-template-columns: minmax(0, 1fr) minmax(320px, .85fr); grid-template-rows: minmax(0, 1fr); }
+  .project-zine .zine-preview-column { grid-row: auto; grid-column: auto; min-height: 0; display: flex; flex-direction: column; padding: 12px; }
+  .project-zine .zine-preview-toolbar { flex: 0 0 auto; margin-bottom: 8px; }
+  .project-zine .zine-view-switch button { min-height: 36px; font-size: 14px; padding: 6px 12px; }
+  .project-zine .zine-reader-view { flex: 1; min-height: 0; }
+  .project-zine .zine-reading-mat { height: 100%; min-height: 0; padding: 0 7px 7px 0; }
+  .project-zine .zine-reader { height: 100%; min-height: 0; max-width: 560px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; padding: 20px; }
+  .project-zine .zine-reader h3.zine-reader-cover-title { font-size: clamp(32px, 3.3vw, 48px); }
+  .project-zine .zine-reader-masthead { font-size: 14px; padding-bottom: 8px; margin-bottom: 12px; }
+  .project-zine .zine-reader-art { max-height: 88px; margin: 12px 0; }
+  .project-zine .zine-reader-subtitle,
+  .project-zine .zine-reader-footer { font-size: 14px; }
+  .project-zine .zine-reader-footer { padding-top: 12px; }
+  .project-zine .zine-write-panel { min-width: 0; min-height: 0; display: flex; flex-direction: column; border-left: 1px solid var(--zine-ink); background: var(--zine-white); }
+  .project-zine .zine-issue-title { grid-area: auto; flex: 0 0 auto; border: 0; border-bottom: 1px solid var(--zine-line); padding: 8px 14px; }
+  .project-zine .zine-issue-title input { min-height: 36px; font-size: 21px; padding: 3px 0; }
+  .project-zine .zine-title-meta { padding-top: 2px; }
+  .project-zine .zine-editor { grid-area: auto; flex: 1; min-height: 0; padding: 8px 14px; border: 0; display: flex; flex-direction: column; }
+  .project-zine .zine-editor-heading { padding-bottom: 4px; display: flex; gap: 8px; align-items: baseline; }
+  .project-zine .zine-editor-heading h3 { font-size: 16px; margin: 0; }
+  .project-zine .zine-eyebrow { font-size: 14px; letter-spacing: 0; }
+  .project-zine .zine-field { margin-bottom: 6px; min-height: 0; }
+  .project-zine .zine-field:has(textarea) { flex: 1; display: flex; flex-direction: column; margin-bottom: 0; }
+  .project-zine .zine-field label { margin-bottom: 3px; }
+  .project-zine .zine-field :is(input, textarea) { min-height: 36px; padding: 5px 8px; }
+  .project-zine .zine-field textarea { flex: 1; height: 0; min-height: 44px; resize: none; overflow-y: auto; }
+  .project-zine .zine-field-count { padding-top: 2px; }
+  .project-zine :is(.zine-field-count, .zine-title-meta) { line-height: 1.25; }
+  .project-zine :is(.zine-field-count, .zine-title-meta, .zine-field label, .zine-field-error, .zine-issue-title label, .zine-issue-title label span, .zine-field-help, .zine-fit-status, .zine-theme-options button, .zine-paper-field label, .zine-style-field legend, .zine-guide-toggle, .zine-guide-toggle small, .zine-download-help, .zine-export-warning, .zine-mini-title, .zine-mini-number, .zine-overview-help, .zine-replace-note, .zine-starter-index, .zine-view-note, .zine-sheet-size, .zine-guide-key, .zine-save-status, .zine-notice, .zine-print-note) { font-size: 14px; }
+  .project-zine .zine-field-error { padding-top: 3px; line-height: 1.3; }
+  .project-zine .zine-starter > span:not(.zine-starter-index, .zine-starter-arrow),
+  .project-zine .zine-footer span,
+  .project-zine .zine-section-heading h2 > span,
+  .project-zine .zine-fold-diagram figcaption,
+  .project-zine .zine-sheet-caption span { font-size: 14px; }
+  .project-zine .zine-worktable-bottom { flex: 0 0 auto; padding: 6px 70px 6px 12px; display: block; min-height: 44px; }
+  .project-zine .zine-save-summary { background: transparent; border: 0; font-size: 14px; padding: 3px 0; text-align: left; text-decoration: underline; text-underline-offset: 3px; min-height: 30px; }
+  .project-zine .zine-export-warning { margin-top: 0; line-height: 1.3; }
+  .project-zine .zine-pane-tabs { padding: 5px; border-bottom: 1px solid var(--zine-line); }
+  .project-zine .zine-pane-tabs button { color: var(--zine-ink); background: var(--zine-white); border: 1px solid var(--zine-line); }
+  .project-zine .zine-pane-tabs[hidden] { display: none; }
+  .project-zine .zine-export-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(250px, .8fr); gap: 24px; }
+  .project-zine .zine-export-tabs { margin-bottom: 14px; }
+  .project-zine .zine-export-tabs button { background: var(--zine-paper); color: var(--zine-ink); border: 1px solid var(--zine-line); }
+  .project-zine .zine-export-tabs[hidden] { display: none; }
+  .project-zine .zine-sheet-caption { padding: 0 0 14px; }
+  .project-zine .zine-sheet-size { margin-bottom: 0; }
+  .project-zine .zine-sheet-problem { min-height: 180px; padding: 14px; }
+  .project-zine .zine-overview { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 0; }
+  .project-zine .zine-starters { margin: 0; padding: 0; border: 0; }
+  .project-zine .zine-folding { padding: 0; }
+  .project-zine .zine-folding > .zine-section-heading { border: 0; padding-top: 0; }
+  .project-zine .zine-folding .zine-view-note { margin-top: 20px; text-align: left; }
+  .project-zine .zine-folding .zine-footer { margin-top: 18px; }
+}
+
+@media screen and (max-width: 900px), screen and (max-height: 560px) {
+  .project-zine .zine-workspace { grid-template-columns: minmax(0, 1fr); }
+  .project-zine .zine-write-panel { border: 0; }
+  .project-zine .zine-issue-title { order: 0; }
+}
+
+@media screen and (max-width: 600px) {
+  .project-zine[data-workspace] { padding: 8px; }
+  .project-zine .zine-masthead { display: flex; flex-wrap: wrap; gap: 7px; padding-bottom: 7px; }
+  .project-zine h1 { font-size: 30px; }
+  .project-zine .zine-masthead-name { font-size: 14px; letter-spacing: 0; gap: 5px; max-width: none; }
+  .project-zine .zine-press-mark { width: 18px; height: 18px; }
+  .project-zine .zine-masthead nav { width: 100%; flex-direction: row; justify-content: space-between; gap: 6px; }
+  .project-zine .zine-masthead a { min-height: 36px; font-size: 14px; gap: 0; }
+  .project-zine .zine-masthead a span { display: none; }
+  .project-zine .zine-masthead nav button { min-height: 36px; padding: 5px 7px; }
+  .project-zine .zine-worktable-top { gap: 5px; padding-inline: 7px; }
+  .project-zine .zine-worktable-top h2 { font-size: 14px; }
+  .project-zine .zine-history button { padding: 5px 6px; min-width: 0; gap: 3px; }
+  .project-zine .zine-editor-jump { padding: 5px; }
+  .project-zine .zine-shared-navigation { gap: 8px; padding-inline: 9px; }
+  .project-zine .zine-page-navigation button span { display: none; }
+  .project-zine .zine-preview-column { padding: 8px; }
+  .project-zine .zine-reader { padding: 15px; }
+  .project-zine .zine-reader h3.zine-reader-cover-title { font-size: 34px; }
+  .project-zine .zine-reader-body { font-size: 16px; }
+  .project-zine .zine-issue-title { padding: 5px 10px; }
+  .project-zine .zine-issue-title input { font-size: 19px; }
+  .project-zine .zine-issue-title label span { display: none; }
+  .project-zine .zine-editor { padding: 5px 10px; }
+  .project-zine .zine-editor-heading .zine-eyebrow { display: none; }
+  .project-zine .zine-editor-heading h3 { font-size: 14px; }
+  .project-zine .zine-export-layout { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .project-zine .zine-overview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .project-zine .zine-starter-grid { grid-template-columns: 1fr; }
+  .project-zine .zine-starter { border: 0; border-bottom: 1px solid var(--zine-line); min-height: 130px; }
+}
+
+@media screen and (max-height: 560px) and (min-width: 601px) {
+  .project-zine .zine-masthead-name { display: none; }
+  .project-zine .zine-write-panel { display: grid; grid-template-columns: 230px minmax(0, 1fr); }
+  .project-zine .zine-issue-title { border-right: 1px solid var(--zine-line); }
+  .project-zine .zine-editor-heading { display: none; }
+  .project-zine .zine-editor { display: grid; grid-template-columns: minmax(0, .7fr) minmax(0, 1fr); gap: 10px; }
+}
+
+@media print {
+  .project-zine[data-workspace] { min-height: 0; height: auto; padding: 0; background: white; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .project-zine .zine-shell,
+  .project-zine .workspace-dialog { display: none !important; }
+  .project-zine .zine-print-output { display: block; }
+  .project-zine .zine-print-output > svg { display: block; max-width: none; width: auto; height: auto; }
+}

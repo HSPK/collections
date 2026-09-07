@@ -1,0 +1,43 @@
+Made with Natural Earth
+
+Dataset: Natural Earth 1:50m Physical Vectors — Land
+Release: natural-earth-vector v5.1.2
+File: ne_50m_land.geojson (unmodified upstream GeoJSON)
+Source: https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_50m_land.geojson
+Project: https://www.naturalearthdata.com/
+Authors: Tom Patterson and Nathaniel Vaughn Kelso, with Natural Earth contributors.
+Retrieved: 2026-09-06
+Bytes: 1636166
+SHA-256: e874b27a51d146452be360cafb3cc50c86001074a67d534113e6534682f9826b
+
+License: PUBLIC DOMAIN.
+Natural Earth states that all versions of its raster and vector map data
+are in the public domain. Use, modification, and dissemination are permitted
+without permission. Attribution is not required, but is gratefully provided.
+Terms: https://www.naturalearthdata.com/about/terms-of-use/
+Versioned license statement:
+https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/README.md
+
+Cartographic scope and limitations:
+This is generalized cartography at a nominal 1:50,000,000 source scale, not
+a surveyed map, navigation chart, topographic model, or cadastral boundary
+dataset. Zoom enlarges the same fixed-resolution coastline; it does not
+download higher-resolution tiles. Inland water is only represented where
+the land dataset contains a hole (not a complete lakes/rivers layer).
+
+The observer picker and Earth texture use the same land polygons, including
+islands, polygon holes, and antimeridian cuts. Coordinates are CRS84
+[longitude, latitude] in degrees, east/north positive. The display is
+equirectangular (Plate carree), north at top: x=(longitude+180)/360 and
+y=(90-latitude)/180. It exaggerates polar area and is not equal-area.
+Antimeridian cuts are filled, but not drawn as physical coastlines.
+The source Antarctic closure is at approximately -89.998926 degrees;
+the original coordinates are retained rather than claiming surveyed pole data.
+
+The textured Earth is a mean-radius display sphere. Physical observer
+calculations elsewhere use a geodetic ellipsoid; this map and texture do
+not replace or alter that model. No elevation, terrain, political borders,
+surface imagery, or topographic accuracy is implied.
+
+This file and its attribution are bundled offline and served same-origin.
+There are no runtime external map requests, remote tiles, or tracking.

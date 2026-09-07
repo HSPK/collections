@@ -2,6 +2,7 @@ import './style.css';
 import { clamp } from '../../core/math';
 import { createProjectPage, downloadBlob, escapeMarkup, query } from '../../core/page';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
+import { createWorkspaceDialog } from '../../core/workspace';
 import { BACKGROUNDS, EXPORT_SIZES, PALETTES, STARTERS } from './data';
 import {
   GRID_SIZE, HISTORY_LIMIT, PixelEditor, emptyGrid, isColor, mirroredCells, rasterize,
@@ -38,6 +39,7 @@ const toolLabels: Record<DrawingTool, string> = {
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'pixel-loom');
   const { root, signal } = page;
+  root.dataset.workspace = 'true';
   root.innerHTML = `
     <div class="pl-shell">
       <header class="pl-masthead">
@@ -227,6 +229,61 @@ export function mount(context: ProjectContext): ProjectInstance {
       </footer>
     </div>`;
 
+  const take = (selector: string) => query<HTMLElement>(root, selector);
+  const button = (label: string) => {
+    const control = document.createElement('button');
+    control.type = 'button';
+    control.textContent = label;
+    return control;
+  };
+  const threadsButton = button('Threads');
+  const finishButton = button('Finish');
+  const patternsButton = button('Patterns');
+  const helpButton = button('Help');
+  const zoomButton = button('Zoom 2×');
+  zoomButton.setAttribute('aria-pressed', 'false');
+  const nav = document.createElement('nav');
+  nav.className = 'pl-workspace-nav';
+  nav.setAttribute('aria-label', 'Studio panes');
+  nav.append(threadsButton, finishButton, patternsButton, helpButton);
+  const masthead = take('.pl-masthead');
+  const helpDialog = createWorkspaceDialog(page, {
+    id: 'pl-help', title: 'Little shortcuts & studio notes', triggers: [helpButton],
+    content: [take('.pl-brandline'), take('.pl-heading-line > p'), take('.pl-keyboard-guide'),
+      take('.pl-canvas-tip'), take('.pl-finishing > .pl-eyebrow'), take('.pl-finishing > h2'),
+      take('.pl-finishing > .pl-field-note'), take('.pl-thread-box > .pl-eyebrow'),
+      take('.pl-thread-box > h2'), take('.pl-thread-box > .pl-field-note'), take('.pl-footer')],
+  });
+  query<HTMLDetailsElement>(helpDialog.dialog, 'details').open = true;
+  masthead.replaceChildren(take('h1'));
+  masthead.after(nav);
+  createWorkspaceDialog(page, {
+    id: 'pl-threads', title: 'Threads & drawing options', triggers: [threadsButton],
+    content: [take('.pl-thread-box'), take('.pl-canvas-meta'), take('[data-stats]')],
+  });
+  createWorkspaceDialog(page, {
+    id: 'pl-finish', title: 'Preview, transform & export', triggers: [finishButton],
+    content: [take('.pl-finishing'), take('.pl-transform-row')],
+  });
+  const patternsDialog = createWorkspaceDialog(page, {
+    id: 'pl-patterns', title: 'Original starter patterns', triggers: [patternsButton], content: [take('.pl-starters')],
+  });
+  take('.pl-history-buttons').append(zoomButton, take('[data-clear]'));
+  take('.pl-sidebar').remove();
+  take('.pl-shell').append(take('[data-status]'));
+  const confirmDialog = createWorkspaceDialog(page, {
+    id: 'pl-clear-dialog', title: 'Clear canvas?', content: [take('[data-confirm]')],
+  });
+  take('[data-clear]').setAttribute('aria-haspopup', 'dialog');
+  take('[data-clear]').setAttribute('aria-controls', confirmDialog.dialog.id);
+  const errorMessage = document.createElement('p');
+  errorMessage.setAttribute('role', 'alert');
+  const errorDialog = createWorkspaceDialog(page, {
+    id: 'pl-error', title: 'Studio message', content: [errorMessage],
+  });
+  const feedback = document.createElement('p');
+  feedback.className = 'pl-dialog-status';
+  feedback.setAttribute('role', 'status');
   const canvas = query<HTMLCanvasElement>(root, '[data-canvas]');
   const actual = query<HTMLCanvasElement>(root, '[data-actual]');
   const preview = query<HTMLCanvasElement>(root, '[data-preview-canvas]');
@@ -264,11 +321,20 @@ export function mount(context: ProjectContext): ProjectInstance {
     if (signal.aborted) return;
     status.textContent = message;
     status.dataset.tone = error ? 'error' : 'normal';
-    page.report(message);
+    if (error) {
+      errorMessage.textContent = message;
+      errorDialog.open();
+    } else {
+      feedback.textContent = message;
+      const openDialog = root.querySelector('dialog[open] .workspace-dialog-content');
+      if (openDialog) {
+        openDialog.parentElement!.append(feedback);
+      }
+    }
   }
 
   if (!stageContext || !artContext || !actualContext || !previewContext) {
-    root.querySelectorAll<HTMLButtonElement | HTMLInputElement | HTMLSelectElement>('button, input, select')
+    root.querySelectorAll<HTMLButtonElement | HTMLInputElement | HTMLSelectElement>('[data-idle], [data-undo], [data-redo], [data-export]')
       .forEach((control) => { control.disabled = true; });
     say('This browser could not open a drawing canvas. Try a browser with 2D canvas support.', true);
     return { destroy: page.destroy };
@@ -447,6 +513,7 @@ export function mount(context: ProjectContext): ProjectInstance {
 
   function closeConfirmation(returnFocus = false) {
     confirmation.hidden = true;
+    confirmDialog.close();
     clearButton.setAttribute('aria-expanded', 'false');
     if (returnFocus) clearButton.focus({ preventScroll: true });
   }
@@ -517,6 +584,27 @@ export function mount(context: ProjectContext): ProjectInstance {
     if (!keyboardStroke) return;
     keyboardStroke = null;
     changed(editor.commit());
+    revealCursor();
+  }
+
+  function revealCursor() {
+    if (!root.classList.contains('pl-zoomed')) return;
+    const viewport = take('.pl-stage-wrap');
+    if (viewport.clientWidth <= 0 || viewport.clientHeight <= 0) return;
+    const clip = viewport.getBoundingClientRect(), surface = canvas.getBoundingClientRect();
+    const left = clip.left + viewport.clientLeft + 2;
+    const top = clip.top + viewport.clientTop + 2;
+    const right = clip.left + viewport.clientLeft + viewport.clientWidth - 2;
+    const bottom = clip.top + viewport.clientTop + viewport.clientHeight - 2;
+    const cellLeft = surface.left + cursor.x * surface.width / GRID_SIZE;
+    const cellRight = surface.left + (cursor.x + 1) * surface.width / GRID_SIZE;
+    const cellTop = surface.top + cursor.y * surface.height / GRID_SIZE;
+    const cellBottom = surface.top + (cursor.y + 1) * surface.height / GRID_SIZE;
+    viewport.scrollBy({
+      left: cellLeft < left ? cellLeft - left : cellRight > right ? cellRight - right : 0,
+      top: cellTop < top ? cellTop - top : cellBottom > bottom ? cellBottom - bottom : 0,
+      behavior: 'instant',
+    });
   }
 
   function history(action: 'undo' | 'redo') {
@@ -587,6 +675,7 @@ export function mount(context: ProjectContext): ProjectInstance {
       tool = 'paint';
       renderPalette();
       changed(editor.replace(starter.pixels, `Load ${starter.name}`), `Loaded ${starter.name}`);
+      patternsDialog.close();
       return;
     }
     const transforms: { id: Transform; label: string }[] = [
@@ -606,6 +695,7 @@ export function mount(context: ProjectContext): ProjectInstance {
       case 'ask-clear':
         confirmation.hidden = false;
         clearButton.setAttribute('aria-expanded', 'true');
+        confirmDialog.open();
         query<HTMLButtonElement>(confirmation, '[data-action="confirm-clear"]').focus({ preventScroll: true });
         break;
       case 'cancel-clear': closeConfirmation(true); break;
@@ -617,6 +707,33 @@ export function mount(context: ProjectContext): ProjectInstance {
       case 'export': void exportPng(); break;
     }
   }, { signal });
+
+  zoomButton.addEventListener('click', () => {
+    cancelStroke();
+    const zoomed = zoomButton.getAttribute('aria-pressed') !== 'true';
+    zoomButton.setAttribute('aria-pressed', String(zoomed));
+    zoomButton.textContent = zoomed ? 'Fit canvas' : 'Zoom 2×';
+    root.classList.toggle('pl-zoomed', zoomed);
+    take('.pl-stage-wrap').scrollTo(0, 0);
+    say(zoomed ? 'Zoomed drawing: use the pan arrows to reach every pixel. Fit canvas restores the whole artwork.' : 'The whole canvas fits the loom.');
+    if (zoomed) revealCursor();
+  }, { signal });
+  const pan = document.createElement('div');
+  pan.className = 'pl-pan';
+  pan.setAttribute('role', 'group');
+  pan.setAttribute('aria-label', 'Pan zoomed canvas');
+  for (const [label, dx, dy] of [['←', -160, 0], ['↑', 0, -160], ['↓', 0, 160], ['→', 160, 0]] as const) {
+    const control = button(label);
+    control.setAttribute('aria-label', `Pan canvas ${dx < 0 ? 'left' : dx > 0 ? 'right' : dy < 0 ? 'up' : 'down'}`);
+    control.addEventListener('click', () => take('.pl-stage-wrap').scrollBy(dx, dy), { signal });
+    pan.append(control);
+  }
+  take('.pl-toolbar').after(pan);
+  confirmDialog.dialog.addEventListener('close', () => {
+    confirmation.hidden = true;
+    clearButton.setAttribute('aria-expanded', 'false');
+  }, { signal });
+  window.addEventListener('resize', () => cancelStroke(), { signal });
 
   paletteInput.addEventListener('change', () => {
     const selected = PALETTES.find((entry) => entry.id === paletteInput.value);
@@ -714,6 +831,7 @@ export function mount(context: ProjectContext): ProjectInstance {
     if (drawingKey) {
       event.preventDefault();
       if (event.repeat || editor.isEditing) return;
+      revealCursor();
       closeConfirmation();
       if (tool === 'pick') { pick(cursor); return; }
       editor.begin(toolLabels[tool]);
@@ -742,6 +860,7 @@ export function mount(context: ProjectContext): ProjectInstance {
       const pixel = editor.pixels[cursor.y * GRID_SIZE + cursor.x];
       say(`Row ${cursor.y + 1}, column ${cursor.x + 1}: ${pixel ? `${nameForColor(pixel)} ${pixel}` : 'transparent'}. Space applies ${tool}.`);
     }
+    revealCursor();
   }, { signal });
   window.addEventListener('keyup', (event) => {
     if (keyboardStroke?.key === event.key) {
@@ -753,11 +872,11 @@ export function mount(context: ProjectContext): ProjectInstance {
     const target = event.target;
     if (target instanceof HTMLElement && (target.matches('input, select, textarea') || target.isContentEditable)) return;
     if (event.key === 'Escape') {
-      event.preventDefault();
-      if (editor.isEditing) cancelStroke();
-      else if (!confirmation.hidden) closeConfirmation(true);
+      if (editor.isEditing) { event.preventDefault(); cancelStroke(); }
+      else if (!confirmation.hidden) { event.preventDefault(); closeConfirmation(true); }
       return;
     }
+    if (target instanceof Element && target.closest('dialog')) return;
     if (event.defaultPrevented || event.altKey) return;
     if ((event.ctrlKey || event.metaKey) && (event.key.toLowerCase() === 'z' || event.key.toLowerCase() === 'y')) {
       event.preventDefault();

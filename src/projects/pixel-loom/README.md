@@ -41,9 +41,32 @@ Shortcuts do not intercept color inputs or select menus.
   direction, a quick-color strip below the canvas on narrow screens, visible
   focus, and reduced-motion support.
 
-The compact masthead leads directly to the drawing tools and board. The mobile
-quick-color strip sits immediately below the canvas. `data-project-preview`
-marks the complete workbench, not the branding.
+## One-screen studio
+
+The drawing board, four tools, quick thread strip, Undo/Redo, clear and feedback
+share the actual remaining viewport height. The page never needs document
+scrolling between drawing and controls. Short landscape screens put controls
+beside the board. The textile mat, forest/cream styling and floating collection
+menu are retained.
+
+**Threads** opens the full palette, custom color, symmetry, grid toggle and pixel
+statistics. **Finish** contains actual/enlarged/repeated previews, reversible
+transforms and PNG settings. **Patterns** and **Help** hold the complete starter
+gallery and original instructions/session warning. These native dialogs keep
+the current canvas and history intact, support Escape, and internally scroll
+longer content. Clear confirmation and export errors are also native dialogs.
+
+On small screens, **Zoom 2×** opens a detailed 640-pixel drawing surface inside
+the same bounded mat. Four pan buttons reach every cell without confusing touch
+painting with scrolling; **Fit canvas** restores the complete artwork. Pointer
+mapping reads the current canvas bounds for every sample, including after pan,
+zoom and viewport resize. A resize cancels an unfinished stroke, preserving
+its original pixels and redo history.
+Entering zoom reveals the existing pixel cursor. Keyboard moves, corner jumps,
+and continuous strokes scroll only the bounded mat just enough to keep the
+active pixel visible; focus and document position do not move.
+
+`data-project-preview` marks the complete workbench, not the branding.
 
 Run only this project's tests:
 `npm test -- tests/projects/pixel-loom.spec.ts --reporter=line`.

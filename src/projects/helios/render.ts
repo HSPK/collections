@@ -13,12 +13,14 @@ import { add, clamp, DEG, scale, skyBasis, unit } from './math';
 import type { Vec3 } from './math';
 import type { StudyState } from './state';
 import { earthAtlas } from './atlas';
+import type { LandGeometry } from './geography';
 import { planetFragment, planetVertex, ringFragment, ringVertex, skyFragment, skyVertex } from './shaders';
 
 const vector = (v: Vec3) => new Vector3(v.x, v.y, v.z);
 interface Label { name: BodyName; x: number; y: number; anchorX: number; anchorY: number; visible: boolean }
 export interface RenderInfo { labels: Label[]; camera: Vec3; target: Vec3; frame: string }
 interface RenderOptions {
+  land: LandGeometry;
   host: HTMLElement; signal: AbortSignal; invalidate: () => void;
   navigate: (dx: number, dy: number, zoom?: number) => void;
   select: (body: BodyName) => void;
@@ -39,7 +41,7 @@ export function createRenderer(options: RenderOptions) {
   const materials = new Set<Material>();
   const geometry = <T extends BufferGeometry>(g: T): T => { geometries.add(g); return g; };
   const material = <T extends Material>(m: T): T => { materials.add(m); return m; };
-  const atlas = new CanvasTexture(earthAtlas()); atlas.colorSpace = SRGBColorSpace;
+  const atlas = new CanvasTexture(earthAtlas(options.land)); atlas.colorSpace = SRGBColorSpace;
   const sphere = geometry(new SphereGeometry(1, 64, 40));
   const scene = new Scene();
   const planetScene = new Scene();
@@ -101,7 +103,7 @@ export function createRenderer(options: RenderOptions) {
       moonLight: { value: new Vector3() }, moonPrime: { value: new Vector3() }, moonEast: { value: new Vector3() }, moonNorth: { value: new Vector3() },
     } }));
   skyScene.add(new Mesh(geometry(new PlaneGeometry(2, 2)), skyMaterial));
-  let width = 1, height = 1, disposed = false, orbitEpoch = '';
+  let width = 1, height = 1, disposed = false, orbitEpoch = '', renderCount = 0;
   let latestState: StudyState | undefined;
   let selectedPlanet: BodyName = 'Earth';
   const raycaster = new Raycaster();
@@ -240,6 +242,7 @@ export function createRenderer(options: RenderOptions) {
     canvas.dataset.camera = JSON.stringify(info.camera);
     canvas.dataset.target = JSON.stringify(info.target);
     canvas.dataset.body = state.body; canvas.dataset.view = state.view;
+    canvas.dataset.renderCount = String(++renderCount);
     return info;
   }
   let pointer: { id: number; x: number; y: number; startX: number; startY: number; moved: boolean } | null = null;

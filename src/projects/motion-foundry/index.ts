@@ -1,6 +1,7 @@
 import './style.css';
 import { createLoop } from '../../core/loop';
 import { createProjectPage, query } from '../../core/page';
+import { createWorkspaceDialog, createWorkspaceTabs } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { LESSONS, PHASE_LABELS } from './data';
 import type { Lesson } from './data';
@@ -11,6 +12,7 @@ import { createScene, lessonButtonMarkup, sceneMarkup } from './scene';
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'motion-foundry');
   page.root.tabIndex = 0;
+  page.root.dataset.workspace = 'true';
   page.root.setAttribute('aria-labelledby', 'mf-title');
   page.root.innerHTML = `
     <div class="mf-site">
@@ -29,9 +31,10 @@ export function mount(context: ProjectContext): ProjectInstance {
           <div><p class="mf-overline" data-mf-study-number></p><h2 id="mf-study-title" data-mf-study-title></h2></div>
           <span class="mf-phase" data-mf-phase></span>
         </header>
+        <div class="mf-scene-tabs"></div>
         <div class="mf-scenes">${sceneMarkup('plain')}${sceneMarkup('expressive')}</div>
         <div class="mf-guide-row">
-          <label class="mf-guide-toggle"><input type="checkbox" data-mf-guides checked> Show motion guides</label>
+          <label class="mf-guide-toggle"><input type="checkbox" data-mf-guides checked aria-label="Show motion guides"> Guides</label>
           <p><span class="mf-guide-dot" aria-hidden="true"></span> Outlines = ⅛-clip snapshots <span aria-hidden="true">·</span> Dashed line = center route</p>
         </div>
         <div class="mf-transport">
@@ -52,7 +55,7 @@ export function mount(context: ProjectContext): ProjectInstance {
           <p id="mf-scrub-hint">Scrubbing pauses the clip. Every frame works in either direction.</p>
           <p class="mf-status" role="status" aria-live="polite" data-mf-status></p>
         </div>
-        <p class="mf-reduced-note" data-mf-reduced hidden>Reduced motion is on. Start with a still study; play only when you choose.</p>
+        <p class="mf-reduced-note" data-mf-reduced hidden>Reduced motion · still until Play.</p>
       </section>
       <div class="mf-lower">
         <article class="mf-lesson-notes" id="mf-lesson-notes" aria-labelledby="mf-explanation-title">
@@ -63,7 +66,7 @@ export function mount(context: ProjectContext): ProjectInstance {
           <div class="mf-challenge"><h3>Try this <span aria-hidden="true">↗</span></h3><p data-mf-challenge></p></div>
         </article>
         <aside class="mf-settings" aria-labelledby="mf-settings-title">
-          <header><h2 id="mf-settings-title">Tune the move.</h2><button type="button" class="mf-reset-button" data-mf-reset>Reset settings</button></header>
+          <header><h2 id="mf-settings-title">Tune the move.</h2><button type="button" class="mf-reset-button" data-mf-reset aria-label="Reset settings">Reset</button></header>
           <p class="mf-settings-intro">One clock. Two treatments. Change one thing.</p>
           <div class="mf-parameter">
             <div class="mf-field-top"><label for="mf-duration">Clip duration</label><output for="mf-duration" data-mf-duration-output aria-live="off"></output></div>
@@ -71,8 +74,8 @@ export function mount(context: ProjectContext): ProjectInstance {
             <p class="mf-control-hint" id="mf-duration-hint">Full clip length at 1×. Viewing speed changes the watching rate.</p>
           </div>
           <div class="mf-parameter">
-            <div class="mf-field-top"><label for="mf-amplitude">Expression amplitude</label><output for="mf-amplitude" data-mf-amplitude-output aria-live="off"></output></div>
-            <input id="mf-amplitude" type="range" min="0" max="100" step="1" value="75" data-mf-amplitude aria-describedby="mf-amplitude-hint">
+            <div class="mf-field-top"><label for="mf-amplitude">Amplitude</label><output for="mf-amplitude" data-mf-amplitude-output aria-live="off"></output></div>
+            <input id="mf-amplitude" type="range" min="0" max="100" step="1" value="75" data-mf-amplitude aria-label="Expression amplitude" aria-describedby="mf-amplitude-hint">
             <p class="mf-control-hint" id="mf-amplitude-hint" data-mf-amplitude-hint></p>
           </div>
           <div class="mf-parameter">
@@ -88,7 +91,59 @@ export function mount(context: ProjectContext): ProjectInstance {
         </aside>
       </div>
       <footer class="mf-footer"><strong>Built from time, not tricks.</strong><p>Six original mathematical studies, not claims of physical realism.</p><p id="mf-keyboard-hint">Focus the workbench and press Space to play or pause. Native controls keep their usual keys.</p></footer>
-    </div>`;
+      <nav class="mf-workspace-actions" aria-label="Motion workspace">
+        <button type="button" data-mf-open-lessons>Lessons</button>
+        <button type="button" data-mf-open-principle>Principle &amp; notes</button>
+      </nav>
+    </div>
+    <p class="sr-only" data-mf-announcement role="status" aria-live="polite"></p>`;
+
+  const actions = query<HTMLElement>(page.root, '.mf-workspace-actions');
+  actions.append(query(page.root, '[data-mf-reset]'));
+  query(page.root, '.mf-study-heading').append(query(page.root, '.mf-guide-toggle'));
+  const notes = query<HTMLElement>(page.root, '.mf-lesson-notes');
+  notes.prepend(query(page.root, '[data-mf-study-number]'));
+  notes.append(
+    query(page.root, '.mf-settings > header'),
+    query(page.root, '.mf-settings-intro'),
+    ...page.root.querySelectorAll<HTMLElement>('.mf-control-hint'),
+    query(page.root, '.mf-model-note'),
+    query(page.root, '.mf-guide-row'),
+    query(page.root, '.mf-transport-notes'),
+    query(page.root, '.mf-footer'),
+  );
+  createWorkspaceDialog(page, {
+    id: 'mf-lessons-dialog', title: 'Choose a motion lesson',
+    triggers: [query(page.root, '[data-mf-open-lessons]')],
+    content: [query(page.root, '.mf-lessons')],
+  });
+  createWorkspaceDialog(page, {
+    id: 'mf-principle-dialog', title: 'Principle & notes',
+    triggers: [query(page.root, '[data-mf-open-principle]')],
+    content: [notes],
+  });
+  const comparison = window.matchMedia('(max-width: 740px)');
+  const scenePanels = ['plain', 'expressive'].map(id => ({
+    id, label: id === 'plain' ? 'Plain' : 'Expressive',
+    panel: query<HTMLElement>(page.root, `[data-mf-scene="${id}"]`),
+  }));
+  function syncComparison() {
+    for (const { panel } of scenePanels) {
+      const inactive = comparison.matches && panel.hasAttribute('data-workspace-inactive');
+      panel.inert = inactive;
+      panel.setAttribute('aria-hidden', String(inactive));
+    }
+    const phase = query<HTMLElement>(page.root, '[data-mf-phase]');
+    if (comparison.matches) notes.prepend(phase);
+    else query(page.root, '.mf-study-heading').insertBefore(phase, query(page.root, '.mf-guide-toggle'));
+  }
+  createWorkspaceTabs(page, {
+    id: 'mf-comparison', label: 'Comparison treatment',
+    host: query(page.root, '.mf-scene-tabs'), panes: scenePanels,
+    initial: 'expressive', preserveLayout: true, onSelect: syncComparison,
+  });
+  comparison.addEventListener('change', syncComparison, { signal: page.signal });
+  syncComparison();
 
   const playButton = query<HTMLButtonElement>(page.root, '[data-mf-play]');
   const playLabel = query<HTMLElement>(page.root, '[data-mf-play-label]');
@@ -103,6 +158,7 @@ export function mount(context: ProjectContext): ProjectInstance {
   const easingInput = query<HTMLSelectElement>(page.root, '[data-mf-easing]');
   const guidesInput = query<HTMLInputElement>(page.root, '[data-mf-guides]');
   const status = query<HTMLElement>(page.root, '[data-mf-status]');
+  const announcement = query<HTMLElement>(page.root, '[data-mf-announcement]');
   const phaseLabel = query<HTMLElement>(page.root, '[data-mf-phase]');
   const reducedNote = query<HTMLElement>(page.root, '[data-mf-reduced]');
   const lessonButtons = Array.from(page.root.querySelectorAll<HTMLButtonElement>('[data-mf-lesson]'));
@@ -117,6 +173,7 @@ export function mount(context: ProjectContext): ProjectInstance {
 
   function announce(message: string, report = false) {
     status.textContent = message;
+    announcement.textContent = status.closest('dialog')?.open ? '' : message;
     if (report) page.report(message);
   }
 
@@ -215,7 +272,7 @@ export function mount(context: ProjectContext): ProjectInstance {
     page.root.classList.remove('mf-guides-hidden');
     syncSettings();
     configureScenes();
-    announce('Default settings restored. Paused on this principle’s study frame.', true);
+    announce('Default settings restored. Paused on this principle’s study frame.');
   }
 
   for (const button of lessonButtons) {
@@ -277,7 +334,7 @@ export function mount(context: ProjectContext): ProjectInstance {
   preference.addEventListener('change', () => {
     setPaused(true);
     reducedNote.hidden = !preference.matches;
-    announce('Motion preference changed. Playback is paused; press Play when you are ready.', true);
+    announce('Motion preference changed. Playback is paused; press Play when you are ready.');
   }, { signal: page.signal });
 
   syncSettings();

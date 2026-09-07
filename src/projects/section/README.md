@@ -130,10 +130,28 @@ Workers, observers, event listeners, RAF, geometries and materials are disposed 
 unmount. Rendering is on demand, DPR <= 1.5, with no auto-motion even without a
 reduced-motion preference.
 
-At 320/375 px, Solid/Section tabs expose full-size geometry panes rather than a
-shrunk CAD desktop. The operation inspector stacks below the linked workbench.
-All essential controls have numeric/keyboard access. Files are local downloads;
-the current unsaved document intentionally lasts only for this mount.
+The root's `data-workspace="true"` allocates one dynamic viewport to the atelier.
+Desktop keeps both linked views beside the bounded inspector; mobile keeps a
+live Solid/Section view and the cut rail above that inspector. Solid/Section tabs
+retain both render hosts' dimensions while the inactive view is invisible and
+inert, so resizing or computing in the other view never introduces zero-size
+camera math. The renderer's existing ResizeObserver continues to resize its
+buffer and orthographic projection without resetting model or camera state.
+
+Construction, Cut plane, Results and Studies are keyboard-operated inspector
+tabs at every size. Their shared, bounded scroll region contains long operation
+lists, shape fields, measurements, resolution and study notes. Cut offset,
+undo/redo and reset stay outside this scroll region. Surface picking selects the
+construction tab and reveals its operand inspector without scrolling the page.
+The plane shortcut selects and focuses its tab without a document scroll.
+Files & guide opens a lifetime-scoped native dialog containing JSON/STL/SVG
+actions and the complete methods/keyboard notes. Import closes it when a file is
+chosen so completion and validation errors remain visible in the status region;
+Escape/Close restore the trigger focus. Files remain local downloads and the
+current unsaved document intentionally lasts only for this mount.
+The existing live-status strip reserves local bottom-right collection-menu
+clearance. Keep inspector controls above it and status text out of its final
+64 px; no shared header or empty footer is required.
 
 ## Extension and integration
 
@@ -166,4 +184,11 @@ Boolean solid near 119 mm world coordinates, and 45-degree rotated boxes at all
 three resolutions. They inspect directed shared edges, stored-facet area,
 buffer/count/bounds/volume agreement and every binary STL facet.
 `tests/projects/section-workflows.spec.ts` covers reset origins across undo/redo,
-same-title and origin-only imports, study switches and complete JSON downloads.
+same-title and origin-only imports, study switches and complete JSON downloads,
+plus mobile pane/edit/view, geometry exports and bounded inspector interaction.
+`tests/workspaces/spatial.spec.ts` checks viewport bounds, render buffers, tab
+hit targets, keyboard selection and dialogs at 1440x900, 1280x720, 375x812,
+320x640 and 768x480. Extend the existing `panels` declaration for supplemental
+inspector data; keep render regions and primary cut/history controls outside
+its scroller. Existing `data-panel`/`data-view-tab` hooks are retained alongside
+the shared semantic tab identifiers.

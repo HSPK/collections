@@ -105,3 +105,83 @@
   .project-perspective-paradox h3 { margin-top: 10px; }
   .project-perspective-paradox .paradox-footer { flex-direction: column; gap: 8px; }
 }
+
+.project-perspective-paradox[data-workspace] {
+  --workspace-paper: #f5f3ec;
+  box-sizing: border-box;
+  height: 100dvh;
+  min-height: 0;
+  padding: 0 20px;
+  display: grid;
+  grid-template-rows: 88px minmax(0, 1fr) 184px 64px;
+}
+.project-perspective-paradox .paradox-masthead { min-height: 0; padding: 8px 0; gap: 18px; }
+.project-perspective-paradox .paradox-edition { margin-right: 0; }
+.project-perspective-paradox .paradox-notes-toggle { margin-left: auto; flex-shrink: 0; }
+.project-perspective-paradox .paradox-workbench { min-height: 0; margin: 0; display: grid; grid-template-rows: 38px minmax(0, 1fr); }
+.project-perspective-paradox .paradox-drawing-head { padding: 6px 14px; align-items: center; }
+.project-perspective-paradox .paradox-scene { height: auto; min-height: 0; }
+.project-perspective-paradox .paradox-instruments { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: 44px minmax(0, 1fr); min-height: 0; padding: 0; gap: 0; }
+.project-perspective-paradox .workspace-tabs { gap: 0; }
+.project-perspective-paradox .workspace-tabs > button { min-height: 44px; border-color: var(--paradox-line); }
+.project-perspective-paradox .workspace-tabs > button[aria-selected="true"] { background: #e5e8dc; }
+.project-perspective-paradox .workspace-pane { min-height: 0; min-width: 0; padding: 8px 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.project-perspective-paradox .paradox-viewbar { border: 1px solid var(--paradox-line); }
+.project-perspective-paradox .paradox-viewbar button { min-height: 44px; padding: 6px 14px; }
+.project-perspective-paradox .paradox-transport { margin-top: 8px; flex-wrap: nowrap; }
+.project-perspective-paradox .paradox-transport button { min-height: 44px; padding: 6px 12px; }
+.project-perspective-paradox .paradox-settings-pane { display: grid; grid-template-columns: 1fr 1fr 1fr; align-content: start; gap: 20px; padding: 12px 0; }
+.project-perspective-paradox .paradox-range input { height: 44px; }
+.project-perspective-paradox .paradox-status { padding: 7px 64px 5px 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.project-perspective-paradox :is(.paradox-brand span, h1 span, .paradox-edition b,
+  .paradox-drawing-head, .paradox-drawing-scale, .paradox-scene-note > span,
+  .paradox-alignment > span, .paradox-alignment small, .paradox-view-label,
+  .paradox-viewbar button > span, .paradox-transport p, .paradox-guides p,
+  .paradox-range output, .paradox-range small, .paradox-status,
+  .paradox-notebook-title > p:first-child, .paradox-notebook-title > p:last-child,
+  .paradox-notebook article > span, .paradox-footer) { font-size: 14px; }
+.project-perspective-paradox .paradox-notebook { grid-template-columns: 1fr 1fr; padding: 22px 0; gap: 24px; }
+.project-perspective-paradox .paradox-footer { padding: 14px 0; flex-wrap: wrap; }
+@media (max-width: 640px) {
+  .project-perspective-paradox[data-workspace] { padding: 0 10px; grid-template-rows: 78px minmax(0, 1fr) 190px 64px; }
+  .project-perspective-paradox .paradox-masthead { gap: 7px; }
+  .project-perspective-paradox .paradox-brand { display: none; }
+  .project-perspective-paradox h1 { font-size: 23px; max-width: 205px; line-height: 1.05; }
+  .project-perspective-paradox h1 span { margin-top: 5px; font-size: 14px; letter-spacing: 0; }
+  .project-perspective-paradox .paradox-notes-toggle { min-height: 44px; padding: 5px 7px; width: 77px; }
+  .project-perspective-paradox .paradox-workbench { grid-template-rows: 34px minmax(0, 1fr); }
+  .project-perspective-paradox .paradox-drawing-head { padding: 4px 8px; font-size: 14px; }
+  .project-perspective-paradox .paradox-drawing-scale { display: none; }
+  .project-perspective-paradox .workspace-pane { padding: 4px 0; }
+  .project-perspective-paradox .paradox-viewbar { grid-template-columns: 1fr 1fr; }
+  .project-perspective-paradox .paradox-viewbar button { padding: 4px 10px; gap: 7px; font-size: 14px; }
+  .project-perspective-paradox .paradox-viewbar button:first-child { grid-column: 1 / -1; }
+  .project-perspective-paradox .paradox-viewbar button:nth-child(2) { border-left: 0; border-top: 1px solid var(--paradox-line); }
+  .project-perspective-paradox .paradox-viewbar button:nth-child(3) { border-top: 1px solid var(--paradox-line); }
+  .project-perspective-paradox .paradox-transport { margin-top: 4px; gap: 6px; }
+  .project-perspective-paradox .paradox-transport button { flex: 1; padding: 4px 6px; }
+  .project-perspective-paradox .paradox-settings-pane { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4px 14px; padding-top: 8px; }
+  .project-perspective-paradox .paradox-range > span { flex-wrap: wrap; gap: 0 4px; line-height: 1.4; }
+  .project-perspective-paradox .paradox-range small { display: none; }
+  .project-perspective-paradox .paradox-guides { grid-column: 1 / -1; }
+  .project-perspective-paradox .paradox-guides button { min-height: 44px; padding: 5px 12px; }
+  .project-perspective-paradox .paradox-guides p { display: none; }
+  .project-perspective-paradox .paradox-scene-note { top: 12px; left: 12px; }
+  .project-perspective-paradox .paradox-scene-note p { font-size: 20px; }
+  .project-perspective-paradox .paradox-alignment { min-width: 0; width: 142px; max-width: none; right: 10px; top: 12px; padding-left: 8px; }
+  .project-perspective-paradox .paradox-alignment > span:last-child { display: none; }
+  .project-perspective-paradox .paradox-notebook { grid-template-columns: 1fr; }
+}
+@media (max-height: 540px) and (min-width: 641px) {
+  .project-perspective-paradox[data-workspace] { grid-template-columns: minmax(0, 1fr) 290px; grid-template-rows: 68px minmax(0, 1fr) 64px; gap: 0 12px; padding-inline: 12px; }
+  .project-perspective-paradox .paradox-masthead { grid-column: 1 / -1; }
+  .project-perspective-paradox .paradox-instruments { grid-column: 2; grid-row: 2; }
+  .project-perspective-paradox .paradox-status { grid-column: 1 / -1; }
+  .project-perspective-paradox .paradox-viewbar { grid-template-columns: minmax(0, 1fr); }
+  .project-perspective-paradox .paradox-viewbar button + button { border-left: 0; border-top: 1px solid var(--paradox-line); }
+  .project-perspective-paradox .paradox-transport { flex-wrap: wrap; }
+  .project-perspective-paradox .paradox-settings-pane { grid-template-columns: minmax(0, 1fr); gap: 5px; }
+  .project-perspective-paradox .paradox-range small, .project-perspective-paradox .paradox-guides p,
+  .project-perspective-paradox .paradox-scene-note p, .project-perspective-paradox .paradox-drawing-scale,
+  .project-perspective-paradox .paradox-view-label span:last-child { display: none; }
+}

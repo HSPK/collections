@@ -1,5 +1,6 @@
 import './style.css';
 import { createProjectPage, escapeMarkup, query } from '../../core/page';
+import { createWorkspaceDialog, createWorkspaceTabs } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { CASES } from './data';
 import type { CaseFile, Evidence, Person } from './data';
@@ -18,6 +19,8 @@ interface Investigation {
   result: Conclusion | null;
   solved: boolean;
   confirmRestart: boolean;
+  pane: string;
+  paneScroll: Record<string, number>;
 }
 
 function newInvestigation(file: CaseFile): Investigation {
@@ -33,6 +36,8 @@ function newInvestigation(file: CaseFile): Investigation {
     result: null,
     solved: false,
     confirmRestart: false,
+    pane: 'evidence',
+    paneScroll: {},
   };
 }
 
@@ -101,22 +106,25 @@ function exhibitIcon(kind: Evidence['kind']): string {
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'detective');
   const { root, signal } = page;
+  root.dataset.workspace = 'true';
   const investigations = CASES.map(newInvestigation);
   let activeCase = 0;
+  let renderedState = investigations[0];
 
   root.innerHTML = `
     <div class="td-shell">
+      <div class="td-workspace-heading"><h1>The Tiny <em>Detective.</em></h1><div><button type="button" class="td-secondary" data-library>Cases</button><button type="button" class="td-secondary" data-guide>Bureau guide</button></div></div>
       <header class="td-masthead">
         <div class="td-masthead-top"><span class="td-wordmark">The tiny casework bureau</span><span class="td-edition">A casebook of everyday curiosities</span></div>
         <div class="td-title-row">
-          <div><p class="td-eyebrow">Small mysteries. Excellent questions.</p><h1>The Tiny<br><em>Detective.</em></h1>
+          <div><p class="td-eyebrow">Small mysteries. Excellent questions.</p><h2>The Tiny<br><em>Detective.</em></h2>
             <p class="td-intro">A missing cake. A wayward parcel. A label on the loose. Three little mysteries for a very observant mind.</p></div>
           <div class="td-bureau-seal" aria-hidden="true">
             <svg viewBox="0 0 190 200" focusable="false"><path d="m103 112 45 57" stroke="#ddaf79" stroke-width="19" stroke-linecap="round"/><path d="m101 116 42 53" stroke="#493243" stroke-width="5" stroke-linecap="round"/><circle cx="80" cy="78" r="52" fill="#f5e8ce" stroke="#ddaf79" stroke-width="8"/><circle cx="80" cy="78" r="42" fill="none" stroke="#493243" stroke-width="2"/><path d="m63 85 12 12 24-36" fill="none" stroke="#647b69" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><path d="M134 39h18m-9-9v18M29 145h12m-6-6v12" stroke="#ddaf79" stroke-width="3"/><path d="M36 118q-8 23 17 32" fill="none" stroke="#ddaf79" stroke-width="2" stroke-dasharray="4 5"/></svg>
             <span>Notice.<br>Connect.<br>Explain.</span>
           </div>
         </div>
-        <div class="td-masthead-bottom"><span>Three original, nonviolent cases</span><a href="#td-case-files">Open the case files <span aria-hidden="true">&darr;</span></a></div>
+        <div class="td-masthead-bottom"><span>Three original, nonviolent cases</span><button class="td-secondary" type="button" data-action="case-desk">Open the case files <span aria-hidden="true">&rarr;</span></button></div>
       </header>
 
       <nav id="td-case-files" class="td-case-library" aria-label="Choose a mystery"></nav>
@@ -135,6 +143,26 @@ export function mount(context: ProjectContext): ProjectInstance {
   const library = query<HTMLElement>(root, '.td-case-library');
   const caseView = query<HTMLElement>(root, '[data-case-view]');
   const live = query<HTMLElement>(root, '[data-live]');
+  const libraryDialog = createWorkspaceDialog(page, {
+    id: 'td-library', title: 'Choose a mystery', content: [library],
+    triggers: [query(root, '[data-library]')],
+  });
+  const guideDialog = createWorkspaceDialog(page, {
+    id: 'td-guide', title: 'The bureau guide',
+    content: [query(root, '.td-masthead'), query(root, '.td-how-to'), query(root, '.td-footer')],
+    triggers: [query(root, '[data-guide]')],
+  });
+  query<HTMLDetailsElement>(root, '.td-how-to').open = true;
+  const scene = document.createElement('div');
+  const reasoning = document.createElement('div');
+  const verdict = document.createElement('div');
+  const restart = document.createElement('div');
+  const sceneDialog = createWorkspaceDialog(page, { id: 'td-scene', title: 'Scene and case rules', content: [scene] });
+  const reasoningDialog = createWorkspaceDialog(page, { id: 'td-reasoning', title: 'Your pinned reasoning', content: [reasoning] });
+  const verdictDialog = createWorkspaceDialog(page, { id: 'td-result', title: 'Conclusion review', content: [verdict] });
+  const restartDialog = createWorkspaceDialog(page, { id: 'td-restart', title: 'Restart this case?', content: [restart] });
+  let paneEvents = new AbortController();
+  page.onCleanup(() => paneEvents.abort());
 
   function announce(message: string) {
     live.textContent = message;
@@ -155,9 +183,10 @@ export function mount(context: ProjectContext): ProjectInstance {
       const expanded = state.expanded.has(evidence.id);
       return `<article class="td-exhibit ${expanded ? 'is-open' : ''} ${state.pinned.has(evidence.id) ? 'is-pinned' : ''}">
         <h4><button type="button" class="td-exhibit-toggle" data-action="evidence" data-id="${evidence.id}" data-focus="exhibit-${evidence.id}" aria-expanded="${expanded}" aria-controls="td-evidence-${evidence.id}">
-          ${exhibitIcon(evidence.kind)}<span><span class="td-exhibit-label">Exhibit ${evidence.letter} <span>${state.inspected.has(evidence.id) ? 'Read' : 'Unread'}</span></span><span class="td-exhibit-title">${escapeMarkup(evidence.title)}</span><span class="td-exhibit-teaser">${escapeMarkup(evidence.teaser)}</span></span><span class="td-open-mark" aria-hidden="true">${expanded ? '&minus;' : '+'}</span>
+          ${exhibitIcon(evidence.kind)}<span><span class="td-exhibit-label"><b><span class="td-exhibit-prefix">Exhibit </span>${evidence.letter}</b><span>${state.inspected.has(evidence.id) ? 'Read' : 'Unread'}</span></span><span class="td-exhibit-title">${escapeMarkup(evidence.title)}</span></span><span class="td-open-mark" aria-hidden="true">${expanded ? '&minus;' : '+'}</span>
         </button></h4>
         <div class="td-exhibit-detail" id="td-evidence-${evidence.id}" ${expanded ? '' : 'hidden'}>
+          <p class="td-exhibit-teaser">${escapeMarkup(evidence.teaser)}</p>
           ${evidence.paragraphs.map((paragraph) => `<p>${escapeMarkup(paragraph)}</p>`).join('')}
           <label class="td-pin-control"><input type="checkbox" data-pin="${evidence.id}" data-focus="pin-${evidence.id}" ${state.pinned.has(evidence.id) ? 'checked' : ''} ${state.solved ? 'disabled' : ''}><span>Pin exhibit ${evidence.letter} to my reasoning</span></label>
         </div>
@@ -225,7 +254,11 @@ export function mount(context: ProjectContext): ProjectInstance {
     </aside>`;
   }
 
-  function renderCase(focusKey?: string, scroll = false) {
+  function renderCase(focusKey?: string) {
+    const previousPane = caseView.querySelector<HTMLElement>('.workspace-pane:not([hidden])');
+    if (previousPane) renderedState.paneScroll[renderedState.pane] = previousPane.scrollTop;
+    paneEvents.abort();
+    paneEvents = new AbortController();
     const file = CASES[activeCase];
     const state = investigations[activeCase];
     const pinned = file.evidence.filter((evidence) => state.pinned.has(evidence.id));
@@ -247,7 +280,7 @@ export function mount(context: ProjectContext): ProjectInstance {
             <p>Open each exhibit. Pin the ones that help identify a person; some details only explain the story.</p>
             <div class="td-evidence-grid">${renderEvidence(file, state)}</div>
           </section>
-          <form class="td-conclusion-form" data-conclusion>
+          <form id="td-conclusion-form" class="td-conclusion-form" data-conclusion>
             <fieldset class="td-people"><legend><span class="td-section-label">02 / Compare the people</span><span>${escapeMarkup(file.question)}</span></legend>
               <p>Read the records, choose your current theory, or rule someone out in pencil. A ruled-out person can always be restored.</p>
               <div class="td-people-grid">${renderPeople(file, state)}</div>
@@ -255,7 +288,7 @@ export function mount(context: ProjectContext): ProjectInstance {
             <section class="td-conclusion" aria-labelledby="td-conclusion-title"><span class="td-section-label">03 / Connect the clues</span><h3 id="td-conclusion-title">Present your case.</h3>
               <p>Choose a person and pin enough identifying exhibits to leave only one possible answer. Pencil eliminations are not evidence.</p>
               <div class="td-pinned-list" aria-label="Evidence in your reasoning">${pinned.length ? pinned.map((evidence) => `<span><strong>${evidence.letter}</strong> ${escapeMarkup(evidence.title)}</span>`).join('') : '<p>No exhibits pinned yet. Open one above to add it.</p>'}</div>
-              <div class="td-submit-row"><button class="td-primary" type="submit" ${state.solved ? 'disabled' : ''}>${state.solved ? 'Case closed' : 'File my conclusion'} <span aria-hidden="true">${state.solved ? '&#10003;' : '&rarr;'}</span></button><span class="td-small">${state.theories ? `${state.theories} ${state.theories === 1 ? 'theory' : 'theories'} presented. ` : ''}No penalty for thinking again.</span></div>
+              <div class="td-submit-row"><span class="td-small">${state.theories ? `${state.theories} ${state.theories === 1 ? 'theory' : 'theories'} presented. ` : ''}No penalty for thinking again.</span></div>
             </section>
           </form>
           ${renderVerdict(file, state)}
@@ -267,16 +300,69 @@ export function mount(context: ProjectContext): ProjectInstance {
       </footer>
       ${state.confirmRestart ? `<section class="td-restart-confirm" aria-labelledby="td-restart-title"><h3 id="td-restart-title">A fresh sheet for this case?</h3><p>This clears this case's notes, evidence pins, eliminations, and conclusion. Your other case files stay as they are.</p><div><button type="button" class="td-primary" data-action="confirm-restart" data-focus="confirm-restart">Yes, restart this case</button><button type="button" class="td-secondary" data-action="cancel-restart">Keep investigating</button></div></section>` : ''}
     </article>`;
+    scene.replaceChildren(
+      query(caseView, '.td-case-heading .td-eyebrow'),
+      query(caseView, '.td-case-summary'), query(caseView, '.td-case-meta'),
+      query(caseView, '.td-illustration-card'), query(caseView, '.td-briefing'),
+      query(caseView, '.td-section-heading'), query(caseView, '.td-exhibits > p'),
+      query(caseView, '.td-case-footer > div:first-child'),
+    );
+    reasoning.replaceChildren(query(caseView, '.td-conclusion'));
+    verdict.replaceChildren(...caseView.querySelectorAll<HTMLElement>('.td-verdict'));
+    restart.replaceChildren(...caseView.querySelectorAll<HTMLElement>('.td-restart-confirm'));
+    const article = query<HTMLElement>(caseView, '.td-case');
+    const heading = query<HTMLElement>(caseView, '.td-case-heading');
+    heading.insertAdjacentHTML('beforeend', '<button class="td-secondary" type="button" data-action="scene" aria-haspopup="dialog">Scene & rules</button>');
+    const tabsHost = document.createElement('div');
+    const panesHost = document.createElement('div');
+    panesHost.className = 'td-pane-stack';
+    const evidence = query<HTMLElement>(caseView, '.td-exhibits');
+    const people = query<HTMLElement>(caseView, '.td-conclusion-form');
+    const notebook = query<HTMLElement>(caseView, '.td-sidebar');
+    panesHost.append(evidence, people, notebook);
+    query(caseView, '.td-investigation-layout').remove();
+    const footer = query<HTMLElement>(caseView, '.td-case-footer');
+    footer.insertAdjacentHTML('afterbegin', `<div class="td-desk-actions"><button type="button" class="td-secondary" data-action="reasoning" aria-haspopup="dialog">${pinned.length} pinned · Reasoning</button><button class="td-primary" ${state.solved ? 'type="button" data-action="result"' : 'type="submit" form="td-conclusion-form"'}>${state.solved ? 'Read solved case' : 'File my conclusion'}</button></div>`);
+    article.insertBefore(tabsHost, footer);
+    article.insertBefore(panesHost, footer);
+    createWorkspaceTabs({ ...page, signal: paneEvents.signal }, {
+      id: 'td-desk', label: 'Investigation desk', host: tabsHost, initial: state.pane,
+      panes: [
+        { id: 'evidence', label: 'Evidence', panel: evidence },
+        { id: 'people', label: 'People', panel: people },
+        { id: 'notes', label: 'Notes & timeline', panel: notebook },
+      ],
+      onSelect: id => { state.pane = id; },
+    });
+    for (const panel of [evidence, people, notebook]) {
+      const id = panel === evidence ? 'evidence' : panel === people ? 'people' : 'notes';
+      panel.scrollTop = state.paneScroll[id] ?? 0;
+      panel.addEventListener('scroll', () => { state.paneScroll[id] = panel.scrollTop; }, { signal: paneEvents.signal });
+    }
+    renderedState = state;
+    if (focusKey === 'verdict') {
+      reasoningDialog.close();
+      verdictDialog.open();
+    }
+    if (focusKey === 'confirm-restart') restartDialog.open();
     if (focusKey) {
-      root.querySelector<HTMLElement>(`[data-focus="${CSS.escape(focusKey)}"]`)?.focus({ preventScroll: !scroll });
+      const target = root.querySelector<HTMLElement>(`[data-focus="${CSS.escape(focusKey)}"]`);
+      target?.focus({ preventScroll: true });
+      if (target?.closest('.workspace-pane')) target.scrollIntoView({ block: 'nearest' });
     }
   }
 
   function chooseCase(index: number) {
     if (!CASES[index]) throw new Error(`Unknown case index: ${index}`);
     activeCase = index;
+    libraryDialog.close();
+    verdictDialog.close();
+    sceneDialog.close();
+    reasoningDialog.close();
+    restartDialog.close();
     renderLibrary();
-    renderCase('case-title', true);
+    renderCase('case-title');
+    if (investigations[index].solved) verdictDialog.open();
     announce(`Case ${CASES[index].number}: ${CASES[index].title}. Your other case files stay on the desk.`);
   }
 
@@ -290,6 +376,12 @@ export function mount(context: ProjectContext): ProjectInstance {
     const id = button.dataset.id;
     if (action === 'choose-case') {
       chooseCase(CASES.findIndex((item) => item.id === id));
+    } else if (action === 'scene') {
+      sceneDialog.open();
+    } else if (action === 'reasoning') {
+      reasoningDialog.open();
+    } else if (action === 'result') {
+      verdictDialog.open();
     } else if (action === 'evidence') {
       const evidence = file.evidence.find((item) => item.id === id);
       if (!evidence) throw new Error('The selected exhibit is not in this case.');
@@ -313,20 +405,24 @@ export function mount(context: ProjectContext): ProjectInstance {
       announce(`${person.name} ${restoring ? 'is back among your possibilities' : 'is ruled out in your pencil notes'}. This is your deduction, not a confirmed alibi.`);
     } else if (action === 'restart') {
       state.confirmRestart = true;
-      renderCase('confirm-restart', true);
+      renderCase('confirm-restart');
     } else if (action === 'cancel-restart') {
       state.confirmRestart = false;
+      restartDialog.close();
       renderCase('restart');
     } else if (action === 'confirm-restart') {
       investigations[activeCase] = newInvestigation(file);
+      restartDialog.close();
+      verdictDialog.close();
       renderLibrary();
-      renderCase('case-title', true);
+      renderCase('case-title');
       announce(`${file.title} has a fresh sheet. The other case files are unchanged.`);
     } else if (action === 'next') {
       chooseCase((activeCase + 1) % CASES.length);
     } else if (action === 'case-desk') {
-      query<HTMLButtonElement>(library, `[data-id="${file.id}"]`).focus();
-      library.scrollIntoView({ block: 'start' });
+      guideDialog.close();
+      libraryDialog.open();
+      query<HTMLButtonElement>(library, `[data-id="${file.id}"]`).focus({ preventScroll: true });
     }
   }, { signal });
 
@@ -375,7 +471,7 @@ export function mount(context: ProjectContext): ProjectInstance {
     if (state.personId && state.pinned.size) state.theories += 1;
     state.solved = state.result.kind === 'solved';
     renderLibrary();
-    renderCase('verdict', true);
+    renderCase('verdict');
     announce(state.result.headline);
   }, { signal });
 

@@ -16,9 +16,17 @@ undo/redo, and A4/US Letter SVG export. No network services or extra packages.
 - `state.ts`: validated local storage and bounded, immutable undo history.
 - `index.ts` / `style.css`: the complete site; styles stay under `.project-zine`.
 
-The reading worktable leads the page; the starter library follows it and is
-linked from the compact masthead. `Edit text` jumps to the current page's editor.
-On mobile, the reading copy stays ahead of the fields without shrinking text.
+The reading worktable fills the remaining viewport height rather than the document.
+Desktop shows the reading copy and writing fields together. Narrow and short
+screens use **Reading copy / Write** tabs; **Edit text** opens and focuses the
+current editor without moving the document. Long writing scrolls only inside its
+reading copy or text area. Shared previous/next controls retain the selected page
+across panes and ink changes. **All pages**, **Starter library**, **How to fold**,
+**Ink & export**, and **Draft & save details** are labeled native dialogs with
+Escape/Close and restored trigger focus. The original explanations, starter
+gallery, artwork, fold diagrams, and save warnings remain available in them.
+Validation failures appear immediately in the workspace, with the full text
+preserved and invalid changes excluded from local storage and export.
 `data-project-preview` marks the worktable rather than the branding.
 
 To add a starter, provide eight `{ heading, body }` pages in `data.ts`.
@@ -53,7 +61,11 @@ Print **landscape, single-sided, 100% / actual size**, on the matching paper.
 Disable fit/shrink, page margins, headers, and footers. Artwork has 6 mm safe
 margins within every panel. Optional dashed gray folds and a solid red cut are
 part of the exported SVG. No page-print button is offered: collection chrome
-can never enter the downloaded sheet.
+can never enter the downloaded sheet. Browser printing also prepares a separate
+physical-size sheet in `beforeprint`; screen-only flex heights and hidden panes
+never constrain printed pages. A4 and Letter use their own landscape `@page`
+size and zero margins. Invalid drafts print an explicit warning instead of a
+stale or cropped sheet.
 
 ## Text and drafts
 
@@ -86,6 +98,12 @@ Unicode and whitespace preservation, fit rejection, valid/safe/complete SVG,
 storage errors, and undo/redo. Browser tests mount this module in a routed test
 fixture, independent of the collection frontend, and exercise editing, keyboard
 navigation, persistence, downloads, over-budget recovery, and abort/remount.
+Standalone workflows additionally cover 1440×900, 1280×720, 375×812, 320×640,
+768×480, theme/selection retention, reversible resets, and screenshot artifacts.
+Print-media tests verify all eight panels and actual millimeter dimensions from
+a small-screen session on both papers.
+The browser fixture isolates only Vite's development-reload socket, preventing
+unrelated site edits from resetting a live writing session during validation.
 If no development server is ready, engine tests can run without one:
 
 ```sh

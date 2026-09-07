@@ -80,9 +80,18 @@ wave phase and `CYCLE_SECONDS` in agreement if changing the cycle.
 - Reset restores coast, tide, light, and phase without changing playback.
 - Sliders, orbiting, resizing, and preference changes invalidate a held frame.
   A paused scene has no continuing camera or simulation movement.
-- All essential labels are at least 12 px, body notes are 15 px, and controls
-  have at least 44 px interaction height. The scene begins after a compact
-  105–112 px masthead; the instruments stack below it on narrow screens.
+- All essential labels are at least 14 px, body notes are 15 px, and controls
+  have at least 44 px interaction height. The viewport-height root carries
+  `data-workspace="true"`. Its real grid allocation shrinks the WebGL surface
+  rather than scaling the whole page or clipping a tall canvas.
+- The sea, three viewpoints, zoom, tide, daylight, phase, playback, and reset
+  remain on one screen. Narrow layouts place tide/daylight side by side above
+  the transport. Resize uses the existing spatial observer, camera aspect, and
+  on-demand invalidation without resetting the held phase or camera position.
+- **Station notebook** opens the original notes, camera help, and live mooring
+  readings in a native dialog using `core/workspace.ts`. Only this secondary
+  surface and the bounded status area scroll. Escape/Close restores focus to
+  the launcher; the floating collection menu retains its lower-right space.
 
 ## Resources and rendering budget
 
@@ -105,7 +114,7 @@ error boundary; they are never silently swallowed.
 
 ## Focused verification
 
-`tests/series/tidal-observatory.spec.ts` has three Playwright tests covering:
+`tests/series/tidal-observatory.spec.ts` has four Playwright tests covering:
 
 1. Actual mesh/vessel waterline agreement at both tide endpoints; agreement
    with the exported pure surface sampler; deterministic phase/beacon looping.
@@ -115,10 +124,22 @@ error boundary; they are never silently swallowed.
    buffer/program deletion plus canvas removal on collection navigation.
    Disposal counts persist across the site's full-document navigation, rather
    than attempting to inspect a handle from the previous JavaScript context.
+4. 1440×900, 1280×720, 375×812, 320×640, and 768×480 resizing with no document
+   scroll, unchanged paused phase, and actual waterline readings inside the
+   notebook. Viewport screenshots use the configured Playwright artifact path.
+
+Run the focused suite against the existing server (take the shared browser lock
+when other project reviews are running):
+
+```sh
+SITE_URL=http://127.0.0.1:4173/ npm test -- tests/series/tidal-observatory.spec.ts --reporter=dot
+```
 
 Stable selectors: `[data-tidal-scene]`, `[data-tidal-host]`,
 `[data-tidal-canvas]`, `[data-tidal-view="coast|lantern|harbor"]`,
 `[data-tidal-play]`, `[data-tidal-status]`, and the labelled sliders.
+The notebook launcher is `[data-tidal-notes]`; its dialog is
+`#tidal-notebook-dialog`.
 `data-ready`, `data-view`, `data-scene-time`, `data-tide`, `data-daylight`,
 `data-water-height`, `data-float-height`, `data-beacon-angle`, and `data-camera`
 describe actual station/scene state, not synthetic test state.

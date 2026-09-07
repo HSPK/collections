@@ -4,6 +4,7 @@ import { createLoop } from '../../core/loop';
 import { clamp, lerp } from '../../core/math';
 import { createProjectPage, escapeMarkup, query } from '../../core/page';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
+import { createWorkspaceTabs } from '../../core/workspace';
 import {
   BRUSH_DIAMETER, BRUSH_MODES, DEFAULT_WATCH, DISCOVERIES, FAMILY_NAMES,
   MAX_PATCHES, MODE_BY_ID, OBJECTS,
@@ -30,6 +31,7 @@ interface PointerStroke {
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'time-brush');
   const { root, signal } = page;
+  root.dataset.workspace = 'true';
   root.innerHTML = `
     <div class="tb-shell">
       <header class="tb-masthead">
@@ -149,6 +151,34 @@ export function mount(context: ProjectContext): ProjectInstance {
         </details>
       </footer>
     </div>`;
+
+  const consolePanel = query<HTMLElement>(root, '.tb-console');
+  const brushPanel = query<HTMLElement>(root, '.tb-brush-panel');
+  const watchPanel = query<HTMLElement>(root, '.tb-watch-panel');
+  const discoveries = query<HTMLElement>(root, '.tb-discoveries');
+  const reference = document.createElement('section');
+  reference.className = 'tb-reference';
+  reference.setAttribute('aria-label', 'Brush instructions');
+  for (const selector of ['.tb-panel-heading', '.tb-brush-description', '#tb-size-help', '.tb-keyboard-note']) {
+    reference.append(query<HTMLElement>(brushPanel, selector));
+  }
+  watchPanel.append(query<HTMLElement>(brushPanel, '.tb-aim-readout'));
+  const tabsHost = document.createElement('div');
+  const panes = [
+    { id: 'brush', label: 'Brush', content: [brushPanel] },
+    { id: 'clock', label: 'Clock', content: [watchPanel] },
+    { id: 'discover', label: 'Discover', content: [discoveries, reference, query<HTMLElement>(root, '.tb-footer')] },
+  ].map(({ id, label, content }) => {
+    const panel = document.createElement('div');
+    panel.className = 'tb-dock-pane';
+    panel.append(...content);
+    return { id, label, panel };
+  });
+  consolePanel.replaceChildren(tabsHost, ...panes.map(pane => pane.panel));
+  const workspaceTabs = createWorkspaceTabs(page, {
+    id: 'tb-tools', label: 'Time painting tools', host: tabsHost, panes,
+    onSelect: () => { finishStroke(false); invalidate(); },
+  });
 
   const stage = query<HTMLElement>(root, '[data-time-stage]');
   const surface = canvas2D(stage, 'Time field painting canvas');
@@ -413,6 +443,7 @@ export function mount(context: ProjectContext): ProjectInstance {
       setBrushDiameter(discovery.radius * 200);
       selectMode(discovery.mode);
       scene.stamp(aim, discovery.mode, discovery.radius);
+      workspaceTabs.select('clock');
       invalidate();
       announce(`${discovery.title}: ${scene.inspect(watch).spec.name} now has a ${formatRate(scene.inspect(watch).rate)} field rate.${paused ? ' Press Play to see it move.' : ''}`);
       return;

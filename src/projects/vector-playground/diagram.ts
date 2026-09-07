@@ -29,6 +29,28 @@ const HANDLES: readonly { id: HandleId; label: string; tone: string }[] = [
 
 let diagramNumber = 0;
 
+function handleHitPolygon(neighbors: readonly Vec2[]): string {
+  let polygon: Vec2[] = [{ x: -22, y: -22 }, { x: 22, y: -22 }, { x: 22, y: 22 }, { x: -22, y: 22 }];
+  // Split overlapping touch areas at the perpendicular bisector, not by SVG paint order.
+  for (const neighbor of neighbors) {
+    const distanceSquared = neighbor.x ** 2 + neighbor.y ** 2;
+    if (distanceSquared === 0) continue;
+    const side = (point: Vec2) => point.x * neighbor.x + point.y * neighbor.y - distanceSquared / 2;
+    const clipped: Vec2[] = [];
+    for (let index = 0; index < polygon.length; index++) {
+      const from = polygon[index], to = polygon[(index + 1) % polygon.length];
+      const fromSide = side(from), toSide = side(to);
+      if ((fromSide <= 0) !== (toSide <= 0)) {
+        const fraction = fromSide / (fromSide - toSide);
+        clipped.push({ x: from.x + fraction * (to.x - from.x), y: from.y + fraction * (to.y - from.y) });
+      }
+      if (toSide <= 0) clipped.push(to);
+    }
+    polygon = clipped;
+  }
+  return polygon.map(point => `${point.x},${point.y}`).join(' ');
+}
+
 export function createDiagram(
   host: HTMLElement,
   signal: AbortSignal,
@@ -43,13 +65,16 @@ export function createDiagram(
   svg.setAttribute('aria-describedby', `${prefix}-description`);
   svg.innerHTML = `
     <desc id="${prefix}-description"></desc>
-    <defs><clipPath id="${prefix}-clip"><rect width="1" height="1"></rect></clipPath></defs>
+    <defs>
+      <clipPath id="${prefix}-clip"><rect width="1" height="1"></rect></clipPath>
+      ${HANDLES.map(({ id }) => `<clipPath id="${prefix}-hit-${id}"><polygon></polygon></clipPath>`).join('')}
+    </defs>
     <g data-vp-grid aria-hidden="true"></g>
     <g data-vp-geometry clip-path="url(#${prefix}-clip)" aria-hidden="true"></g>
     <g data-vp-handles>
       ${HANDLES.map(({ id, tone }) => `
         <g class="vp-handle vp-${tone}" data-vp-handle="${id}" tabindex="0" role="button">
-          <circle class="vp-hit" r="22"></circle>
+          <circle class="vp-hit" r="22" clip-path="url(#${prefix}-hit-${id})"></circle>
           <circle class="vp-focus-ring" r="12"></circle>
           <circle class="vp-grip" r="5.5"></circle>
         </g>`).join('')}
@@ -62,6 +87,7 @@ export function createDiagram(
   const handles = HANDLES.map((handle) => ({
     ...handle,
     element: svg.querySelector<SVGGElement>(`[data-vp-handle="${handle.id}"]`)!,
+    hit: svg.querySelector<SVGPolygonElement>(`#${prefix}-hit-${handle.id} polygon`)!,
   }));
   let width = 760;
   let height = 474;
@@ -227,7 +253,7 @@ export function createDiagram(
       : [state.source, state.direction, project(state.source, state.direction).projected ?? { x: 0, y: 0 }];
     const extentX = Math.max(3.4, ...points.map((point) => Math.abs(point.x) + 0.55));
     const extentY = Math.max(2.8, ...points.map((point) => Math.abs(point.y) + 0.55));
-    unit = drag?.unit ?? Math.min((width - 64) / (2 * extentX), (height - 100) / (2 * extentY));
+    unit = drag?.unit ?? Math.min(Math.max(1, width - 64) / (2 * extentX), Math.max(1, height - 64) / (2 * extentY));
     origin = { x: width / 2, y: height / 2 + 8 };
     svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
     svg.setAttribute('aria-label', state.mode === 'transform' ? 'Matrix transformation diagram' : 'Dot product and projection diagram');
@@ -237,15 +263,19 @@ export function createDiagram(
     clip.setAttribute('height', height.toString());
     drawGrid();
     geometry.innerHTML = state.mode === 'transform' ? drawTransform(state) : drawProjection(state);
+    const visibleHandles = handles.filter(handle => state.mode === 'transform'
+      ? handle.id === 'basis-x' || handle.id === 'basis-y' || handle.id === 'vector'
+      : handle.id === 'source' || handle.id === 'direction');
     for (const handle of handles) {
-      const visible = state.mode === 'transform'
-        ? handle.id === 'basis-x' || handle.id === 'basis-y' || handle.id === 'vector'
-        : handle.id === 'source' || handle.id === 'direction';
+      const visible = visibleHandles.includes(handle);
       handle.element.style.display = visible ? '' : 'none';
       handle.element.setAttribute('tabindex', visible ? '0' : '-1');
       if (!visible) continue;
       const point = getPoint(handle.id, state);
       const location = screen(point);
+      handle.hit.setAttribute('points', handleHitPolygon(visibleHandles
+        .filter(other => other !== handle)
+        .map(other => subtract(screen(getPoint(other.id, state)), location))));
       handle.element.setAttribute('transform', `translate(${location.x}, ${location.y})`);
       handle.element.setAttribute('aria-label', `${handle.label} ${formatVector(point)}. Arrow keys move by 0.1; Shift moves by 0.5.`);
       handle.element.dataset.x = point.x.toString();

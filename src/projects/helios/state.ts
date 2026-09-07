@@ -92,6 +92,12 @@ export class StudyHistory {
   get canUndo(): boolean { return this.past.length > 0; }
   claim(): number { return ++this.epoch; }
   owns(token: number): boolean { return this.alive && this.epoch === token; }
+  advanceTime(time: number): void {
+    if (!this.alive) throw new Error('This observation has been closed.');
+    // A clock tick is not a new user intent: it must not steal a pending file's
+    // ownership. Every explicit edit still goes through commit/claim.
+    this.value = { ...this.value, time: validTime(time) };
+  }
   commit(value: StudyState, remember = true): void {
     if (!this.alive) throw new Error('This observation has been closed.');
     const valid = validateState(value);

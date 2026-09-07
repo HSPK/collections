@@ -1,5 +1,6 @@
 import './style.css';
 import { createProjectPage, query } from '../../core/page';
+import { createWorkspaceDialog, createWorkspaceTabs } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { artwork } from './artwork';
 import { STARTERS, THEMES, makeBlank, makeStarter } from './data';
@@ -16,6 +17,7 @@ let mountedCount = 0;
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'zine');
   const { root, signal } = page;
+  root.dataset.workspace = 'true';
   const id = `zine-${++mountedCount}`;
   const storageAccess = () => window.localStorage;
   const stored = loadDraft(storageAccess);
@@ -43,7 +45,7 @@ export function mount(context: ProjectContext): ProjectInstance {
           <p class="zine-masthead-name"><span class="zine-press-mark" aria-hidden="true">↗</span> THE POCKET PRESS / 8 PAGES, 1 SHEET</p>
           <h1 id="${id}-heading">Zine <span>Machine<span class="zine-title-dot">.</span></span></h1>
         </div>
-        <nav aria-label="Studio sections"><a href="#${id}-library">Starter library</a><a href="#${id}-fold">How to fold <span aria-hidden="true">↘</span></a></nav>
+        <nav aria-label="Studio sections"><a href="#${id}-library">Starter library</a><a href="#${id}-fold">How to fold <span aria-hidden="true">↘</span></a><button type="button" data-open-export>Ink &amp; export</button></nav>
       </header>
 
       <section class="zine-worktable" aria-labelledby="${id}-worktable" data-project-preview>
@@ -55,6 +57,8 @@ export function mount(context: ProjectContext): ProjectInstance {
             <button type="button" data-action="redo" title="Redo (Ctrl or Command + Shift + Z)"><span aria-hidden="true">↷</span> Redo</button>
           </div>
         </div>
+        <div class="zine-shared-navigation"><button type="button" data-open-pages>All pages</button></div>
+        <div class="zine-pane-tabs"></div>
         <div class="zine-workspace">
           <div class="zine-preview-column">
             <div class="zine-preview-toolbar">
@@ -215,11 +219,108 @@ export function mount(context: ProjectContext): ProjectInstance {
   const overview = find<HTMLElement>('.zine-overview');
   const notice = find<HTMLElement>('.zine-notice');
   const downloadButton = find<HTMLButtonElement>('[data-action="download"]');
+  const previewColumn = find<HTMLElement>('.zine-preview-column');
+  const editor = find<HTMLElement>('.zine-editor');
+  const writePanel = document.createElement('div');
+  writePanel.className = 'zine-write-panel';
+  find('.zine-workspace').append(writePanel);
+  writePanel.append(find('.zine-issue-title'), editor);
+  find('.zine-shared-navigation').prepend(pageNavigation);
+  const tabHost = find<HTMLElement>('.zine-pane-tabs');
+  const compact = window.matchMedia('(max-width: 900px), (max-height: 560px)');
+  const syncPanes = () => {
+    tabHost.hidden = !compact.matches;
+    if (!compact.matches) {
+      for (const panel of [previewColumn, writePanel]) {
+        panel.hidden = false;
+        panel.inert = false;
+        panel.setAttribute('aria-hidden', 'false');
+      }
+    }
+  };
+  const panes = createWorkspaceTabs(page, {
+    id: `${id}-workspace`, label: 'Zine workspace', host: tabHost,
+    panes: [{ id: 'read', label: 'Reading copy', panel: previewColumn }, { id: 'write', label: 'Write', panel: writePanel }],
+    onSelect: syncPanes,
+  });
+  compact.addEventListener('change', () => { panes.select(panes.selected); syncPanes(); }, { signal });
+  syncPanes();
+  const libraryDialog = createWorkspaceDialog(page, {
+    id: `${id}-library-dialog`, title: 'Starter library', content: [find('.zine-starters')],
+    triggers: [find(`a[href="#${id}-library"]`)],
+  });
+  createWorkspaceDialog(page, {
+    id: `${id}-pages-dialog`, title: 'All eight pages', content: [overview, find('.zine-overview-help')],
+    triggers: [find('[data-open-pages]')],
+  });
+  const fold = find<HTMLElement>('.zine-folding');
+  fold.append(find('.zine-view-note'), find('.zine-field-help'), find('.zine-footer'));
+  createWorkspaceDialog(page, {
+    id: `${id}-fold-dialog`, title: 'How to fold', content: [fold],
+    triggers: [find(`a[href="#${id}-fold"]`)],
+  });
+  const exportControls = document.createElement('div');
+  exportControls.className = 'zine-export-controls';
+  exportControls.append(find('.zine-style-field'), find('.zine-paper-field'), find('.zine-guide-toggle'),
+    downloadButton, find('.zine-download-help'));
+  const exportLayout = document.createElement('div');
+  exportLayout.className = 'zine-export-layout';
+  exportLayout.append(sheetView, exportControls);
+  const exportTabs = document.createElement('div');
+  exportTabs.className = 'zine-export-tabs';
+  const compactExport = window.matchMedia('(max-width: 600px)');
+  const syncExport = () => {
+    exportTabs.hidden = !compactExport.matches;
+    if (!compactExport.matches) {
+      for (const panel of [sheetView, exportControls]) {
+        panel.hidden = false;
+        panel.inert = false;
+        panel.setAttribute('aria-hidden', 'false');
+      }
+    }
+  };
+  const exportPanes = createWorkspaceTabs(page, {
+    id: `${id}-output`, label: 'Sheet and output', host: exportTabs, initial: 'output',
+    panes: [{ id: 'sheet', label: 'Print layout', panel: sheetView }, { id: 'output', label: 'Ink & output', panel: exportControls }],
+    onSelect: syncExport,
+  });
+  compactExport.addEventListener('change', () => { exportPanes.select(exportPanes.selected); syncExport(); }, { signal });
+  syncExport();
+  const exportDialog = createWorkspaceDialog(page, {
+    id: `${id}-export-dialog`, title: 'Ink & export', content: [exportTabs, exportLayout],
+  });
+  exportDialog.dialog.addEventListener('close', () => { mode = 'read'; renderPreview(); }, { signal });
+  const saveDetails = document.createElement('div');
+  saveDetails.append(find('.zine-save-status'), notice, find('.zine-fit-status'));
+  saveDetails.append(...root.querySelectorAll<HTMLElement>('.zine-field-error'));
+  const saveButton = document.createElement('button');
+  saveButton.type = 'button';
+  saveButton.className = 'zine-save-summary';
+  saveButton.setAttribute('aria-live', 'polite');
+  saveButton.setAttribute('aria-atomic', 'true');
+  const saveDialog = createWorkspaceDialog(page, {
+    id: `${id}-save-dialog`, title: 'Draft & save details', content: [saveDetails], triggers: [saveButton],
+  });
+  find('.zine-worktable-bottom').append(saveButton, find('.zine-export-warning'));
+  find('.zine-export-warning').setAttribute('role', 'alert');
+  const printOutput = document.createElement('div');
+  printOutput.className = 'zine-print-output';
+  root.append(printOutput);
+  const printStyle = document.createElement('style');
+  root.append(printStyle);
+  function preparePrint(): void {
+    printStyle.textContent = `@page { size: ${history.present.paper === 'a4' ? 'A4' : 'letter'} landscape; margin: 0; }`;
+    printOutput.innerHTML = analysis.issues.length
+      ? `<p>Printing paused. ${escapeXml(analysis.issues[0]!.message)} Your full draft remains in the editor.</p>`
+      : makeSheetSvg(history.present, THEMES[history.present.theme], { guides, measure }).replace(/^<\?xml[^>]+\?>\s*/u, '');
+  }
+  window.addEventListener('beforeprint', preparePrint, { signal });
 
-  function announce(message: string): void {
+  function announce(message: string, error = false): void {
     if (signal.aborted) return;
     notice.textContent = message;
-    page.report(message);
+    saveButton.textContent = `${message.split('. ')[0]!.replace(/\.$/u, '')} · Details`;
+    if (error) saveDialog.open();
   }
 
   function setInputValue(input: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement, value: string): void {
@@ -233,8 +334,8 @@ export function mount(context: ProjectContext): ProjectInstance {
     const dimensions = sheetGeometry(draft.paper);
     const heading = activePage === 0 ? draft.title : panel.heading;
     const role = activePage === 0 ? 'Front cover' : activePage === 7 ? 'Back cover' : 'Inside page';
-    readView.hidden = mode !== 'read';
-    pageNavigation.hidden = mode !== 'read';
+    readView.hidden = false;
+    pageNavigation.hidden = false;
     sheetView.hidden = mode !== 'sheet';
     root.querySelectorAll<HTMLButtonElement>('[data-action="mode"]').forEach((button) => {
       button.setAttribute('aria-pressed', String(button.dataset.mode === mode));
@@ -279,6 +380,8 @@ export function mount(context: ProjectContext): ProjectInstance {
     }
     find<HTMLElement>('.zine-guide-key').hidden = !guides;
     find<HTMLElement>('.zine-sheet-size').textContent = `${PAPERS[draft.paper].name} · ${number(dimensions.width)} × ${number(dimensions.height)} mm · landscape · 100% scale${guides ? '' : ' · guides off'}`;
+    exportPanes.select(exportPanes.selected);
+    syncExport();
   }
 
   function renderEditor(): void {
@@ -322,10 +425,15 @@ export function mount(context: ProjectContext): ProjectInstance {
     downloadButton.disabled = analysis.issues.length > 0;
     find<HTMLElement>('.zine-download-label').textContent = `Download ${PAPERS[draft.paper].name} sheet`;
     find<HTMLElement>('.zine-export-warning').textContent = analysis.issues.length
-      ? `Export paused. ${analysis.issues[0]!.message}` : '';
+      ? `Export paused: ${analysis.issues[0]!.message.split('. ')[0]}` : '';
     const saved = find<HTMLElement>('.zine-save-status');
     saved.textContent = saveMessage;
     saved.classList.toggle('zine-save-problem', saveProblem);
+    const summary = saveProblem
+      ? analysis.issues.length ? 'Not saved yet · Details' : 'Local saving unavailable · Details'
+      : saveMessage.startsWith('Your draft stays') ? 'Local draft · Save details' : 'Local draft saved · Details';
+    if (saveButton.textContent !== summary) saveButton.textContent = summary;
+    saveButton.classList.toggle('zine-save-problem', saveProblem);
   }
 
   function refresh(persist = false): void {
@@ -371,8 +479,8 @@ export function mount(context: ProjectContext): ProjectInstance {
   }
 
   function returnToWorktable(): void {
-    find<HTMLElement>('.zine-worktable').scrollIntoView({ block: 'start', behavior: context.reducedMotion ? 'auto' : 'smooth' });
-    const target = mode === 'read' ? reader : find<HTMLButtonElement>('[data-action="mode"][data-mode="sheet"]');
+    libraryDialog.close();
+    const target = panes.selected === 'write' ? (activePage === 0 ? titleInput : bodyInput) : reader;
     target.focus({ preventScroll: true });
   }
 
@@ -411,7 +519,7 @@ export function mount(context: ProjectContext): ProjectInstance {
       announce(`${PAPERS[history.present.paper].name} SVG downloaded. Print landscape, single-sided, at 100% actual size. Then follow the folding guide.`);
     } catch (error) {
       if (!(error instanceof DOMException)) throw error;
-      announce('The browser could not create the download. Your draft is still here; try again or copy your text before leaving.');
+      announce('The browser could not create the download. Your draft is still here; try again or copy your text before leaving.', true);
     }
   }
 
@@ -425,7 +533,7 @@ export function mount(context: ProjectContext): ProjectInstance {
     const target = event.target;
     if (target instanceof HTMLSelectElement && target.name === 'paper') {
       if (target.value !== 'a4' && target.value !== 'letter') {
-        announce('Choose A4 or US Letter. Your previous paper size is unchanged.');
+        announce('Choose A4 or US Letter. Your previous paper size is unchanged.', true);
         target.value = history.present.paper;
         return;
       }
@@ -442,14 +550,14 @@ export function mount(context: ProjectContext): ProjectInstance {
     if (!target || target.disabled || !root.contains(target)) return;
     switch (target.dataset.action) {
       case 'edit-page':
-        (activePage === 0 ? titleInput : bodyInput).focus();
+        panes.select('write');
+        (activePage === 0 ? titleInput : bodyInput).focus({ preventScroll: true });
         break;
       case 'starter': {
         const starter = STARTERS.find((item) => item.id === target.dataset.starter);
         if (!starter) return;
         const next = makeStarter(starter.id);
         next.paper = history.present.paper;
-        activePage = 0;
         edit(next);
         announce(`Loaded “${starter.name}”. Undo restores your previous draft.`);
         returnToWorktable();
@@ -459,7 +567,6 @@ export function mount(context: ProjectContext): ProjectInstance {
         const next = makeBlank();
         next.paper = history.present.paper;
         next.theme = history.present.theme;
-        activePage = 0;
         edit(next);
         announce('Eight open pages, ready for your words. Undo restores your previous draft.');
         returnToWorktable();
@@ -475,12 +582,15 @@ export function mount(context: ProjectContext): ProjectInstance {
       case 'next': selectPage(activePage + 1); break;
       case 'mode':
         mode = target.dataset.mode === 'sheet' ? 'sheet' : 'read';
+        if (mode === 'sheet') exportPanes.select('sheet');
         renderPreview();
+        if (mode === 'sheet') exportDialog.open();
+        else panes.select('read');
         break;
       case 'theme': {
         const themeId = THEME_IDS.find((theme) => theme === target.dataset.theme);
         if (!themeId) {
-          announce('That ink treatment is not available. Choose one of the three studio styles.');
+          announce('That ink treatment is not available. Choose one of the three studio styles.', true);
           return;
         }
         const next = cloneDocument(history.present);
@@ -490,6 +600,12 @@ export function mount(context: ProjectContext): ProjectInstance {
       }
       case 'download': download(); break;
     }
+  }, { signal });
+  find('[data-open-export]').addEventListener('click', () => {
+    mode = 'sheet';
+    exportPanes.select('output');
+    renderPreview();
+    exportDialog.open();
   }, { signal });
   root.addEventListener('keydown', (event) => {
     if (event.isComposing || event.altKey) return;
@@ -519,6 +635,5 @@ export function mount(context: ProjectContext): ProjectInstance {
 
   refresh();
   if (!measurementContext) announce('This browser cannot measure system fonts. The sheet uses conservative text estimates; print a proof copy first.');
-  if (stored.status === 'invalid' || stored.status === 'unavailable') page.report(saveMessage);
   return { destroy: page.destroy };
 }

@@ -181,7 +181,9 @@
   .project-gradient-lab .gl-method-name { gap: 5px; font-size: 12px; }
   .project-gradient-lab .gl-path-key { width: 13px; }
   .project-gradient-lab .gl-path-key::after { left: 5px; }
-  .project-gradient-lab .gl-transport-meta { width: 100%; justify-content: space-between; }
+  .project-gradient-lab .gl-transport-meta { width: auto; justify-content: space-between; }
+  .project-gradient-lab .gl-path-readouts { display: grid; gap: 6px; margin-bottom: 16px; }
+  .project-gradient-lab .gl-path-readouts p { margin: 0; padding: 6px; border: 1px solid var(--gl-line); }
   .project-gradient-lab .gl-settings, .project-gradient-lab .gl-inspection { padding: 19px; }
 }
 @media (max-width: 790px) {
@@ -263,3 +265,70 @@
 @media (prefers-reduced-motion: reduce) {
   .project-gradient-lab *, .project-gradient-lab *::before, .project-gradient-lab *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }
+
+.project-gradient-lab[data-workspace="true"] { height: 100dvh; min-height: 0; --workspace-paper: var(--gl-panel); }
+.project-gradient-lab .gl-shell { height: 100%; padding: 8px 12px; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 8px; }
+.project-gradient-lab .gl-header { margin: 0; gap: 10px; }
+.project-gradient-lab h1 { font-size: 30px; margin: 0; }
+.project-gradient-lab .gl-mark { width: 36px; height: 36px; }
+.project-gradient-lab .gl-workspace-tools { display: flex; gap: 6px; }
+.project-gradient-lab .gl-workbench { min-height: 0; grid-template-columns: minmax(0, 1fr) 380px; }
+.project-gradient-lab .gl-map-panel { min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; }
+.project-gradient-lab .gl-panel-heading { min-height: 0; padding: 6px 12px; }
+.project-gradient-lab .gl-panel-heading h2 { font-size: 20px; margin: 0; }
+.project-gradient-lab .gl-landscape { min-height: 0; height: auto; }
+.project-gradient-lab .gl-comparison { padding: 4px 8px; }
+.project-gradient-lab button.gl-method { padding: 5px 7px; }
+.project-gradient-lab .gl-method-loss, .project-gradient-lab .gl-method-position, .project-gradient-lab .gl-method-status { margin: 0; }
+.project-gradient-lab .gl-transport { padding: 6px 8px; gap: 5px; }
+.project-gradient-lab .gl-transport-meta { width: 100%; justify-content: space-between; }
+.project-gradient-lab .gl-inspector { display: grid; min-height: 0; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; }
+.project-gradient-lab .gl-inspector > .gl-feedback-row { max-height: 58px; overflow: auto; padding: 4px 8px; overscroll-behavior: contain; }
+.project-gradient-lab .gl-inspector > .gl-feedback-row > p { line-height: 1.3; }
+.project-gradient-lab[data-workspace="true"] .workspace-dialog-heading > button { min-height: 44px; }
+.project-gradient-lab .gl-dock-panels { min-height: 0; display: grid; }
+.project-gradient-lab .gl-dock-panels > div { min-height: 0; min-width: 0; overflow: auto; overscroll-behavior: contain; padding: 10px; }
+.project-gradient-lab .gl-settings, .project-gradient-lab .gl-inspection { padding: 0; border: 0; }
+.project-gradient-lab .gl-rate { margin-top: 10px; padding-top: 10px; }
+.project-gradient-lab .gl-start-form { padding-top: 0; }
+.project-gradient-lab .gl-start-inputs { grid-template-columns: 1fr 1fr auto; gap: 6px; align-items: end; }
+.project-gradient-lab .gl-set-start { grid-column: auto; }
+.project-gradient-lab .gl-dock-panels .gl-help { margin-block: 4px; }
+.project-gradient-lab .gl-inspector .workspace-tabs { gap: 0; }
+.project-gradient-lab .gl-inspector .workspace-tabs button { min-height: 44px; border-radius: 0; padding-inline: 6px; }
+.project-gradient-lab .gl-inspector .workspace-tabs button[aria-selected="true"] { color: var(--gl-lime); background: #20362d; }
+.project-gradient-lab .gl-dock-panels .gl-history { padding-top: 0; }
+.project-gradient-lab .gl-loss-plot { height: 180px; }
+.project-gradient-lab .gl-history-heading, .project-gradient-lab .gl-history > .gl-help, .project-gradient-lab .gl-history-tools { padding-inline: 0; }
+.project-gradient-lab .gl-history-tools { flex-direction: column; }
+.project-gradient-lab .gl-samples { width: 100%; }
+.project-gradient-lab .gl-challenge-grid, .project-gradient-lab .gl-guide-grid { grid-template-columns: 1fr; }
+.project-gradient-lab .gl-challenges, .project-gradient-lab .gl-field-guide { padding-top: 0; }
+.project-gradient-lab .workspace-dialog .gl-deck { text-align: left; }
+.project-gradient-lab :is(.gl-eyebrow, .gl-compute-stamp, .gl-map-caption, .gl-comparison-heading > span:last-child, .gl-method-name, .gl-method-position, .gl-method-status, .gl-speed, .gl-speed select, .gl-round, .gl-round > span, .gl-help, summary, .gl-export, table, caption, .gl-field, .gl-derivative, .gl-range-extents, .gl-start-heading > span, .gl-toggle, .gl-reset-note, .gl-inspection-heading > .gl-eyebrow, .gl-status-chip, .gl-selected-loss > span, .gl-coordinates dt, .gl-iteration, .gl-vectors dt, .gl-vectors dd, .gl-used-gradient, .gl-update-rule, .gl-state-reason, .gl-feedback-row > span, .gl-run-record, .gl-section-heading > span, .gl-challenge-number, .gl-challenge > .gl-challenge-setup, .gl-rulebook-foot, .gl-footer) { font-size: 14px; }
+@media (max-width: 700px) {
+  .project-gradient-lab .gl-shell { padding: 6px; gap: 5px; }
+  .project-gradient-lab .gl-header { display: flex; flex-wrap: wrap; gap: 4px; }
+  .project-gradient-lab .gl-identity { gap: 6px; }
+  .project-gradient-lab h1 { font-size: 25px; }
+  .project-gradient-lab .gl-mark { width: 25px; height: 25px; }
+  .project-gradient-lab .gl-workspace-tools { margin-left: auto; gap: 4px; }
+  .project-gradient-lab .gl-workspace-tools button { padding-inline: 7px; }
+  .project-gradient-lab .gl-workbench { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) 262px; }
+  .project-gradient-lab .gl-inspector { border-left: 0; }
+  .project-gradient-lab .gl-dock-panels > div { padding: 6px; }
+  .project-gradient-lab .gl-panel-heading { padding: 2px 8px; }
+  .project-gradient-lab .gl-panel-heading h2 { font-size: 16px; }
+  .project-gradient-lab .gl-method-name { gap: 4px; }
+  .project-gradient-lab .gl-method-loss { font-size: 14px; letter-spacing: -.5px; }
+  .project-gradient-lab .gl-method-position, .project-gradient-lab .gl-method-status { line-height: 1.25; }
+  .project-gradient-lab .gl-path-key { width: 10px; }
+  .project-gradient-lab .gl-transport { padding: 4px 6px; }
+  .project-gradient-lab .gl-transport-actions { gap: 4px; }
+  .project-gradient-lab .gl-transport-actions button { padding-inline: 6px; }
+  .project-gradient-lab .gl-transport-meta { gap: 4px; width: auto; }
+  .project-gradient-lab .gl-start-inputs { gap: 4px; }
+  .project-gradient-lab .gl-set-start { padding-inline: 5px; }
+}
+.project-gradient-lab .gl-dock-panels > div { padding-inline-end: calc(64px + env(safe-area-inset-right, 0px)); }
+.project-gradient-lab .gl-inspector > .gl-feedback-row { padding-inline-end: calc(64px + env(safe-area-inset-right, 0px)); }

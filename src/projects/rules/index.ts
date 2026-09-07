@@ -1,6 +1,7 @@
 import './style.css';
 import { createProjectPage, downloadText, escapeMarkup, query } from '../../core/page';
 import { createLoop } from '../../core/loop';
+import { createWorkspaceDialog, createWorkspaceTabs } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import {
   BOARD_HEIGHT, BOARD_WIDTH, fieldNotes, presetBoard, presetById, presets, references,
@@ -48,6 +49,7 @@ function customDescription(rule: Rule): string {
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'rules');
   const { root, signal } = page;
+  root.dataset.workspace = 'true';
   const initial = presetById('garden');
   const opening = presetBoard(initial);
   let study: Study = {
@@ -67,7 +69,7 @@ export function mount(context: ProjectContext): ProjectInstance {
       <header class="rules-masthead">
         <a class="rules-wordmark" href="#rules-top"><span aria-hidden="true">✳</span> An artificial field guide</a>
         <nav aria-label="Garden navigation">
-          <a href="#rules-lab">Planting table</a><a href="#rules-library">Seed library</a><a href="#rules-notes">Field notes</a>
+          <button type="button" data-library>Seed library</button><button type="button" data-notes>Field notes</button>
         </nav>
       </header>
       <section class="rules-intro" id="rules-top" aria-labelledby="rules-title">
@@ -112,9 +114,9 @@ export function mount(context: ProjectContext): ProjectInstance {
               Space or Enter to apply your brush, and Delete to erase. On a small screen, zoom in or use the row and column editor below.</p>
             <dl class="rules-counts" aria-label="Actual board counts" aria-live="off">
               <div><dt>Generation</dt><dd data-generation>0</dd></div>
-              <div><dt>Living cells</dt><dd data-population>0</dd></div>
-              <div><dt>Last births</dt><dd data-births>—</dd></div>
-              <div><dt>Last deaths</dt><dd data-deaths>—</dd></div>
+              <div><dt aria-label="Living cells">Living</dt><dd data-population>0</dd></div>
+              <div><dt aria-label="Last births">Births</dt><dd data-births>—</dd></div>
+              <div><dt aria-label="Last deaths">Deaths</dt><dd data-deaths>—</dd></div>
             </dl>
             <p class="rules-status" data-status role="status">A composed board, paused at generation 0. Try Step before Play.</p>
           </div>
@@ -125,8 +127,8 @@ export function mount(context: ProjectContext): ProjectInstance {
               <label class="rules-field">Seed pattern<select data-preset>
                 ${presets.map((preset) => `<option value="${preset.id}">${escapeMarkup(preset.name)}</option>`).join('')}
               </select></label>
-              <p data-preset-note class="rules-help">${escapeMarkup(initial.description)}</p>
               <button type="button" data-load>Load pattern + its rule</button>
+              <p data-preset-note class="rules-help">${escapeMarkup(initial.description)}</p>
             </section>
             <section class="rules-tool-section">
               <h3>Set the conditions</h3>
@@ -234,6 +236,57 @@ export function mount(context: ProjectContext): ProjectInstance {
       </footer>
     </div>`;
 
+  const notes = query<HTMLElement>(root, '.rules-notes');
+  const intro = query<HTMLElement>(root, '.rules-intro');
+  const masthead = query<HTMLElement>(root, '.rules-masthead');
+  notes.prepend(query<HTMLElement>(root, '.rules-wordmark'));
+  masthead.prepend(query<HTMLElement>(root, '#rules-title'));
+  notes.prepend(intro, query<HTMLElement>(root, '.rules-lab > .rules-section-heading'));
+  const boardColumn = query<HTMLElement>(root, '.rules-board-column');
+  const tools = query<HTMLElement>(root, '.rules-workbench');
+  const sections = [...tools.querySelectorAll<HTMLElement>('.rules-tool-section')];
+  const toolTabs = document.createElement('div');
+  tools.prepend(toolTabs);
+  const tabPanels = sections.map((section, index) => {
+    const panel = document.createElement('div');
+    panel.className = 'rules-tool-pane';
+    panel.append(section);
+    tools.append(panel);
+    return { id: ['plant', 'rules', 'edit', 'keep'][index], label: ['Plant', 'Rules', 'Edit', 'Keep'][index], panel };
+  });
+  createWorkspaceTabs(page, { id: 'rules-tools', label: 'Garden tools', host: toolTabs, panes: tabPanels });
+  const viewTools = document.createElement('div');
+  viewTools.className = 'rules-view-tools';
+  viewTools.append(
+    query<HTMLElement>(root, '[data-rate]').closest('label')!,
+    query<HTMLElement>(root, '[data-zoom]').closest('label')!,
+    query<HTMLElement>(root, '.rules-pan-mode'),
+  );
+  sections[2].append(viewTools);
+  const quickActions = document.createElement('div');
+  quickActions.className = 'rules-quick-actions';
+  quickActions.append(...['undo', 'reset', 'clear'].map(id => query<HTMLElement>(root, `[data-${id}]`)));
+  for (const [id, label, name] of [['reset', 'Reset', 'Reset pattern'], ['clear', 'Clear', 'Clear grid']]) {
+    const button = query<HTMLElement>(quickActions, `[data-${id}]`);
+    button.textContent = label;
+    button.setAttribute('aria-label', name);
+  }
+  query<HTMLElement>(root, '.rules-board-topline').append(quickActions);
+  notes.prepend(query<HTMLElement>(root, '#rules-board-help'), query<HTMLElement>(root, '.rules-motion-note'));
+  sections[2].append(query<HTMLElement>(root, '.rules-board-legend'));
+  const library = createWorkspaceDialog(page, {
+    id: 'rules-seed-library', title: 'Seed library', content: [query(root, '.rules-library')],
+    triggers: [query(root, '[data-library]')],
+  });
+  const fieldNotesDialog = createWorkspaceDialog(page, {
+    id: 'rules-field-notes', title: 'Field notes', content: [notes, query(root, '.rules-footer')],
+    triggers: [query(root, '[data-notes]')],
+  });
+  root.querySelectorAll<HTMLAnchorElement>('a[href="#rules-library"]').forEach(link => {
+    link.addEventListener('click', event => { event.preventDefault(); fieldNotesDialog.close(); library.open(); }, { signal });
+  });
+  query(root, '.rules-wordmark').addEventListener('click', event => { event.preventDefault(); fieldNotesDialog.close(); }, { signal });
+
   const boardElement = query<SVGSVGElement>(root, '[data-board]');
   const cellElements = [...root.querySelectorAll<SVGRectElement>('[data-cell]')];
   const presetSelect = query<HTMLSelectElement>(root, '[data-preset]');
@@ -257,10 +310,20 @@ export function mount(context: ProjectContext): ProjectInstance {
   const playLabel = query<HTMLElement>(root, '[data-play-label]');
   const playDot = query<HTMLElement>(root, '[data-play-dot]');
   rateSelect.value = String(rate);
+  const boardViewport = query<HTMLElement>(boardColumn, '.rules-board-scroll');
+  const zoomSelect = query<HTMLSelectElement>(root, '[data-zoom]');
+  function fitBoard() {
+    const width = Math.min(boardViewport.clientWidth - 12, (boardViewport.clientHeight - 12) * BOARD_WIDTH / BOARD_HEIGHT);
+    const scaled = Math.max(1, width) * Number(zoomSelect.value) / 100;
+    boardElement.style.width = `${scaled}px`;
+    boardElement.style.height = `${scaled * BOARD_HEIGHT / BOARD_WIDTH}px`;
+  }
+  const boardResize = new ResizeObserver(fitBoard);
+  boardResize.observe(boardViewport);
+  page.onCleanup(() => boardResize.disconnect());
 
   function report(message: string) {
     status.textContent = message;
-    page.report(message);
   }
 
   function remember() {
@@ -411,7 +474,7 @@ export function mount(context: ProjectContext): ProjectInstance {
   query<HTMLSelectElement>(root, '[data-zoom]').addEventListener('change', (event) => {
     const target = event.currentTarget;
     if (!(target instanceof HTMLSelectElement)) return;
-    boardElement.style.width = `${target.value}%`;
+    fitBoard();
     report(target.value === '100' ? 'The whole board fits the view.' : `${Number(target.value) / 100} times zoom. Enable Pan view to scroll or swipe around, then uncheck it to paint.`);
   }, { signal });
   panControl.addEventListener('change', () => {
@@ -537,7 +600,12 @@ export function mount(context: ProjectContext): ProjectInstance {
     setPlaying(false);
     cursor = [Math.max(0, Math.min(BOARD_WIDTH - 1, x)), Math.max(0, Math.min(BOARD_HEIGHT - 1, y))];
     render();
-    cellElements[cursor[1] * BOARD_WIDTH + cursor[0]].scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'instant' });
+    const cell = cellElements[cursor[1] * BOARD_WIDTH + cursor[0]].getBoundingClientRect();
+    const view = boardViewport.getBoundingClientRect();
+    if (cell.left < view.left) boardViewport.scrollLeft -= view.left - cell.left + 6;
+    if (cell.right > view.right) boardViewport.scrollLeft += cell.right - view.right + 6;
+    if (cell.top < view.top) boardViewport.scrollTop -= view.top - cell.top + 6;
+    if (cell.bottom > view.bottom) boardViewport.scrollTop += cell.bottom - view.bottom + 6;
     report(inspector.textContent ?? 'Cell selected.');
   }, { signal });
 
@@ -581,7 +649,7 @@ export function mount(context: ProjectContext): ProjectInstance {
       const id = button.dataset.plant;
       if (!id) throw new Error('The seed button is missing its pattern id.');
       loadPreset(id);
-      query<HTMLElement>(root, '#rules-lab').scrollIntoView({ block: 'start', behavior: 'instant' });
+      library.close();
       query<HTMLButtonElement>(root, '[data-step]').focus({ preventScroll: true });
     }, { signal });
   });

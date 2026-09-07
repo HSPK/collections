@@ -13,7 +13,7 @@ editable notes, manual eliminations, and an evidence-backed conclusion.
 - `index.ts`: accessible DOM case files, hand-drawn inline SVG illustrations,
   in-memory investigations, and lifecycle-scoped event delegation.
 - `style.css`: plum-and-parchment casebook styling, scoped to
-  `.project-detective`, with a single-column phone layout.
+  `.project-detective`, with a remaining-height desk and single-column phone panes.
 - `manifest.json`: standalone discovery metadata.
 - `../../../tests/projects/detective.spec.ts`: rule, uniqueness, regression,
   and focused browser coverage.
@@ -76,18 +76,30 @@ Changing the case or presenting a conclusion moves focus to its heading/result.
 Re-rendering an interactive control preserves its focus. Inline status feedback
 is a persistent polite live region.
 
+The viewport is the desk, not a cropped long page. Evidence, People, and
+Notes & timeline are keyboard-accessible tabs with independent internal
+reading space. The conclusion, pinned reasoning, restart, and case chooser
+stay reachable without document scrolling. Scene & rules, Cases, and Bureau
+guide open native dialogs; all introductory writing, artwork, case rules, and
+privacy explanations remain available there. Verdicts and restart confirmation
+open immediately in modal dialogs with Escape, focus containment, and a Close
+button. Long interviews, exhibits, timelines, and solved explanations scroll
+inside their pane/dialog. Changing cases remembers that case's selected pane.
+
 Each case retains its own notes, pins, read state, eliminations, optional
-timeline, and conclusion during the visit. Restart uses an inline confirmation
+timeline, and conclusion during the visit. Restart uses a native confirmation dialog
 and clears only that case. A completed case remains readable; replay enables a
 fresh investigation. Refreshing clears all state, as disclosed on the page.
 There is no storage, network request, timer, audio, or external asset.
 `createProjectPage()` owns the root and aborts every event listener on teardown.
 
-Run the assigned tests with the existing Playwright runner:
+Run the focused tests with the existing Playwright runner:
 
 ```sh
-SITE_URL=http://127.0.0.1:4173 npm test -- tests/projects/detective.spec.ts --grep engine
-npm test -- tests/projects/detective.spec.ts
+npm test -- tests/projects/detective.spec.ts --reporter=dot
 ```
 
-The first command is Node-only; the second includes standalone browser flows.
+Set `SITE_URL` to reuse an existing server. Browser workflows cover 1440×900,
+1280×720, 375×812, 320×640, and 768×480, including unobscured primary
+controls, case/pane state retention, evidence, proof, and confirmed reset.
+Viewport screenshots are written to each test's Playwright output directory.

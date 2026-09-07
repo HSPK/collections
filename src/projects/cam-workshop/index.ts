@@ -1,6 +1,7 @@
 import './style.css';
 import { createLoop } from '../../core/loop';
 import { createProjectPage, escapeMarkup, query } from '../../core/page';
+import { createWorkspaceDialog, createWorkspaceTabs } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { DEFAULT_SETTINGS, DEFAULT_SPEED, LAWS, LIMITATIONS, LIMITS, OPENING_ANGLE, PRESETS, SEGMENTS } from './data';
 import type { CamSettings, LawId, TimingInput } from './data';
@@ -17,6 +18,7 @@ export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'cam-workshop');
   const id = `cw-${++nextId}`;
   page.root.setAttribute('aria-labelledby', `${id}-title`);
+  page.root.dataset.workspace = 'true';
   page.root.innerHTML = `
     <div class="cw-site">
       <header class="cw-masthead">
@@ -25,6 +27,11 @@ export function mount(context: ProjectContext): ProjectInstance {
         <h1 id="${id}-title">Cam <em>Workshop</em><span aria-hidden="true">.</span></h1>
         <p class="cw-intro">One turn. Four phases.<br> A shape that tells a follower where to go.</p>
       </header>
+      <nav class="cw-workspace-tools" aria-label="Workbench panels">
+        <button type="button" data-cw-parameters-open>Parameters</button>
+        <button type="button" data-cw-traces-open>Traces</button>
+        <button type="button" data-cw-notebook-open>Notebook</button>
+      </nav>
 
       <section class="cw-workbench" data-project-preview aria-label="Interactive radial cam workbench" aria-describedby="${id}-keyboard" tabindex="0">
         <section class="cw-mechanism" aria-labelledby="${id}-mechanism">
@@ -172,6 +179,65 @@ export function mount(context: ProjectContext): ProjectInstance {
   page.root.querySelectorAll('output').forEach((output) => output.setAttribute('aria-live', 'off'));
   const get = <T extends Element>(selector: string) => query<T>(page.root, selector);
   const workbench = get<HTMLElement>('.cw-workbench');
+  const program = get<HTMLElement>('.cw-program');
+  program.prepend(get('.cw-law-controls'));
+  const parametersPanel = document.createElement('div');
+  const tracesPanel = document.createElement('div');
+  parametersPanel.append(program);
+  tracesPanel.append(get('.cw-traces'));
+  const panels = document.createElement('div');
+  panels.id = `${id}-instrument-panels`;
+  panels.className = 'cw-dock-panels';
+  panels.append(parametersPanel, tracesPanel);
+  const tabsHost = document.createElement('div');
+  const instruments = document.createElement('aside');
+  instruments.className = 'cw-instruments';
+  instruments.setAttribute('aria-label', 'Cam instruments');
+  instruments.append(tabsHost, panels);
+  const tabs = createWorkspaceTabs(page, {
+    id: `${id}-instruments`, label: 'Cam instruments', host: tabsHost, preserveLayout: true,
+    panes: [
+      { id: 'parameters', label: 'Parameters', panel: parametersPanel },
+      { id: 'traces', label: 'Traces', panel: tracesPanel },
+    ],
+  });
+  const guide = document.createElement('div');
+  guide.className = 'cw-operating-notes';
+  guide.append(get('.cw-edition'), get('.cw-intro'), get('.cw-panel-heading > div:first-child'),
+    get('.cw-machine-caption'), get('.cw-transport-note'), get('.cw-reduced-note'));
+  const stageLabel = document.createElement('span');
+  stageLabel.className = 'cw-stage-label';
+  stageLabel.textContent = 'Knife-edge cam';
+  get('.cw-panel-heading').prepend(stageLabel);
+  createWorkspaceDialog(page, {
+    id: `${id}-notebook-dialog`, title: 'Motion-law notebook',
+    content: [guide, get('.cw-notebook'), get('.cw-law-library'), get('.cw-model'), get('.cw-footer')],
+    triggers: [get('[data-cw-notebook-open]')],
+  });
+  get('.cw-settings').remove();
+  const dock = createWorkspaceDialog(page, {
+    id: `${id}-instruments-dialog`, title: 'Cam instruments', content: [instruments],
+  });
+  const compact = window.matchMedia('(max-width: 700px), (max-height: 540px)');
+  const triggers = [get<HTMLButtonElement>('[data-cw-parameters-open]'), get<HTMLButtonElement>('[data-cw-traces-open]')];
+  function placeInstruments() {
+    const focused = instruments.contains(document.activeElement);
+    dock.close();
+    (compact.matches ? query(dock.dialog, '.workspace-dialog-content') : workbench).append(instruments);
+    for (const trigger of triggers) {
+      trigger.setAttribute('aria-controls', compact.matches ? dock.dialog.id : panels.id);
+      if (compact.matches) trigger.setAttribute('aria-haspopup', 'dialog');
+      else trigger.removeAttribute('aria-haspopup');
+    }
+    if (focused) triggers[0].focus({ preventScroll: true });
+  }
+  triggers.forEach((trigger, index) => trigger.addEventListener('click', () => {
+    tabs.select(index === 0 ? 'parameters' : 'traces');
+    if (compact.matches) dock.open();
+    else tabsHost.querySelector<HTMLButtonElement>('[aria-selected="true"]')!.focus({ preventScroll: true });
+  }, { signal: page.signal }));
+  compact.addEventListener('change', placeInstruments, { signal: page.signal });
+  placeInstruments();
   const playButton = get<HTMLButtonElement>('[data-cw-play]');
   const playText = get<HTMLElement>('[data-cw-play-text]');
   const playIcon = get<HTMLElement>('[data-cw-play-icon]');

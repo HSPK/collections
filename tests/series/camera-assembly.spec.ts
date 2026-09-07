@@ -89,7 +89,9 @@ test('camera browser controls scrub, inspect all groups, and orbit while paused'
   await expect(root).toHaveAttribute('data-progress', EXPLODED_FRAME.toFixed(5));
   await scrub(page, 0.72);
   await expect(root).toHaveAttribute('data-progress', '0.72000');
+  await root.getByRole('button', { name: 'Stages & notes', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Jump to lens stage' })).toHaveAttribute('aria-current', 'step');
+  await root.getByRole('button', { name: 'Close Stages & notes', exact: true }).click();
 
   await page.getByRole('button', { name: 'Rear', exact: true }).click();
   await expect(canvas).toHaveAttribute('data-view', 'rear');
@@ -108,6 +110,7 @@ test('camera browser controls scrub, inspect all groups, and orbit while paused'
   await expect(canvas).toHaveAttribute('data-view', 'front');
   await page.getByRole('button', { name: 'Three-quarter', exact: true }).click();
 
+  await root.getByRole('button', { name: 'Inspect parts', exact: true }).click();
   for (const part of PARTS) {
     const button = page.getByRole('button', { name: `Inspect ${part.name.toLowerCase()}`, exact: true });
     await button.click();
@@ -120,6 +123,7 @@ test('camera browser controls scrub, inspect all groups, and orbit while paused'
   await page.getByRole('button', { name: 'Clear highlight' }).click();
   await expect(canvas).toHaveAttribute('data-selected', '');
   await expect(root.locator('[data-ca-part][aria-pressed="true"]')).toHaveCount(0);
+  await root.getByRole('button', { name: 'Close Camera parts inspector', exact: true }).click();
 
   await scrub(page, 0.72);
   const pose = await canvas.screenshot();
@@ -132,10 +136,12 @@ test('camera browser controls scrub, inspect all groups, and orbit while paused'
     await testInfo.attach('camera-repeated-pose', { body: repeatedPose, contentType: 'image/png' });
   }
   expect(repeatedPose.equals(pose), 'Revisiting a paused timeline position must preserve the exact rendered pose.').toBe(true);
+  await root.getByRole('button', { name: 'Stages & notes', exact: true }).click();
   await page.getByRole('button', { name: 'Jump to print stage' }).click();
   await expect(root).toHaveAttribute('data-progress', '1.00000');
   await expect(canvas).toHaveAttribute('data-print', 'visible');
   await expect(root.locator('[data-ca-phase-title]')).toHaveText('Keep a little light.');
+  await root.getByRole('button', { name: 'Close Stages & notes', exact: true }).click();
   await renderedFrames(page);
   await page.screenshot({ path: testInfo.outputPath('camera-assembly-desktop.png'), fullPage: true });
   expect(errors).toEqual([]);
@@ -215,8 +221,10 @@ test('camera 375px layout keeps the scene near the top and all controls in bound
   expect(layout.smallTargets).toEqual([]);
   await renderedFrames(page);
   await page.screenshot({ path: testInfo.outputPath('camera-assembly-mobile.png'), fullPage: true });
+  await root.getByRole('button', { name: 'Inspect parts', exact: true }).click();
   await page.getByRole('button', { name: 'Inspect housing', exact: true }).click();
   await expect(root.locator('[data-ca-part-title]')).toHaveText('03 / Housing');
+  await root.getByRole('button', { name: 'Close Camera parts inspector', exact: true }).click();
   await scrub(page, 0.5);
   await expect(root).toHaveAttribute('data-progress', '0.50000');
 });
@@ -280,3 +288,87 @@ test('camera isolated mount abort disposes WebGL resources and removes its DOM',
   expect(result.reported).toBe(true);
   expect(result.graphicsMessages).toEqual([]);
 });
+
+for (const viewport of [
+  { width: 1440, height: 900 }, { width: 1280, height: 720 },
+  { width: 375, height: 812 }, { width: 320, height: 640 }, { width: 768, height: 480 },
+]) {
+  test(`camera workspace: ${viewport.width}x${viewport.height} preserves view, transport, and inspection`, async ({ page }, testInfo) => {
+    await page.setViewportSize(viewport);
+    const root = await openExhibit(page);
+    await expect(root).toHaveAttribute('data-workspace', 'true');
+    const canvas = root.locator('canvas');
+    const assertFits = async () => {
+      expect(await page.evaluate(() => ({
+        width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight,
+        x: window.scrollX, y: window.scrollY,
+      }))).toEqual({ width: viewport.width, height: viewport.height, x: 0, y: 0 });
+    };
+    await assertFits();
+    expect(await root.evaluate(element => getComputedStyle(element).overflowY)).not.toMatch(/hidden|clip/);
+    for (const selector of ['canvas', '[data-ca-play]', '[data-ca-replay]', '[data-ca-speed]', '[data-ca-progress]', '[data-ca-open-parts]', '[data-ca-open-notes]']) {
+      const bounds = (await root.locator(selector).boundingBox())!;
+      expect(bounds.x).toBeGreaterThanOrEqual(0);
+      expect(bounds.x + bounds.width).toBeLessThanOrEqual(viewport.width);
+      expect(bounds.y).toBeGreaterThanOrEqual(0);
+      expect(bounds.y + bounds.height).toBeLessThanOrEqual(viewport.height);
+    }
+    for (const button of await root.locator('button:visible, select:visible').all()) {
+      expect(await button.evaluate(element => {
+        const bounds = element.getBoundingClientRect();
+        return [bounds.left + 4, bounds.left + bounds.width / 2, bounds.right - 4]
+          .every(x => element.contains(document.elementFromPoint(x, bounds.y + bounds.height / 2)));
+      })).toBe(true);
+    }
+    const slider = root.getByRole('slider', { name: 'Assembly progress' });
+    await slider.focus();
+    await slider.press('End');
+    await expect(canvas).toHaveAttribute('data-print', 'visible');
+    await slider.press('Home');
+    await expect(canvas).toHaveAttribute('data-print', 'hidden');
+    await root.getByRole('button', { name: 'Rear', exact: true }).click();
+    const rear = await canvas.getAttribute('data-camera');
+    const box = (await canvas.boundingBox())!;
+    await page.mouse.move(box.x + box.width * 0.45, box.y + box.height * 0.55);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width * 0.65, box.y + box.height * 0.55, { steps: 4 });
+    await page.mouse.up();
+    await expect(canvas).toHaveAttribute('data-view', 'custom');
+    expect(await canvas.getAttribute('data-camera')).not.toBe(rear);
+    await root.getByRole('button', { name: 'Inspect parts', exact: true }).click();
+    await root.getByRole('button', { name: 'Inspect housing', exact: true }).click();
+    await expect(canvas).toHaveAttribute('data-selected', 'housing');
+    await expect(root).toHaveAttribute('data-progress', EXPLODED_FRAME.toFixed(5));
+    await assertFits();
+    await page.screenshot({ path: testInfo.outputPath('camera-workspace-parts.png') });
+    await page.keyboard.press('Escape');
+    await expect(root.getByRole('button', { name: 'Inspect parts', exact: true })).toBeFocused();
+    await root.getByRole('button', { name: 'Stages & notes', exact: true }).click();
+    await root.getByRole('button', { name: 'Jump to print stage', exact: true }).click();
+    await expect(canvas).toHaveAttribute('data-print', 'visible');
+    await expect(root.getByRole('dialog', { name: 'Stages & notes' })).toContainText('Original geometry');
+    await assertFits();
+    await page.keyboard.press('Escape');
+    await root.getByRole('button', { name: 'Three-quarter', exact: true }).click();
+    await assertFits();
+    await renderedFrames(page);
+    await page.screenshot({ path: testInfo.outputPath('camera-workspace.png') });
+    const size = await canvas.evaluate((element: HTMLCanvasElement) => ({
+      width: element.width, height: element.height,
+      displayWidth: element.clientWidth, displayHeight: element.clientHeight,
+    }));
+    const pixelRatio = size.width / size.displayWidth;
+    expect(Math.abs(size.height - size.displayHeight * pixelRatio)).toBeLessThanOrEqual(2);
+    if (viewport.width === 375) {
+      const camera = await canvas.getAttribute('data-camera');
+      await page.setViewportSize({ width: 1280, height: 720 });
+      await expect.poll(async () => canvas.evaluate((element: HTMLCanvasElement) => element.width)).toBeGreaterThan(size.width);
+      await expect(canvas).toHaveAttribute('data-selected', 'housing');
+      await expect(canvas).toHaveAttribute('data-camera', camera!);
+      await expect(canvas).toHaveAttribute('data-progress', '1.00000');
+      await page.setViewportSize(viewport);
+      await expect.poll(async () => canvas.evaluate((element: HTMLCanvasElement) => element.width)).toBe(size.width);
+      await assertFits();
+    }
+  });
+}

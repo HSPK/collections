@@ -84,6 +84,29 @@ imperative reset. There are no observers, animation frames, audio, storage, or
 timers. Layout works at 375px with native keyboard controls and no animation,
 including reduced-motion mode.
 
+## Viewport workspace
+
+Inspector content keeps a local 64px right-side clearance plus the safe-area
+inset, preserving control hit targets around the collection launcher without
+a blank footer or a smaller probability stage.
+
+The fixed-height workspace keeps the complete probability overview, generated
+text, and Print/Backtrack/Reset transport together. Gray base bars and orange
+final bars share a 0–100% scale; all output tokens remain present. A side
+inspector becomes a lower, independently scrollable dock on narrow screens.
+**Settings** holds presets and all native decoding controls; **Distribution**
+keeps exact probabilities, cut reasons, entropy, and the CDF draw; **History**
+keeps receipts and recorded-step inspection. **Model** contains filter order,
+the complete corpus, inventory, and fitted-count inspector. **Experiments**
+holds the pinned proof and comparisons, and **Notes** retains model limitations.
+Pinning opens Experiments; inspection and tab changes consume no randomness.
+
+`workspace.ts` composes retained regions inside accessible tabpanel wrappers.
+Extend it for additional panes; keep numerical presentation in `graphics.ts`
+and retain input/button nodes across rendering. The compact probability overview
+and detailed table use the same decoded distribution, including recorded draws.
+All tab events use the page lifecycle; no extra observers or playback are added.
+
 ## Focused verification
 
 ```sh

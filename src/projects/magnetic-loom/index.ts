@@ -3,6 +3,7 @@ import { canvas2D } from '../../core/canvas';
 import { createLoop } from '../../core/loop';
 import { createProjectPage, escapeMarkup, query } from '../../core/page';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
+import { createWorkspaceDialog } from '../../core/workspace';
 import { FILING_COUNT, NOTES, PALETTE } from './data';
 import { LoomEngine } from './engine';
 import { createLoomRenderer, projectionFor } from './renderer';
@@ -11,6 +12,7 @@ const mark = `<svg viewBox="0 0 42 48" fill="none" aria-hidden="true"><path d="M
 
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'magnetic-loom');
+  page.root.dataset.workspace = 'true';
   page.root.setAttribute('aria-labelledby', 'ml-title');
   page.root.innerHTML = `
     <header class="ml-header">
@@ -19,6 +21,7 @@ export function mount(context: ProjectContext): ProjectInstance {
         <div><p class="ml-kicker">No. 045 / Particle study</p><h1 id="ml-title">Magnetic Loom</h1></div>
       </div>
       <p class="ml-deck">Iron filings. Invisible forces.<br>Make a small change. Follow the field.</p>
+      <button class="ml-control" type="button" data-notes aria-label="Field notes and settings">Field notes</button>
     </header>
     <div class="ml-workspace" data-project-preview>
       <section class="ml-plate" aria-label="Magnetic filing workspace">
@@ -86,6 +89,26 @@ export function mount(context: ProjectContext): ProjectInstance {
     <footer class="ml-colophon"><span>Soft-pole approximation / locally rendered</span><span>Magnetic Loom — 045</span></footer>`;
 
   try {
+    const tools = query<HTMLElement>(page.root, '.ml-tools');
+    const manipulate = document.createElement('div');
+    manipulate.className = 'ml-manipulate';
+    manipulate.append(query(page.root, '.ml-nudges'), query(page.root, '[data-flip]'));
+    query<HTMLElement>(page.root, '.ml-magnet-tools').append(manipulate);
+    tools.append(query(page.root, '.ml-transport'));
+    createWorkspaceDialog(page, {
+      id: 'ml-notes-dialog',
+      title: 'Field notes and settings',
+      triggers: [query(page.root, '[data-notes]')],
+      content: [
+        query(page.root, '.ml-bed-tools'),
+        query(page.root, '.ml-keyboard-note'),
+        query(page.root, '.ml-label-row:has(.ml-small-note)'),
+        query(page.root, '.ml-bed-footer'),
+        query(page.root, '.ml-deck'),
+        query(page.root, '.ml-notes'),
+        query(page.root, '.ml-colophon'),
+      ],
+    });
     const bed = query<HTMLElement>(page.root, '[data-loom-bed]');
     const status = query<HTMLElement>(page.root, '[data-report]');
     const play = query<HTMLButtonElement>(page.root, '[data-play]');

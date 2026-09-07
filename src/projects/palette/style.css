@@ -219,3 +219,132 @@
 @media (prefers-reduced-motion: reduce) {
   .project-palette *, .project-palette *::before, .project-palette *::after { scroll-behavior: auto; animation: none; transition: none; }
 }
+
+.project-palette[data-workspace] {
+  --workspace-paper: var(--pk-paper);
+  height: 100dvh;
+  min-height: 0;
+  padding: 12px clamp(10px, 3vw, 44px);
+}
+.project-palette .pk-wrap { height: 100%; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+.project-palette .pk-header { flex: 0 0 auto; gap: 8px; padding: 0 0 8px; }
+.project-palette .pk-header h1 { margin-right: auto; font-size: 38px; }
+.project-palette .pk-header button { padding-inline: 12px; }
+.project-palette .pk-counter { display: flex; flex: 1; flex-direction: column; gap: 10px; min-height: 0; }
+.project-palette .pk-counter > .pk-section-heading { margin: 0; border: 0; padding: 0; flex: 0 0 auto; }
+.project-palette .pk-proof-toggle { font-size: 14px; min-height: 28px; }
+.project-palette .pk-spectrum { flex: 0 0 clamp(100px, 22dvh, 205px); min-height: 0; box-shadow: 0 5px 0 -2px #cfc5b3; }
+.project-palette .pk-chip { height: 100%; min-height: 0; padding: 10px 14px; }
+.project-palette .pk-chip-type { font-size: clamp(30px, 7dvh, 66px); }
+.project-palette .pk-chip-label, .project-palette .pk-chip-hex { font-size: 14px; letter-spacing: 0; }
+.project-palette[data-workspace] .workspace-tabs > button { min-height: 44px; }
+.project-palette .pk-workbench { flex: 1; display: flex; min-height: 0; }
+.project-palette .pk-workbench > .workspace-pane { width: 100%; min-height: 0; padding: 14px 20px; margin: 0; border: 0; }
+.project-palette .pk-recipe-controls { display: grid; grid-template-columns: 1fr 1fr; align-content: center; gap: 12px 28px; }
+.project-palette .pk-base-form { grid-column: 1; }
+.project-palette .pk-field { grid-column: 2; grid-row: 1; margin: 0; }
+.project-palette .pk-sliders { grid-column: 1 / -1; margin: 0; gap: 28px; }
+.project-palette .pk-sliders input { height: 36px; margin: 0; }
+.project-palette label > span:not(.pk-chip-label), .project-palette .pk-error,
+.project-palette .pk-pin-note, .project-palette .pk-ink-comparisons span,
+.project-palette .pk-small-label, .project-palette .pk-specimen-actions label,
+.project-palette .pk-verdict span, .project-palette .pk-recipe-number,
+.project-palette .pk-recipe-note, .project-palette .pk-presets-heading button,
+.project-palette .pk-remove-recipe, .project-palette .pk-saved-recipe > button:first-child > span:last-child,
+.project-palette .pk-matrix-details summary span, .project-palette table :is(th, caption),
+.project-palette table td button span, .project-palette .pk-footer, .project-palette .pk-caption { font-size: 14px; }
+.project-palette .pk-pigment-editor { display: grid; grid-template-columns: 1fr 1fr; align-content: center; gap: 12px 28px; }
+.project-palette .pk-pigment-editor .pk-card-heading { grid-column: 1; margin: 0; }
+.project-palette .pk-pigment-editor form { grid-column: 1; }
+.project-palette .pk-pin-row { grid-column: 1; margin: 0; }
+.project-palette .pk-ink-comparisons { grid-column: 2; grid-row: 1 / 4; align-self: center; }
+.project-palette .pk-ink-sample { padding: 10px; }
+.project-palette .pk-tasting { display: flex; flex-direction: column; gap: 8px; }
+.project-palette .pk-tasting > .pk-section-heading, .project-palette .pk-keeping > .pk-section-heading { margin: 0; padding: 0; border: 0; }
+.project-palette .pk-taste-grid { display: flex; flex: 1; min-height: 0; }
+.project-palette .pk-pairing { display: grid; width: 100%; min-height: 0; grid-template-columns: 1fr 1fr; grid-template-rows: auto 1fr; gap: 10px 24px; }
+.project-palette .pk-pair-selectors { margin: 0; }
+.project-palette .pk-specimen { grid-column: 2; grid-row: 1 / 3; min-height: 0; overflow: auto; padding: 16px; }
+.project-palette .pk-specimen h3 { font-size: 28px; margin-bottom: 10px; }
+.project-palette .pk-specimen-kicker { font-size: 14px; margin-bottom: 8px; }
+.project-palette .pk-verdict { align-self: start; padding: 10px; flex-wrap: wrap; gap: 8px; border-top: 1px solid var(--pk-rule); }
+.project-palette .pk-specimen-actions { grid-column: 1 / -1; margin: 0; justify-content: start; }
+.project-palette .pk-keep-grid { grid-template-columns: 1fr 1fr; gap: 24px; padding-top: 10px; align-items: start; }
+.project-palette .pk-pantry { grid-column: 1; grid-row: 1; padding: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.project-palette .pk-pantry form { display: contents; }
+.project-palette .pk-pantry form label, .project-palette .pk-pantry form input { grid-column: 1 / -1; margin: 0; }
+.project-palette .pk-pantry form button, .project-palette .pk-pantry > button { margin: 0; }
+.project-palette .pk-export { grid-column: 2; }
+.project-palette .pk-export-buttons { margin: 0; display: grid; grid-template-columns: 1fr 1fr; }
+.project-palette .pk-status { flex: 0 0 auto; min-height: 54px; margin: 0; padding: 6px 68px 6px 10px; line-height: 1.4; display: flex; align-items: center; }
+.project-palette .pk-dialog-status { margin-bottom: 12px; padding: 10px; border: 1px dashed var(--pk-rule); font-size: 14px; }
+.project-palette .workspace-dialog-content > * + * { margin-top: 16px; }
+.project-palette .workspace-dialog .pk-wordmark { font-size: 14px; }
+.project-palette .workspace-dialog .pk-wordmark svg { width: 40px; }
+.project-palette .workspace-dialog .pk-matrix-details { margin: 0; padding: 0; border: 0; }
+.project-palette .workspace-dialog textarea { font-size: 14px; resize: none; }
+@media (max-width: 600px) {
+  .project-palette .pk-wrap, .project-palette .pk-counter { gap: 7px; }
+  .project-palette .pk-header { gap: 5px; padding-bottom: 5px; }
+  .project-palette .pk-header h1 { font-size: 28px; }
+  .project-palette .pk-header button { padding: 6px; }
+  .project-palette .pk-counter h2 { font-size: 20px; }
+  .project-palette .pk-counter h2 > span { display: none; }
+  .project-palette .pk-spectrum { flex-basis: clamp(88px, 14dvh, 118px); }
+  .project-palette[data-pane="taste"] .pk-spectrum { flex-basis: 52px; }
+  .project-palette[data-pane="taste"] .pk-chip-type { display: none; }
+  .project-palette .pk-chip { padding: 5px 3px 9px; }
+  .project-palette .pk-chip-label { justify-content: center; }
+  .project-palette .pk-chip-hex { display: none; }
+  .project-palette .pk-chip-type { font-size: 34px; align-self: center; }
+  .project-palette .pk-chip-label > span:first-child { display: none; }
+  .project-palette .pk-workbench > .workspace-pane { padding: 8px; }
+  .project-palette .pk-recipe-controls { grid-template-columns: 1fr; gap: 8px; }
+  .project-palette .pk-field { grid-column: 1; grid-row: auto; }
+  .project-palette .pk-input-row { margin-top: 4px; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 6px; }
+  .project-palette .pk-color-input { width: 40px; height: 44px; }
+  .project-palette .pk-sliders { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .project-palette .pk-sliders label > span { font-size: 14px; line-height: 1.3; }
+  .project-palette .pk-pigment-editor { grid-template-columns: 1fr; gap: 6px; }
+  .project-palette .pk-pigment-editor .pk-card-heading h3 { font-size: 23px; }
+  .project-palette .pk-selected-dot { width: 24px; height: 24px; }
+  .project-palette .pk-ink-comparisons { grid-column: 1; grid-row: auto; gap: 8px; }
+  .project-palette .pk-ink-sample { padding: 5px; font-size: 14px; }
+  .project-palette .pk-ink-comparisons strong { margin: 0; font-size: 18px; }
+  .project-palette .pk-ink-comparisons span { line-height: 1.2; }
+  .project-palette .pk-tasting > .pk-section-heading, .project-palette .pk-keeping > .pk-section-heading { display: none; }
+  .project-palette .pk-pairing { display: flex; flex-direction: column; gap: 6px; }
+  .project-palette .pk-pair-selectors { gap: 6px; }
+  .project-palette .pk-pair-selectors select { font-size: 14px; margin: 0; }
+  .project-palette .pk-specimen { flex: 1; padding: 8px; }
+  .project-palette .pk-specimen h3 { font-size: 23px; }
+  .project-palette .pk-specimen-body { font-size: 14px; }
+  .project-palette .pk-verdict { align-self: stretch; padding: 6px; flex-wrap: nowrap; }
+  .project-palette .pk-verdict strong { font-size: 20px; }
+  .project-palette .pk-specimen-actions { gap: 4px; display: grid; grid-template-columns: 1fr 1fr; }
+  .project-palette .pk-specimen-actions button { padding: 5px; }
+  .project-palette .pk-specimen-actions > button:last-child { grid-column: 1 / -1; }
+  .project-palette .pk-keep-grid { display: flex; flex-direction: column; padding: 0; gap: 8px; }
+  .project-palette .pk-pantry { padding: 8px; width: 100%; }
+  .project-palette .pk-pantry form label { gap: 0; }
+  .project-palette .pk-pantry form label span { margin-left: auto; }
+  .project-palette .pk-pantry form button, .project-palette .pk-pantry > button { margin: 0; }
+  .project-palette .pk-export { width: 100%; }
+  .project-palette .pk-export-buttons { gap: 6px; }
+  .project-palette .pk-export-buttons button { padding: 6px; }
+  .project-palette .pk-export-buttons > :last-child { grid-column: 1 / -1; }
+  .project-palette .pk-status { min-height: 64px; font-size: 14px; }
+  .project-palette .pk-recipes { grid-template-columns: 1fr; }
+}
+@media (max-height: 540px) and (min-width: 601px) {
+  .project-palette[data-workspace] { padding-block: 8px; }
+  .project-palette .pk-wrap, .project-palette .pk-counter { gap: 6px; }
+  .project-palette .pk-header { padding-bottom: 4px; }
+  .project-palette .pk-header h1 { font-size: 32px; }
+  .project-palette .pk-spectrum { flex-basis: 64px; }
+  .project-palette .pk-chip { padding-block: 5px; }
+  .project-palette .pk-chip-type { display: none; }
+  .project-palette .pk-workbench > .workspace-pane { padding-block: 8px; }
+  .project-palette .pk-tasting > .pk-section-heading, .project-palette .pk-keeping > .pk-section-heading { display: none; }
+  .project-palette .pk-keep-grid { padding-top: 0; }
+}

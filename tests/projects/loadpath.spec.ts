@@ -495,6 +495,7 @@ async function openWorkbench(page: Page): Promise<void> {
   await expect(page.getByRole('button', { name: 'Collection menu', exact: true })).toBeVisible();
 }
 async function editNumber(page: Page, field: string, value: number): Promise<void> {
+  await page.getByRole('tab', { name: 'Edit', exact: true }).click();
   const input = page.locator(`[data-lp-field="${field}"]`);
   await input.fill(String(value));
   await input.press('Tab');
@@ -503,15 +504,20 @@ async function metric(page: Page, key = 'max-displacement'): Promise<number> {
   return Number((await page.locator(`[data-lp-metric="${key}"]`).textContent())?.replaceAll(',', ''));
 }
 async function downloadText(page: Page, action: string): Promise<string> {
+  const alreadyOpen = await page.locator('#lp-files').evaluate((element) => (element as HTMLDialogElement).open);
+  if (!alreadyOpen) await page.getByRole('button', { name: 'Files & notes', exact: true }).click();
   const pending = page.waitForEvent('download');
   await page.locator(`[data-lp-action="${action}"]`).click();
   const file = await pending;
   const path = await file.path();
   expect(path).not.toBeNull();
-  return readFile(path!, 'utf8');
+  const text = await readFile(path!, 'utf8');
+  if (!alreadyOpen) await page.getByRole('button', { name: 'Close Design files & notes', exact: true }).click();
+  return text;
 }
 async function restoreTripod(page: Page): Promise<void> {
   await page.locator('[data-lp-study]').selectOption('mechanism');
+  await page.getByRole('tab', { name: 'Edit', exact: true }).click();
   await page.locator('.lp-builder summary').click();
   await page.locator('[data-lp-connect-from]').selectOption('N03');
   await page.locator('[data-lp-connect-to]').selectOption('N04');
@@ -560,7 +566,9 @@ test.describe('LOADPATH browser workbench', () => {
     await openWorkbench(page);
     await page.locator('[data-lp-case]').selectOption('asymmetric');
     const initial = await metric(page);
+    await page.getByRole('tab', { name: 'Results', exact: true }).click();
     await page.locator('[data-lp-action="pin"]').click();
+    await page.getByRole('tab', { name: 'Edit', exact: true }).click();
     await page.locator('[data-lp-select-kind="member"]').click();
     await page.locator('[data-lp-selection]').selectOption('M01');
     const area = Number(await page.locator('[data-lp-field="area"]').inputValue());
@@ -568,10 +576,12 @@ test.describe('LOADPATH browser workbench', () => {
     expect(await metric(page)).toBeCloseTo(initial / 2, 2);
     await expect(page.locator('[data-lp-comparison-delta]')).toContainText('Displacement change: -');
     const screenshot = testInfo.outputPath('loadpath-results-comparison.png');
+    await page.getByRole('tab', { name: 'Results', exact: true }).click();
     await page.locator('.lp-results-pane').screenshot({ path: screenshot });
     console.log(`LOADPATH_RESULTS_CAPTURE ${screenshot}`);
     await editNumber(page, 'modulus', 100);
     expect(await metric(page)).toBeCloseTo(initial, 2);
+    await page.getByRole('tab', { name: 'Structure', exact: true }).click();
     await page.locator('[data-lp-deformed]').check();
     await page.locator('[data-lp-amplification]').fill('150');
     await page.locator('[data-lp-amplification]').press('Tab');
@@ -580,6 +590,7 @@ test.describe('LOADPATH browser workbench', () => {
     await page.locator('[data-lp-color]').selectOption('stress');
     await expect(page.locator('[data-lp-legend]')).toContainText('MPa');
     await page.locator('[data-lp-reactions]').check();
+    await page.getByRole('tab', { name: 'Results', exact: true }).click();
     await page.locator('[data-lp-action="restore-pin"]').click();
     expect(Number(await page.locator('[data-lp-field="area"]').inputValue())).toBeCloseTo(area, 4);
     await page.locator('[data-lp-case]').selectOption('lateral');
@@ -597,6 +608,7 @@ test.describe('LOADPATH browser workbench', () => {
     await expect(page.locator('[data-lp-metric="max-displacement"]')).toHaveText('—');
     await expect(page.locator('[data-lp-action="export-csv"]')).toBeDisabled();
     await expect(page.locator('[data-lp-invalid]')).toContainText(/mechanism|stiffness/);
+    await page.getByRole('tab', { name: 'Edit', exact: true }).click();
     await page.locator('.lp-builder summary').click();
     await page.locator('[data-lp-connect-from]').selectOption('N03');
     await page.locator('[data-lp-connect-to]').selectOption('N04');
@@ -665,12 +677,14 @@ test.describe('LOADPATH browser workbench', () => {
     const csv = await downloadText(page, 'export-csv');
     expect(csv).toContain(`"${expected.members[2].force}"`);
     expect(csv).toContain('"K_u_minus_F_Y_N"');
+    await page.getByRole('tab', { name: 'Structure', exact: true }).click();
     await page.locator('[data-lp-deformed]').check();
     const svg = await downloadText(page, 'export-svg');
     expect(svg).toContain('Deformed geometry x400');
     expect(svg).toContain('N04');
     expect(svg).toContain('Z depth collapsed');
     await page.locator('[data-lp-study]').selectOption('tower');
+    await page.getByRole('button', { name: 'Files & notes', exact: true }).click();
     await page.locator('[data-lp-import]').setInputFiles({ name: 'design.json', mimeType: 'application/json', buffer: Buffer.from(json) });
     await expect(page.locator('[data-lp-status]')).toContainText('JSON model imported');
     expect(await metric(page)).toBeCloseTo(expected.maxDisplacement * 1000, 3);
@@ -684,6 +698,7 @@ test.describe('LOADPATH browser workbench', () => {
       expect(await metric(page)).toBeCloseTo(expected.maxDisplacement * 1000, 3);
     }
     expect(deserialize(await downloadText(page, 'export-json'))).toEqual(saved);
+    await page.getByRole('button', { name: 'Close Design files & notes', exact: true }).click();
     await page.locator('[data-lp-action="undo"]').click();
     await expect(page.locator('[data-lp-study]')).toHaveValue('tower');
   });
@@ -693,6 +708,7 @@ test.describe('LOADPATH browser workbench', () => {
     const model = denseModel();
     const incoming = JSON.stringify({ format: 'loadpath', version: 1, units: 'SI', model });
     const choose = async (text: string): Promise<void> => {
+      await page.getByRole('button', { name: 'Files & notes', exact: true }).click();
       const pending = page.waitForEvent('filechooser');
       await page.getByRole('button', { name: 'Import JSON', exact: true }).click();
       const chooser = await pending;
@@ -701,6 +717,7 @@ test.describe('LOADPATH browser workbench', () => {
       await expect(page.locator('.project-loadpath')).toHaveAttribute('data-analysis', 'stable');
       await expect(page.locator('[data-lp-scene]')).toHaveAttribute('data-node-count', '60');
       await expect(page.locator('[data-lp-scene]')).toHaveAttribute('data-member-count', '240');
+      await page.getByRole('button', { name: 'Close Design files & notes', exact: true }).click();
     };
     await choose(incoming);
     const before = await metric(page);
@@ -723,6 +740,7 @@ test.describe('LOADPATH browser workbench', () => {
     await page.locator('[data-lp-select-kind="node"]').click();
     await page.locator('[data-lp-selection]').selectOption('N04');
     await page.locator('[data-lp-plane]').selectOption('XY');
+    await page.getByRole('tab', { name: 'Structure', exact: true }).click();
     await page.locator('[data-lp-view="front"]').click();
     await expect(page.locator('.lp-canvas')).toHaveAttribute('data-camera', /front$/);
     const original = deserialize(await downloadText(page, 'export-json'));
@@ -752,6 +770,7 @@ test.describe('LOADPATH browser workbench', () => {
     await page.locator('[data-lp-view="front"]').click();
     await page.locator('.lp-canvas').press('ArrowRight');
     await expect(page.locator('[data-lp-view="orbit"]')).toHaveAttribute('aria-pressed', 'true');
+    await page.getByRole('tab', { name: 'Edit', exact: true }).click();
     await page.locator('[data-lp-plane]').selectOption('inspect');
     await page.locator('.lp-nudge summary').click();
     await editNumber(page, 'nudge-step', 0.5);
@@ -771,7 +790,9 @@ test.describe('LOADPATH browser workbench', () => {
         return text;
       };
     });
+    await page.getByRole('button', { name: 'Files & notes', exact: true }).click();
     await page.locator('[data-lp-import]').setInputFiles({ name: 'tower.json', mimeType: 'application/json', buffer: Buffer.from(serialize(STUDIES[1].model)) });
+    await page.getByRole('button', { name: 'Close Design files & notes', exact: true }).click();
     await editNumber(page, 'position-1', 5.9);
     await expect(page.locator('[data-lp-status]')).toContainText('Import cancelled');
     await expect(page.locator('[data-lp-study]')).toHaveValue('canopy');

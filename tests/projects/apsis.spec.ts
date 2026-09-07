@@ -459,7 +459,7 @@ test.describe('APSIS executable planning', () => {
 async function openDesk(page: Page) {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  await page.goto('/projects/apsis/');
+  await page.goto('./projects/apsis/');
   await expect(page.locator('.project-apsis .apsis-canvas')).toBeVisible();
   await expect(page.locator('[data-apsis-altitude]')).toHaveText('400.0');
   return errors;
@@ -468,8 +468,73 @@ async function openDesk(page: Page) {
 test.describe('APSIS browser flight desk', () => {
   test.setTimeout(90_000);
 
+  test('desktop transfer and mobile panes retain live flight and bounded reference at every viewport', async ({ page }, testInfo) => {
+    const errors = await openDesk(page);
+    const root = page.locator('.project-apsis');
+    await expect(root).toHaveAttribute('data-workspace', 'true');
+    const fits = async () => {
+      const sizes = await page.evaluate(() => ({
+        width: innerWidth, height: innerHeight,
+        documentWidth: document.documentElement.scrollWidth,
+        documentHeight: document.documentElement.scrollHeight,
+        bodyWidth: document.body.scrollWidth, bodyHeight: document.body.scrollHeight,
+        x: scrollX, y: scrollY,
+      }));
+      expect(sizes.documentWidth).toBeLessThanOrEqual(sizes.width);
+      expect(sizes.documentHeight).toBeLessThanOrEqual(sizes.height);
+      expect(sizes.bodyWidth).toBeLessThanOrEqual(sizes.width);
+      expect(sizes.bodyHeight).toBeLessThanOrEqual(sizes.height);
+      expect([sizes.x, sizes.y]).toEqual([0, 0]);
+    };
+    for (const [width, height] of [[1440, 900], [1280, 720], [375, 812], [320, 640], [768, 480]]) {
+      await page.setViewportSize({ width, height });
+      await root.locator('[data-apsis-reset]').click();
+      await root.getByRole('tab', { name: 'Plan', exact: true }).click();
+      await fits();
+      for (const selector of ['.apsis-canvas', '[data-apsis-build]', '[data-apsis-execute]', '[data-apsis-run]', '[data-apsis-reset]']) {
+        await expect(root.locator(selector)).toBeInViewport({ ratio: 1 });
+      }
+      const renderer = await root.locator('.apsis-canvas').evaluate((canvas: HTMLCanvasElement) => ({
+        width: canvas.width, height: canvas.height, cssHeight: canvas.getBoundingClientRect().height,
+      }));
+      expect(renderer.width).toBeGreaterThan(100);
+      expect(renderer.height).toBeGreaterThan(100);
+      expect(renderer.cssHeight).toBeGreaterThan(100);
+      await page.screenshot({ path: testInfo.outputPath(`apsis-workspace-${width}x${height}.png`) });
+      await root.locator('[data-apsis-build]').click();
+      await expect(root.getByRole('tab', { name: 'Burns', exact: true })).toHaveAttribute('aria-selected', 'true');
+      await expect(root.locator('[data-apsis-burn]')).toHaveCount(2);
+      await root.getByRole('tab', { name: 'Inspect', exact: true }).click();
+      await root.locator('[data-apsis-inspect]').focus();
+      await root.locator('[data-apsis-inspect]').press('End');
+      await expect(root.locator('[data-apsis-inspect-altitude]')).toHaveText('2,000.0');
+      await expect(root.locator('[data-apsis-clock]')).toHaveText('T+00:00:00');
+      await root.getByRole('tab', { name: 'Manual', exact: true }).click();
+      await root.locator('[data-apsis-prograde]').fill('0.04');
+      await expect(root.locator('[data-apsis-draft-cost]')).toHaveText('0.0400 km/s');
+      await fits();
+      await root.locator('[data-apsis-execute]').click();
+      await root.locator('[data-apsis-execute]').click();
+      await expect(root).toHaveAttribute('data-mission-complete', 'true');
+      await root.locator('[data-apsis-notes]').click();
+      await expect(root.getByRole('dialog')).toBeVisible();
+      if (await root.locator('.apsis-log').getAttribute('open') === null) await root.locator('.apsis-log summary').click();
+      await expect(root.locator('[data-apsis-log]')).toBeVisible();
+      await expect(root.locator('[data-apsis-log]')).toContainText('Circularize');
+      await fits();
+      await page.keyboard.press('Escape');
+      await expect(root.getByRole('dialog')).toBeHidden();
+      await expect(root.locator('[data-apsis-notes]')).toBeFocused();
+      const tinyControls = await root.locator('button, input, select, label').evaluateAll(elements =>
+        elements.filter(element => element.getClientRects().length && getComputedStyle(element).visibility !== 'hidden' &&
+          parseFloat(getComputedStyle(element).fontSize) < 14).map(element => element.textContent));
+      expect(tinyControls).toEqual([]);
+    }
+    expect(errors).toEqual([]);
+  });
+
   test('desktop transfer, real future inspection, two burns, undo, and reset', async ({ page }, testInfo) => {
-    await page.setViewportSize({ width: 1440, height: 1100 });
+    await page.setViewportSize({ width: 1440, height: 900 });
     const errors = await openDesk(page);
     const root = page.locator('.project-apsis');
     await expect(root.locator('[data-project-preview]')).toHaveCount(1);
@@ -482,6 +547,7 @@ test.describe('APSIS browser flight desk', () => {
     await expect(root.locator('[data-apsis-burn]')).toHaveCount(2);
     expect(await root.locator('[data-apsis-chart-path]').getAttribute('d')).not.toBe(originalPath);
     await page.screenshot({ path: testInfo.outputPath('apsis-desktop.png'), fullPage: false });
+    await root.getByRole('tab', { name: 'Inspect', exact: true }).click();
     await root.locator('[data-apsis-inspect]').focus();
     await root.locator('[data-apsis-inspect]').press('End');
     await expect(root.locator('[data-apsis-inspect-altitude]')).toHaveText('2,000.0');
@@ -520,6 +586,7 @@ test.describe('APSIS browser flight desk', () => {
     const errors = await openDesk(page);
     const root = page.locator('.project-apsis');
     const initialPath = await root.locator('[data-apsis-chart-path]').getAttribute('d');
+    await root.getByRole('tab', { name: 'Manual', exact: true }).click();
     await root.locator('[data-apsis-prograde]').fill('2');
     await root.locator('[data-apsis-queue]').click();
     await expect(root.locator('[data-apsis-editor-error]')).toContainText('exceeds');
@@ -545,6 +612,7 @@ test.describe('APSIS browser flight desk', () => {
     await expect(root.locator('[data-apsis-clock]')).toHaveText('T+00:02:00');
     await expect(root.locator('[data-apsis-budget]')).toHaveText('1.1250');
     const expected = elements(applyBurn(propagate(initialState(MISSIONS[0]), 120), { ...zeros, prograde: 0.075 }, 1.2).state);
+    await root.getByRole('tab', { name: 'Inspect', exact: true }).click();
     expect(Number((await root.locator('[data-apsis-metric="apoapsis"]').innerText()).replace(/[^0-9.-]/g, ''))).toBeCloseTo(expected.apoapsis!, 1);
     await expect(root).toHaveAttribute('data-mission-complete', 'false');
     expect(errors).toEqual([]);
@@ -611,6 +679,7 @@ test.describe('APSIS browser flight desk', () => {
     const errors = await openDesk(page);
     const root = page.locator('.project-apsis');
     await root.locator('[data-apsis-mission]').selectOption('long-arc');
+    await root.getByRole('tab', { name: 'Manual', exact: true }).click();
     await root.locator('[data-apsis-delay]').fill('0');
     await root.locator('[data-apsis-prograde]').fill('0');
     await root.locator('[data-apsis-radial]').fill('0.01');
@@ -619,6 +688,7 @@ test.describe('APSIS browser flight desk', () => {
     await expect(root.locator('[data-apsis-budget]')).toHaveText('0.7900');
     await expect(root.locator('[data-apsis-reserved]')).toHaveText('0.0000');
     await expect(root.locator('[data-apsis-build]')).toBeDisabled();
+    await root.getByRole('tab', { name: 'Plan', exact: true }).click();
     await root.locator('[data-apsis-plan-hint]').scrollIntoViewIfNeeded();
     await expect(root.locator('[data-apsis-plan-hint]')).toContainText('cannot correct orbital-plane or periapsis-direction misalignment');
     await expect(root.locator('[data-apsis-plan-hint]')).toContainText('Reset this mission or use manual burns');
@@ -641,7 +711,7 @@ test.describe('APSIS browser flight desk', () => {
     const root = page.locator('.project-apsis');
     expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
     const scene = root.locator('[data-apsis-scene]');
-    expect((await scene.boundingBox())!.height).toBeGreaterThanOrEqual(400);
+    expect((await scene.boundingBox())!.height).toBeGreaterThanOrEqual(160);
     await page.screenshot({ path: testInfo.outputPath('apsis-mobile.png'), fullPage: false });
     await root.locator('.apsis-canvas').focus();
     await root.locator('.apsis-canvas').press('ArrowRight');
@@ -653,9 +723,10 @@ test.describe('APSIS browser flight desk', () => {
     await root.locator('[data-apsis-fit]').click();
     await expect(root.locator('[data-apsis-clock]')).toHaveText('T+00:00:00');
     await root.locator('[data-apsis-build]').click();
+    await root.getByRole('tab', { name: 'Plan', exact: true }).click();
     await root.locator('.apsis-planner').scrollIntoViewIfNeeded();
     await page.screenshot({ path: testInfo.outputPath('apsis-mobile-plan.png'), fullPage: false });
-    await root.locator('.apsis-prediction-panel').evaluate((element) => element.scrollIntoView({ block: 'start' }));
+    await root.getByRole('tab', { name: 'Inspect', exact: true }).click();
     await page.screenshot({ path: testInfo.outputPath('apsis-mobile-inspection.png'), fullPage: false });
     const chartWidth = await root.locator('[data-apsis-chart] svg').evaluate((element) => {
       if (!(element instanceof SVGSVGElement)) throw new Error('Missing altitude plot.');
@@ -670,7 +741,7 @@ test.describe('APSIS browser flight desk', () => {
     await expect(root).toHaveAttribute('data-mission-complete', 'true');
     await expect(root.locator('[data-apsis-metric="periapsis"]')).toHaveText('2,000.0 km');
     expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
-    await root.locator('.apsis-notes summary').click();
+    await root.locator('[data-apsis-notes]').click();
     await expect(root.locator('.apsis-notes-grid')).toBeVisible();
     await page.setViewportSize({ width: 320, height: 760 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);

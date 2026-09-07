@@ -54,11 +54,32 @@ also pauses at a useful frame. Play and Replay remain explicit opt-ins.
 All inputs are native and labeled. Space toggles playback only outside native
 controls and editable content, within the page. The SVGs have current textual
 descriptions; only interaction feedback, not every frame, is live-announced.
-The panels stack on narrow screens instead of shrinking two scenes into one row.
+Desktop shows both treatments side by side. On narrow screens, native
+**Plain / Expressive** tabs share one explicitly sized visual layer instead of
+stacking results above their controls. Both SVGs retain identical dimensions
+and continue receiving the same calculated frame. Arrow/Home/End tab navigation
+is supported; inactive mobile content is inert. Desktop restores both panels’
+visibility and accessibility when the breakpoint changes.
 
 `createProjectPage` owns the root and abortable listeners. Its cleanup destroys
 the shared `createLoop` instance; destroying or aborting the page is idempotent.
 No animation runs in CSS. A paused loop has no continuing frame requests.
+
+## One-screen workspace
+
+The root declares `data-workspace="true"` and lays out identity, a flexible
+comparison, primary parameters, and an action dock within `100dvh`.
+Duration, amplitude, easing, playback, scrubber, viewing speed, and Guides remain
+next to the result at all supported sizes. No scene or primary-control scrolling
+is required, and no page scaling is used. The compact easing field and action
+dock reserve the collection-menu corner locally. Motion-preference changes use
+the existing accessible status instead of a toast over the controls.
+
+**Lessons** opens all six studies in a native dialog. **Principle & notes**
+contains teaching copy, challenges, parameter hints, the existing “Under the
+hood” disclosure, feedback, and keyboard instructions. Only secondary content
+scrolls. Escape/Close restores opener focus without losing settings or position.
+**Reset settings** stays in the dock. Dialogs retain the lavender paper palette.
 
 ## Adding a lesson
 
@@ -76,5 +97,10 @@ No animation runs in CSS. A paused loop has no continuing frame requests.
 Run the existing focused suite against the running Vite server:
 
 ```sh
-SITE_URL=http://127.0.0.1:4173 ./node_modules/.bin/playwright test tests/series/motion-foundry.spec.ts
+SITE_URL=http://127.0.0.1:4173/ flock /home/hangxingwei/.copilot/session-state/23f8825b-223c-4cb6-95ec-3e7881d9e65f/files/viewport-browser.lock npm test -- tests/series/motion-foundry.spec.ts --reporter=dot
 ```
+
+The suite retains all six models, reverse scrubbing, playback, preferences, and
+cleanup checks. Workspace tests cover 1440×900, 1280×720, 375×812, 320×640, and
+768×480, testing document bounds, real parameter-to-pose changes, comparison
+tabs, lesson/notes workflows, and per-test screenshots.

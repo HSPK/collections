@@ -3,6 +3,7 @@ import { canvas2D, pointerPosition } from '../../core/canvas';
 import { createLoop } from '../../core/loop';
 import { createProjectPage, query } from '../../core/page';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
+import { createWorkspaceDialog, createWorkspaceTabs } from '../../core/workspace';
 import { arrangements } from './data';
 import { alignment, boundedLamp, LAMP_LIMITS, tablePoint } from './engine';
 import type { Lamp } from './engine';
@@ -11,6 +12,7 @@ import { drawTable } from './renderer';
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'shadow-play');
   const { root, signal } = page;
+  root.dataset.workspace = 'true';
   let arrangement = arrangements[0];
   let lamp: Lamp = { ...arrangement.start };
   let tracing = true;
@@ -41,6 +43,9 @@ export function mount(context: ProjectContext): ProjectInstance {
           </div>
         </section>
         <aside class="shadow-inspector" aria-label="Arrangements and lamp controls">
+          <div data-shadow-tabs></div>
+          <div class="shadow-dock-body">
+          <div data-shadow-studies tabindex="0">
           <div class="shadow-inspector-title"><span>Paper studies</span><span data-discoveries>0 / 3 found</span></div>
           <div class="shadow-arrangements" role="group" aria-label="Choose an arrangement">
             ${arrangements.map((item, index) => `<button type="button" data-arrangement="${item.id}" aria-pressed="${index === 0}">
@@ -53,8 +58,10 @@ export function mount(context: ProjectContext): ProjectInstance {
             <p data-clue></p>
             <div class="shadow-match"><span data-match>Shadows apart</span><output data-percent aria-live="off">0%</output></div>
             <meter data-alignment min="0" max="100" value="0" aria-label="Shadow alignment">0%</meter>
-            <p class="shadow-message" role="status" aria-live="polite" aria-atomic="true" data-message>Follow the dotted silhouettes, or explore without them.</p>
+            <p class="shadow-message" data-message>Follow the dotted silhouettes, or explore without them.</p>
           </section>
+          </div>
+          <div data-shadow-lamp>
           <fieldset class="shadow-lamp-controls">
             <legend>Lamp position</legend>
             <div class="shadow-axis-label"><label for="shadow-x">Left / right</label><output data-x-value aria-live="off" aria-hidden="true"></output></div>
@@ -72,6 +79,8 @@ export function mount(context: ProjectContext): ProjectInstance {
             <button type="button" data-hint aria-pressed="false">Show lamp guide</button>
             <button type="button" data-reset>Reset lamp</button>
           </div>
+          </div>
+          </div>
         </aside>
       </div>
       <section class="shadow-notes" aria-label="How the light table works">
@@ -80,7 +89,23 @@ export function mount(context: ProjectContext): ProjectInstance {
         <div><h3>Three things to discover</h3><p>A boat, a bird, and an empty diamond. Alignment measures the actual projected outlines against their design, not a mouse hotspot. Everything runs locally; nothing here uses AI.</p><p class="shadow-object-list" data-pieces></p></div>
       </section>
       <footer class="shadow-footer"><span>Original paper constructions / an interactive light study</span><span>Ivory is paper. Charcoal is its absence of light.</span></footer>
+      <div class="shadow-workspace-footer"><button type="button" data-notes>Table notes</button><span>Paper, light, and a little geometry.</span></div>
+      <p class="shadow-announcement" role="status" aria-live="polite" aria-atomic="true" data-announcement></p>
     </div>`;
+
+  query(root, '[data-shadow-studies]').append(query(root, '.shadow-switches'));
+  createWorkspaceTabs(page, {
+    id: 'shadow-dock', label: 'Light table controls', host: query(root, '[data-shadow-tabs]'),
+    panes: [
+      { id: 'lamp', label: 'Lamp', panel: query(root, '[data-shadow-lamp]') },
+      { id: 'studies', label: 'Studies', panel: query(root, '[data-shadow-studies]') },
+    ],
+  });
+  createWorkspaceDialog(page, {
+    id: 'shadow-notes', title: 'Table notes',
+    content: [query(root, '.shadow-notes'), query(root, '.shadow-footer')],
+    triggers: [query(root, '[data-notes]')],
+  });
 
   const surface = query<HTMLDivElement>(root, '[data-table]');
   const stage = canvas2D(surface, 'Light table. Pale raised paper, charcoal projected shadows, and a movable amber lamp.');
@@ -98,9 +123,15 @@ export function mount(context: ProjectContext): ProjectInstance {
   const percent = query<HTMLOutputElement>(root, '[data-percent]');
   const match = query<HTMLElement>(root, '[data-match]');
   const message = query<HTMLElement>(root, '[data-message]');
+  const announcement = query<HTMLElement>(root, '[data-announcement]');
   const driftButton = query<HTMLButtonElement>(root, '[data-drift]');
   const hintButton = query<HTMLButtonElement>(root, '[data-hint]');
   const foundCount = query<HTMLElement>(root, '[data-discoveries]');
+
+  function announce(text: string): void {
+    message.textContent = text;
+    announcement.textContent = text;
+  }
 
   function render(): void {
     drawTable(stage.context, stage.size.width, stage.size.height, {
@@ -149,11 +180,11 @@ export function mount(context: ProjectContext): ProjectInstance {
     surface.dataset.aligned = String(result.found);
     if (result.found && !wasFound) {
       discoveries.add(arrangement.id);
-      message.textContent = arrangement.revealed;
+      announce(arrangement.revealed);
       foundCount.textContent = `${discoveries.size} / ${arrangements.length} found`;
       query<HTMLElement>(root, `[data-found="${arrangement.id}"]`).textContent = '+';
     } else if (!result.found && wasFound) {
-      message.textContent = 'The composition comes apart again. Your discovery is kept for this visit.';
+      announce('The composition comes apart again. Your discovery is kept for this visit.');
     }
     wasFound = result.found;
   }
@@ -180,7 +211,7 @@ export function mount(context: ProjectContext): ProjectInstance {
     hintButton.setAttribute('aria-pressed', 'false');
     hintButton.textContent = 'Show lamp guide';
     wasFound = false;
-    message.textContent = 'Follow the dotted silhouettes, or explore without them.';
+    announce('Follow the dotted silhouettes, or explore without them.');
     changeLamp({ ...arrangement.start });
   }
 
@@ -247,16 +278,16 @@ export function mount(context: ProjectContext): ProjectInstance {
     station = !station;
     hintButton.setAttribute('aria-pressed', String(station));
     hintButton.textContent = station ? 'Hide lamp guide' : 'Show lamp guide';
-    message.textContent = station
+    announce(station
       ? 'Set the lamp height to 360 mm, then drag the amber light into the small dashed circle. The shadows, not the circle, decide the match.'
-      : arrangement.hint;
+      : arrangement.hint);
     loop.requestRender();
   }, { signal });
   driftButton.addEventListener('click', () => {
     setDrifting(!drifting);
-    message.textContent = drifting
+    announce(drifting
       ? 'The lamp is drifting. Drag it, use a slider, or pause to take over.'
-      : 'Light paused. All lamp controls still work.';
+      : 'Light paused. All lamp controls still work.');
   }, { signal });
   query<HTMLButtonElement>(root, '[data-reset]').addEventListener('click', resetLamp, { signal });
   window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', (event) => {

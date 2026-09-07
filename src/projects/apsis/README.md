@@ -11,6 +11,7 @@ An Earth-centered orbital flight desk. There are no fetched assets, services, or
 - `scene.ts`: Three.js Earth, daylight/night shading, atmosphere, orbit semantics, marker inspection, and accessible camera controls.
 - `ui.ts`: flight-desk markup, numerical formatting, timeline, and altitude chart.
 - `index.ts`: lifecycle, mission workflow, undo checkpoints, clock, reduced-motion preference, and UI binding.
+- `workspace.ts`: bounded pane assembly, dimension-preserving chart tabs and the reference dialog.
 
 ## Model contract
 
@@ -30,6 +31,21 @@ For an unclipped ellipse, `sampleOrbit(state, 240)` retains its 241-point orderi
 
 ## Workflows and extension points
 
+The root is a fixed `100dvh` workspace (`data-workspace="true"`), not a scrolling
+document. The live WebGL scene, clock, Run/step/warp/undo/reset and Build/Execute
+actions remain available beside the desk, or above its compact mobile panes.
+**Plan / Burns / Inspect / Manual** are bounded, keyboard-accessible tabs. Inspect
+retains its chart dimensions while inactive, so changing tabs never resets the
+camera, forecast or live flight. Building or saving an impulse opens Burns;
+editing an impulse opens Manual. **Field notes** opens a native dialog containing
+the mission briefing/library, complete model notes, checklist, recorder and
+export/clock explanations. Escape closes it and returns focus to its trigger.
+Only panes and the reference dialog scroll; viewport layout never clips the
+document or scales the interface.
+
+Build/Execute and the status line reserve a local 64px right-hand clearance for
+the host's floating menu; there is no additional footer or shared header.
+
 First light opens paused. **Build transfer -> inspect projected flight -> Execute burn 1 -> Execute burn 2** reaches a 2,000 km circular orbit from 400 km. Execution jumps simulation time to the actual event, not to a scripted scene. Run advances the same model and automatically executes scheduled events. Meridian rotates velocity at the intersection of the planes. The long arc changes apoapsis with a periapsis trim.
 
 Every change creates a bounded undo checkpoint. Run creates a checkpoint at its start; undo restores the whole run. Reset starts the current mission with its original budget. Scrubbing only evaluates a copy; it does not change live time or fuel. Export produces a versioned, full-precision JSON log, not an importable save.
@@ -44,4 +60,4 @@ Open `/projects/apsis/`. The workbench is marked `[data-project-preview]`.
 
 Useful selectors: `[data-apsis-build]`, `[data-apsis-execute]`, `[data-apsis-inspect]`, `[data-apsis-clock]` (full-precision `data-seconds`), `[data-apsis-budget]`, `[data-apsis-goal-text]`, `[data-apsis-metric]`, `[data-apsis-burn]`, `[data-apsis-burn-form]`, and `[data-apsis-mission]`. `.project-apsis[data-mission-complete="true"]` reflects the actual live-state goal evaluation.
 
-Targeted coverage lives in `tests/projects/apsis.spec.ts`. Use the existing Playwright runner and shared dev server; no additional server or dependency is needed.
+Targeted coverage lives in `tests/projects/apsis.spec.ts`, including real document/body scroll-size assertions at 1440×900, 1280×720, 375×812, 320×640 and 768×480, screenshots, complete transfer execution, prediction and native-dialog workflows. Use the existing Playwright runner and shared dev server; no additional server or dependency is needed.

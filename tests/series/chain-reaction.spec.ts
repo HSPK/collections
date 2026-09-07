@@ -7,6 +7,13 @@ import {
 } from '../../src/projects/chain-reaction/timeline';
 
 async function openMachine(page: Page, reducedMotion: 'reduce' | 'no-preference' = 'reduce') {
+  await page.routeWebSocket(/^ws:\/\/127\.0\.0\.1:4173\//, socket => {
+    const server = socket.connectToServer();
+    server.onMessage(message => {
+      if (typeof message === 'string' && /"type"\s*:\s*"(?:update|full-reload)"/.test(message)) return;
+      socket.send(message);
+    });
+  });
   await page.emulateMedia({ reducedMotion });
   await page.goto('./projects/chain-reaction/');
   await expect(page.locator('.project-chain-reaction')).toBeVisible();
@@ -104,12 +111,14 @@ test('chain browser: stage inspection, reverse scrubbing, transport, speed, and 
   await expect(root).toHaveAttribute('data-time', '0.0000');
   expect((await svg.boundingBox())!.y).toBeLessThan(250);
 
+  await root.getByRole('button', { name: 'Inspect stages', exact: true }).click();
   await root.getByRole('button', { name: 'Inspect stage 3: Release', exact: true }).click();
   await expect(root).toHaveAttribute('data-stage', 'release');
   await expect(root).toHaveAttribute('data-time', '5.8300');
   await expect(root.locator('[data-detail-title]')).toHaveText('A change of direction.');
   await expect(root.locator('[data-explanation]')).toContainText('pin out of the wheel');
   await expect(root.getByRole('button', { name: 'Inspect stage 3: Release', exact: true })).toHaveAttribute('aria-current', 'step');
+  await root.getByRole('button', { name: 'Close Follow the hand-off', exact: true }).click();
 
   await seek(page, 8.25);
   await expect(slider).toHaveCSS('--cr-progress', '68.75%');
@@ -195,7 +204,13 @@ test('chain browser: 375px framing keeps the full machine, readable controls, an
   expect(sceneBox!.width).toBeLessThan(375);
   expect(sceneBox!.height).toBeGreaterThan(400);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  for (const button of await root.locator('[data-seek-stage], [data-play], [data-replay]').all()) {
+  for (const button of await root.locator('[data-seek-stage]:visible, [data-play], [data-replay]').all()) {
+    const bounds = (await button.boundingBox())!;
+    expect(bounds.width).toBeGreaterThanOrEqual(44);
+    expect(bounds.height).toBeGreaterThanOrEqual(44);
+  }
+  await root.getByRole('button', { name: 'Inspect stages', exact: true }).click();
+  for (const button of await root.locator('[data-seek-stage]:visible').all()) {
     const bounds = (await button.boundingBox())!;
     expect(bounds.width).toBeGreaterThanOrEqual(44);
     expect(bounds.height).toBeGreaterThanOrEqual(44);
@@ -203,6 +218,7 @@ test('chain browser: 375px framing keeps the full machine, readable controls, an
   await root.getByRole('button', { name: 'Inspect stage 5: Bloom', exact: true }).click();
   await expect(root.locator('[data-flower]')).toHaveAttribute('data-open', '1.0000');
   await expect(root.locator('[data-detail-title]')).toContainText('delight');
+  await root.getByRole('button', { name: 'Close Follow the hand-off', exact: true }).click();
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: testInfo.outputPath('chain-reaction-mobile.png') });
   await page.setViewportSize({ width: 1280, height: 900 });
@@ -288,3 +304,64 @@ test('chain browser: external abort cancels frames, removes visibility listeners
   expect(result.listenersBefore).toBe(1);
   expect(result).toMatchObject({ pendingAfter: 0, listenersAfter: 0, children: 0, newReports: 0 });
 });
+
+for (const viewport of [
+  { width: 1440, height: 900 }, { width: 1280, height: 720 },
+  { width: 375, height: 812 }, { width: 320, height: 640 }, { width: 768, height: 480 },
+]) {
+  test(`chain workspace: ${viewport.width}x${viewport.height} keeps transport with the real machine`, async ({ page }, testInfo) => {
+    await page.setViewportSize(viewport);
+    await openMachine(page);
+    const root = page.locator('.project-chain-reaction');
+    await expect(root).toHaveAttribute('data-workspace', 'true');
+    const assertFits = async () => {
+      expect(await page.evaluate(() => ({
+        width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight,
+        x: window.scrollX, y: window.scrollY,
+      }))).toEqual({ width: viewport.width, height: viewport.height, x: 0, y: 0 });
+    };
+    await assertFits();
+    expect(await root.evaluate(element => getComputedStyle(element).overflowY)).not.toMatch(/hidden|clip/);
+    for (const selector of ['.cr-scene', '[data-play]', '[data-replay]', '.cr-speed select', '.cr-scrubber input', '[data-open-stages]', '[data-open-notes]']) {
+      const bounds = (await root.locator(selector).boundingBox())!;
+      expect(bounds.y).toBeGreaterThanOrEqual(0);
+      expect(bounds.y + bounds.height).toBeLessThanOrEqual(viewport.height);
+    }
+    for (const button of await root.locator('button:visible, select:visible').all()) {
+      expect(await button.evaluate(element => {
+        const bounds = element.getBoundingClientRect();
+        return [bounds.left + 4, bounds.left + bounds.width / 2, bounds.right - 4]
+          .every(x => element.contains(document.elementFromPoint(x, bounds.y + bounds.height / 2)));
+      })).toBe(true);
+    }
+    const timeline = root.getByRole('slider', { name: 'Timeline position' });
+    await timeline.focus();
+    await timeline.press('End');
+    await expect(root.locator('[data-flower]')).toHaveAttribute('data-open', '1.0000');
+    await timeline.press('Home');
+    await expect(root.locator('[data-flower]')).toHaveAttribute('data-open', '0.0000');
+    await root.getByLabel('Playback speed', { exact: true }).selectOption('0.5');
+    await root.getByRole('button', { name: 'Play animation', exact: true }).click();
+    await expect.poll(async () => Number(await root.getAttribute('data-time'))).toBeGreaterThan(0);
+    await root.getByRole('button', { name: 'Pause animation', exact: true }).click();
+    await root.getByRole('button', { name: 'Inspect stages', exact: true }).click();
+    const inspector = root.getByRole('dialog', { name: 'Follow the hand-off' });
+    await expect(inspector).toBeVisible();
+    for (const stage of await inspector.locator('[data-seek-stage]').all()) {
+      expect(await stage.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
+    }
+    await inspector.getByRole('button', { name: 'Inspect stage 4: Turn', exact: true }).click();
+    await expect(root).toHaveAttribute('data-stage', 'turn');
+    await expect(root.locator('[data-wheel]')).not.toHaveAttribute('data-angle', '0.0000');
+    await assertFits();
+    await page.screenshot({ path: testInfo.outputPath('chain-workspace-stages.png') });
+    await page.keyboard.press('Escape');
+    await expect(root.getByRole('button', { name: 'Inspect stages', exact: true })).toBeFocused();
+    await root.getByRole('button', { name: 'Behind the motion', exact: true }).click();
+    await expect(root.getByRole('dialog', { name: 'Behind the motion' })).toContainText('not a rigid-body physics simulation');
+    await assertFits();
+    await root.getByRole('button', { name: 'Close Behind the motion', exact: true }).click();
+    await assertFits();
+    await page.screenshot({ path: testInfo.outputPath('chain-workspace.png') });
+  });
+}

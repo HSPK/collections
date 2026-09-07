@@ -8,6 +8,19 @@ visibility. The images use the same geometry as the explicit truth reveal.
 
 ## A complete study
 
+The page is a `100dvh` workspace, not a scrolling article. A live recovered-space
+preview stays beside the dock on desktop and above it on phones. **View A** and
+**View B** expose the original calibrated images; **Inspect** contains pixel
+editing and live reconstruction metrics; **Rig** contains calibration/noise;
+**Space** offers orbit/pick, home and truth reveal (and enlarges the phone view).
+Each tab supports arrows, Home/End and one tab stop. Long inspectors scroll
+inside their allocated pane. **Notebook** opens the guided experiments,
+estimated F/geometry sheet, JSON/PLY exchange, model notes and footer in a
+keyboard-dismissable dialog. No study state is reset by changing panes.
+The live-status strip reserves bottom-right collection-menu clearance, with
+64 px of local text inset. Keep dock controls above that occupied strip rather
+than placing actions under the floating navigation.
+
 1. Select the signal ridge in either image or the landmark selector. Yellow
    marks are observed pixels; the red square is the displayed point reprojected
    with the assumed calibration. The line is the calibrated epipolar locus.
@@ -109,7 +122,11 @@ and redraws on input/resize, with no auto-orbit, damping or continuous animation
 Image and orbit gestures share single-pointer ownership. Pixel drags have one
 undo boundary and cancellation restores the original. Keyboard arrows navigate
 image features; the volume's arrows orbit, +/- zoom, and Home resets.
-Mobile pane tabs have one tab stop and support arrow keys, Home and End.
+The shared workspace tabs retain inactive exposure dimensions with inert,
+invisible panels occupying the same explicitly bounded grid cell. The live
+volume is never detached; ResizeObserver ignores zero-size regions, requests a
+real redraw on resize, and keeps the sensor pixels independent of display size.
+Canvas/SVG exposures share a contained 3:2 image rectangle, including picking.
 File imports belong to their selection sequence and starting experiment/input
 revision. A late file cannot replace a newer selection, committed edit, or
 uncommitted pixel input; the existing work is preserved with explicit feedback.
@@ -135,7 +152,7 @@ scenes. Mesh recovery and arbitrary image uploads are not claimed.
 Run only the owned suite against the existing server:
 
 ```sh
-SITE_URL=http://127.0.0.1:4173/ npx playwright test tests/projects/parallax.spec.ts
+SITE_URL=http://127.0.0.1:4173/ npm test -- tests/projects/parallax.spec.ts tests/projects/parallax-workflows.spec.ts --reporter=dot
 ```
 
 Numerical cases cover gauge invariance, F/E constraints, cheirality, degeneracy,
@@ -143,11 +160,20 @@ noise, Jacobians, refinement improvement, covariance, outlier rejection,
 observation provenance, visibility and strict serialization. Browser cases
 exercise edits, repair, calibration mismatch, all rigs, guidance, exports,
 imports, image resizing, keyboard/pointer selection, 320/375 px panes,
-reduced-motion idleness and remounts.
+reduced-motion idleness and remounts. Workspace checks resize through
+1440×900, 1280×720, 375×812, 320×640 and 768×480, assert no document scrolling,
+edit pixels then return to the exposure, undo precisely, open secondary geometry,
+and save screenshots in the configured Playwright output directory. When sharing
+the browser with other agents, acquire the coordinator's browser lock.
 
 Useful integration selectors: `.project-parallax`, `[data-project-preview]`,
 `[data-image-overlay="a"]`, `[data-image-overlay="b"]`,
 `[data-camera-image="a"]`, `.px-space-canvas`, `[data-point3d]` (full calculation
 in `data-xyz`), `[data-rms]` and `[data-uncertainty]` (`data-value`),
-`[data-pixel="b-y"]`, `[data-rig="baseline"]`, `[data-tab="inspect"]`,
+`[data-pixel="b-y"]`, `[data-rig="baseline"]`, `[data-tab="a|b|space|rig|inspect"]`,
 `[data-action="fit-f"]`, `[data-import-text]`, `[data-status]`.
+Existing `data-tab` selectors and root `data-active-pane` remain available;
+tabs also expose `data-workspace-tab`, semantic tab/tabpanel relationships and
+`aria-selected`. `data-pane="space"` remains the persistent preview, while the
+Space tab controls `#px-pane-space-tools`. Notebook content remains under the
+same project root, so delegated actions and file ownership keep their contracts.

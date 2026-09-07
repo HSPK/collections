@@ -747,3 +747,76 @@
     scroll-behavior: auto;
   }
 }
+
+.project-magnetic-loom[data-workspace] {
+  --workspace-paper: #f1efe5;
+  height: 100dvh;
+  min-height: 0;
+  padding: 18px 28px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 16px;
+}
+.project-magnetic-loom .ml-header,
+.project-magnetic-loom .ml-workspace { width: 100%; margin: 0 auto; }
+.project-magnetic-loom .ml-header { padding-right: 0; }
+.project-magnetic-loom .ml-workspace { grid-template-columns: minmax(0, 1fr) 300px; overflow: visible; }
+.project-magnetic-loom .ml-plate { min-height: 0; }
+.project-magnetic-loom .ml-bed { min-height: 0; aspect-ratio: auto; }
+.project-magnetic-loom .ml-bed-heading { min-height: 36px; padding: 8px 12px; font-size: 14px; }
+.project-magnetic-loom .ml-tools { display: flex; padding: 18px; gap: 16px; border-top: 0; border-left: 1px solid #c5c6b4; }
+.project-magnetic-loom .ml-selector { min-height: 60px; }
+.project-magnetic-loom .ml-position { margin: 12px 0; font-size: 14px; }
+.project-magnetic-loom .ml-label-row,
+.project-magnetic-loom :is(.ml-control, .ml-reset, .ml-traces, .ml-motion, .ml-small-note, .ml-flip-hint, .ml-keyboard-note, .ml-status, .ml-bed-footer, .ml-colophon) { font-size: 14px; }
+.project-magnetic-loom .ml-magnet-id,
+.project-magnetic-loom .ml-mini-poles i { font-size: 14px; }
+.project-magnetic-loom .ml-manipulate { display: grid; gap: 10px; }
+.project-magnetic-loom .ml-flip { margin: 0; }
+.project-magnetic-loom .ml-bed-tools { margin: 0; padding: 0; border: 0; }
+.project-magnetic-loom .ml-status { min-height: 0; }
+.project-magnetic-loom .ml-keyboard-note { margin-block: 16px; }
+.project-magnetic-loom .ml-notes { grid-template-columns: 1fr; padding-top: 16px; gap: 14px; }
+.project-magnetic-loom .ml-deck { display: block; margin: 16px 0; }
+.project-magnetic-loom .ml-bed-footer { padding-inline: 0; flex-wrap: wrap; }
+.project-magnetic-loom .workspace-dialog-heading > button { min-height: 44px; }
+@media (max-width: 600px), (max-height: 540px) {
+  .project-magnetic-loom[data-workspace] { padding: 10px; gap: 10px; }
+  .project-magnetic-loom .ml-header { padding-right: 0; gap: 8px; }
+  .project-magnetic-loom .ml-brand { gap: 8px; }
+  .project-magnetic-loom .ml-mark { width: 27px; flex-basis: 27px; }
+  .project-magnetic-loom h1 { font-size: 29px; }
+  .project-magnetic-loom .ml-kicker { font-size: 10px; letter-spacing: 0; }
+  .project-magnetic-loom .ml-header > button { padding: 4px 8px; line-height: 1.2; }
+  .project-magnetic-loom .ml-workspace { grid-template-columns: minmax(0, 1fr) 286px; }
+  .project-magnetic-loom .ml-tools { padding: 8px; gap: 8px; }
+  .project-magnetic-loom .ml-tool-heading { margin-bottom: 4px; }
+  .project-magnetic-loom .ml-tools h2 { margin: 0 0 8px; font-size: 22px; }
+  .project-magnetic-loom .ml-selector { min-height: 44px; flex-direction: row; align-items: center; padding: 4px 8px; gap: 6px; flex-wrap: nowrap; }
+  .project-magnetic-loom .ml-mini-poles i { min-width: 16px; padding: 2px 4px; }
+  .project-magnetic-loom .ml-position { margin: 4px 0; }
+  .project-magnetic-loom .ml-label-row { margin-bottom: 0; }
+  .project-magnetic-loom .ml-angle-control { margin-bottom: 6px; gap: 6px; }
+  .project-magnetic-loom .ml-manipulate { grid-template-columns: 1fr auto; gap: 6px; }
+  .project-magnetic-loom .ml-nudges { gap: 4px; }
+  .project-magnetic-loom .ml-flip { width: auto; padding: 0 6px; gap: 4px; }
+  .project-magnetic-loom .ml-flip-hint { display: none; }
+}
+@media (max-width: 600px) {
+  .project-magnetic-loom .ml-workspace { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+  .project-magnetic-loom .ml-header .ml-brand { display: block; }
+  .project-magnetic-loom .ml-header .ml-mark { display: none; }
+  .project-magnetic-loom .ml-tools { border-left: 0; border-top: 1px solid #c5c6b4; }
+  .project-magnetic-loom .ml-magnet-tools { display: grid; grid-template-columns: 1fr 1fr; column-gap: 8px; }
+  .project-magnetic-loom .ml-tool-heading { grid-column: 1 / -1; }
+  .project-magnetic-loom .ml-tools h2 { font-size: 18px; line-height: 1.2; margin: 0; }
+  .project-magnetic-loom .ml-selectors { grid-column: 1 / -1; grid-row: 3; margin-block: 6px; }
+  .project-magnetic-loom .ml-position { grid-column: 1 / -1; margin: 0 0 4px; }
+  .project-magnetic-loom .ml-label-row { grid-column: 2; grid-row: 2; }
+  .project-magnetic-loom .ml-angle-control,
+  .project-magnetic-loom .ml-manipulate { grid-column: 1 / -1; }
+  .project-magnetic-loom .ml-bed-heading { font-size: 14px; gap: 6px; padding: 6px 8px; }
+  .project-magnetic-loom .ml-section-number { margin-right: 4px; }
+  .project-magnetic-loom .ml-material { letter-spacing: -.04em; }
+  .project-magnetic-loom .ml-transport { padding-right: 56px; }
+}

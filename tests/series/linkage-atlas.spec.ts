@@ -261,6 +261,37 @@ async function setRange(input: Locator, value: number) {
   }, value);
 }
 
+test('large valid linkages still autofit all joints and the draggable input after resizing', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const root = await openAtlas(page);
+  for (const [name, value] of [
+    ['Input length a', '1200000'], ['Coupler length b', '3600000'],
+    ['Output length c', '2600000'], ['Ground length d', '4000000'],
+  ]) await root.getByRole('spinbutton', { name, exact: true }).fill(value);
+  await expect(root).toHaveAttribute('data-status', 'closed');
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 375, height: 812 }]) {
+    await page.setViewportSize(viewport);
+    const scene = root.locator('.la-scene');
+    await expect.poll(() => scene.evaluate(svg => {
+      const bounds = svg.getBoundingClientRect();
+      const points = [...svg.querySelectorAll('[data-joint="A"], [data-joint="B"], [data-joint="C"], [data-joint="D"], [data-angle-handle]')];
+      return points.length === 5 && points.every(point => {
+        const rect = point.getBoundingClientRect();
+        return rect.left >= bounds.left && rect.right <= bounds.right &&
+          rect.top >= bounds.top && rect.bottom <= bounds.bottom;
+      });
+    })).toBe(true);
+    const handle = root.getByRole('slider', { name: 'Input angle handle', exact: true });
+    const before = await root.getAttribute('data-angle');
+    await handle.focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(root).not.toHaveAttribute('data-angle', before!);
+    await expect(root).toHaveAttribute('data-status', 'closed');
+    expect(await page.evaluate(() => [document.documentElement.scrollWidth, document.documentElement.scrollHeight, scrollY]))
+      .toEqual([viewport.width, viewport.height, 0]);
+  }
+});
+
 test('desktop controls alter actual rod geometry and traces; seeking, playback, and reset agree', async ({ page }, testInfo) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
@@ -296,6 +327,7 @@ test('desktop controls alter actual rod geometry and traces; seeking, playback, 
   expect(await trace.getAttribute('d')).toBe(plusPath);
   expect(await root.locator('[data-joint="C"]').getAttribute('transform')).toBe(plusC);
 
+  await root.getByRole('tab', { name: 'Tracer', exact: true }).click();
   const fraction = page.getByRole('slider', { name: 'Coupler fraction', exact: true });
   const point = root.locator('[data-joint="P"]');
   const firstPoint = await point.getAttribute('data-x');
@@ -312,7 +344,9 @@ test('desktop controls alter actual rod geometry and traces; seeking, playback, 
   await expect(root.locator('[data-construction] circle')).toHaveCount(2);
   await page.getByRole('checkbox', { name: 'Other assembly trace', exact: true }).check();
   expect((await root.locator('[data-other-trace]').getAttribute('d'))!.length).toBeGreaterThan(100);
+  await root.getByRole('tab', { name: 'Readout', exact: true }).click();
   await expect(root.locator('[data-other-legend]')).toBeVisible();
+  await root.getByRole('tab', { name: 'Tracer', exact: true }).click();
 
   const angle = page.getByRole('slider', { name: 'Input angle', exact: true });
   await setRange(angle, 47);
@@ -490,8 +524,17 @@ test('375px view has immediate legible geometry, generous controls, and live red
   expect(labelSizes.length).toBeGreaterThan(0);
   expect(Math.min(...labelSizes)).toBeGreaterThanOrEqual(12);
   for (const control of await root.locator('button, select, input:not([type="checkbox"]), .la-toggles label').all()) {
+    const dialogId = await control.evaluate((element) => element.closest('dialog')?.id);
+    const opened = root.locator('dialog[open]');
+    if (await opened.count() && await opened.getAttribute('id') !== dialogId) await page.keyboard.press('Escape');
+    if (dialogId && !await root.locator(`#${dialogId}`).evaluate((dialog: HTMLDialogElement) => dialog.open)) {
+      await root.locator(`button[aria-controls="${dialogId}"]`).first().click();
+    }
+    const panelId = await control.evaluate((element) => element.closest('[role="tabpanel"]')?.id);
+    if (panelId) await root.locator(`button[aria-controls="${panelId}"]`).click();
     expect((await control.boundingBox())!.height).toBeGreaterThanOrEqual(44);
   }
+  if (await root.locator('dialog[open]').count()) await page.keyboard.press('Escape');
   const target = (await root.locator('[data-angle-handle]').boundingBox())!;
   expect(target.width).toBeGreaterThanOrEqual(44);
   expect(target.height).toBeGreaterThanOrEqual(44);
@@ -510,6 +553,31 @@ test('375px view has immediate legible geometry, generous controls, and live red
   await page.getByRole('button', { name: 'Reset study', exact: true }).click();
   await page.evaluate(() => scrollTo(0, 0));
   await page.screenshot({ path: relative(process.cwd(), testInfo.outputPath('linkage-atlas-mobile.png')) });
+});
+
+test('linkage panes retain edited fields and resized pointer coordinates', async ({ page }) => {
+  const root = await openAtlas(page);
+  const input = root.getByRole('spinbutton', { name: 'Input length a', exact: true });
+  await input.fill('1.5');
+  await expect(input).toBeFocused();
+  await root.getByRole('button', { name: 'Observations', exact: true }).click();
+  await expect(root.getByRole('dialog', { name: 'Study observations', exact: true })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(root.getByRole('button', { name: 'Observations', exact: true })).toBeFocused();
+  await expect(input).toHaveValue('1.5');
+  await page.setViewportSize({ width: 375, height: 812 });
+  const handle = root.locator('[data-angle-handle]');
+  await expect(handle).toBeVisible();
+  await expect.poll(async () => root.locator('.la-scene').evaluate((svg: SVGSVGElement) =>
+    Math.abs(svg.viewBox.baseVal.width - svg.getBoundingClientRect().width))).toBeLessThan(1);
+  const a = (await root.locator('[data-joint="A"]').boundingBox())!;
+  const b = (await handle.boundingBox())!;
+  const center = { x: a.x + a.width / 2, y: a.y + a.height / 2 };
+  await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(center.x + 35, center.y - 35);
+  await page.mouse.up();
+  expect(Number(await root.getAttribute('data-angle'))).toBeCloseTo(45, 1);
 });
 
 test('abort and repeated destroy cancel frames, disconnect resize, and leave stale APIs inert', async ({ page }) => {

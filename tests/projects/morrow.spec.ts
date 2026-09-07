@@ -36,8 +36,81 @@ test.describe('MORROW mathematical workcell', () => {
     await expect(root.locator('[data-morrow-canvas]')).toHaveAttribute('data-ready', 'true');
     return root;
   }
+  async function view(page: Page, name: 'cell' | 'inspector' | 'motion') {
+    await page.locator(`[data-morrow-view="${name}"]`).click();
+  }
+  async function files(page: Page) {
+    await page.locator('[data-morrow-files]').click();
+    await expect(page.getByRole('dialog', { name: 'Files and model guide' })).toBeVisible();
+  }
+  async function closeFiles(page: Page) {
+    await page.getByRole('button', { name: 'Close Files and model guide', exact: true }).click();
+  }
   test.describe('MORROW software WebGL workbench', () => {
     test.setTimeout(90_000);
+
+    test('viewport workspace preserves live preview, real edits and motion across all pane sizes', async ({ page }, testInfo) => {
+      const errors: string[] = [];
+      page.on('pageerror', error => errors.push(error.message));
+      const root = await openMorrow(page);
+      await expect(root).toHaveAttribute('data-workspace', 'true');
+      for (const [width, height] of [[1440, 900], [1280, 720], [375, 812], [320, 640], [768, 480]]) {
+        await page.setViewportSize({ width, height });
+        for (const name of ['cell', 'inspector', 'motion'] as const) {
+          await view(page, name);
+          await expect.poll(() => page.evaluate(() => ({
+            width: document.documentElement.scrollWidth, height: document.documentElement.scrollHeight, scrollY,
+          }))).toEqual({ width, height, scrollY: 0 });
+          const canvas = root.locator('[data-morrow-canvas]');
+          await expect(canvas).toBeInViewport({ ratio: 1 });
+          const box = await canvas.boundingBox();
+          expect(box!.height).toBeGreaterThan(80);
+          await expect.poll(() => canvas.evaluate(element => {
+            const bounds = element.getBoundingClientRect();
+            return element instanceof HTMLCanvasElement && element.width > 0 && element.height > 0 &&
+              Math.abs(element.width - bounds.width * Math.min(devicePixelRatio, 1.5)) < 2 &&
+              Math.abs(element.height - bounds.height * Math.min(devicePixelRatio, 1.5)) < 2;
+          })).toBe(true);
+          const fonts = await root.locator('button, input, select').evaluateAll(elements =>
+            elements.filter(element => element.getClientRects().length > 0).map(element => parseFloat(getComputedStyle(element).fontSize)));
+          expect(Math.min(...fonts)).toBeGreaterThanOrEqual(14);
+        }
+        await view(page, 'inspector');
+        const live = await root.locator('[data-morrow-tool]').textContent();
+        await root.locator('[data-morrow-tab="joints"]').click();
+        await root.locator('[data-morrow-joint="0"]').fill('5');
+        await root.locator('[data-morrow-joint="0"]').press('Tab');
+        await expect(root.locator('[data-morrow-ik-state]')).toHaveText('Converged');
+        await expect(root.locator('[data-morrow-tool]')).toHaveText(live!);
+        await expect(root.locator('[data-morrow-canvas]')).toBeInViewport();
+        if (width === 320) await page.screenshot({ path: testInfo.outputPath('morrow-workspace-mobile-edit.png') });
+        await files(page);
+        await root.locator('[data-morrow-undo]').click();
+        await closeFiles(page);
+        await root.locator('[data-morrow-tab="pose"]').click();
+        await root.locator('[data-morrow-source]').click();
+        await root.locator('[data-morrow-plan]').click();
+        await expect(root.locator('[data-morrow-plan-state]')).toContainText('certified edges');
+        await view(page, 'motion');
+        await root.locator('[data-morrow-step]').click();
+        await expect(root.locator('[data-morrow-time]')).toContainText('0.10 /');
+        await expect(root.locator('[data-morrow-trace] svg')).toBeVisible();
+        await page.screenshot({ path: testInfo.outputPath(`morrow-workspace-${width}x${height}.png`) });
+        await root.locator('[data-morrow-reset]').click();
+        await expect(root.locator('[data-morrow-run]')).toBeDisabled();
+        await expect(root.locator('[data-morrow-tool]')).toHaveText(live!);
+        expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBe(height);
+      }
+      await files(page);
+      await page.getByText('Model, limits & keyboard guide', { exact: true }).click();
+      await expect(root.locator('.morrow-guide')).toContainText('No hardware connection');
+      const download = page.waitForEvent('download');
+      await root.locator('[data-morrow-save]').click();
+      expect(serialize(deserialize(await readFile((await (await download).path())!, 'utf8')))).toBe(serialize(createState()));
+      await page.keyboard.press('Escape');
+      await expect(root.locator('[data-morrow-files]')).toBeFocused();
+      expect(errors).toEqual([]);
+    });
 
     test('a real UI pick/place, inspection isolation, timed execution, program export and project reload', async ({ page }, testInfo) => {
       const errors: string[] = [];
@@ -49,11 +122,13 @@ test.describe('MORROW mathematical workcell', () => {
       await page.screenshot({ path: testInfo.outputPath('morrow-desktop.png'), fullPage: false });
       await root.locator('[data-morrow-grip]').click();
       await expect(root.locator('[data-morrow-status]')).toContainText('25 mm');
+      await page.getByRole('button', { name: 'Dismiss message', exact: true }).click();
       await root.locator('[data-morrow-plan]').click();
       await expect(root.locator('[data-morrow-run]')).toBeEnabled();
       await expect(root.locator('[data-morrow-plan-state]')).toContainText('certified edges');
       const initialTool = await root.locator('[data-morrow-tool]').textContent();
       const scrub = root.locator('[data-morrow-scrub]');
+      await view(page, 'motion');
       await scrub.focus();
       await scrub.press('End');
       await expect(root).toHaveAttribute('data-inspection', 'true');
@@ -64,6 +139,7 @@ test.describe('MORROW mathematical workcell', () => {
       await root.locator('[data-morrow-run]').click();
       await expect(root).toHaveAttribute('data-executing', 'true');
       await expect(root.locator('[data-morrow-motion-state]')).toHaveText('AT GOAL / PAUSED', { timeout: 25_000 });
+      await view(page, 'inspector');
       await root.locator('[data-morrow-grip]').click();
       await expect(root.locator('[data-morrow-payload]')).toContainText('CLOSED');
       await root.locator('[data-morrow-receiver]').click();
@@ -72,6 +148,7 @@ test.describe('MORROW mathematical workcell', () => {
       await expect(root.locator('[data-morrow-status]')).toContainText('Payload included');
       await page.evaluate(() => window.scrollTo(0, 0));
       await page.screenshot({ path: testInfo.outputPath('morrow-carry-plan.png'), fullPage: false });
+      await files(page);
       const download = page.waitForEvent('download');
       await root.locator('[data-morrow-export]').click();
       const programFile = await download;
@@ -81,16 +158,22 @@ test.describe('MORROW mathematical workcell', () => {
       expect(program.warning).toContain('Not commands for physical hardware');
       expect(program.payload).toBe(true);
       expect(program.nodes.length).toBeGreaterThanOrEqual(2);
+      await closeFiles(page);
+      await view(page, 'motion');
       await root.locator('[data-morrow-run]').click();
       await expect(root.locator('[data-morrow-motion-state]')).toHaveText('AT GOAL / PAUSED', { timeout: 30_000 });
+      await view(page, 'inspector');
       await root.locator('[data-morrow-release]').click();
       await expect(root).toHaveAttribute('data-task-complete', 'true');
       await expect(root.locator('[data-morrow-status]')).toContainText('Transfer complete');
       await expect(root.locator('[data-morrow-payload]')).toContainText('COUPON PLACED');
+      await files(page);
       const saved = page.waitForEvent('download');
       await root.locator('[data-morrow-save]').click();
       const savedPath = await (await saved).path();
       expect(savedPath).not.toBeNull();
+      await closeFiles(page);
+      await view(page, 'motion');
       await root.locator('[data-morrow-reset]').click();
       await expect(root).toHaveAttribute('data-task-complete', 'false');
       await root.locator('[data-morrow-file]').setInputFiles(savedPath!);
@@ -108,17 +191,21 @@ test.describe('MORROW mathematical workcell', () => {
       await expect(root.locator('[data-morrow-ik-state]')).toHaveText('Not converged');
       await expect(root.locator('[data-morrow-pose="x"]')).toHaveValue('2.800');
       await expect(root.locator('[data-morrow-tool]')).toHaveText(liveTool!);
+      await page.getByRole('button', { name: 'Dismiss message', exact: true }).click();
       await root.locator('[data-morrow-source]').click();
       await root.locator('[data-morrow-tab="program"]').click();
       await root.locator('[data-morrow-queue-add]').click();
       await expect(root.locator('[data-morrow-queue-count]')).toHaveText('1 / 6');
+      await files(page);
       await root.locator('[data-morrow-undo]').click();
       await expect(root.locator('[data-morrow-queue-count]')).toHaveText('0 / 6');
       await root.locator('[data-morrow-redo]').click();
       await expect(root.locator('[data-morrow-queue-count]')).toHaveText('1 / 6');
+      await closeFiles(page);
       await root.locator('[data-morrow-queue-clear]').click();
       await root.locator('[data-morrow-plan]').click();
       await expect(root.locator('[data-morrow-run]')).toBeEnabled();
+      await view(page, 'motion');
       await root.locator('[data-morrow-step]').click();
       await expect(root.locator('[data-morrow-tool]')).not.toHaveText(liveTool!);
       await root.locator('[data-morrow-reverse]').click();
@@ -126,6 +213,7 @@ test.describe('MORROW mathematical workcell', () => {
       await expect(root.locator('[data-morrow-tool]')).toHaveText(liveTool!);
       await root.locator('[data-morrow-run]').click();
       await expect(root).toHaveAttribute('data-executing', 'true');
+      await view(page, 'inspector');
       await root.locator('[data-morrow-tab="joints"]').click();
       await root.locator('[data-morrow-joint="0"]').fill('5');
       await expect(root).toHaveAttribute('data-executing', 'false');

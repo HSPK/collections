@@ -4,6 +4,7 @@ import { createLoop } from '../../core/loop';
 import { clamp } from '../../core/math';
 import { createProjectPage, query } from '../../core/page';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
+import { createWorkspaceDialog, createWorkspaceTabs } from '../../core/workspace';
 import { portals, worlds } from './data';
 import {
   interpolateCamera, leaveFrame, MAX_DEPTH, overview, panBy, portalCamera,
@@ -15,6 +16,7 @@ import { drawAtlas } from './illustrations';
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'worlds-within');
   const { root, signal } = page;
+  root.dataset.workspace = 'true';
   let smooth = !context.reducedMotion;
   let journey: Journey = { camera: { x: 500, y: 350, zoom: 0.96 }, depth: 0 };
   let travel: { from: Camera; to: Camera; elapsed: number } | undefined;
@@ -32,7 +34,8 @@ export function mount(context: ProjectContext): ProjectInstance {
         </div>
         <p class="ww-header-note">Every picture<br>is another place.</p>
       </header>
-      <section class="ww-atlas" aria-label="Recursive illustrated atlas" data-project-preview>
+      <div class="ww-workspace" data-project-preview>
+      <section class="ww-atlas" aria-label="Recursive illustrated atlas">
         <div class="ww-toolbar">
           <div class="ww-current"><span class="ww-eyebrow" data-depth-label>Layer 0 / the beginning</span><h2 data-world-name>The afternoon desk</h2></div>
           <div class="ww-navigation" role="group" aria-label="Atlas navigation">
@@ -44,18 +47,27 @@ export function mount(context: ProjectContext): ProjectInstance {
         </div>
         <div class="ww-stage" data-stage></div>
         <div class="ww-entry">
-          <div><p class="ww-eyebrow" data-address></p><p data-story></p></div>
           <button type="button" class="ww-enter" data-enter>Enter the postcard <span aria-hidden="true">&rarr;</span></button>
         </div>
+      </section>
+      <aside class="ww-dock" aria-label="Atlas stories and field notes">
+        <div data-atlas-tabs></div>
+        <div class="ww-dock-body">
+        <div class="ww-story" data-story-panel tabindex="0">
+          <p class="ww-eyebrow" data-address></p><p data-story></p>
+          <div class="ww-readout">
+            <p data-status></p>
+            <div><output data-zoom aria-live="off">Scene scale 0.96x</output><button type="button" data-motion aria-pressed="${smooth}">Smooth travel: ${smooth ? 'on' : 'off'}</button></div>
+          </div>
+        </div>
+        <div data-fieldnotes-panel tabindex="0"></div>
+        </div>
+      </aside>
+      </div>
         <div class="ww-instructions" id="ww-controls-help">
           <p>Scroll or pinch to zoom. Drag to wander. Tap the framed picture to enter.</p>
           <p>Keyboard: <kbd>+</kbd> <kbd>-</kbd> zoom, <kbd>Arrows</kbd> pan, <kbd>Enter</kbd> go in, <kbd>Esc</kbd> back.</p>
         </div>
-      </section>
-      <div class="ww-readout">
-        <p role="status" aria-live="polite" aria-atomic="true" data-status></p>
-        <div><output data-zoom aria-live="off">Scene scale 0.96x</output><button type="button" data-motion aria-pressed="${smooth}">Smooth travel: ${smooth ? 'on' : 'off'}</button></div>
-      </div>
       <section class="ww-fieldnotes" aria-labelledby="ww-note-title">
         <div class="ww-fieldnotes-heading"><p class="ww-eyebrow">Four places / one impossible loop</p><h2 id="ww-note-title">Small is a point of view.</h2></div>
         <ol class="ww-world-list">
@@ -64,7 +76,23 @@ export function mount(context: ProjectContext): ProjectInstance {
         <details class="ww-mechanics"><summary>A drawn loop, not an infinite universe</summary><p>These four original vector scenes repeat. Each next scene is actually drawn inside its parent's frame, not swapped in by a slideshow. Zoom keeps the point under your cursor in place; crossing a frame only changes the coordinates used to describe the same view. The journey is capped at ${MAX_DEPTH} layers to keep navigation bounded. Everything is local and deterministic, with no generative AI or external imagery.</p><p>Switch smooth travel off for immediate jumps. Wheel zoom, touch, panning, and every navigation control keep working with motion off.</p></details>
       </section>
       <footer class="ww-footer"><span>Drawn from nowhere. Addressed to you.</span><span>A local, repeating atlas / No. 33</span></footer>
+      <div class="ww-workspace-footer"><button type="button" data-help>Atlas guide</button><span>Drag to wander. Zoom to discover.</span></div>
+      <p class="ww-announcement" role="status" aria-live="polite" aria-atomic="true" data-announcement></p>
     </div>`;
+
+  query(root, '[data-fieldnotes-panel]').append(query(root, '.ww-fieldnotes'));
+  createWorkspaceTabs(page, {
+    id: 'atlas-dock', label: 'Atlas reading', host: query(root, '[data-atlas-tabs]'),
+    panes: [
+      { id: 'story', label: 'Story', panel: query(root, '[data-story-panel]') },
+      { id: 'notes', label: 'Field notes', panel: query(root, '[data-fieldnotes-panel]') },
+    ],
+  });
+  createWorkspaceDialog(page, {
+    id: 'atlas-guide', title: 'Atlas guide',
+    content: [query(root, '.ww-instructions'), query(root, '.ww-footer')],
+    triggers: [query(root, '[data-help]')],
+  });
 
   const stage = canvas2D(query<HTMLDivElement>(root, '[data-stage]'), 'A desk containing a postcard city, with more illustrated worlds inside.');
   page.onCleanup(stage.dispose);
@@ -77,6 +105,7 @@ export function mount(context: ProjectContext): ProjectInstance {
   const story = query<HTMLElement>(root, '[data-story]');
   const address = query<HTMLElement>(root, '[data-address]');
   const status = query<HTMLElement>(root, '[data-status]');
+  const announcement = query<HTMLElement>(root, '[data-announcement]');
   const zoomOutput = query<HTMLOutputElement>(root, '[data-zoom]');
   const enterButton = query<HTMLButtonElement>(root, '[data-enter]');
   const backButton = query<HTMLButtonElement>(root, '[data-back]');
@@ -108,6 +137,7 @@ export function mount(context: ProjectContext): ProjectInstance {
       describedDepth = journey.depth;
     }
     if (message) status.textContent = message;
+    if (announcement.textContent !== status.textContent) announcement.textContent = status.textContent;
   }
 
   const loop = createLoop((_elapsed, delta) => {

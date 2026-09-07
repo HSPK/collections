@@ -251,3 +251,93 @@
 @media (prefers-reduced-motion: reduce) {
   .project-parallax *, .project-parallax *::before, .project-parallax *::after { scroll-behavior: auto; transition: none; animation: none; }
 }
+
+.project-parallax[data-workspace] {
+  --workspace-paper: var(--px-paper);
+  height: 100dvh;
+  min-height: 0;
+  padding: 12px 20px;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: 8px;
+}
+.project-parallax[data-workspace] .px-header { padding: 0 64px 0 0; gap: 12px; }
+.project-parallax[data-workspace] .px-brand { gap: 10px; }
+.project-parallax[data-workspace] .px-brand svg { width: 34px; height: 34px; }
+.project-parallax[data-workspace] .px-brand h1 { font-size: 32px; letter-spacing: -2px; }
+.project-parallax[data-workspace] .px-brand h1 span { font-size: 12px; margin-top: 3px; }
+.project-parallax[data-workspace] .px-toolbar { padding: 6px 0; gap: 10px; flex-wrap: wrap; }
+.project-parallax[data-workspace] .px-study-label { min-width: 0; font-size: 14px; gap: 8px; }
+.project-parallax[data-workspace] .px-study-label select { min-width: 0; width: 210px; font-size: 14px; }
+.project-parallax[data-workspace] .px-method-group { margin-left: auto; }
+.project-parallax[data-workspace] .px-studio { display: grid; min-height: 0; padding: 0; gap: 16px; grid-template-columns: minmax(0, 1.15fr) minmax(300px, 1fr); }
+.project-parallax[data-workspace] .px-space-panel { display: grid; grid-template-rows: auto minmax(0, 1fr); min-height: 0; }
+.project-parallax[data-workspace] .px-space-host { min-height: 0; height: auto; }
+.project-parallax[data-workspace] .px-dock { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 6px; min-width: 0; min-height: 0; }
+.project-parallax[data-workspace] .px-mobile-tabs { display: flex; position: static; margin: 0; gap: 2px; background: var(--px-paper); }
+.project-parallax[data-workspace] .px-mobile-tabs button { padding: 7px 5px; font-size: 14px; min-height: 36px; }
+.project-parallax[data-workspace] .px-mobile-tabs button[aria-selected="true"] { background: var(--px-yellow); }
+.project-parallax[data-workspace] .px-dock-panels { display: grid; grid-template-rows: minmax(0, 1fr); min-height: 0; min-width: 0; }
+.project-parallax[data-workspace] .px-dock-panels > * { grid-area: 1 / 1; min-width: 0; min-height: 0; max-height: 100%; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.project-parallax[data-workspace] .px-camera-panel { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; }
+.project-parallax[data-workspace] .px-exposure { min-height: 0; aspect-ratio: auto; }
+.project-parallax[data-workspace] .px-exposure > canvas { object-fit: contain; }
+.project-parallax[data-workspace] .px-capture-tools { display: none; padding: 0; margin: 0; }
+.project-parallax[data-workspace][data-active-pane="a"] .px-capture-tools,
+.project-parallax[data-workspace][data-active-pane="b"] .px-capture-tools { display: flex; }
+.project-parallax[data-workspace] .px-capture-tools span { font-size: 14px; line-height: 1.25; }
+.project-parallax[data-workspace] .px-inspector { display: block; border: 0; padding: 0 8px 0 0; }
+.project-parallax[data-workspace] .px-inspector-body { columns: auto; padding-top: 4px; }
+.project-parallax[data-workspace] .px-pixel-form { margin-block: 12px; }
+.project-parallax[data-workspace] .px-calibration { display: block; padding: 10px; }
+.project-parallax[data-workspace] .px-calibration h2 { font-size: 24px; }
+.project-parallax[data-workspace] .px-calibration h2 br { display: none; }
+.project-parallax[data-workspace] .px-calibration-intro p { max-width: none; }
+.project-parallax[data-workspace] .px-rig,
+.project-parallax[data-workspace] .px-sensor { padding: 0; margin-top: 18px; border: 0; }
+.project-parallax[data-workspace] .px-space-tools { padding: 10px 2px; justify-content: flex-start; }
+.project-parallax[data-workspace] .px-space-tools > label { flex-basis: auto; }
+.project-parallax[data-workspace] .px-status { min-height: 58px; max-height: 58px; overflow: auto; overscroll-behavior: contain; margin: 0; padding: 5px 64px 5px 8px; font-size: 14px; }
+.project-parallax[data-workspace] .px-notebook { grid-template-columns: 1fr; gap: 18px; padding: 14px 0; }
+.project-parallax[data-workspace] .px-notebook > section { padding: 10px 0; }
+.project-parallax[data-workspace] .px-edition { display: flex; margin-block: 16px; }
+.project-parallax[data-workspace] .px-footer { padding: 14px 0; }
+@media (max-width: 900px) {
+  .project-parallax[data-workspace] .px-toolbar { gap: 4px 8px; }
+  .project-parallax[data-workspace] .px-study-label { flex: 1; }
+  .project-parallax[data-workspace] .px-history { margin-left: auto; }
+  .project-parallax[data-workspace] .px-history button { padding-inline: 6px; }
+  .project-parallax[data-workspace] .px-studio { gap: 10px; }
+}
+@media (max-width: 600px) {
+  .project-parallax[data-workspace] { padding: 8px; gap: 5px; }
+  .project-parallax[data-workspace] .px-header { display: flex; padding-right: 44px; gap: 4px; }
+  .project-parallax[data-workspace] .px-brand { gap: 5px; }
+  .project-parallax[data-workspace] .px-brand svg { width: 23px; height: 28px; }
+  .project-parallax[data-workspace] .px-brand h1 { font-size: 25px; letter-spacing: -1.6px; }
+  .project-parallax[data-workspace] .px-brand h1 span { font-size: 9px; letter-spacing: -.5px; }
+  .project-parallax[data-workspace] .px-notebook-button { padding: 5px; min-height: 36px; }
+  .project-parallax[data-workspace] .px-toolbar { display: grid; grid-template-columns: 1fr; padding: 4px 0; gap: 3px; }
+  .project-parallax[data-workspace] .px-study-label select { flex: 1; width: 0; min-height: 32px; }
+  .project-parallax[data-workspace] .px-method-group { margin: 0; }
+  .project-parallax[data-workspace] .px-method-group button { min-height: 34px; padding: 5px 4px; }
+  .project-parallax[data-workspace] .px-history { margin: 0; }
+  .project-parallax[data-workspace] .px-history button { min-height: 30px; padding-block: 3px; }
+  .project-parallax[data-workspace] .px-studio { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(100px, .36fr) minmax(0, 1fr); gap: 6px; }
+  .project-parallax[data-workspace][data-active-pane="space"] .px-studio { grid-template-rows: minmax(0, 1fr) 130px; }
+  .project-parallax[data-workspace] .px-panel-heading { height: 28px; }
+  .project-parallax[data-workspace] .px-panel-heading h2 { font-size: 14px; }
+  .project-parallax[data-workspace] .px-panel-heading > span { font-size: 10px; }
+  .project-parallax[data-workspace] .px-space-caption { left: 8px; top: 6px; }
+  .project-parallax[data-workspace] .px-space-caption strong { font-size: 14px; margin-top: 3px; }
+  .project-parallax[data-workspace]:not([data-active-pane="space"]) .px-space-caption strong { display: none; }
+  .project-parallax[data-workspace] .px-space-caption span { font-size: 9px; }
+  .project-parallax[data-workspace] .px-space-legend { left: 8px; bottom: 5px; font-size: 9px; }
+  .project-parallax[data-workspace] .px-space-tools { gap: 5px; padding: 4px 0; }
+  .project-parallax[data-workspace] .px-space-tools button { padding-inline: 5px; min-height: 34px; }
+  .project-parallax[data-workspace] .px-space-tools label { min-height: 30px; }
+  .project-parallax[data-workspace] .px-point-heading { margin-top: 5px; }
+  .project-parallax[data-workspace] .px-point-heading > strong { font-size: 24px; }
+  .project-parallax[data-workspace] .px-capture-tools button { min-height: 34px; padding: 5px 8px; }
+  .project-parallax[data-workspace] .px-status { line-height: 1.3; padding: 3px 64px 3px 6px; }
+}

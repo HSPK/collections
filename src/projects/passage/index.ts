@@ -1,6 +1,7 @@
 import './style.css';
 import { createProjectPage, downloadText, escapeMarkup, query, readLocalData, writeLocalData } from '../../core/page';
 import { createLoop } from '../../core/loop';
+import { createWorkspaceDialog, createWorkspaceTabs } from '../../core/workspace';
 import { clamp } from '../../core/math';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { makeLayout, PRESETS, PROFILES } from './presets';
@@ -22,10 +23,40 @@ export async function mount(context: ProjectContext): Promise<ProjectInstance> {
   const page = createProjectPage(context, 'passage'), id = `passage-${++nextId}`;
   page.root.setAttribute('aria-labelledby', `${id}-title`);
   page.root.innerHTML = workbenchMarkup(id);
+  page.root.dataset.workspace = 'true';
   const get = <T extends Element>(selector: string) => query<T>(page.root, selector);
   const el = <T extends Element>(name: string) => get<T>(`[data-passage-${name}]`);
   const text = (name: string, value: string) => { el<HTMLElement>(name).textContent = value; };
   const listen = (name: string, event: string, action: (event: Event) => void) => el<HTMLElement>(name).addEventListener(event, action, { signal: page.signal });
+  const workbench = el<HTMLElement>('workbench');
+  const dock = document.createElement('div');
+  dock.className = 'passage-dock';
+  const journey = document.createElement('section');
+  journey.className = 'passage-space-controls';
+  journey.append(get('.passage-building-line'), get('.passage-journey'));
+  const panels = ['plan', 'route', 'edit'].map(name => el<HTMLElement>(`panel="${name}"`));
+  dock.append(journey, ...panels);
+  workbench.append(dock);
+  const paneTabs = createWorkspaceTabs(page, {
+    id: `${id}-panes`, label: 'Workbench panes', host: get('.passage-pane-nav'),
+    panes: [{ id: 'space', label: 'Space', panel: journey },
+      ...panels.map((panel, index) => ({ id: ['plan', 'route', 'edit'][index], label: ['Plan', 'Route', 'Edit'][index], panel }))],
+    onSelect: value => {
+      workbench.dataset.pane = value;
+      for (const tab of page.root.querySelectorAll<HTMLButtonElement>('[data-passage-pane]')) {
+        tab.setAttribute('aria-pressed', String(tab.dataset.passagePane === value));
+      }
+    },
+  });
+  for (const tab of page.root.querySelectorAll<HTMLButtonElement>('[data-workspace-tab]')) {
+    tab.dataset.passagePane = tab.dataset.workspaceTab;
+    tab.setAttribute('aria-pressed', String(tab.dataset.passagePane === paneTabs.selected));
+  }
+  const keep = document.createElement('button');
+  keep.type = 'button'; keep.dataset.passageKeep = ''; keep.textContent = 'Keep / guide';
+  get('.passage-history').append(keep);
+  createWorkspaceDialog(page, { id: `${id}-keep`, title: 'Keep this study', triggers: [keep],
+    content: [get('.passage-bottom'), get('.passage-deck'), get('.passage-space-footer')] });
   const history = new History(makeLayout());
   let floor = 'g', exploded = true, interaction: Interaction = 'camera', selectedObject = 'g-shelf-a';
   let route: Route | null = null, result: SearchResult | null = null, search: Search | null = null;
@@ -232,8 +263,7 @@ export async function mount(context: ProjectContext): Promise<ProjectInstance> {
     updateEditor(); updateScene(); drawPlan();
   }
   function pane(value: string) {
-    el<HTMLElement>('workbench').dataset.pane = value;
-    for (const button of page.root.querySelectorAll<HTMLButtonElement>('[data-passage-pane]')) button.setAttribute('aria-pressed', String(button.dataset.passagePane === value));
+    paneTabs.select(value);
   }
   page.root.addEventListener('click', (event) => {
     if (!(event.target instanceof Element)) return;

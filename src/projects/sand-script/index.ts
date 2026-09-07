@@ -4,6 +4,7 @@ import { createLoop } from '../../core/loop';
 import { clamp } from '../../core/math';
 import { createProjectPage, downloadBlob, query } from '../../core/page';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
+import { createWorkspaceDialog } from '../../core/workspace';
 import { PIGMENTS, STENCILS } from './data';
 import type { SandTool, Stencil } from './data';
 import { SandGrid } from './engine';
@@ -25,18 +26,22 @@ export function mount(context: ProjectContext): ProjectInstance {
 }
 
 function createSandSite(page: ReturnType<typeof createProjectPage>, context: ProjectContext): ProjectInstance {
+  page.root.dataset.workspace = 'true';
   page.root.innerHTML = `
     <div class="ss-page">
       <header class="ss-header">
         <div><p class="ss-eyebrow">The cabinet of small landscapes</p><h1>Sand <em>Script</em><span aria-hidden="true">.</span></h1></div>
         <p>Pour a line.<br>Let gravity finish the sentence.</p>
+        <button type="button" data-materials aria-label="Materials and notes">Materials</button>
       </header>
       <div class="ss-workbench">
         <section class="ss-editor" aria-label="Granular sand editor">
           <div class="ss-tools" role="group" aria-label="Sand tools">
-            <button type="button" data-tool="sand" aria-pressed="true" aria-label="Pour sand (B)"><span aria-hidden="true">::: </span>Pour sand <kbd>B</kbd></button>
+            <button type="button" data-tool="sand" aria-pressed="true" aria-label="Pour sand (B)"><span aria-hidden="true">::: </span>Pour <kbd>B</kbd></button>
             <button type="button" data-tool="wall" aria-pressed="false" aria-label="Build wall (W)"><span aria-hidden="true">&#9637;</span>Wall <kbd>W</kbd></button>
             <button type="button" data-tool="erase" aria-pressed="false" aria-label="Erase (E)"><span aria-hidden="true">/</span>Erase <kbd>E</kbd></button>
+            <select data-pigment-select aria-label="Sand pigment">${PIGMENTS.map(item =>
+              `<option value="${item.cell}" ${item.cell === 4 ? 'selected' : ''}>${item.name}</option>`).join('')}</select>
           </div>
           <div class="ss-tray" data-project-preview data-tray></div>
           <div class="ss-transport">
@@ -79,6 +84,24 @@ function createSandSite(page: ReturnType<typeof createProjectPage>, context: Pro
         <span>No two pours need to be alike.</span></footer>
     </div>`;
 
+  const primary = document.createElement('div');
+  primary.className = 'ss-primary';
+  primary.setAttribute('aria-label', 'Brush and falling controls');
+  primary.append(...page.root.querySelectorAll<HTMLElement>('.ss-field'));
+  query<HTMLElement>(page.root, '.ss-editor').append(primary);
+  createWorkspaceDialog(page, {
+    id: 'ss-materials-dialog',
+    title: 'Materials and notes',
+    triggers: [query(page.root, '[data-materials]')],
+    content: [
+      query(page.root, '.ss-materials'),
+      query(page.root, '.ss-status'),
+      query(page.root, '.ss-help'),
+      query(page.root, '.ss-header > p'),
+      query(page.root, '.ss-footer'),
+    ],
+  });
+
   const host = query<HTMLElement>(page.root, '[data-tray]');
   const surface = canvas2D(host, 'A layered sand landscape inside an editable granular tray');
   page.onCleanup(surface.dispose);
@@ -92,6 +115,7 @@ function createSandSite(page: ReturnType<typeof createProjectPage>, context: Pro
   const report = query<HTMLElement>(page.root, '[data-report]');
   const count = query<HTMLOutputElement>(page.root, '[data-count]');
   const stencilSelect = query<HTMLSelectElement>(page.root, '[data-stencil]');
+  const pigmentSelect = query<HTMLSelectElement>(page.root, '[data-pigment-select]');
   let paused = context.reducedMotion;
   let stencil: Stencil = 'vessel';
   let tool: SandTool = 'sand';
@@ -236,9 +260,10 @@ function createSandSite(page: ReturnType<typeof createProjectPage>, context: Pro
 
   const pointerCell = (event: PointerEvent) => {
     const point = pointerPosition(event, canvas);
+    const rect = canvas.getBoundingClientRect();
     const bounds = trayBounds(size.width, size.height, grid);
-    return { x: clamp(Math.floor((point.x - bounds.x) / bounds.scale), 1, grid.width - 2),
-      y: clamp(Math.floor((point.y - bounds.y) / bounds.scale), 1, grid.height - 2) };
+    return { x: clamp(Math.floor((point.x * size.width / rect.width - bounds.x) / bounds.scale), 1, grid.width - 2),
+      y: clamp(Math.floor((point.y * size.height / rect.height - bounds.y) / bounds.scale), 1, grid.height - 2) };
   };
   canvas.addEventListener('canvasresize', invalidate, { signal: page.signal });
   canvas.addEventListener('pointerdown', (event) => {
@@ -322,19 +347,22 @@ function createSandSite(page: ReturnType<typeof createProjectPage>, context: Pro
       selectTool(next);
     }, { signal: page.signal });
   }
-  for (const button of page.root.querySelectorAll<HTMLButtonElement>('[data-pigment]')) {
-    button.addEventListener('click', () => {
-      finishEdit();
-      const selected = PIGMENTS.find((item) => String(item.cell) === button.dataset.pigment);
-      if (!selected) throw new Error('The selected sand pigment is missing.');
-      pigment = selected.cell;
-      for (const option of page.root.querySelectorAll('[data-pigment]')) {
-        option.setAttribute('aria-pressed', String(option === button));
-      }
-      selectTool('sand');
-      report.textContent = `${selected.name} sand is ready to pour.`;
-    }, { signal: page.signal });
+  function selectPigment(value: string): void {
+    finishEdit();
+    const selected = PIGMENTS.find((item) => String(item.cell) === value);
+    if (!selected) throw new Error('The selected sand pigment is missing.');
+    pigment = selected.cell;
+    pigmentSelect.value = value;
+    for (const option of page.root.querySelectorAll<HTMLElement>('[data-pigment]')) {
+      option.setAttribute('aria-pressed', String(option.dataset.pigment === value));
+    }
+    selectTool('sand');
+    report.textContent = `${selected.name} sand is ready to pour.`;
   }
+  for (const button of page.root.querySelectorAll<HTMLButtonElement>('[data-pigment]')) {
+    button.addEventListener('click', () => selectPigment(button.dataset.pigment!), { signal: page.signal });
+  }
+  pigmentSelect.addEventListener('change', () => selectPigment(pigmentSelect.value), { signal: page.signal });
   const brush = query<HTMLInputElement>(page.root, '[data-brush]');
   brush.addEventListener('input', () => {
     radius = brush.valueAsNumber;

@@ -1,4 +1,5 @@
 .project-motion-foundry {
+  --workspace-paper: #c5ace8;
   --mf-paper: #c5ace8;
   --mf-ink: #19161f;
   --mf-lime: #dcff70;
@@ -179,4 +180,100 @@
   .project-motion-foundry .mf-settings h2 { font-size: 28px; }
   .project-motion-foundry .mf-footer { display: block; }
   .project-motion-foundry .mf-footer p { margin-top: 7px; }
+}
+
+.project-motion-foundry[data-workspace="true"] { height: 100dvh; min-height: 0; padding: 12px 24px; }
+.project-motion-foundry .mf-site {
+  height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; gap: 8px;
+}
+.project-motion-foundry .mf-masthead { margin: 0; }
+.project-motion-foundry h1 { font-size: clamp(30px, 3.6vw, 48px); margin-top: 3px; }
+.project-motion-foundry .mf-workbench {
+  min-height: 0; display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto;
+}
+.project-motion-foundry .mf-study-heading { padding: 4px 14px; }
+.project-motion-foundry .mf-study-heading .mf-overline { display: none; }
+.project-motion-foundry .mf-study-heading h2 { font-size: 22px; }
+.project-motion-foundry .mf-phase { margin-left: auto; font-size: 14px; }
+.project-motion-foundry .mf-guide-toggle { font-size: 14px; white-space: nowrap; }
+.project-motion-foundry[data-workspace="true"] .mf-scene-tabs { display: none; }
+.project-motion-foundry .mf-scenes { min-height: 0; height: 100%; }
+.project-motion-foundry .mf-scene {
+  min-height: 0; height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
+}
+.project-motion-foundry .mf-scene-svg { height: 100%; min-height: 0; max-height: none; }
+.project-motion-foundry .mf-scene figcaption { padding: 6px 12px; font-size: 14px; }
+.project-motion-foundry .mf-scene figcaption strong { font-size: 14px; }
+.project-motion-foundry .mf-transport { padding: 6px 0 4px; gap: 16px; margin-inline: 14px; }
+.project-motion-foundry .mf-field-top output,
+.project-motion-foundry .mf-reset-button { font-size: 14px; }
+.project-motion-foundry .mf-reduced-note { margin: 0; padding: 3px 14px; font-size: 14px; border: 0; }
+.project-motion-foundry .mf-lower { display: contents; }
+.project-motion-foundry .mf-settings {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; border: 0; padding: 0;
+}
+.project-motion-foundry .mf-parameter { margin: 0; min-width: 0; }
+.project-motion-foundry .mf-parameter select { margin-top: 0; min-height: 44px; }
+.project-motion-foundry .mf-workspace-actions { display: flex; gap: 6px; padding-right: 56px; }
+.project-motion-foundry .mf-workspace-actions button {
+  min-height: 44px; padding: 7px 14px; border: 1px solid var(--mf-ink); border-radius: 0;
+  background: transparent; color: var(--mf-ink); font-size: 14px; cursor: pointer;
+}
+.project-motion-foundry .mf-workspace-actions button:hover { background: var(--mf-light); }
+.project-motion-foundry .mf-workspace-actions [data-mf-reset] { margin-left: auto; }
+.project-motion-foundry .workspace-dialog-heading > button { min-height: 44px; }
+.project-motion-foundry .workspace-dialog .mf-lessons { grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; }
+.project-motion-foundry .workspace-dialog .mf-lesson-button { min-height: 64px; font-size: 14px; }
+.project-motion-foundry .workspace-dialog .mf-control-hint { margin-block: 10px; font-size: 14px; }
+.project-motion-foundry .workspace-dialog .mf-guide-row { padding: 10px 0; }
+.project-motion-foundry .workspace-dialog .mf-guide-row p,
+.project-motion-foundry .workspace-dialog .mf-transport-notes,
+.project-motion-foundry .workspace-dialog .mf-status { color: var(--mf-ink); font-size: 14px; }
+.project-motion-foundry .workspace-dialog .mf-transport-notes { margin: 0; }
+.project-motion-foundry .workspace-dialog .mf-phase { display: inline-flex; color: var(--mf-ink); margin-bottom: 12px; }
+@media (min-width: 741px) {
+  .project-motion-foundry[data-workspace="true"] .mf-scenes > [data-workspace-inactive] { visibility: visible; pointer-events: auto; }
+}
+@media (max-width: 740px) {
+  .project-motion-foundry[data-workspace="true"] { padding: 8px 10px; }
+  .project-motion-foundry .mf-site { gap: 6px; }
+  .project-motion-foundry h1 { font-size: 32px; }
+  .project-motion-foundry .mf-brand-line { font-size: 12px; }
+  .project-motion-foundry .mf-workbench { grid-template-rows: auto auto minmax(0, 1fr) auto auto; }
+  .project-motion-foundry .mf-study-heading { padding: 0 8px; gap: 6px; }
+  .project-motion-foundry .mf-study-heading h2 { font-size: 18px; }
+  .project-motion-foundry .mf-phase { display: none; }
+  .project-motion-foundry .mf-guide-toggle { margin-left: auto; gap: 5px; }
+  .project-motion-foundry[data-workspace="true"] .mf-scene-tabs { display: flex; padding: 0 6px; gap: 2px; }
+  .project-motion-foundry[data-workspace="true"] .mf-scene-tabs > button { min-height: 44px; background: var(--mf-light); color: var(--mf-ink); border: 0; }
+  .project-motion-foundry .mf-scene-tabs > button[aria-selected="true"] { background: var(--mf-lime); }
+  /* Both SVGs keep identical dimensions when the visible treatment changes. */
+  .project-motion-foundry .mf-scenes { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); padding: 0 6px; gap: 0; }
+  .project-motion-foundry .mf-scene { grid-area: 1 / 1; grid-template-rows: minmax(0, 1fr) auto; width: 100%; }
+  .project-motion-foundry .mf-scene-heading { display: none; }
+  .project-motion-foundry .mf-scene figcaption { gap: 2px; padding: 4px 8px; }
+  .project-motion-foundry .mf-scene figcaption > * { width: 100%; }
+  .project-motion-foundry .mf-transport { margin-inline: 8px; grid-template-columns: minmax(0, 1fr) 88px; gap: 0 8px; padding-top: 4px; }
+  .project-motion-foundry .mf-playback-buttons button { font-size: 14px; padding: 8px; }
+  .project-motion-foundry .mf-speed { gap: 0; position: relative; }
+  .project-motion-foundry .mf-speed label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .project-motion-foundry .mf-speed select { padding: 6px; }
+  .project-motion-foundry .mf-timeline { margin-top: 3px; }
+  .project-motion-foundry .mf-reduced-note { padding: 0 8px 3px; line-height: 1.3; }
+  .project-motion-foundry .mf-settings { grid-template-columns: 1fr 1fr; gap: 0 12px; }
+  .project-motion-foundry .mf-parameter:last-child { grid-column: 1 / -1; display: grid; grid-template-columns: 70px minmax(0, 1fr); align-items: center; gap: 8px; margin-right: 56px; }
+  .project-motion-foundry .mf-workspace-actions { gap: 4px; }
+  .project-motion-foundry .mf-workspace-actions button { padding: 6px; }
+  .project-motion-foundry .workspace-dialog .mf-lessons { grid-template-columns: 1fr 1fr; }
+}
+@media (max-height: 520px) and (min-width: 741px) {
+  .project-motion-foundry[data-workspace="true"] { padding: 6px 12px; }
+  .project-motion-foundry .mf-site { gap: 4px; }
+  .project-motion-foundry .mf-brand-line { display: none; }
+  .project-motion-foundry h1 { font-size: 30px; }
+  .project-motion-foundry .mf-tagline { font-size: 14px; line-height: 1.1; }
+  .project-motion-foundry .mf-scene-heading { padding-top: 0; }
+  .project-motion-foundry .mf-scene-heading h3 { font-size: 19px; }
+  .project-motion-foundry .mf-transport { margin-inline: 8px; gap: 8px; padding-block: 2px; }
+  .project-motion-foundry .mf-parameter:last-child { margin-right: 56px; }
 }

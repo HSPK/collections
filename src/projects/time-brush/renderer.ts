@@ -125,9 +125,9 @@ export class TimeRenderer {
       this.circle(center.x, center.y, radius);
       ctx.stroke();
       ctx.setLineDash([]);
-      if (!compact) {
+      if (!compact && height >= 300) {
         ctx.globalAlpha = 0.9;
-        ctx.font = `12px ${MONO}`;
+        ctx.font = `14px ${MONO}`;
         ctx.fillStyle = mode.color;
         const label = `${mode.name.toUpperCase()} ${formatRate(mode.rate)}`;
         const labelWidth = ctx.measureText(label).width;
@@ -346,11 +346,12 @@ export class TimeRenderer {
   private drawLabels(layout: SceneLayout): void {
     const { ctx } = this;
     const { width, height } = this.size;
-    ctx.font = `12px ${MONO}`;
+    ctx.font = `14px ${MONO}`;
     ctx.fillStyle = '#b5c9f1';
-    ctx.fillText('01 / ORBITAL ARRAY', 20, 25);
-    ctx.fillText('02 / HARMONIC TIDES', layout.compact ? 20 : width * 0.57, layout.compact ? height * 0.47 : 25);
-    ctx.fillText('03 / THE CIRCULAR LINE', 20, height * (layout.compact ? 0.77 : 0.635));
+    const short = width < 600;
+    ctx.fillText(short ? '01 / ORBITS' : '01 / ORBITAL ARRAY', 20, 25);
+    ctx.fillText(short ? '02 / WAVES' : '02 / HARMONIC TIDES', layout.compact ? 20 : width * 0.57, layout.compact ? height * 0.47 : 25);
+    ctx.fillText(short ? '03 / TRAINS' : '03 / THE CIRCULAR LINE', 20, height * (layout.compact ? 0.77 : 0.635));
   }
 
   private drawWatch(scene: TimeScene, id: string): void {
@@ -363,7 +364,7 @@ export class TimeRenderer {
     ctx.stroke();
     const name = watched.spec.name.replace('Orbiter', 'ORB').replace('Wave bead', 'WAVE').replace('Train', 'LINE').replace('Central spindle', 'SPINDLE');
     const label = `${name} / ${formatRate(watched.rate)}`;
-    ctx.font = `12px ${MONO}`;
+    ctx.font = `14px ${MONO}`;
     const width = ctx.measureText(label).width + 16;
     const x = clamp(p.x + 18, 10, this.size.width - width - 10);
     const y = clamp(p.y - 37, 33, this.size.height - 34);
@@ -401,7 +402,7 @@ export class TimeRenderer {
     this.drawRails(layout);
     this.drawWaves(layout, scene);
     this.drawObjects(scene, layout);
-    this.drawLabels(layout);
+    if (height >= 260) this.drawLabels(layout);
     this.drawWatch(scene, options.watch);
     if (options.showAim) {
       const aim = this.point(options.aim);

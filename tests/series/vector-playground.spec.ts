@@ -120,6 +120,31 @@ test('dot products and projections preserve their invariants and explain zero ve
   expect(formatNumber(1e-9)).toBe('1e-9');
 });
 
+test('vector-playground: nearby endpoints keep distinct pointer targets after resizing', async ({ page }) => {
+  await page.goto('./projects/vector-playground/');
+  const root = page.locator('.project-vector-playground');
+  await expect(root.locator('.vp-svg')).toBeVisible();
+  for (const size of [{ width: 1440, height: 900 }, { width: 320, height: 640 }, { width: 768, height: 480 }]) {
+    await page.setViewportSize(size);
+    await expect.poll(() => root.locator('[data-vp-handle]:visible').evaluateAll(handles => handles.every(handle => {
+      const grip = handle.querySelector('.vp-grip')!.getBoundingClientRect();
+      return handle.contains(document.elementFromPoint(grip.x + grip.width / 2, grip.y + grip.height / 2));
+    }))).toBe(true);
+    const tip = root.locator('[data-vp-handle="basis-x"]');
+    const grip = (await tip.locator('.vp-grip').boundingBox())!;
+    const unit = Number(await root.locator('.vp-svg').getAttribute('data-unit'));
+    await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(grip.x + grip.width / 2 + unit * 0.5, grip.y + grip.height / 2, { steps: 4 });
+    await page.mouse.up();
+    await expect(root.locator('[data-vp-number="a"]')).toHaveValue('1.5');
+    await expect(root.locator('[data-vp-number="b"]')).toHaveValue('0.75');
+    await expect(root.locator('[data-vp-number="c"]')).toHaveValue('0');
+    await expect(tip).toBeFocused();
+    await root.getByRole('button', { name: 'Reset both labs' }).click();
+  }
+});
+
 test('the workbench really changes, stays honest and keyboard-accessible, and fits 375px', async ({ page }, testInfo) => {
   test.setTimeout(100_000);
   const errors: string[] = [];
@@ -211,6 +236,7 @@ test('the workbench really changes, stays honest and keyboard-accessible, and fi
   await expect(reading(2)).toHaveText('(0, 0)');
   await expect(root.locator('[data-vp-eigen-title]')).toHaveText('Every direction · λ = 0');
   await expect(root.locator('[data-vp-eigen-line]')).toHaveCount(0);
+  await root.getByRole('tab', { name: 'Guide', exact: true }).click();
   await root.getByRole('button', { name: 'Try the rank-one challenge' }).click();
   await expect(number('d')).toBeFocused();
   await number('d').fill('0');
@@ -218,6 +244,7 @@ test('the workbench really changes, stays honest and keyboard-accessible, and fi
   await root.getByRole('button', { name: 'Reset both labs' }).click();
   await expect(reading(0)).toHaveText('+1');
   await expect(reading(2)).toHaveText('(2.75, 1)');
+  await root.getByRole('tab', { name: 'Readout', exact: true }).click();
   await root.getByRole('checkbox', { name: 'Show eigen-directions' }).uncheck();
   await expect(root.locator('[data-vp-eigen-line]')).toHaveCount(0);
   await root.getByRole('checkbox', { name: 'Show eigen-directions' }).check();

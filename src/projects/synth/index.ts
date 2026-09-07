@@ -3,6 +3,7 @@ import {
   createProjectPage, downloadText, escapeMarkup, query, readLocalData, writeLocalData,
 } from '../../core/page';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
+import { createWorkspaceDialog, createWorkspaceTabs } from '../../core/workspace';
 import {
   clonePattern, isPattern, MAX_JSON_LENGTH, MAX_TEMPO, MIN_TEMPO, noteName,
   parsePatternJSON, patternFilename, patternJSON, STARTERS, STEP_COUNT, STORAGE_KEY,
@@ -59,6 +60,7 @@ function sequencerMarkup(pattern: SynthPattern): string {
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'synth');
   const { root, signal } = page;
+  root.dataset.workspace = 'true';
   let pattern = clonePattern(STARTERS[0].pattern);
   let importOperation = 0;
 
@@ -69,11 +71,7 @@ export function mount(context: ProjectContext): ProjectInstance {
           <span class="synth-logo" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
           <div class="synth-wordmark"><span class="synth-model">PS—16 / PERSONAL MUSIC MACHINE</span><h1>Pocket Synth</h1></div>
         </a>
-        <nav aria-label="Pocket Synth navigation">
-          <a href="#synth-machine">Machine <span>01</span></a>
-          <a href="#synth-notebook">Pattern notebook <span>02</span></a>
-          <a href="#synth-how">How it works <span>03</span></a>
-        </nav>
+        <nav aria-label="Pocket Synth navigation"><div data-synth-tabs></div></nav>
       </div>
     </header>
 
@@ -144,7 +142,8 @@ export function mount(context: ProjectContext): ProjectInstance {
             ${sequencerMarkup(pattern)}
           </div>
           <div class="synth-grid-footer">
-            <div class="synth-legend" aria-hidden="true"><span><i class="synth-legend-on"></i>Step on</span><span><i class="synth-legend-now"></i>Playing now</span></div>
+            <button type="button" class="synth-settings-open">Sound settings</button>
+            <span class="synth-swipe-hint">Swipe steps →</span>
             <button type="button" class="synth-clear" data-action="clear">Clear pads <span aria-hidden="true">↗</span></button>
           </div>
           <p id="synth-grid-help" class="synth-grid-help"><strong>Click or tap</strong> a pad to toggle. <kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> move between pads; <kbd>Space</kbd> toggles; <kbd>Tab</kbd> leaves the pads. On small screens, swipe the grid sideways.</p>
@@ -215,11 +214,54 @@ export function mount(context: ProjectContext): ProjectInstance {
         </div>
         <div class="synth-playing-notes">
           <div><h3>Leave some air.</h3><p>Start with a kick on 1 and 9, a snare on 5 and 13, and a few hats in between. Add just two bass notes. Repetition does most of the work; the empty pads matter too.</p></div>
-          <div><h3>Not hearing anything?</h3><p>Press Play, raise the master a little, and check that some pads are on and their tracks are not muted. Check your device’s sound output, too. Changing tabs or leaving this page stops the engine. It never resumes by itself.</p></div>
+          <div><h3>Not hearing anything?</h3><p>Press Play, raise the master a little, and check that some pads are on and their tracks are not muted. Check your device’s sound output, too. Hiding the browser tab or leaving this page stops the engine. Workspace panes and sound settings keep it playing. It never resumes by itself.</p></div>
         </div>
       </section>
       <footer class="synth-footer"><strong>POCKET SYNTH / PS—16</strong><p>No account. No microphone. No audio leaves this page.</p><a href="#synth-machine">Back to the machine ↑</a></footer>
     </div>`;
+
+  const content = query<HTMLElement>(root, '.synth-content');
+  const how = query<HTMLElement>(root, '#synth-how');
+  const machineSection = query<HTMLElement>(root, '#synth-machine');
+  const reading = document.createElement('div');
+  reading.className = 'synth-machine-notes';
+  for (const selector of [
+    '.synth-machine-section > .synth-section-heading', '.synth-introduction',
+    '.synth-grid-help', '.synth-machine-bottom', '.synth-under-machine',
+  ]) reading.append(query<HTMLElement>(root, selector));
+  how.append(reading, query<HTMLElement>(root, '.synth-footer'));
+  machineSection.removeAttribute('aria-labelledby');
+  machineSection.setAttribute('aria-label', 'Step sequencer');
+  const panes = [
+    { id: 'machine', label: 'Machine', panel: machineSection },
+    { id: 'notebook', label: 'Notebook', panel: query<HTMLElement>(root, '#synth-notebook') },
+    { id: 'guide', label: 'Guide', panel: how },
+  ].map(pane => {
+    const wrapper = document.createElement('div');
+    wrapper.className = `synth-pane synth-pane-${pane.id}`;
+    wrapper.append(pane.panel);
+    content.append(wrapper);
+    return { ...pane, panel: wrapper };
+  });
+  const tabs = createWorkspaceTabs(page, {
+    id: 'synth-workspace', label: 'Pocket Synth workspace',
+    host: query<HTMLElement>(root, '[data-synth-tabs]'), panes,
+  });
+  for (const link of root.querySelectorAll<HTMLAnchorElement>('a[href="#synth-machine"]')) {
+    link.addEventListener('click', event => {
+      event.preventDefault();
+      tabs.select('machine');
+    }, { signal });
+  }
+  const settings = document.createElement('div');
+  settings.className = 'synth-settings';
+  for (const selector of ['.synth-starter-control', '.synth-root-control', '.synth-volume-control']) {
+    settings.append(query<HTMLElement>(root, selector));
+  }
+  createWorkspaceDialog(page, {
+    id: 'synth-sound-settings', title: 'Sound settings', content: [settings],
+    triggers: [query<HTMLElement>(root, '.synth-settings-open')],
+  });
 
   const playButton = query<HTMLButtonElement>(root, '.synth-play');
   const stopButton = query<HTMLButtonElement>(root, '.synth-stop');
@@ -282,8 +324,8 @@ export function mount(context: ProjectContext): ProjectInstance {
     const hasSteps = pattern.tracks.some((track) => !track.muted && track.steps.some(Boolean));
     silenceNote.hidden = pattern.volume > 0 && hasSteps;
     silenceNote.textContent = pattern.volume === 0
-      ? 'The master is at 0%. Raise it to hear the loop.'
-      : 'This pattern is silent. Turn on a pad in an unmuted track to hear it.';
+      ? 'Master is at 0%. Raise it to listen.'
+      : 'Silent: enable an unmuted pad.';
   }
 
   function updateTempoControls(): void {

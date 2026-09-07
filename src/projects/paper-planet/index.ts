@@ -1,5 +1,6 @@
 import './style.css';
 import { createProjectPage, escapeMarkup, query } from '../../core/page';
+import { createWorkspaceDialog, createWorkspaceTabs } from '../../core/workspace';
 import type { ProjectContext, ProjectInstance } from '../../core/types';
 import { INITIAL_PHASE, LANDMARKS, getLandmark } from './data';
 import type { LandmarkId } from './data';
@@ -10,11 +11,12 @@ const globeMark = `<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" c
 
 export function mount(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'paper-planet');
+  page.root.dataset.workspace = 'true';
   page.root.setAttribute('aria-labelledby', 'pp-title');
   page.root.innerHTML = `
     <header class="pp-header">
       <div class="pp-brand">${globeMark}<span>A very small atlas<span>Imaginary places, carefully folded</span></span></div>
-      <nav aria-label="Paper Planet"><a href="#pp-globe">Explore the globe <span aria-hidden="true">↗</span></a><a href="#pp-notes">Maker’s note</a></nav>
+      <nav aria-label="Paper Planet"><button type="button" data-pp-notes>Maker’s note</button></nav>
     </header>
     <div class="pp-intro">
       <div><p class="pp-kicker">Edition 01 / A world of little things</p><h1 id="pp-title">Paper Planet<span aria-hidden="true">.</span></h1></div>
@@ -73,6 +75,29 @@ export function mount(context: ProjectContext): ProjectInstance {
       <p>Every island, apple and rooftop belongs to an invented little world. This is a dimensional paper illustration, built from simple shapes and a local color palette. No real places. No borrowed maps. Just a few good folds.</p>
       <div class="pp-palette"><span aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><p>Forest · clay · wheat · sea · cream<br>Five colors to get a little lost in.</p></div>
     </footer>`;
+
+  const atlas = query<HTMLElement>(page.root, '.pp-atlas');
+  const dock = document.createElement('div');
+  dock.className = 'pp-dock';
+  const tabs = document.createElement('div');
+  const atmosphere = document.createElement('div');
+  const journal = document.createElement('div');
+  atmosphere.append(query<HTMLElement>(page.root, '.pp-day-strip'));
+  journal.append(query<HTMLElement>(page.root, '.pp-journal'));
+  dock.append(tabs, atmosphere, journal);
+  atlas.append(dock);
+  createWorkspaceTabs(page, {
+    id: 'pp-atlas-tools', label: 'Atlas tools', host: tabs,
+    panes: [
+      { id: 'atmosphere', label: 'Atmosphere', panel: atmosphere },
+      { id: 'journal', label: 'Field journal', panel: journal },
+    ],
+  });
+  createWorkspaceDialog(page, {
+    id: 'pp-maker-dialog', title: 'Maker’s note',
+    triggers: [query<HTMLElement>(page.root, '[data-pp-notes]')],
+    content: [query<HTMLElement>(page.root, '.pp-notes')],
+  });
 
   const sceneHost = query<HTMLElement>(page.root, '[data-pp-scene]');
   const status = query<HTMLElement>(page.root, '[data-pp-status]');

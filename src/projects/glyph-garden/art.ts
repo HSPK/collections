@@ -1,5 +1,5 @@
 import type { CanvasSize } from '../../core/canvas';
-import { clamp, random } from '../../core/math';
+import { random } from '../../core/math';
 import { BEDS, PLANT_OFFSETS } from './data';
 import type { BedId, GardenState, Plant } from './data';
 import type { Point } from './engine';
@@ -208,7 +208,7 @@ export function createGardenPainter(g: Ink) {
 
   return (size: CanvasSize, state: GardenState, selected: BedId, time: number, stroke: InkStroke | null) => {
     const { width: w, height: h, dpr } = size;
-    const unit = clamp(Math.min(w / 860, h / 510), 0.53, 1.18);
+    const unit = Math.min(w / 860, h / 510, 1.18);
     g.setTransform(dpr, 0, 0, dpr, 0, 0);
     g.lineCap = 'round';
     g.lineJoin = 'round';
@@ -332,7 +332,7 @@ export function createGardenPainter(g: Ink) {
       const y = Math.min(h - 17, bed.y * h + h * 0.055);
       oval(g, x, y, 12, 12, bed.id === selected ? '#f6de9a' : '#dae0b5', '#5b7b50');
       g.fillStyle = '#355640';
-      g.font = '600 12px "Trebuchet MS", sans-serif';
+      g.font = '600 14px "Trebuchet MS", sans-serif';
       g.textAlign = 'center';
       g.textBaseline = 'middle';
       g.fillText(String(index + 1), x, y + 0.5);

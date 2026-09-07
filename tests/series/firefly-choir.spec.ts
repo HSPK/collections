@@ -136,7 +136,9 @@ test('garden controls, torch, reset and playback update the real canvas', async 
   await expect(page.getByRole('button', { name: 'Enable torch', exact: true })).toHaveAttribute('aria-pressed', 'false');
   await page.getByRole('button', { name: 'Scatter phases', exact: true }).click();
   await expect(root.locator('[data-status]')).toContainText('clocks are scattered');
+  await page.getByRole('button', { name: 'Field notes', exact: false }).click();
   await page.getByRole('button', { name: 'Begin again' }).click();
+  await page.getByRole('button', { name: 'Close Field notes', exact: true }).click();
   await expect(garden).toHaveAttribute('data-particle-count', '160');
   await expect(garden).toHaveAttribute('data-simulation-time', '0.000');
   await expect(page.getByLabel('Neighbor coupling', { exact: true })).toHaveValue('2.8');
@@ -188,15 +190,81 @@ test.describe('small-screen reduced-motion garden', () => {
     await page.getByLabel('Firefly count', { exact: true }).press('Home');
     await expect(garden).toHaveAttribute('data-particle-count', '40');
     await expect(garden).toHaveAttribute('data-simulation-time', '0.000');
-    const controlHeights = await root.locator('button, input[type="range"]').evaluateAll(
+    const controlHeights = await root.locator('button:visible, input[type="range"]:visible').evaluateAll(
       (elements) => elements.map((element) => element.getBoundingClientRect().height),
     );
     expect(controlHeights.every((height) => height >= 44)).toBe(true);
+    await page.getByRole('button', { name: 'Field notes', exact: false }).tap();
     await page.getByRole('button', { name: 'Begin again' }).tap();
+    await page.getByRole('button', { name: 'Close Field notes', exact: true }).tap();
     await testInfo.attach('night-garden-mobile', { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' });
     await garden.press('Space');
     await expect(root).toHaveAttribute('data-motion', 'playing');
     await expect.poll(async () => Number(await garden.getAttribute('data-simulation-time'))).toBeGreaterThan(0.1);
     expect(errors).toEqual([]);
   });
+
 });
+
+for (const viewport of [
+    { width: 1440, height: 900 }, { width: 1280, height: 720 },
+    { width: 375, height: 812 }, { width: 320, height: 640 },
+    { width: 768, height: 480 },
+  ]) {
+    test(`one-screen garden, real population and field notes at ${viewport.width}x${viewport.height}`, async ({ page }) => {
+      await page.setViewportSize(viewport);
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await page.goto('./projects/firefly-choir/');
+      const root = page.locator('.project-firefly-choir');
+      const garden = page.getByRole('group', { name: 'Interactive firefly garden' });
+      const canvas = garden.locator('canvas');
+      await expect(root).toHaveAttribute('data-workspace', 'true');
+      await expect(garden).toHaveAttribute('data-simulation-time', '0.000');
+      const fits = () => page.evaluate(() => ({
+        width: document.documentElement.scrollWidth <= innerWidth,
+        height: document.documentElement.scrollHeight <= innerHeight,
+        controls: [...document.querySelectorAll<HTMLElement>('.fc-workbench button, .fc-workbench input')].every(element => {
+          const bounds = element.getBoundingClientRect();
+          const uncovered = document.querySelector('dialog[open]') || [4, bounds.width / 2, bounds.width - 4].every(x =>
+            [4, bounds.height / 2, bounds.height - 4].every(y =>
+              element.contains(document.elementFromPoint(bounds.left + x, bounds.top + y))));
+          return !!uncovered && bounds.top >= 0 && bounds.bottom <= innerHeight && bounds.left >= 0 && bounds.right <= innerWidth;
+        }),
+      }));
+      await expect.poll(fits).toEqual({ width: true, height: true, controls: true });
+      const initial = await canvas.evaluate((element: HTMLCanvasElement) => element.toDataURL());
+      await page.getByLabel('Firefly count', { exact: true }).press('End');
+      await expect(garden).toHaveAttribute('data-particle-count', '280');
+      await expect.poll(() => canvas.evaluate((element: HTMLCanvasElement) => element.toDataURL())).not.toBe(initial);
+      await page.getByLabel('Neighbor coupling', { exact: true }).press('Home');
+      await expect(page.locator('[data-coupling-output]')).toHaveText('0.0');
+      await page.getByLabel('Breeze', { exact: true }).press('Home');
+      await expect(page.locator('[data-breeze-output]')).toHaveText('West · 100%');
+      const bounds = (await garden.boundingBox())!;
+      await garden.click({ position: { x: bounds.width * .4, y: bounds.height * .6 } });
+      await expect(garden).toHaveAttribute('data-torch', 'on');
+      await expect(garden).toHaveAttribute('data-torch-x', '0.400');
+      await expect(garden).toHaveAttribute('data-torch-y', '0.600');
+      const torch = await canvas.evaluate((element: HTMLCanvasElement) => element.toDataURL());
+      await garden.press('ArrowRight');
+      await expect.poll(() => canvas.evaluate((element: HTMLCanvasElement) => element.toDataURL())).not.toBe(torch);
+      await page.getByRole('button', { name: 'Field notes', exact: false }).click();
+      const dialog = page.getByRole('dialog', { name: 'Field notes', exact: true });
+      await expect(dialog).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Close Field notes', exact: true })).toBeFocused();
+      const explanation = page.getByText('An illustrative model.', { exact: true });
+      await explanation.scrollIntoViewIfNeeded();
+      await expect(explanation).toBeInViewport();
+      await expect.poll(fits).toEqual({ width: true, height: true, controls: true });
+      if (viewport.width === 375) await page.screenshot({ path: test.info().outputPath('firefly-choir-field-notes.png') });
+      await page.getByRole('button', { name: 'Begin again', exact: false }).click();
+      await expect(garden).toHaveAttribute('data-particle-count', '160');
+      await expect(garden).toHaveAttribute('data-simulation-time', '0.000');
+      await page.keyboard.press('Escape');
+      await expect(dialog).not.toBeVisible();
+      await expect(page.getByRole('button', { name: 'Field notes', exact: false })).toBeFocused();
+      await expect(page.getByLabel('Neighbor coupling', { exact: true })).toHaveValue('2.8');
+      await expect.poll(fits).toEqual({ width: true, height: true, controls: true });
+    await page.screenshot({ path: test.info().outputPath(`firefly-choir-${viewport.width}x${viewport.height}.png`) });
+  });
+}

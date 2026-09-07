@@ -22,6 +22,22 @@ fonts, environment maps, or network services.
   breeze phase, and pause. Every visit starts paused. Enabling reduced motion
   during playback pauses it; disabling the preference does not auto-play.
 
+## Viewport workspace
+
+The `data-workspace="true"` atlas fills `100dvh` without document scrolling.
+The globe remains visible beside a desktop dock or above its compact mobile
+counterpart. **Atmosphere** contains daylight/dusk, breeze scrubbing and playback;
+**Field journal** contains all six landmarks and their live narrated entries.
+The journal scrolls inside its own panel, with the globe's dimensions unchanged
+when switching tabs. Whole world and zoom stay beside the live scene.
+**Maker’s note** opens a native dialog; Escape/Close restores trigger focus.
+
+Tabs wrap the existing section/aside instead of replacing their semantics.
+They use the shared abort-scoped helper. Existing camera/resize/render ownership
+is unchanged, and the collection menu retains its bottom-right space. Primary
+text is at least 14 px. The series tests cover five viewport sizes and retain
+workspace screenshots in the Playwright run artifacts.
+
 ## Files and extension points
 
 - `data.ts`: six original journal entries, local palette, cycle constants,

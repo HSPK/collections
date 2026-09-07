@@ -10,6 +10,7 @@ import {
   beginEdit, cancelEdit, changeScene, createHistory, ExperimentValidationError, finishEdit,
   MAX_ELEMENTS, MAX_EMITTERS, MAX_FILE_BYTES, nextId, parseExperiment, redo, replaceElement, serializeExperiment, undo, validateElement,
 } from './state';
+import { arrangeWorkspace } from './workspace';
 
 const icons = {
   undo: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5 3 10l5 5M3 10h11a6 6 0 0 1 0 12" transform="translate(0 -3)" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
@@ -97,6 +98,7 @@ export function mountLumen(context: ProjectContext): ProjectInstance {
   const page = createProjectPage(context, 'lumen');
   const { root, signal } = page;
   root.innerHTML = shell();
+  const workspace = arrangeWorkspace(page);
   let activePreset = 'dispersion';
   let resetScene = presetScene(activePreset);
   let history = createHistory(resetScene);
@@ -141,9 +143,11 @@ export function mountLumen(context: ProjectContext): ProjectInstance {
     detectorSelect.value = detectorId;
     detectorSelect.disabled = !detectors.length;
     if (!detectorId) {
+      query<HTMLElement>(root, '[data-live-power]').textContent = 'No detector';
       measurement.innerHTML = '<p class="lumen-empty-reading">Add a detector to measure the beam. Rays leaving the bench are counted as escaped energy.</p>';
     } else {
       const reading = measureDetector(trace, { id: detectorId });
+      query<HTMLElement>(root, '[data-live-power]').textContent = `${reading.power.toFixed(3)} mW collected`;
       measurement.innerHTML = `<div class="lumen-measure-grid"><div class="lumen-meter-values">
         <div><span>Collected power</span><strong data-power="${reading.power}">${reading.power.toFixed(3)}<small>mW</small></strong><span data-capture>${(reading.capture * 100).toFixed(1)}% of all input</span></div>
         <div><span>Band separation</span><strong data-separation="${reading.separation ?? ''}">${reading.separation === null ? '&mdash;' : reading.separation.toFixed(1)}<small>mm</small></strong><span>Outer captured bands</span></div>
@@ -179,6 +183,7 @@ export function mountLumen(context: ProjectContext): ProjectInstance {
     studyByScene.set(history.present, { preset: activePreset, baseline: resetScene });
     if (renderedPreset !== activePreset) {
       renderedPreset = activePreset;
+      workspace.study.value = activePreset;
       const index = PRESETS.findIndex((preset) => preset.id === activePreset);
       query<HTMLElement>(root, '[data-study-label]').textContent = index < 0 ? 'Imported experiment / Working copy' : `Experiment 0${index + 1} / ${PRESETS[index].topic}`;
       root.querySelectorAll<HTMLButtonElement>('[data-preset]').forEach((entry) => entry.setAttribute('aria-pressed', String(entry.dataset.preset === activePreset)));
@@ -269,9 +274,7 @@ export function mountLumen(context: ProjectContext): ProjectInstance {
   }
 
   function changePanel(panel: string): void {
-    query<HTMLElement>(root, '[data-inspector]').hidden = panel !== 'inspector';
-    query<HTMLElement>(root, '[data-notebook]').hidden = panel !== 'notebook';
-    root.querySelectorAll<HTMLButtonElement>('[data-panel]').forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.panel === panel)));
+    workspace.navigation.select(panel);
   }
 
   root.addEventListener('click', (event) => {
@@ -292,6 +295,7 @@ export function mountLumen(context: ProjectContext): ProjectInstance {
       const index = PRESETS.findIndex((preset) => preset.id === presetId);
       setScene(resetScene, `${PRESETS[index].name} loaded. Undo restores your previous experiment.`);
       centerView();
+      workspace.files.close();
       return;
     }
     switch (button.dataset.action) {
@@ -322,8 +326,8 @@ export function mountLumen(context: ProjectContext): ProjectInstance {
       case 'redo': cancelDrag(); history = redo(history); renderedSelection = undefined; render(); announce('Redid the last edit.'); break;
       case 'reset': cancelDrag(); renderedSelection = undefined; setScene(activePreset ? presetScene(activePreset) : resetScene, 'Study reset. This reset can be undone.'); centerView(); break;
       case 'open': fileInput.click(); break;
-      case 'inspect': changePanel('inspector'); query<HTMLElement>(root, '.lumen-drawer').scrollIntoView({ block: 'start' }); selection.focus({ preventScroll: true }); break;
-      case 'bench': bench.scrollIntoView({ block: 'start' }); bench.focus({ preventScroll: true }); break;
+      case 'inspect': changePanel('inspector'); selection.focus({ preventScroll: true }); break;
+      case 'bench': bench.focus({ preventScroll: true }); break;
       case 'save': downloadText('lumen-experiment.json', serializeExperiment(history.present), 'application/json'); announce('Experiment downloaded with its geometry and notebook.'); break;
       case 'svg': downloadText('lumen-optical-bench.svg', exportSceneSvg(history.present, trace, options), 'image/svg+xml'); announce('Optical bench exported as a self-contained SVG.'); break;
       case 'record': {
@@ -347,7 +351,8 @@ export function mountLumen(context: ProjectContext): ProjectInstance {
   root.addEventListener('change', (event) => {
     const input = event.target;
     if (!(input instanceof HTMLInputElement || input instanceof HTMLSelectElement || input instanceof HTMLTextAreaElement)) return;
-    if (input === selection) choose(selection.value);
+    if (input === workspace.study) query<HTMLButtonElement>(root, `[data-preset="${input.value}"]`).click();
+    else if (input === selection) choose(selection.value);
     else if (input === detectorSelect) { detectorId = detectorSelect.value; renderMeasurement(); }
     else if (input.hasAttribute('data-zoom')) {
       zoom = input.value === '2' ? 2 : 1;
@@ -499,6 +504,7 @@ export function mountLumen(context: ProjectContext): ProjectInstance {
   bench.addEventListener('lostpointercapture', () => { if (drag || pan) cancelDrag(); }, { signal });
 
   root.addEventListener('keydown', (event) => {
+    if (root.querySelector('dialog[open]')) return;
     if (event.key === 'Escape' && (drag || pan)) { event.preventDefault(); cancelDrag(); return; }
     if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLSelectElement) return;
     if ((event.ctrlKey || event.metaKey) && (event.key.toLowerCase() === 'z' || event.key.toLowerCase() === 'y')) {

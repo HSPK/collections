@@ -39,3 +39,24 @@ pointer capture, and all listeners are cleaned up with the page. There are no
 external assets, network requests, storage, or idle animation timers.
 
 Focused coverage: `tests/series/worlds-within.spec.ts`.
+
+## Viewport workspace
+
+The viewport-height `data-workspace="true"` root allocates real flex/grid space
+to the atlas instead of giving the canvas a tall fixed height. The navigation
+toolbar and Enter button remain with the live stage at every size. The **Story**
+dock carries the current address, narration, scale, and smooth-travel preference;
+**Field notes** contains the four-world index and recursion explanation. These
+secondary panes scroll internally and never change the stage dimensions.
+Live navigation announcements remain available while Field notes is selected.
+
+**Atlas guide** opens a native dialog for pointer, touch, and keyboard help.
+Shared workspace helpers supply tab focus/inert state and dialog cleanup. The
+footer leaves a clear area for the collection menu. Existing resize handling
+still cancels in-flight travel, rebases the actual camera, and requests a frame;
+there is no CSS scaling or camera substitute.
+
+The focused suite preserves numerical portal, wheel-focus, and pinch assertions.
+Additional checks exercise 1440×900, 1280×720, 375×812, 320×640, and 768×480,
+including viewport screenshots, document dimensions, primary-control bounds,
+tab-stable canvas size, live recursion from the notes pane, and dialog focus.

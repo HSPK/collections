@@ -40,6 +40,22 @@ guides work while paused. Reset restores the canonical eye, sun, and hidden
 guides. Enabling reduced motion stops playback; disabling it does not start
 motion without the visitor's choice.
 
+## Viewport workspace
+
+The `data-workspace="true"` drawing board occupies exactly `100dvh`, with the
+real scene assigned the remaining grid height. **Viewpoints** holds all three
+camera presets plus Play inspection and Reset model. **Instruments** holds
+inspection angle, sun direction and projection guides. Their fixed-size dock
+scrolls internally if needed; short landscape screens place it alongside the
+scene. The canvas remains visible and keeps its dimensions across tab changes.
+
+**Field notes** opens the native **Construction field notes** dialog for camera
+help, the complete construction notebook and physical-gap measurements.
+Close/Escape restores focus. The shared helpers own keyboard tab navigation,
+inert inactive panels and abort-scoped events. No scene or projection math is
+replaced. Text remains at least 14 px and the status row reserves the floating
+collection menu's corner. Five viewport checks save screenshots in test artifacts.
+
 ## Budget and lifetime
 
 There is no postprocessing, external asset, audio, or secondary animation loop.
