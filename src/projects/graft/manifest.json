@@ -1,0 +1,15 @@
+{
+  "id": "graft",
+  "order": 76,
+  "title": "Graft",
+  "subtitle": "A small world, negotiated.",
+  "description": "Tend a luminous cut-paper biome where three fictional colony agents compete, cooperate, and conserve. Route finite water and nutrients through six seasons to carry every lineage into the spore archive.",
+  "category": "play",
+  "format": "page",
+  "runtime": "openai-compatible",
+  "medium": "Living ecology strategy",
+  "tags": ["Agent games", "Ecology", "Strategy", "Generative illustration"],
+  "color": "#eee6cd",
+  "ink": "#344533",
+  "instruction": "Stage up to three interventions, then ask the colonies to choose a season. Keep all three lineages, six patches, and eighteen spores alive."
+}

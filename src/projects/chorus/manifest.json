@@ -1,0 +1,15 @@
+{
+  "id": "chorus",
+  "order": 80,
+  "title": "Chorus",
+  "subtitle": "A way to mean the same thing.",
+  "description": "Make first contact through a learnable language of kinetic glyphs, standing waves and shared light. Teach, translate and bargain with a real AI counterpart to restore one common beacon.",
+  "category": "play",
+  "format": "page",
+  "runtime": "openai-compatible",
+  "medium": "Kinetic first-contact language game",
+  "tags": ["Agent games", "Visual language", "First contact", "Cooperative puzzles"],
+  "color": "#f4f0e5",
+  "ink": "#252e35",
+  "instruction": "Open contact. Echo, translate and negotiate through a language of living signals. Restore a common beacon within eighteen intervals. A model connection is required."
+}

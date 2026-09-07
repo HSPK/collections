@@ -19,10 +19,12 @@ There are no iframes and no requirement to fit a project inside an animation
 viewport. Collection navigation lives in a collapsible floating menu, not
 an injected page header.
 
-Everything is statically hosted and runs in the visitor's browser. "AI-made"
-describes how this collection was created, not a hosted inference service.
-There are no AI API keys, accounts, analytics, or backend functions. Some
-projects keep preferences or work locally on the visitor's device.
+Every website is statically hosted. The original 71 projects run locally;
+ten **API-required agent games** also use a model endpoint supplied by the
+player. The index labels that requirement before you open them. There is
+no collection account, analytics, shared API key, or hosted inference
+service. Game rules and rendering remain in the browser; optional model
+decisions use a bounded, explicitly configured connection.
 
 ## Made something with AI? Give it a home.
 
@@ -43,6 +45,40 @@ Replace the starter with your idea and
 the site publishes automatically after the main-branch quality gate.
 
 ## The websites
+
+### Ten games with agents on the other side
+
+Not ten chat windows with different backgrounds. Each game has its own
+rules, world, campaign, playable ending, and visual language. A model makes
+bounded decisions as an opponent, collaborator, witness, or director of
+challenges; the local engine remains the authority on what is legal.
+
+| Game | What the agent does |
+|------|--------------------|
+| [Ghost Courier](https://hspk.github.io/collections/projects/ghost-courier/) | A warden adapts patrols in an isometric time-loop heist. |
+| [Nothing to Declare](https://hspk.github.io/collections/projects/custodian/) | Impossible-cargo merchants choose consignments, claims, and negotiations. |
+| [Mnemosyne](https://hspk.github.io/collections/projects/mnemosyne/) | Witnesses trade partial knowledge across a verifiable mystery network. |
+| [Accord](https://hspk.github.io/collections/projects/accord/) | Competing delegates bargain and vote over a tidal city's resource policies. |
+| [Graft](https://hspk.github.io/collections/projects/graft/) | Organism colonies plan their growth and cooperation inside a player-shaped biome. |
+| [Sigil](https://hspk.github.io/collections/projects/sigil/) | An architect selects adaptive, mechanically checked spell-grammar challenges. |
+| [Afterlight](https://hspk.github.io/collections/projects/afterlight/) | A rescue crew coordinates movement and repairs through a cutaway derelict ship. |
+| [Mise](https://hspk.github.io/collections/projects/mise/) | Kitchen staff coordinate real recipe dependencies, stations, and service orders. |
+| [Chorus](https://hspk.github.io/collections/projects/chorus/) | A first-contact counterpart communicates through a learnable kinetic language. |
+| [Takes](https://hspk.github.io/collections/projects/takes/) | Actors improvise blocking while you solve real camera coverage and continuity. |
+
+Search or select the **Agent games** tag. Set up your own model through the
+game's **Model** dialog. There are no model calls on page load and no
+scripted stand-in when the API is unavailable. Native tool schemas, pure
+rule engines, cancellation, revision-checked commits, and validated replays
+are shared rather than copied ten times. The public action log contains
+intentions and accepted actions, not private model reasoning.
+
+For an API on port 8080, `npm run dev` supplies the local same-origin
+connection. To play the built collection locally, run `npm run build` then
+`npm run games:serve`. Public Pages needs your own compatible endpoint;
+it cannot host the gateway. Read the
+[connection guide](docs/model-connections.md) for HTTPS/CORS, model selection,
+memory-only keys, request limits, and provider billing.
 
 ### Helios: the sky, from here
 
@@ -257,7 +293,10 @@ All project manifests use `format: "page"`.
 - Press **/** to focus library search or **Ctrl/Command + K** to find a
   project from anywhere. Dialogs support Tab, Enter, and Escape.
 - The library starts with project content, not a heavyweight 3D hero.
-  Its first load does not request Three.js or the astronomy engine.
+  Its first load does not request Three.js, the astronomy engine, or a model.
+- API-required games are labeled in both library layouts, quick search,
+  and project information. Existing local projects remain usable without
+  model configuration. Game notebooks keep validated replays, not API keys.
 - Controls, labels, and body copy use readable sizes. Sites are designed
   for narrow screens and provide keyboard or touch alternatives.
 - Interactive sites use viewport-height workspaces: primary controls stay
@@ -290,6 +329,8 @@ Relative assets and per-page base markers support repository Pages
 All public assets are local; there are no CDN font or runtime library
 dependencies. If deploying under a different brand/domain, also update
 the canonical social URLs in `index.html` and `scripts/project-pages.ts`.
+The optional model gateway runs only on a user's own machine/server;
+it is not part of the GitHub Pages deployment.
 
 ## Browser coverage and real previews
 
@@ -303,6 +344,10 @@ documents, direct refreshes, original art controls, reduced motion, audio
 consent and cleanup, editable typography, and the new sites' own rules and
 interactions. New `page` projects automatically enter the shared
 standalone/mobile coverage.
+Agent-game workflows use deterministic, OpenAI-compatible native-tool
+fixtures through the same client and rule validators as production, with no
+external model requests in CI. The shared
+[agent contracts](src/core/agents/README.md) describe extension and testing.
 
 ```sh
 npm run test:update-previews

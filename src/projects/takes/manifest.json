@@ -1,0 +1,15 @@
+{
+  "id": "takes",
+  "order": 81,
+  "title": "Takes",
+  "subtitle": "Quiet on the tiny set.",
+  "description": "Direct two opinionated model actors in a handmade 3D theater. Block an original little film, choose lenses and camera angles, and earn six honest shots through real framing, sightlines and continuity before the film runs out.",
+  "category": "play",
+  "format": "page",
+  "runtime": "openai-compatible",
+  "medium": "Miniature theater, bounded AI ensemble and geometric filmmaking",
+  "tags": ["Agent games", "Filmmaking", "3D", "Strategy"],
+  "color": "#542330",
+  "ink": "#f0e3c7",
+  "instruction": "Open a production brief, rehearse with your configured model, then frame and record a wide and portrait in each scene. Ten film exposures; six shots to keep."
+}

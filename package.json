@@ -7,8 +7,10 @@
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1",
+    "games:serve": "node --experimental-strip-types scripts/play-games.ts",
     "new:project": "node scripts/new-project.mjs",
     "test": "playwright test",
+    "test:gateway": "SITE_URL=http://127.0.0.1:1 playwright test tests/agent-gateway.spec.ts",
     "test:update-previews": "UPDATE_PREVIEWS=1 playwright test tests/previews.spec.ts"
   },
   "dependencies": {

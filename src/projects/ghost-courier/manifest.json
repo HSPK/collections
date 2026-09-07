@@ -1,0 +1,15 @@
+{
+  "id": "ghost-courier",
+  "order": 72,
+  "title": "Ghost Courier",
+  "subtitle": "Borrow a route from your past self.",
+  "description": "An original isometric time-loop heist through a nocturnal clockwork city. Outwit a model-powered warden with recorded echoes, pressure switches, readable patrols, and three replayable courier cases.",
+  "category": "play",
+  "format": "page",
+  "runtime": "openai-compatible",
+  "medium": "A clockwork stealth diorama",
+  "tags": ["Agent games", "Isometric", "Stealth", "Time loops", "Strategy"],
+  "color": "#171e19",
+  "ink": "#d5f487",
+  "instruction": "Connect a model to begin. Record a route to a relay, rewind to leave your echo holding it, then carry a stolen parcel past the warden. Local moves advance the clock; the model replans only between loops."
+}

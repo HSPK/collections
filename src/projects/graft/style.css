@@ -1,0 +1,189 @@
+.project-graft {
+  --graft-ink: #344533;
+  --graft-muted: #6b6d52;
+  --graft-paper: #eee6cd;
+  --agent-paper: #f4edd7;
+  --agent-ink: #344533;
+  --workspace-paper: #f4edd7;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  width: 100%;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+  padding: 22px 32px 12px;
+  color: var(--graft-ink);
+  background: radial-gradient(ellipse at 40% 38%, #f9f2d9 0, #eee6cd 63%, #e4dac0 100%);
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.4;
+}
+.project-graft *, .project-graft *::before, .project-graft *::after { box-sizing: border-box; }
+.project-graft [hidden] { display: none !important; }
+.project-graft button, .project-graft select {
+  min-height: 40px;
+  min-width: 0;
+  color: inherit;
+  background: #f9f2dc88;
+  border: 1px solid #7c805c70;
+  border-radius: 4px;
+  padding: 7px 10px;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.project-graft select { width: 100%; background: #f5eed6; }
+.project-graft button:hover:not(:disabled) { background: #fff9e7; border-color: #536746; }
+.project-graft button:disabled, .project-graft select:disabled { opacity: .5; cursor: not-allowed; }
+.project-graft :focus-visible { outline: 3px solid #a55336; outline-offset: 3px; }
+.project-graft p { margin: 0; }
+.project-graft h1, .project-graft h2, .project-graft h3 { color: inherit; }
+.project-graft .graft-mast { display: flex; justify-content: space-between; align-items: center; gap: 18px; padding-bottom: 17px; }
+.project-graft .graft-wordmark { display: flex; align-items: baseline; gap: 20px; }
+.project-graft h1 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(36px, 4.1vw, 59px); line-height: .95; font-weight: 500; letter-spacing: -3px; }
+.project-graft h1 span { color: #b76246; }
+.project-graft .graft-wordmark p { font-family: Georgia, serif; font-size: 17px; font-style: italic; color: var(--graft-muted); }
+.project-graft nav { display: flex; gap: 8px; }
+.project-graft nav button { border-color: transparent; background: transparent; }
+.project-graft .graft-season-strip { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 24px; padding: 12px 0; border-block: 1px solid #797c5255; }
+.project-graft .graft-season-strip > div { display: flex; gap: 18px; align-items: baseline; }
+.project-graft .graft-season-strip strong { font-weight: 500; font-size: 14px; }
+.project-graft .graft-eyebrow { font-size: 14px; letter-spacing: .07em; color: #5b6547; }
+.project-graft .graft-season-strip > p { font-size: 14px; }
+.project-graft .graft-goal { margin-left: auto; }
+.project-graft .graft-workbench { display: grid; grid-template-columns: minmax(0, 1fr) 290px; min-height: 0; gap: 26px; }
+.project-graft .graft-world { display: grid; grid-template-rows: 39px minmax(0, 1fr) 59px; position: relative; min-height: 0; min-width: 0; }
+.project-graft .graft-annotations { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-top: 8px; color: #717454; }
+.project-graft .graft-annotations > span { font-size: 14px; letter-spacing: .12em; }
+.project-graft .graft-annotations button { min-height: 32px; padding: 3px 10px; background: none; border-color: transparent; }
+.project-graft .graft-scene { min-height: 0; min-width: 0; position: relative; touch-action: manipulation; border-radius: 46%; }
+.project-graft .graft-biome { display: block; width: 100%; height: 100%; overflow: hidden; }
+.project-graft .graft-tile { cursor: pointer; }
+.project-graft .graft-tile:hover .graft-selection { stroke: #6c714d; stroke-width: 2; }
+.project-graft .graft-tile.is-selected .graft-selection { stroke-width: 3; }
+.project-graft .graft-vein { animation: graft-vein-breath 6s ease-in-out infinite alternate; }
+@keyframes graft-vein-breath { from { opacity: .52; } to { opacity: 1; } }
+.project-graft .graft-legend { display: flex; align-items: center; justify-content: center; gap: 24px; }
+.project-graft .graft-legend button { display: flex; align-items: center; gap: 9px; padding: 4px 8px; border-color: transparent; background: transparent; text-align: left; }
+.project-graft .graft-legend small { display: block; font-size: 14px; color: #6a7053; }
+.project-graft .graft-mark { display: block; width: 19px; height: 26px; background: #637e42; border-radius: 70% 0 70% 0; transform: rotate(-20deg); box-shadow: inset -3px -2px #365333; }
+.project-graft .graft-mark-lichen { background: #d9b64f; border-radius: 45%; height: 21px; box-shadow: inset 0 0 0 5px #a18430; transform: rotate(20deg); }
+.project-graft .graft-mark-coral { background: #d88870; height: 25px; border-radius: 65% 65% 20% 20%; transform: rotate(15deg); box-shadow: inset -5px 1px #b55e49; }
+.project-graft .graft-tending { display: flex; flex-direction: column; justify-content: center; gap: 12px; min-width: 0; min-height: 0; padding: 25px 0 25px 23px; border-left: 1px solid #7c805c40; }
+.project-graft .graft-tend-heading h2 { font: 400 32px/1.1 Georgia, serif; letter-spacing: -1px; margin: 10px 0 14px; }
+.project-graft .graft-tend-heading p { font-size: 15px; color: #676b50; line-height: 1.55; }
+.project-graft .graft-stock { display: flex; gap: 16px; padding-block: 10px; border-block: 1px solid #7c805c40; font-size: 14px; }
+.project-graft .graft-stock span { display: flex; flex-direction: column; }
+.project-graft .graft-stock b { font: 400 30px/1.1 Georgia, serif; }
+.project-graft .graft-site-line { display: flex; gap: 8px; align-items: center; }
+.project-graft .graft-site-line label { display: flex; flex: 1; gap: 8px; align-items: center; min-width: 0; }
+.project-graft .graft-site-line select { flex: 1; min-width: 0; }
+.project-graft .graft-tile-detail { font-size: 14px; color: #5c654b; }
+.project-graft .graft-edit-line { display: flex; flex-wrap: wrap; gap: 7px; }
+.project-graft .graft-operation { flex: 1 1 160px; min-width: 0; }
+.project-graft [data-destination-label] { flex: 1 1 80px; }
+.project-graft .graft-draft-line { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 14px; color: #8a553b; }
+.project-graft .graft-draft-line button { background: transparent; min-height: 34px; padding: 4px 7px; border: none; }
+.project-graft .graft-commit { width: 100%; min-height: 48px; border-radius: 5px 5px 18px 5px; border-color: #344b35; background: #344b35; color: #fff2cc; text-align: left; padding: 10px 15px; font-size: 16px; }
+.project-graft .graft-commit:hover:not(:disabled) { background: #465f40; color: #fff6dc; }
+.project-graft .graft-local-status { font-size: 14px; line-height: 1.4; max-height: 62px; min-height: 40px; overflow: auto; overflow-wrap: anywhere; scrollbar-width: thin; }
+.project-graft .graft-footer { display: flex; align-items: center; gap: 22px; padding: 9px 60px 0 0; border-top: 1px solid #797c5255; min-width: 0; }
+.project-graft .agent-console { flex: 1; min-width: 0; }
+.project-graft .agent-console > p { white-space: normal; max-height: 58px; overflow: auto; text-overflow: clip; scrollbar-width: thin; line-height: 1.3; }
+.project-graft .graft-fiction { font: italic 14px Georgia, serif; color: #6d7156; max-width: 185px; }
+.project-graft .graft-ending { position: absolute; z-index: 2; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-1deg); padding: 25px; width: min(420px, 90%); max-height: 88%; overflow: auto; background: #f9f2ddea; border: 1px solid #92956c; box-shadow: 5px 12px 0 #8c81531c; text-align: center; }
+.project-graft .graft-ending > span { font-size: 14px; letter-spacing: .08em; }
+.project-graft .graft-ending h2 { font: 400 38px/1.05 Georgia, serif; margin: 14px 0; }
+.project-graft .graft-ending p { font-size: 15px; margin-bottom: 16px; }
+.project-graft .graft-guide, .project-graft .graft-inspection { font-size: 16px; line-height: 1.6; }
+.project-graft .graft-guide p, .project-graft .graft-inspection p { margin-bottom: 16px; }
+.project-graft .graft-guide h3, .project-graft .graft-inspection h3 { font: 400 25px Georgia, serif; margin-block: 20px 8px; }
+.project-graft .graft-guide .graft-guide-intro { font: 400 38px/1.15 Georgia, serif; }
+.project-graft .graft-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@media (min-width: 701px) and (max-height: 760px) {
+  .project-graft { padding: 13px 22px 8px; }
+  .project-graft .graft-mast { padding-bottom: 10px; }
+  .project-graft .graft-tending { padding-block: 10px; gap: 7px; }
+  .project-graft .graft-tend-heading h2 { font-size: 26px; margin: 0 0 7px; }
+  .project-graft .graft-tend-heading .graft-eyebrow { display: none; }
+  .project-graft .graft-tend-heading p { font-size: 14px; line-height: 1.3; }
+  .project-graft .graft-stock { padding-block: 6px; }
+  .project-graft .graft-stock span { flex-direction: row; gap: 5px; align-items: baseline; }
+  .project-graft .graft-stock b { font-size: 22px; }
+  .project-graft .graft-local-status { min-height: 20px; max-height: 40px; }
+}
+@media (max-width: 950px) {
+  .project-graft .graft-wordmark p { display: none; }
+  .project-graft .graft-season-strip { gap: 5px 16px; padding-block: 8px; }
+  .project-graft .graft-season-strip > div { gap: 10px; }
+  .project-graft .graft-season-strip strong { display: none; }
+  .project-graft .graft-fiction { display: none; }
+  .project-graft .graft-workbench { grid-template-columns: minmax(0, 1fr) 266px; gap: 14px; }
+  .project-graft .graft-tending { padding-left: 14px; }
+}
+@media (max-width: 700px) {
+  .project-graft { padding: 11px 14px 8px; }
+  .project-graft .graft-mast { padding-bottom: 10px; gap: 10px; }
+  .project-graft h1 { font-size: 40px; letter-spacing: -2px; }
+  .project-graft nav { gap: 0; }
+  .project-graft nav button { padding: 5px 7px; min-height: 36px; }
+  .project-graft .graft-season-strip { display: grid; grid-template-columns: 1fr auto; gap: 3px; padding-block: 6px; }
+  .project-graft .graft-season-strip .graft-eyebrow { letter-spacing: 0; }
+  .project-graft .graft-goal { grid-column: 1 / -1; margin: 0; }
+  .project-graft .graft-workbench { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(140px, 1fr) auto; gap: 0; }
+  .project-graft .graft-world { grid-template-rows: 28px minmax(0, 1fr) 38px; }
+  .project-graft .graft-annotations { padding: 0; }
+  .project-graft .graft-annotations > span { letter-spacing: .04em; font-size: 14px; }
+  .project-graft .graft-annotations button { min-height: 28px; }
+  .project-graft .graft-legend { gap: 8px; justify-content: space-around; }
+  .project-graft .graft-legend button { gap: 6px; padding: 2px 3px; min-height: 36px; }
+  .project-graft .graft-legend small { display: inline; margin-left: 5px; }
+  .project-graft .graft-mark { width: 12px; height: 18px; flex-shrink: 0; }
+  .project-graft .graft-tending { padding: 7px 0; border-left: none; border-top: 1px solid #7c805c40; gap: 5px; display: grid; grid-template-columns: 1fr auto; }
+  .project-graft .graft-tend-heading { display: none; }
+  .project-graft .graft-stock { padding: 0; border: 0; gap: 14px; grid-column: 1 / -1; }
+  .project-graft .graft-stock span { flex-direction: row; align-items: baseline; gap: 4px; }
+  .project-graft .graft-stock b { font-size: 18px; }
+  .project-graft .graft-site-line { grid-column: 1 / -1; }
+  .project-graft .graft-site-line select, .project-graft .graft-site-line button { min-height: 34px; padding-block: 3px; }
+  .project-graft .graft-tile-detail { grid-column: 1 / -1; }
+  .project-graft .graft-edit-line { grid-column: 1 / -1; flex-wrap: nowrap; gap: 5px; }
+  .project-graft .graft-operation { flex: 1 1 0; }
+  .project-graft .graft-edit-line select, .project-graft .graft-edit-line button { min-height: 36px; padding: 4px 6px; }
+  .project-graft [data-destination-label] { flex: 0 0 78px; }
+  .project-graft .graft-draft-line { grid-column: 1 / -1; }
+  .project-graft .graft-draft-line button { min-height: 26px; padding-block: 2px; }
+  .project-graft .graft-commit { grid-column: 1 / -1; min-height: 40px; padding: 7px 12px; }
+  .project-graft .graft-local-status { grid-column: 1 / -1; min-height: 0; max-height: 20px; overflow: auto; }
+  .project-graft .graft-footer { padding-top: 5px; }
+  .project-graft .agent-console { gap: 5px; }
+  .project-graft .agent-console > button { min-height: 34px; padding: 4px 7px; }
+  .project-graft .agent-console > p { max-height: 39px; }
+  .project-graft .graft-ending { padding: 13px; }
+  .project-graft .graft-ending h2 { font-size: 25px; margin-block: 8px; }
+  .project-graft .graft-ending p { font-size: 14px; margin-bottom: 8px; }
+}
+@media (max-width: 380px) {
+  .project-graft { padding-inline: 10px; }
+  .project-graft nav button { padding-inline: 5px; }
+  .project-graft .graft-legend small { display: none; }
+}
+@media (min-width: 701px) and (max-height: 530px) {
+  .project-graft { padding: 8px 16px 6px; }
+  .project-graft h1 { font-size: 38px; }
+  .project-graft .graft-mast { padding-bottom: 5px; }
+  .project-graft .graft-season-strip { padding-block: 5px; }
+  .project-graft .graft-tending { gap: 5px; padding-block: 5px; }
+  .project-graft .graft-tend-heading { display: none; }
+  .project-graft .graft-stock { padding-block: 3px; }
+  .project-graft .graft-world { grid-template-rows: 32px minmax(0, 1fr) 43px; }
+  .project-graft .graft-legend { gap: 8px; }
+  .project-graft .graft-site-line select, .project-graft .graft-site-line button, .project-graft .graft-edit-line select, .project-graft .graft-edit-line button { min-height: 34px; padding-block: 3px; }
+  .project-graft .graft-commit { min-height: 39px; }
+  .project-graft .graft-footer { padding-top: 5px; }
+}
+.project-graft[data-reduced-motion="true"] .graft-vein { animation: none; opacity: .85; }
+@media (prefers-reduced-motion: reduce) {
+  .project-graft .graft-vein { animation: none; opacity: .85; }
+}

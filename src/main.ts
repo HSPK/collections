@@ -122,8 +122,13 @@ function bindCommon(signal: AbortSignal) {
 
 function queryMatches(project: Project): boolean {
   const words = library.query.toLowerCase().trim().split(/\s+/).filter(Boolean);
-  const haystack = `${project.title} ${project.subtitle} ${project.description} ${project.medium} ${project.tags.join(' ')} ${categoryNames[project.category]}`.toLowerCase();
+  const haystack = projectSearchText(project);
   return words.every((word) => haystack.includes(word));
+}
+
+function projectSearchText(project: Project): string {
+  const runtime = project.runtime === 'openai-compatible' ? 'openai-compatible openai api model required agent' : '';
+  return `${project.title} ${project.subtitle} ${project.description} ${project.medium} ${project.tags.join(' ')} ${categoryNames[project.category]} ${runtime}`.toLowerCase();
 }
 
 function discoveryOrder(items: Project[]): Project[] {
@@ -139,14 +144,15 @@ function discoveryOrder(items: Project[]): Project[] {
 }
 
 function card(project: Project) {
-  return `<article class="project-card" data-category="${project.category}">
-    <a class="project-open" data-project="${project.id}" href="${projectUrl(project.id)}" aria-label="${escapeMarkup(project.title)}: ${escapeMarkup(project.subtitle)}">
+  const requiresModel = project.runtime === 'openai-compatible';
+  return `<article class="project-card" data-category="${project.category}" data-runtime="${project.runtime ?? 'local'}">
+    <a class="project-open" data-project="${project.id}" href="${projectUrl(project.id)}" aria-label="${escapeMarkup(project.title)}: ${escapeMarkup(project.subtitle)}"${requiresModel ? ` aria-describedby="requirement-${project.id}"` : ''}>
       <div class="card-art" style="--art-color:${project.color};--art-ink:${project.ink}">
         <div class="card-placeholder" aria-hidden="true"><span>${escapeMarkup(project.medium)}</span><strong>${escapeMarkup(project.title)}</strong></div>
         <img src="${siteUrl(project.preview || `previews/${project.id}.jpg`)}" alt="${escapeMarkup(project.title)} website preview" loading="lazy" decoding="async" width="1200" height="800" />
         <span class="card-open-indicator">${diagonal}</span>
       </div>
-      <div class="card-copy"><h2>${escapeMarkup(project.title)}</h2><p>${escapeMarkup(project.description)}</p></div>
+      <div class="card-copy"><div class="card-heading"><h2>${escapeMarkup(project.title)}</h2>${requiresModel ? `<span class="card-requirement" id="requirement-${project.id}" title="Bring your own OpenAI-compatible model connection.">API required</span>` : ''}</div><p>${escapeMarkup(project.description)}</p></div>
     </a>
     <div class="card-tags">${project.tags.slice(0, 3).map((tag) => `<span>${escapeMarkup(tag)}</span>`).join('')}</div>
     <footer class="card-footer"><span>${categoryIcon(project.category)}${categoryNames[project.category]}</span><a href="${sourceUrl(project)}" target="_blank" rel="noopener noreferrer" aria-label="View source for ${escapeMarkup(project.title)}">${codeIcon}</a></footer>
@@ -322,7 +328,7 @@ function renderLibrary() {
           <label class="sort-label"><span class="sr-only">Sort projects</span><select aria-label="Sort projects" data-sort><option value="discover">Discover</option><option value="newest">Recently added</option><option value="az">A to Z</option></select></label>
           <div class="layout-switch" role="group" aria-label="Collection layout"><button type="button" data-layout="grid" aria-label="Grid view" aria-pressed="true"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 2h6v6H2zm10 0h6v6h-6zM2 12h6v6H2zm10 0h6v6h-6z" fill="currentColor"/></svg></button><button type="button" data-layout="list" aria-label="List view" aria-pressed="false"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 3h16v2H2zm0 6h16v2H2zm0 6h16v2H2z" fill="currentColor"/></svg></button></div>
         </div>
-        <div class="results-line"><p role="status" aria-live="polite" data-result-count></p><label class="mobile-category"><span class="sr-only">Project type</span><select aria-label="Project type" data-mobile-category><option value="all">All types</option>${categories.map((category) => `<option value="${category.id}">${category.label}</option>`).join('')}</select></label><button class="mobile-tags-button" type="button" data-open-tags aria-label="Filter projects by tags" aria-haspopup="dialog" aria-controls="library-tags-dialog" aria-expanded="false">Tags <span data-tags-count hidden></span></button><span class="local-note"><span></span>Runs in your browser</span></div>
+        <div class="results-line"><p role="status" aria-live="polite" data-result-count></p><label class="mobile-category"><span class="sr-only">Project type</span><select aria-label="Project type" data-mobile-category><option value="all">All types</option>${categories.map((category) => `<option value="${category.id}">${category.label}</option>`).join('')}</select></label><button class="mobile-tags-button" type="button" data-open-tags aria-label="Filter projects by tags" aria-haspopup="dialog" aria-controls="library-tags-dialog" aria-expanded="false">Tags <span data-tags-count hidden></span></button><span class="local-note"><span></span>API games are labeled</span></div>
         <p class="storage-note" data-storage-note ${storageWarning ? '' : 'hidden'}>${escapeMarkup(storageWarning)}</p>
         <div class="project-grid" data-project-grid role="region" aria-label="Project list" tabindex="0"></div>
       </section>
@@ -452,6 +458,9 @@ async function renderProject(project: Project) {
     projectInfo.querySelector('h2')!.textContent = project.title;
     projectInfo.querySelector('[data-info-description]')!.textContent = project.description;
     projectInfo.querySelector('[data-info-medium]')!.textContent = `${categoryNames[project.category]} / ${project.medium}`;
+    projectInfo.querySelector('[data-info-runtime]')!.textContent = project.runtime === 'openai-compatible' ?
+      'Requires your own OpenAI-compatible model connection. Game observations are sent only when you request a turn. The collection does not provide hosted inference; provider charges may apply.' :
+      'This project runs locally in your browser and does not require a hosted model.';
     const link = projectInfo.querySelector<HTMLAnchorElement>('a')!;
     link.href = sourceUrl(project);
     projectInfo.showModal();
@@ -532,17 +541,17 @@ function makeDialog(className: string, labelledBy: string, html: string, parent:
   return dialog;
 }
 
-const aboutDialog = makeDialog('about-dialog', 'about-title', `<div class="dialog-top"><h2 id="about-title">A collection, not a template.</h2><button class="dialog-close" type="button" aria-label="Close about dialog">&times;</button></div><p>Odd Index collects independent, AI-made websites: useful little tools, original games, invented worlds, stories, and visual experiments.</p><p>Each project has its own page and its own point of view. Open one, use it, read it, or take apart its source code.</p><div class="about-facts"><strong>${projects.length} projects</strong><span>No accounts</span><span>No hosted AI calls</span></div><p>Everything runs in your browser. Some projects save work or progress on your device; nothing is uploaded. Sound and optional microphone input are off until you explicitly enable them. Microphone signals stay on your device and are not recorded. Fictional worlds are labeled as fiction.</p><a class="text-link" href="https://github.com/HSPK/collections/blob/main/src/projects/README.md" target="_blank" rel="noopener noreferrer">How the independent project system works ${diagonal}</a>`);
-const projectInfo = makeDialog('project-info-dialog', 'project-info-title', '<div class="dialog-top"><h2 id="project-info-title">About this project</h2><button class="dialog-close" type="button" aria-label="Close project information">&times;</button></div><p class="info-medium" data-info-medium></p><p data-info-description></p><a class="text-link" href="https://github.com/HSPK/collections" target="_blank" rel="noopener noreferrer">Source code & extension notes</a>');
+const aboutDialog = makeDialog('about-dialog', 'about-title', `<div class="dialog-top"><h2 id="about-title">A collection, not a template.</h2><button class="dialog-close" type="button" aria-label="Close about dialog">&times;</button></div><p>Odd Index collects independent, AI-made websites: useful little tools, original games, invented worlds, stories, and visual experiments.</p><p>Each project has its own page and its own point of view. Open one, use it, read it, or take apart its source code.</p><div class="about-facts"><strong>${projects.length} projects</strong><span>Static hosting</span><span>No collection account</span></div><p>Most projects work entirely on your device. Games marked <strong>API required</strong> send fictional game observations to the model endpoint you configure, only when you request a turn. The collection does not provide hosted inference. Provider charges and browser connection restrictions may apply; optional browser keys remain in memory, not saved progress.</p><p>Work and progress can be saved on your device. Sound and optional microphone input are off until explicitly enabled. Microphone signals stay on your device and are not recorded. Fictional worlds are labeled as fiction.</p><a class="text-link" href="https://github.com/HSPK/collections/blob/main/src/projects/README.md" target="_blank" rel="noopener noreferrer">How the independent project system works ${diagonal}</a>`);
+const projectInfo = makeDialog('project-info-dialog', 'project-info-title', '<div class="dialog-top"><h2 id="project-info-title">About this project</h2><button class="dialog-close" type="button" aria-label="Close project information">&times;</button></div><p class="info-medium" data-info-medium></p><p data-info-description></p><p data-info-runtime></p><a class="text-link" href="https://github.com/HSPK/collections" target="_blank" rel="noopener noreferrer">Source code & extension notes</a>');
 const searchDialog = makeDialog('search-dialog', 'search-title', `<div class="dialog-top"><h2 id="search-title">Find a project</h2><button class="dialog-close" type="button" aria-label="Close search">&times;</button></div><label class="sr-only" for="project-search">Search all projects</label><div class="search-input-wrap">${searchIcon}<input id="project-search" type="search" placeholder="Tools, stories, games, ideas..." autocomplete="off" spellcheck="false" /></div><p class="search-result-count" aria-live="polite"></p><div class="search-results"></div><p class="search-help">Tab to browse results. Enter to open. Escape to return.</p>`);
 const searchInput = searchDialog.querySelector<HTMLInputElement>('input')!;
 const searchResults = searchDialog.querySelector<HTMLElement>('.search-results')!;
 
 function updateSearch() {
   const query = searchInput.value.trim().toLowerCase();
-  const results = projects.filter((project) => `${project.title} ${project.description} ${project.medium} ${project.tags.join(' ')}`.toLowerCase().includes(query));
+  const results = projects.filter((project) => projectSearchText(project).includes(query));
   searchDialog.querySelector('.search-result-count')!.textContent = `${results.length} projects`;
-  searchResults.innerHTML = results.length ? results.map((project) => `<a class="search-result" href="${projectUrl(project.id)}"><span class="search-project-icon" style="--icon-color:${project.color};--icon-ink:${project.ink}">${categoryIcon(project.category)}</span><span><strong>${escapeMarkup(project.title)}</strong><small>${escapeMarkup(project.medium)}</small></span>${diagonal}</a>`).join('') : '<p class="search-empty">No projects by that name. Try a different word or idea.</p>';
+  searchResults.innerHTML = results.length ? results.map((project) => `<a class="search-result" href="${projectUrl(project.id)}"><span class="search-project-icon" style="--icon-color:${project.color};--icon-ink:${project.ink}">${categoryIcon(project.category)}</span><span><strong>${escapeMarkup(project.title)}</strong><small>${escapeMarkup(project.medium)}${project.runtime === 'openai-compatible' ? ' / API required' : ''}</small></span>${diagonal}</a>`).join('') : '<p class="search-empty">No projects by that name. Try a different word or idea.</p>';
 }
 
 function openSearch() {

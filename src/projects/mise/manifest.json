@@ -1,0 +1,15 @@
+{
+  "id": "mise",
+  "order": 79,
+  "title": "Mise",
+  "subtitle": "Three staff. Two hobs. A full house.",
+  "description": "Arrange a miniature bistro, prepare real ingredients and direct three model-coordinated staff through a three-sitting service. Manage shared stations, recipe dependencies, heat, quality and ticket deadlines in deliberate kitchen pulses.",
+  "category": "play",
+  "format": "page",
+  "runtime": "openai-compatible",
+  "medium": "Agent kitchen service simulation",
+  "tags": ["Agent games", "Strategy", "Simulation", "Original game"],
+  "color": "#eee0ba",
+  "ink": "#393d2e",
+  "instruction": "Arrange and prep before service. Inspect tickets, set priorities and hob heat, then call the crew for one bounded service beat. A connected model coordinates staff; local rules decide every dish."
+}

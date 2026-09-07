@@ -1,0 +1,15 @@
+{
+  "id": "accord",
+  "order": 75,
+  "title": "Accord",
+  "subtitle": "The river rises. The city must agree.",
+  "description": "Govern a fictional tidal city through six seasons. Draw public works on an architectural river board, negotiate binding votes and counteroffers with three distinct model delegates, and keep the water, grid, gardens, and civic trust in balance.",
+  "category": "play",
+  "format": "page",
+  "runtime": "openai-compatible",
+  "medium": "Civic diplomacy · tidal-city simulation",
+  "tags": ["Agent games", "Diplomacy", "Simulation", "City planning", "Strategy"],
+  "color": "#f3efe4",
+  "ink": "#193e59",
+  "instruction": "Allocate twelve works, request a council hearing, and enact a two-vote policy. Read the six-season forecast, honor public pacts, and keep Nacre supplied."
+}

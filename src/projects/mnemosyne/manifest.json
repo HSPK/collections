@@ -1,0 +1,15 @@
+{
+  "id": "mnemosyne",
+  "order": 74,
+  "title": "Mnemosyne",
+  "subtitle": "A town remembers. The record disagrees.",
+  "description": "An original two-chapter archive-noir mystery. Interview partial-memory witnesses, route rumors through their trust network, inspect physical records, and build a corroborated accusation. The witnesses choose what to tell you; the seeded evidence alone decides what is true.",
+  "category": "play",
+  "format": "page",
+  "runtime": "openai-compatible",
+  "medium": "An epistemic mystery in a living witness network",
+  "tags": ["Agent games", "Mystery", "Deduction", "Evidence", "Original fiction"],
+  "color": "#f0e9d9",
+  "ink": "#242923",
+  "instruction": "Open the case, interview a witness or route a known claim, and inspect the records they locate. Pin independent evidence for identity, entry, and time before filing one final accusation."
+}

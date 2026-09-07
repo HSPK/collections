@@ -1,0 +1,215 @@
+.project-afterlight {
+  --al-bg: #071018;
+  --al-panel: #101e28;
+  --al-line: #2b414c;
+  --al-text: #e2eded;
+  --al-muted: #a6bcc8;
+  --al-cyan: #a0e5de;
+  --al-coral: #f4a18a;
+  --workspace-paper: #101e28;
+  --agent-paper: #101e28;
+  --agent-ink: #e2eded;
+  --al-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  color: var(--al-text);
+  background: var(--al-bg);
+  color-scheme: dark;
+  font: 14px/1.5 "Helvetica Neue", Arial, sans-serif;
+  width: 100%;
+  height: 100dvh;
+  min-height: 0;
+  min-width: 0;
+  display: grid;
+  grid-template-rows: 68px 54px minmax(0, 1fr) 64px 28px 40px;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+.project-afterlight *, .project-afterlight *::before, .project-afterlight *::after { box-sizing: border-box; }
+.project-afterlight [hidden] { display: none !important; }
+.project-afterlight :is(button, select, input) { font: inherit; font-size: 14px; }
+.project-afterlight button {
+  color: var(--al-text); background: #172b36; border: 1px solid #3c5662; border-radius: 3px;
+  min-height: 40px; padding: 8px 13px; cursor: pointer; transition: background .15s, border-color .15s;
+}
+.project-afterlight button:hover:not(:disabled) { background: #29434f; border-color: #83bbb9; }
+.project-afterlight button:disabled { opacity: .45; cursor: not-allowed; }
+.project-afterlight :is(button,select,input,a):focus-visible { outline: 2px solid #b8faf0; outline-offset: 3px; }
+.project-afterlight button[aria-pressed="true"] { color: #cafff3; border-color: #85cfc5; background: #25413f; }
+.project-afterlight .al-header { display: flex; align-items: center; justify-content: space-between; padding: 0 28px; gap: 20px; border-bottom: 1px solid var(--al-line); }
+.project-afterlight .al-brand { display: flex; align-items: center; gap: 15px; }
+.project-afterlight h1 { font-size: 32px; font-weight: 450; line-height: 1; margin: 0; letter-spacing: -1.4px; }
+.project-afterlight .al-brand p { font: 10px/1 var(--al-mono); letter-spacing: 2px; margin: 8px 0 0; color: var(--al-muted); }
+.project-afterlight .al-emblem { width: 36px; height: 36px; border: 1px solid #a9d8d8; border-radius: 50%; position: relative; }
+.project-afterlight .al-emblem::before { content: ""; position: absolute; inset: 7px; border: 3px double #a9d8d8; border-radius: 50%; }
+.project-afterlight .al-emblem::after { content: ""; position: absolute; width: 44px; height: 1px; background: #a9d8d8; left: -5px; top: 17px; transform: rotate(-50deg); }
+.project-afterlight .al-header-note { font: 10px var(--al-mono); letter-spacing: 2.4px; color: #9aadb9; }
+.project-afterlight .al-header nav { display: flex; gap: 8px; }
+.project-afterlight .al-header nav button { background: transparent; border-color: #314752; }
+.project-afterlight .al-telemetry { display: flex; align-items: center; gap: 40px; padding: 0 28px; border-bottom: 1px solid var(--al-line); background: #101c25; }
+.project-afterlight .al-telemetry > div { white-space: nowrap; }
+.project-afterlight .al-telemetry > div > span:first-child { font-size: 14px; color: var(--al-muted); margin-right: 12px; }
+.project-afterlight .al-telemetry strong { font: 22px var(--al-mono); font-weight: 400; letter-spacing: -1px; }
+.project-afterlight .al-unit { color: var(--al-muted); font-size: 14px; }
+.project-afterlight .al-pause-mark { margin-left: auto; font: 11px var(--al-mono); letter-spacing: 1px; color: #a0c7c5; display: flex; align-items: center; gap: 10px; }
+.project-afterlight .al-pause-mark i { width: 7px; height: 7px; border-radius: 50%; background: #a2e3ce; box-shadow: 0 0 12px #72d9b766; }
+.project-afterlight .al-main { display: grid; grid-template-columns: minmax(0, 1fr) 285px; min-height: 0; }
+.project-afterlight .al-stage { position: relative; min-height: 0; min-width: 0; isolation: isolate; overflow: hidden; }
+.project-afterlight .al-scene, .project-afterlight .al-webgl, .project-afterlight .al-plan { position: absolute; inset: 0; min-width: 0; min-height: 0; }
+.project-afterlight .al-scene::after { content: ""; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 0 90px 12px #07101866; }
+.project-afterlight .al-scene canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.project-afterlight .al-view-controls { position: absolute; z-index: 2; top: 16px; left: 20px; display: flex; gap: 5px; }
+.project-afterlight .al-view-controls button { font-size: 14px; background: #0c1a23df; padding: 7px 12px; backdrop-filter: blur(12px); }
+.project-afterlight .al-coordinate { position: absolute; pointer-events: none; right: 22px; top: 23px; color: #7d96a5; font: 10px/1.8 var(--al-mono); letter-spacing: 1.4px; text-align: right; }
+.project-afterlight .al-scene-caption { position: absolute; left: 24px; bottom: 98px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.project-afterlight .al-scene-caption > span { font: 14px var(--al-mono); color: #c1d8dc; letter-spacing: 1px; text-shadow: 0 2px 5px #000; }
+.project-afterlight .al-scene-caption button { background: #0c1b24da; padding: 5px 10px; min-height: 36px; }
+.project-afterlight .al-scene-legend { position: absolute; bottom: 105px; right: 20px; color: #acbec8; font-size: 14px; display: grid; text-align: right; gap: 4px; pointer-events: none; }
+.project-afterlight .al-scene-legend span::before { content: ""; display: inline-block; width: 16px; border-top: 1px solid #b3d6d8; margin-right: 7px; vertical-align: middle; }
+.project-afterlight .al-scene-legend span:last-child::before { border-top-style: dashed; }
+.project-afterlight .al-crew-strip { position: absolute; left: 20px; right: 20px; bottom: 18px; display: flex; gap: 8px; z-index: 2; }
+.project-afterlight .al-crew-strip > button { flex: 1; min-width: 0; max-width: 230px; text-align: left; background: #11222ce8; backdrop-filter: blur(12px); border-color: #3a4e59; padding: 8px 12px 10px; }
+.project-afterlight .al-crew-strip > button[aria-pressed="true"] { border-color: var(--crew-color); background: #20333c; }
+.project-afterlight .al-crew-name { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 500; }
+.project-afterlight .al-crew-name i { width: 7px; height: 7px; background: var(--crew-color); border-radius: 50%; box-shadow: 0 0 12px color-mix(in srgb,var(--crew-color), transparent 50%); }
+.project-afterlight .al-key { margin-left: auto; font: 11px var(--al-mono); color: #8ba0ad; }
+.project-afterlight [data-al-crew-location] { color: #aec1cb; font: 14px/1.7 var(--al-mono); white-space: nowrap; }
+.project-afterlight .al-energy-track { display: block; height: 2px; background: #34444f; margin-top: 5px; }
+.project-afterlight .al-energy-track > span { display: block; height: 100%; background: var(--crew-color); }
+.project-afterlight .al-sidebar { border-left: 1px solid var(--al-line); padding: 23px 22px; min-height: 0; overflow: auto; scrollbar-width: thin; background: linear-gradient(145deg,#14242e,#0c1922); }
+.project-afterlight .al-sidebar-heading { display: flex; align-items: center; justify-content: space-between; }
+.project-afterlight .al-eyebrow { font: 10px/1.4 var(--al-mono); letter-spacing: 1.7px; color: var(--al-muted); }
+.project-afterlight .al-live-dot { width: 5px; height: 5px; border: 1px solid #a3d9d0; transform: rotate(45deg); }
+.project-afterlight .al-sidebar h2 { font-size: 28px; font-weight: 400; letter-spacing: -1px; line-height: 1.1; margin: 22px 0 10px; }
+.project-afterlight .al-intro { margin: 0 0 22px; color: var(--al-muted); font-size: 14px; }
+.project-afterlight .al-objectives { padding: 0; margin: 0; list-style: none; }
+.project-afterlight .al-objectives li { display: flex; gap: 12px; padding: 12px 0; border-top: 1px solid #293c46; }
+.project-afterlight .al-objectives li > span { color: #9eb3be; font: 11px var(--al-mono); padding-top: 3px; }
+.project-afterlight .al-objectives strong { display: block; font-size: 14px; font-weight: 500; }
+.project-afterlight .al-objectives small { display: block; color: #a2b6c3; font-size: 14px; margin-top: 3px; }
+.project-afterlight .al-objectives [data-complete="true"] strong { color: #9fe3ce; }
+.project-afterlight .al-objectives [data-complete="true"] > span { color: #9fe3ce; }
+.project-afterlight .al-forecast-card { padding: 16px; margin: 18px 0 0; border: 1px solid #45605f; background: #1d343733; }
+.project-afterlight .al-forecast-card > strong { display: block; font: 20px var(--al-mono); color: #c1e5de; margin-top: 9px; }
+.project-afterlight .al-forecast-card p { color: #b4c9ce; margin: 9px 0 12px; font-size: 14px; }
+.project-afterlight .al-forecast-card button { width: 100%; background: transparent; }
+.project-afterlight .al-latest { padding-top: 20px; }
+.project-afterlight .al-latest p { white-space: pre-line; font-size: 14px; color: var(--al-muted); line-height: 1.6; }
+.project-afterlight .al-command-bar { border-top: 1px solid #3a515c; background: #14232c; display: flex; align-items: center; gap: 10px; padding: 12px 24px; }
+.project-afterlight .al-command-copy { margin-right: auto; min-width: 0; }
+.project-afterlight .al-command-copy > span { display: block; font: 10px var(--al-mono); color: #a8c2cb; letter-spacing: 1.4px; }
+.project-afterlight .al-command-copy > strong { display: block; font-size: 14px; text-transform: capitalize; margin-top: 3px; font-weight: 400; }
+.project-afterlight .al-command-bar button { min-height: 46px; }
+.project-afterlight .al-command-bar .al-advance { min-width: 210px; color: #08211f; background: #b6e3d5; border-color: #b6e3d5; text-align: left; font-weight: 600; display: flex; align-items: center; justify-content: space-between; gap: 30px; }
+.project-afterlight .al-command-bar .al-advance:hover:not(:disabled) { background: #d1f5e7; border-color: #d1f5e7; }
+.project-afterlight .al-status-row { min-width: 0; display: flex; align-items: center; gap: 10px; padding: 0 90px 0 24px; background: #0c1921; }
+.project-afterlight .al-status-row p { min-width: 0; flex: 1; margin: 0; font-size: 14px; color: #a8c1cb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.project-afterlight .al-status-row button { min-height: 28px; padding: 1px 8px; background: transparent; border: 0; color: #bdd7d8; }
+.project-afterlight .al-agent-host.agent-console { min-width: 0; min-height: 0; border-top: 1px solid #243c47; border-radius: 0; background: #0b171f; padding: 3px 90px 3px 16px; margin: 0; gap: 8px; font-size: 14px; }
+.project-afterlight .al-agent-host.agent-console button { min-height: 34px; padding: 4px 10px; font-size: 14px; }
+.project-afterlight .al-agent-host.agent-console p { min-width: 0; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.project-afterlight .al-agent-host[data-agent-error="true"] { border-top-color: var(--al-coral); }
+.project-afterlight .al-ending { position: absolute; z-index: 4; top: 50%; left: 50%; transform: translate(-50%,-55%); width: min(450px,calc(100% - 32px)); padding: 28px; border: 1px solid #8fcec1; background: #102726ed; backdrop-filter: blur(16px); box-shadow: 0 18px 80px #0009; }
+.project-afterlight .al-ending[data-outcome="lost"] { background: #291e22f2; border-color: #db8b7b; }
+.project-afterlight .al-ending h2 { font-size: 35px; font-weight: 400; letter-spacing: -1px; margin: 10px 0; }
+.project-afterlight .al-ending p { font-size: 14px; color: #c5d9dd; }
+.project-afterlight .al-ending button { margin-top: 8px; }
+.project-afterlight .al-graphics-error { position: absolute; inset: 30% 10% auto; z-index: 3; padding: 20px; background: #251b22; color: #fbc4b7; border: 1px solid #bc8075; font-size: 16px; }
+.project-afterlight .workspace-dialog { border-color: #546d77; border-radius: 6px; background: #101e28; color: var(--al-text); font-size: 16px; line-height: 1.6; }
+.project-afterlight .workspace-dialog-heading { background: #132731; border-color: #3c525c; }
+.project-afterlight .workspace-dialog :is(p,li,label,small,button,select,input) { font-size: 14px; }
+.project-afterlight .workspace-dialog h3 { font-weight: 500; font-size: 20px; margin: 24px 0 12px; }
+.project-afterlight .workspace-dialog label { display: flex; flex-direction: column; gap: 7px; color: #c3d7dd; }
+.project-afterlight .workspace-dialog select { width: 100%; min-height: 44px; background: #172c36; color: #e2eded; border: 1px solid #58717b; padding: 9px; border-radius: 3px; }
+.project-afterlight .workspace-dialog input { min-height: 44px; }
+.project-afterlight .al-field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0 16px; }
+.project-afterlight .al-dialog-intro { padding: 14px 16px; margin: 0; border-left: 2px solid #96d2c7; background: #1a333735; }
+.project-afterlight .al-dialog-section { border-top: 1px solid #38505a; margin-top: 24px; }
+.project-afterlight .al-bulkheads { display: flex; flex-wrap: wrap; gap: 8px; }
+.project-afterlight .al-bulkheads button { flex: 1; min-width: 160px; text-align: left; }
+.project-afterlight .al-warning { color: #ffd1ab; border: 1px solid #6e5940; background: #b6752d0a; padding: 12px; }
+.project-afterlight .al-muted { color: #afc3cd; }
+.project-afterlight .al-crew-tabs { display: flex; gap: 8px; }
+.project-afterlight .al-crew-tabs button { flex: 1; }
+.project-afterlight .al-crew-readout { padding: 15px; background: #1a3038; border: 1px solid #3e5a61; font: 14px/1.9 var(--al-mono); margin-bottom: 20px; }
+.project-afterlight .al-catalog { padding-left: 20px; }
+.project-afterlight .al-catalog li { margin: 12px 0; color: #c3d8db; }
+.project-afterlight .al-journal { padding: 0 0 0 20px; margin: 0; }
+.project-afterlight .al-journal li { padding: 14px 8px; border-bottom: 1px solid #304751; color: #c3d7db; }
+@media (min-width: 1450px) {
+  .project-afterlight .al-main { grid-template-columns: minmax(0,1fr) 320px; }
+  .project-afterlight .al-sidebar { padding: 26px; }
+}
+@media (max-width: 1050px) {
+  .project-afterlight { grid-template-rows: 62px 52px minmax(0,1fr) 64px 30px 42px; }
+  .project-afterlight .al-main { grid-template-columns: minmax(0,1fr); }
+  .project-afterlight .al-sidebar { display: none; }
+  .project-afterlight .al-header-note { display: none; }
+  .project-afterlight .al-header, .project-afterlight .al-telemetry { padding-left: 20px; padding-right: 20px; }
+  .project-afterlight .al-telemetry { gap: 30px; }
+  .project-afterlight .al-command-bar { padding: 8px 20px; }
+  .project-afterlight .al-crew-strip > button { max-width: 220px; }
+}
+@media (max-width: 600px) {
+  .project-afterlight { grid-template-rows: 54px 48px minmax(0,1fr) 58px 0 40px; }
+  .project-afterlight .al-header { padding: 0 12px; gap: 8px; }
+  .project-afterlight .al-brand { gap: 8px; }
+  .project-afterlight .al-brand p, .project-afterlight .al-emblem, .project-afterlight .al-pause-mark, .project-afterlight .al-unit { display: none; }
+  .project-afterlight h1 { font-size: 25px; }
+  .project-afterlight .al-header nav { gap: 5px; }
+  .project-afterlight .al-header nav button { padding: 6px 8px; min-height: 38px; }
+  .project-afterlight .al-telemetry { gap: 0; justify-content: space-between; padding: 4px 12px; }
+  .project-afterlight .al-telemetry > div > span:first-child { display: block; margin: 0; font-size: 14px; line-height: 1.2; }
+  .project-afterlight .al-telemetry strong { font-size: 17px; line-height: 1.3; letter-spacing: -.6px; }
+  .project-afterlight .al-view-controls { top: 10px; left: 8px; right: 8px; gap: 4px; flex-wrap: wrap; }
+  .project-afterlight .al-view-controls button { padding: 5px 8px; min-height: 38px; font-size: 14px; }
+  .project-afterlight .al-coordinate { display: none; }
+  .project-afterlight .al-crew-strip { left: 8px; right: 8px; bottom: 9px; gap: 5px; }
+  .project-afterlight .al-crew-strip > button { padding: 6px 7px 8px; }
+  .project-afterlight .al-crew-name { font-size: 14px; gap: 5px; }
+  .project-afterlight .al-key { display: none; }
+  .project-afterlight [data-al-crew-location] { font: 14px/1.5 "Helvetica Neue",Arial,sans-serif; letter-spacing: -.6px; }
+  .project-afterlight .al-scene-caption { left: 10px; bottom: 85px; gap: 3px; }
+  .project-afterlight .al-scene-caption > span { font-size: 14px; }
+  .project-afterlight .al-scene-caption button { min-height: 34px; font-size: 14px; padding: 3px 8px; }
+  .project-afterlight .al-scene-legend { display: none; }
+  .project-afterlight .al-command-copy { display: none; }
+  .project-afterlight .al-command-bar { gap: 5px; padding: 6px 8px; }
+  .project-afterlight .al-command-bar > button { min-width: 0; padding: 7px 9px; min-height: 44px; font-size: 14px; }
+  .project-afterlight .al-command-bar > button:nth-last-child(2) { max-width: 85px; line-height: 1.15; }
+  .project-afterlight .al-command-bar .al-advance { flex: 1; min-width: 0; gap: 8px; white-space: nowrap; }
+  .project-afterlight .al-status-row { overflow: hidden; visibility: hidden; padding: 0; }
+  .project-afterlight .al-agent-host.agent-console { padding: 3px 65px 3px 8px; gap: 5px; }
+  .project-afterlight .al-agent-host.agent-console button { padding: 4px 7px; }
+  .project-afterlight .al-agent-host.agent-console [data-agent-status] { white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+  .project-afterlight .al-ending { padding: 20px; transform: translate(-50%,-50%); }
+  .project-afterlight .al-ending h2 { font-size: 28px; }
+  .project-afterlight .al-field-grid { grid-template-columns: 1fr; gap: 12px; }
+  .project-afterlight .workspace-dialog-content { padding: 14px; }
+}
+@media (max-height: 540px) and (min-width: 601px) {
+  .project-afterlight { grid-template-rows: 48px 40px minmax(0,1fr) 50px 0 38px; }
+  .project-afterlight .al-header { padding: 0 16px; }
+  .project-afterlight h1 { font-size: 25px; }
+  .project-afterlight .al-brand p, .project-afterlight .al-emblem, .project-afterlight .al-header-note { display: none; }
+  .project-afterlight .al-header nav button { min-height: 36px; padding: 4px 10px; }
+  .project-afterlight .al-main { grid-template-columns: minmax(0,1fr); }
+  .project-afterlight .al-sidebar { display: none; }
+  .project-afterlight .al-telemetry { gap: 24px; }
+  .project-afterlight .al-telemetry strong { font-size: 18px; }
+  .project-afterlight .al-telemetry > div > span:first-child { margin-right: 7px; }
+  .project-afterlight .al-pause-mark { display: none; }
+  .project-afterlight .al-view-controls { top: 8px; left: 12px; }
+  .project-afterlight .al-view-controls button { min-height: 34px; padding: 4px 9px; }
+  .project-afterlight .al-crew-strip { left: auto; width: 330px; bottom: 10px; right: 14px; gap: 5px; }
+  .project-afterlight .al-crew-strip > button { padding: 5px 7px; }
+  .project-afterlight .al-crew-name { font-size: 14px; }
+  .project-afterlight [data-al-crew-location] { font: 14px/1.5 sans-serif; letter-spacing: -.5px; }
+  .project-afterlight .al-scene-caption { bottom: 13px; left: 14px; }
+  .project-afterlight .al-scene-legend { display: none; }
+  .project-afterlight .al-command-bar { padding: 4px 16px; }
+  .project-afterlight .al-command-bar button { min-height: 40px; }
+  .project-afterlight .al-status-row { visibility: hidden; overflow: hidden; padding: 0; }
+  .project-afterlight .al-agent-host.agent-console { padding-top: 2px; padding-bottom: 2px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .project-afterlight * { transition: none !important; scroll-behavior: auto !important; }
+}

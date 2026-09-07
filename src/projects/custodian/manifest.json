@@ -1,0 +1,15 @@
+{
+  "id": "custodian",
+  "order": 73,
+  "title": "Nothing to Declare",
+  "subtitle": "Impossible cargo. Very real paperwork.",
+  "description": "Work a six-traveller shift at an interdimensional customs desk. Model-driven merchants choose hidden cargo, make dubious declarations and negotiate real terms; your instruments, regulations and stamps decide what crosses.",
+  "category": "play",
+  "format": "page",
+  "runtime": "openai-compatible",
+  "medium": "A paper-and-glass customs investigation",
+  "tags": ["Agent games", "Investigation", "Negotiation", "Original fiction"],
+  "color": "#e7deca",
+  "ink": "#263f38",
+  "instruction": "Configure a model and call a traveller. Compare declarations with measured evidence and current regulations, negotiate if useful, then stamp Admit, Quarantine or Return."
+}

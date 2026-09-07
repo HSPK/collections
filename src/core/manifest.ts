@@ -58,6 +58,10 @@ export function parseManifest(value: unknown, source = 'Project manifest'): Proj
   if (preview !== undefined && (typeof preview !== 'string' || !/^previews\/[a-z0-9-]+\.(jpg|png|webp|svg)$/.test(preview))) {
     throw new Error(`${source}: preview must be a local file in previews/.`);
   }
+  const runtime = value.runtime;
+  if (runtime !== undefined && runtime !== 'local' && runtime !== 'openai-compatible') {
+    throw new Error(`${source}: runtime must be "local" or "openai-compatible".`);
+  }
   return {
     id, order, color, ink,
     title: text('title'),
@@ -69,6 +73,7 @@ export function parseManifest(value: unknown, source = 'Project manifest'): Proj
     tags,
     instruction: text('instruction', true),
     ...(preview ? { preview } : {}),
+    ...(runtime ? { runtime } : {}),
   };
 }
 

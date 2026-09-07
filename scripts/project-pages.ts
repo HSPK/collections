@@ -26,11 +26,12 @@ export function readProjectManifests(root: string): ProjectManifest[] {
 
 export function renderProjectDocument(html: string, project: ProjectManifest, built: boolean): string {
   const title = escapeMarkup(`${project.title} - Odd Index`);
-  const description = escapeMarkup(project.description);
+  const description = escapeMarkup(project.description + (project.runtime === 'openai-compatible' ?
+    ' Requires an OpenAI-compatible model connection.' : ''));
   const canonical = `https://hspk.github.io/collections/projects/${project.id}/`;
   const preview = `https://hspk.github.io/collections/${project.preview || `previews/${project.id}.jpg`}`;
   let result = html
-    .replace(/<body\b([^>]*)>/i, (_match, attributes: string) => `<body${attributes} data-project="${project.id}">`)
+    .replace(/<body\b([^>]*)>/i, (_match, attributes: string) => `<body${attributes} data-project="${project.id}" data-runtime="${project.runtime ?? 'local'}">`)
     .replace(/<title>.*?<\/title>/, () => `<title>${title}</title>`)
     .replace(/<meta name="odd-index-base"[^>]*>/, '<meta name="odd-index-base" content="../../" />')
     .replace(/<meta name="description"[^>]*>/, () => `<meta name="description" content="${description}" />`)

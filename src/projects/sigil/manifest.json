@@ -1,0 +1,15 @@
+{
+  "id": "sigil",
+  "order": 77,
+  "title": "Sigil",
+  "subtitle": "An atelier of executable light.",
+  "description": "Engrave real glyph programs that transform light, shape, color and time. An API-backed architect adapts five solver-verified chapters to your mistakes; the local interpreter alone decides which spells hold.",
+  "category": "play",
+  "format": "page",
+  "runtime": "openai-compatible",
+  "medium": "Executable spell-grammar workshop",
+  "tags": ["Agent games", "Programming", "Logic", "Light & time"],
+  "color": "#efe7d5",
+  "ink": "#263348",
+  "instruction": "Invite the architect, compose glyphs left to right, and fire a spell to earn each of five mechanically verified seals."
+}

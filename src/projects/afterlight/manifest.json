@@ -1,0 +1,15 @@
+{
+  "id": "afterlight",
+  "order": 78,
+  "title": "Afterlight",
+  "subtitle": "The quiet after the signal.",
+  "description": "Captain a three-agent salvage crew through a derelict ring ship. Route power and oxygen, isolate breaches, recover survivors and bring everyone home before the extraction window closes.",
+  "category": "play",
+  "format": "page",
+  "runtime": "openai-compatible",
+  "medium": "3D tactical salvage and rescue",
+  "tags": ["Agent games", "3D", "Strategy", "Space", "Rescue"],
+  "color": "#101e28",
+  "ink": "#b6e3d5",
+  "instruction": "Set captain orders, then request a bounded model crew turn. Transfer a cell to Vale, restore the reactor, recover both pods and the core, and extract together."
+}

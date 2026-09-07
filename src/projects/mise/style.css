@@ -1,0 +1,145 @@
+.project-mise {
+  --app-ink: #393d2e;
+  --paper: #f5ebcc;
+  --workspace-paper: #f5ebcc;
+  --mise-red: #ac3e31;
+  height: 100dvh;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: 66px 40px minmax(0, 1fr) auto 66px;
+  background: #eee0ba;
+  color: #393d2e;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.35;
+}
+.project-mise button, .project-mise select { min-height: 36px; font-size: 14px; }
+.project-mise button { border: 1px solid #8c8467; border-radius: 4px; background: #f7edce; padding: 7px 11px; box-shadow: 0 2px 0 #5f553a20; }
+.project-mise button:hover:not(:disabled) { background: #fff6da; border-color: #743c2b; }
+.project-mise button:focus-visible, .project-mise select:focus-visible { outline: 3px solid #8e3028; outline-offset: 3px; }
+.project-mise button[aria-pressed="true"] { background: #e5cf99; border-color: #813c2d; }
+.project-mise .mise-header { display: flex; justify-content: space-between; align-items: center; padding: 0 24px; gap: 12px; border-bottom: 2px solid #6a6145; background: #f5e8bd; }
+.project-mise .mise-brand { display: flex; align-items: center; gap: 20px; }
+.project-mise h1 { font: 700 46px/.9 Georgia, serif; letter-spacing: -3px; margin: 0; }
+.project-mise h1 span { color: #b34032; }
+.project-mise .mise-brand > span { font-size: 14px; letter-spacing: 2px; }
+.project-mise nav { display: flex; gap: 7px; }
+.project-mise .mise-metrics { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 24px; border-bottom: 1px solid #b0a583; background: #e6d7af; font-variant-numeric: tabular-nums; }
+.project-mise .mise-workbench { display: grid; grid-template-columns: minmax(0, 1fr) 280px; min-height: 0; min-width: 0; }
+.project-mise .mise-scene { position: relative; display: grid; grid-template-rows: minmax(0, 1fr) auto; min-width: 0; min-height: 0; }
+.project-mise .mise-kitchen { position: relative; min-height: 0; min-width: 0; }
+.project-mise .mise-kitchen canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.project-mise .mise-caption { position: absolute; top: 12px; left: 18px; right: 18px; display: flex; align-items: center; justify-content: space-between; gap: 8px; pointer-events: none; }
+.project-mise .mise-caption span { font-size: 14px; color: #65573e; background: #eee1bdde; padding: 4px 7px; }
+.project-mise .mise-caption button { pointer-events: auto; background: #eee1bdde; }
+.project-mise .mise-crew { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; padding: 10px 18px; background: #dfd1a9; border-top: 1px solid #b3a67e; }
+.project-mise .mise-crew > div { min-width: 0; display: flex; align-items: baseline; gap: 8px; }
+.project-mise .mise-crew strong { color: var(--staff); border-top: 3px solid var(--staff); padding-top: 3px; }
+.project-mise .mise-crew span { display: block; max-height: 38px; overflow: auto; font-size: 14px; scrollbar-width: thin; }
+.project-mise .mise-orders { display: flex; flex-direction: column; min-height: 0; min-width: 0; border-left: 2px solid #736348; background: #8d6948; padding: 0 12px 10px; }
+.project-mise .mise-orders > header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; padding: 11px 0; color: #fff1cb; }
+.project-mise .mise-orders h2 { margin: 0; font: 23px Georgia, serif; }
+.project-mise .mise-orders header span { font-size: 14px; }
+.project-mise .mise-ticket-list { display: flex; flex-direction: column; gap: 14px; min-height: 0; overflow: auto; padding: 10px 4px 6px; scrollbar-width: thin; scrollbar-color: #dbc28a #8d6948; }
+.project-mise .mise-ticket { display: block; position: relative; flex-shrink: 0; text-align: left; padding: 13px 12px 10px; border-radius: 0 0 7px 2px; border: 0; background: #fcf0ca; box-shadow: 3px 5px 0 #49372432; transform: rotate(-.6deg); }
+.project-mise .mise-ticket:nth-child(even) { transform: rotate(.6deg); }
+.project-mise .mise-ticket::before { content: ""; position: absolute; top: -8px; left: 46%; width: 28px; height: 13px; border-radius: 3px; background: #a7ac97; border: 1px solid #494c3e; box-shadow: inset 0 3px #d7d8c4; }
+.project-mise .mise-ticket[aria-pressed="true"] { background: #fff2c3; outline: 2px solid #ac3e31; outline-offset: -3px; }
+.project-mise .mise-ticket-top { display: flex; justify-content: space-between; gap: 6px; font: 14px "Courier New", monospace; border-bottom: 1px dashed #b49b6e; padding-bottom: 7px; }
+.project-mise .mise-ticket-top > span { color: #9e3c2d; font-weight: bold; }
+.project-mise .mise-dish-name { display: block; font: 22px/1.2 Georgia, serif; margin: 9px 0; }
+.project-mise .mise-ticket-time { display: block; font-size: 14px; }
+.project-mise .mise-ticket-progress { display: flex; align-items: center; gap: 5px; margin-top: 8px; font-size: 14px; }
+.project-mise .mise-ticket-progress i { width: 9px; height: 9px; border-radius: 50%; border: 1px solid #827353; background: #e1cca0; }
+.project-mise .mise-ticket-progress i[data-stage="prepared"], .project-mise .mise-ticket-progress i[data-stage="prepping"] { background: #d4a450; }
+.project-mise .mise-ticket-progress i[data-stage="cooking"] { background: #c36a3f; }
+.project-mise .mise-ticket-progress i[data-stage="ready"], .project-mise .mise-ticket-progress i[data-stage="plated"] { background: #6e7e49; }
+.project-mise .mise-ticket-progress i[data-stage="burnt"] { background: #883627; }
+.project-mise .mise-ticket[data-status="served"] { background: #e0dfb6; }
+.project-mise .mise-ticket[data-status="missed"] { background: #e0b399; }
+.project-mise .mise-dock { border-top: 2px solid #6b6047; padding: 10px 20px; display: grid; grid-template-columns: minmax(340px, .9fr) minmax(340px, 1.1fr); gap: 18px; background: #f2e5bd; }
+.project-mise .mise-strategy { display: flex; gap: 10px; align-items: end; }
+.project-mise .mise-strategy > label { display: flex; flex: 1; flex-direction: column; min-width: 0; gap: 3px; font-size: 14px; }
+.project-mise [data-hob-status] { font-size: 14px; font-weight: bold; }
+.project-mise [data-hob-status][data-ready="true"] { color: #a33829; }
+.project-mise select { width: 100%; min-width: 0; border: 1px solid #9c8c67; background: #f9edc9; color: #393d2e; border-radius: 3px; padding: 5px; }
+.project-mise .mise-service { display: grid; grid-template-columns: minmax(170px, 1fr) auto; gap: 7px; align-items: end; }
+.project-mise .mise-primary { background: #a8392e; color: #fff3d5; border-color: #843228; font-weight: bold; min-height: 42px; }
+.project-mise .mise-primary:hover:not(:disabled) { background: #883024; }
+.project-mise .mise-service p { grid-column: 1 / -1; min-height: 18px; max-height: 38px; overflow: auto; margin: 0; font-size: 14px; scrollbar-width: thin; }
+.project-mise .mise-footer { padding: 8px 82px 10px 20px; border-top: 1px solid #b2a17b; background: #e2d3aa; min-width: 0; min-height: 0; }
+.project-mise .agent-console { border: 0; padding: 0; background: none; color: #393d2e; min-height: 0; gap: 8px; }
+.project-mise .agent-console [data-agent-status] { font-size: 14px; max-height: 40px; overflow: auto; scrollbar-width: thin; white-space: normal; text-overflow: clip; }
+.project-mise .agent-console button { color: #393d2e; background: #f5e8c2; }
+.project-mise .workspace-dialog { border: 2px solid #766244; border-radius: 5px; font-size: 16px; line-height: 1.5; }
+.project-mise .workspace-dialog h3 { font: 25px Georgia, serif; margin: 20px 0 10px; }
+.project-mise .workspace-dialog p { margin: 10px 0; }
+.project-mise .workspace-dialog li { margin-bottom: 8px; }
+.project-mise .mise-prep-dialog fieldset { border: 1px solid #b09e76; padding: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+.project-mise .mise-prep-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; border-top: 1px dashed #b8a37a; padding: 10px 0; }
+.project-mise .mise-prep-row > strong { width: 100%; }
+.project-mise .mise-dependencies { padding-left: 24px; }
+.project-mise .mise-dependencies li > span { display: block; font-size: 15px; }
+.project-mise .mise-score { font: 56px Georgia, serif; color: #a8392e; }
+.project-mise .mise-score span { font: 16px "Trebuchet MS", sans-serif; color: #5b4a31; }
+@media (max-width: 1000px) {
+  .project-mise { grid-template-rows: 56px 36px minmax(0, 1fr) auto 66px; }
+  .project-mise .mise-header { padding: 0 14px; }
+  .project-mise h1 { font-size: 40px; }
+  .project-mise .mise-brand > span { display: none; }
+  .project-mise .mise-workbench { grid-template-columns: minmax(0, 1fr) 226px; }
+  .project-mise .mise-orders h2 { font-size: 20px; }
+  .project-mise .mise-dock { grid-template-columns: 1fr; gap: 8px; padding: 8px 14px; }
+  .project-mise .mise-strategy > button { flex: 1.3; }
+  .project-mise .mise-service { grid-template-columns: minmax(160px, 1fr) auto minmax(100px, 1.2fr); align-items: center; }
+  .project-mise .mise-service p { grid-column: auto; max-height: 40px; }
+  .project-mise .mise-crew { gap: 8px; padding: 6px 10px; }
+  .project-mise .mise-crew > div { display: block; }
+  .project-mise .mise-caption { top: 7px; left: 8px; right: 8px; }
+  .project-mise .mise-caption span { max-width: 60%; }
+}
+@media (max-width: 600px) {
+  .project-mise { grid-template-rows: 48px 44px minmax(0, 1fr) auto 68px; }
+  .project-mise .mise-header { padding: 0 10px; gap: 6px; }
+  .project-mise h1 { font-size: 37px; }
+  .project-mise nav { gap: 4px; }
+  .project-mise nav button { padding: 6px 7px; }
+  .project-mise .mise-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 0 10px; padding: 4px 10px; }
+  .project-mise .mise-metrics > :nth-child(even) { text-align: right; }
+  .project-mise .mise-workbench { grid-template-columns: minmax(0, 1fr); grid-template-rows: 130px minmax(0, 1fr); }
+  .project-mise .mise-orders { grid-row: 1; border-left: 0; padding: 0 6px 3px; }
+  .project-mise .mise-orders > header { padding: 3px 4px 0; }
+  .project-mise .mise-orders h2 { font-size: 16px; }
+  .project-mise .mise-ticket-list { flex-direction: row; gap: 9px; padding: 7px 4px 4px; }
+  .project-mise .mise-ticket { width: 176px; padding: 7px 9px; }
+  .project-mise .mise-ticket-top { padding-bottom: 3px; }
+  .project-mise .mise-dish-name { font-size: 18px; margin: 3px 0; }
+  .project-mise .mise-ticket-progress { margin-top: 3px; }
+  .project-mise .mise-ticket-time { font-size: 14px; }
+  .project-mise .mise-caption { top: 5px; }
+  .project-mise .mise-caption > span { display: none; }
+  .project-mise .mise-caption button { margin-left: auto; min-height: 30px; padding: 3px 7px; }
+  .project-mise .mise-crew { gap: 5px; padding: 4px 8px; }
+  .project-mise .mise-crew strong { border-top: 0; }
+  .project-mise .mise-crew span { max-height: 36px; line-height: 1.2; }
+  .project-mise .mise-dock { padding: 6px 8px; gap: 6px; }
+  .project-mise .mise-strategy { gap: 5px; }
+  .project-mise .mise-strategy > button { flex: 1; padding: 5px; }
+  .project-mise .mise-strategy select { padding: 4px 1px; }
+  .project-mise .mise-service { grid-template-columns: minmax(0, 1fr) auto; gap: 4px; }
+  .project-mise .mise-service p { grid-column: 1 / -1; height: 20px; max-height: 20px; font-size: 14px; line-height: 1.2; }
+  .project-mise .mise-footer { padding: 5px 75px 5px 8px; }
+  .project-mise .agent-console { gap: 4px; flex-wrap: wrap; }
+  .project-mise .agent-console [data-agent-status] { order: 5; width: 100%; flex-basis: 100%; max-height: 18px; line-height: 18px; margin: 0; }
+  .project-mise .agent-console button { min-height: 30px; padding: 3px 9px; }
+}
+@media (max-height: 520px) and (min-width: 601px) {
+  .project-mise { grid-template-rows: 48px 30px minmax(0, 1fr) auto 60px; }
+  .project-mise .mise-caption span { display: none; }
+  .project-mise .mise-caption button { margin-left: auto; }
+  .project-mise .mise-dock { gap: 5px; padding-top: 5px; padding-bottom: 5px; }
+  .project-mise .mise-crew span { max-height: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .project-mise *, .project-mise *::before { scroll-behavior: auto; transition: none; animation: none; }
+}

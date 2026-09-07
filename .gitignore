@@ -4,6 +4,9 @@ test-results/
 playwright-report/
 .DS_Store
 *.local
+.env
+.env.*
+!.env.example
 src/projects/*/.browser-runtime/
 src/projects/*/.validation/
 src/projects/*/.review-*.png

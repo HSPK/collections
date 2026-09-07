@@ -53,6 +53,11 @@ whitespace aliases are grouped, and a tag counts a project only once.
 Categories are `create`, `play`, `read`, `learn`, `explore`, and `art`.
 Every project uses `format: "page"` and owns its layout and controls.
 `order` must be unique and positive.
+The optional `runtime` is `"local"` (the default) or
+`"openai-compatible"`. The latter adds an **API required** disclosure to the
+library, quick search, project information, and generated page metadata.
+It does not create a backend or perform a model request. Keep this marker
+accurate; existing local websites need no model configuration.
 The default cover is `public/previews/<id>.jpg`; an optional `preview`
 can point to another local image inside `previews/`.
 Add `data-project-preview` to the main workbench, exhibit, or content region
@@ -100,6 +105,26 @@ and touch targets generous. A 320px viewport should remain usable without
 document-level horizontal scrolling. Provide substantive content and functioning controls.
 Sound must start only after explicit opt-in. Label fictional information
 as fiction and distinguish a local generator from a hosted AI model.
+
+## API-powered games
+
+Keep the scene, pure game rules, editable campaign data, and agent intent
+contracts in separate modules. Reuse `core/agents` for explicit connection
+settings, native bounded tools, validation, cancellation, and stale-world
+ownership checks, and `core/games` for replay-based persistence.
+The [agent authoring guide](../core/agents/README.md) documents the contracts
+and the test-only OpenAI-compatible fixtures.
+
+An AI opponent or collaborator must change legal game decisions, not merely
+narrate local random outcomes. Conversely, a model must not become the
+authority for scores, budgets, physics, or win conditions. Provide complete
+setup, progression, success/failure, recovery and restart; no silent offline
+AI replacement. Never contact the model just because a page or preview opens.
+
+Pages remains static. Explain the user's endpoint requirement and the
+[local gateway / HTTPS connection choices](../../docs/model-connections.md).
+Persist only nonsecret connection preferences. Model keys and private
+reasoning do not belong in saved games, logs, previews, or repository content.
 
 ## Viewport workspaces
 

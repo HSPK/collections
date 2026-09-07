@@ -1,0 +1,274 @@
+.project-accord {
+  --accord-blue: #193e59;
+  --accord-ink: #16364d;
+  --accord-paper: #f3efe4;
+  --accord-line: #b9bdae;
+  --accord-red: #ba452d;
+  --workspace-paper: var(--accord-paper);
+  --agent-paper: var(--accord-paper);
+  --agent-ink: var(--accord-ink);
+  box-sizing: border-box;
+  height: 100dvh;
+  min-height: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  padding: 0 24px;
+  color: var(--accord-ink);
+  background: var(--accord-paper);
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.4;
+}
+.project-accord *, .project-accord *::before, .project-accord *::after { box-sizing: border-box; }
+.project-accord [hidden] { display: none !important; }
+.project-accord button, .project-accord input, .project-accord select { font: inherit; color: inherit; }
+.project-accord button {
+  min-height: 40px;
+  padding: 7px 12px;
+  background: transparent;
+  border: 1px solid var(--accord-line);
+  border-radius: 0;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1.3;
+  transition: background .16s, color .16s, border-color .16s;
+}
+.project-accord button:hover:not(:disabled) { background: #e2e7dd; border-color: var(--accord-blue); }
+.project-accord button:disabled { opacity: .48; cursor: not-allowed; }
+.project-accord :focus-visible { outline: 3px solid var(--accord-red); outline-offset: 3px; }
+.project-accord h1, .project-accord h2, .project-accord h3, .project-accord p { margin: 0; }
+.project-accord h1 { font-family: Georgia, "Times New Roman", serif; font-size: 42px; line-height: .94; letter-spacing: -2px; font-weight: 500; }
+.project-accord .accord-eyebrow { font: 11px/1.5 ui-monospace, "SFMono-Regular", Consolas, monospace; letter-spacing: .13em; text-transform: uppercase; }
+.project-accord .accord-masthead { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 76px; min-width: 0; }
+.project-accord .accord-identity { display: flex; align-items: center; gap: 12px; }
+.project-accord .accord-identity > svg { width: 42px; height: 50px; }
+.project-accord .accord-identity .accord-eyebrow { margin-bottom: 4px; }
+.project-accord .accord-masthead nav { display: flex; gap: 6px; align-items: center; }
+.project-accord .accord-masthead nav button { border-color: transparent; }
+.project-accord .accord-masthead nav button:last-child { border-color: var(--accord-line); }
+.project-accord .accord-workbench { display: grid; grid-template-columns: minmax(0, 1fr) 342px; min-height: 0; border-top: 1px solid var(--accord-blue); border-bottom: 1px solid var(--accord-blue); }
+.project-accord .accord-board { display: grid; grid-template-rows: auto minmax(0, 1fr) 99px auto; min-width: 0; min-height: 0; position: relative; background: #ece8da; }
+.project-accord .accord-chart-heading { min-height: 54px; padding: 10px 20px 3px; display: flex; justify-content: space-between; align-items: center; gap: 12px; z-index: 1; }
+.project-accord .accord-chart-heading strong { font-size: 14px; font-weight: 500; }
+.project-accord .accord-forecast-button { border: 0; display: flex; align-items: center; gap: 12px; padding: 4px; text-align: right; }
+.project-accord .accord-forecast-button b { font-weight: 700; font-variant-numeric: tabular-nums; }
+.project-accord .accord-spark { height: 28px; width: 64px; display: flex; align-items: end; gap: 4px; }
+.project-accord .accord-spark i { height: calc(var(--level) * 100%); width: 7px; background: #a6b7b1; }
+.project-accord .accord-spark i[data-current="true"] { background: var(--accord-red); }
+.project-accord .accord-map { position: relative; min-height: 0; min-width: 0; }
+.project-accord .accord-city-svg { display: block; width: 100%; height: 100%; }
+.project-accord .accord-city-svg text { font: 15px ui-monospace, Consolas, monospace; letter-spacing: .05em; }
+.project-accord .accord-city-svg .accord-map-caption { font-size: 23px; }
+.project-accord .accord-section-drawing { color: var(--accord-blue); fill: var(--accord-blue); }
+.project-accord .accord-block-shadow { fill: #183e59; opacity: .12; }
+.project-accord .accord-block-side { fill: #aab9ae; stroke: #23465d; stroke-width: .8; }
+.project-accord .accord-block-front { fill: #d4d8c9; stroke: #23465d; stroke-width: .8; }
+.project-accord .accord-block-roof { fill: #f2eddf; stroke: #23465d; stroke-width: .8; }
+.project-accord .accord-roof-line { stroke: #b1baaa; stroke-width: .8; fill: none; }
+.project-accord .accord-window { stroke: #27495c; stroke-width: 2.5; fill: none; opacity: .7; }
+.project-accord .accord-civic .accord-block-roof { fill: #d1dbc9; }
+.project-accord .accord-wall .accord-block-roof { fill: #bf5539; }
+.project-accord [data-wall], .project-accord [data-turbine], .project-accord [data-garden] { transition: opacity .25s; }
+.project-accord [data-active="false"] { opacity: .15; }
+.project-accord .accord-flood-contour { opacity: var(--accord-flood, 0); transition: opacity .35s; }
+.project-accord .accord-flow { animation: accord-flow 6s linear infinite; }
+.project-accord .accord-flow-slow { animation-duration: 10s; }
+@keyframes accord-flow { to { stroke-dashoffset: -108; } }
+.project-accord .accord-view-switch { position: absolute; bottom: 7px; left: 17px; display: flex; background: var(--accord-paper); }
+.project-accord .accord-view-switch button { min-height: 36px; padding: 5px 10px; }
+.project-accord .accord-view-switch button + button { border-left: 0; }
+.project-accord .accord-view-switch button[aria-pressed="true"] { background: var(--accord-blue); color: var(--accord-paper); }
+.project-accord .accord-flood-tag { position: absolute; right: 18px; bottom: 14px; font-size: 14px; background: #ece8dadb; padding: 2px 5px; }
+.project-accord [data-danger="true"], .project-accord .accord-warning { color: var(--accord-red); font-weight: 650; }
+.project-accord .accord-council { position: relative; padding-top: 17px; margin: 0 22px; min-width: 0; }
+.project-accord .accord-council-note { position: absolute; top: 0; left: 0; font: 14px ui-monospace, Consolas, monospace; }
+.project-accord .accord-council-note b { font-weight: 400; }
+.project-accord .accord-seating-arc { position: absolute; width: 86%; height: 77%; left: 7%; bottom: 0; opacity: .4; }
+.project-accord .accord-seats { position: relative; width: min(90%, 580px); margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); }
+.project-accord .accord-seat { display: grid; justify-items: center; gap: 1px; border: 0; padding: 5px 3px; background: transparent; min-width: 0; }
+.project-accord .accord-seat:nth-child(2) { transform: translateY(-9px); }
+.project-accord .accord-seat:hover:not(:disabled) { background: transparent; color: var(--accord-red); }
+.project-accord .accord-seat-seal { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--accord-paper); border: 1px solid var(--accord-blue); font-family: Georgia, serif; font-size: 21px; box-shadow: 0 4px 0 #c5cabb; }
+.project-accord .accord-seat-name { font-size: 14px; font-weight: 650; }
+.project-accord .accord-seat-vote { font: 14px ui-monospace, Consolas, monospace; text-transform: uppercase; }
+.project-accord .accord-seat[data-vote="yes"] .accord-seat-seal { color: var(--accord-paper); background: var(--accord-blue); }
+.project-accord .accord-seat[data-vote="no"] .accord-seat-seal { color: var(--accord-red); border-color: var(--accord-red); }
+.project-accord .accord-seat[data-vote="no"] .accord-seat-vote { color: var(--accord-red); }
+.project-accord .accord-ledger { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--accord-line); padding: 8px 17px; gap: 16px; background: #e4e4d7; }
+.project-accord .accord-ledger > div { min-width: 0; display: grid; gap: 1px; }
+.project-accord .accord-ledger > div > span:first-child { text-transform: capitalize; font-size: 14px; }
+.project-accord .accord-ledger strong { font: 21px/1.5 ui-monospace, Consolas, monospace; white-space: nowrap; }
+.project-accord .accord-reserve-track { height: 3px; background: #c5cec0; }
+.project-accord .accord-reserve-track i { display: block; height: 100%; background: var(--accord-blue); transition: width .25s; }
+.project-accord .accord-policy { min-width: 0; min-height: 0; display: flex; flex-direction: column; border-left: 1px solid var(--accord-blue); background: var(--accord-paper); }
+.project-accord .accord-policy-heading { flex-shrink: 0; padding: 16px 20px 10px; border-bottom: 1px solid var(--accord-line); }
+.project-accord .accord-policy-heading h2 { font: 28px/1.1 Georgia, "Times New Roman", serif; letter-spacing: -.7px; margin-top: 7px; }
+.project-accord .accord-mandate { display: flex; gap: 22px; margin-top: 10px; font-size: 14px; }
+.project-accord .accord-mandate b { font-family: ui-monospace, Consolas, monospace; }
+.project-accord .accord-policy-body { min-height: 0; flex: 1; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; padding: 15px 20px; }
+.project-accord .accord-policy-body p { margin: 0 0 12px; }
+.project-accord .accord-intro { font: 38px/1.07 Georgia, "Times New Roman", serif; letter-spacing: -1px; padding: 10px 0 9px; }
+.project-accord .accord-setup > label { display: block; margin-top: 24px; }
+.project-accord select { width: 100%; min-height: 40px; padding: 6px 27px 6px 9px; border: 1px solid var(--accord-line); border-radius: 0; background: transparent; font-size: 14px; }
+.project-accord .accord-setup [data-condition-note] { font-size: 14px; margin-top: 8px; }
+.project-accord .accord-small, .project-accord .accord-edit-hint, .project-accord .accord-pledge-label { font-size: 14px; line-height: 1.45; }
+.project-accord .accord-small { color: #48606a; }
+.project-accord .accord-allocation-title { display: flex; align-items: baseline; justify-content: space-between; gap: 5px; }
+.project-accord .accord-allocation-title h3 { font-size: 15px; font-weight: 600; }
+.project-accord .accord-allocation-title strong { font: 14px ui-monospace, Consolas, monospace; }
+.project-accord .accord-edit-hint { margin-top: 7px !important; color: #48606a; }
+.project-accord .accord-allocation { display: grid; grid-template-columns: minmax(0, 1fr) 28px; min-width: 0; gap: 3px; margin-bottom: 8px; }
+.project-accord .accord-allocation label { font-size: 14px; display: flex; align-items: center; gap: 8px; }
+.project-accord .accord-sector-number { font: 11px ui-monospace, Consolas, monospace; color: #647773; }
+.project-accord .accord-allocation output { font: 18px ui-monospace, Consolas, monospace; text-align: right; }
+.project-accord .accord-allocation input { grid-column: 1 / -1; min-width: 0; width: 100%; height: 32px; margin: 0; cursor: ew-resize; appearance: none; background: transparent; }
+.project-accord .accord-allocation input::-webkit-slider-runnable-track { height: 7px; background: linear-gradient(to right, var(--accord-blue) var(--allocation), #cdd3c4 var(--allocation)); border: 1px solid #b9c1b4; }
+.project-accord .accord-allocation input::-moz-range-track { height: 7px; background: #cdd3c4; border: 1px solid #b9c1b4; }
+.project-accord .accord-allocation input::-moz-range-progress { height: 7px; background: var(--accord-blue); }
+.project-accord .accord-allocation input::-webkit-slider-thumb { appearance: none; width: 16px; height: 25px; margin-top: -10px; border: 2px solid var(--accord-paper); border-radius: 0; background: var(--accord-red); box-shadow: 0 0 0 1px var(--accord-red); }
+.project-accord .accord-allocation input::-moz-range-thumb { width: 13px; height: 22px; border: 2px solid var(--accord-paper); border-radius: 0; background: var(--accord-red); }
+.project-accord .accord-allocation input:disabled { opacity: .55; cursor: default; }
+.project-accord .accord-pledge-label { display: block; border-top: 1px solid var(--accord-line); padding-top: 12px; margin-bottom: 5px; }
+.project-accord [data-pledge-note] { margin-top: 8px; }
+.project-accord .accord-ballot-summary { font-weight: 600; }
+.project-accord .accord-offers { display: grid; gap: 8px; margin-bottom: 10px; }
+.project-accord .accord-offer { display: grid; text-align: left; border-left: 3px solid var(--accord-red); }
+.project-accord .accord-offer strong { font-size: 17px; margin: 5px 0; font-weight: 500; }
+.project-accord .accord-pact-note { border-left: 3px solid var(--accord-blue); padding: 7px 10px; font-size: 14px; background: #e3e8dc; }
+.project-accord .accord-action-dock { flex-shrink: 0; border-top: 1px solid var(--accord-blue); padding: 10px 20px 11px; }
+.project-accord .accord-turn-budget { font: 14px/1.4 ui-monospace, Consolas, monospace; margin-bottom: 8px; }
+.project-accord [data-season-label] { font-size: 14px; letter-spacing: .02em; }
+.project-accord .accord-main-actions { display: flex; gap: 7px; }
+.project-accord .accord-primary { background: var(--accord-blue); color: var(--accord-paper); border-color: var(--accord-blue); min-height: 44px; font-weight: 600; }
+.project-accord .accord-primary:hover:not(:disabled) { background: #2d526a; color: #fff; }
+.project-accord .accord-main-actions .accord-primary { flex: 1; }
+.project-accord .accord-amend { padding: 7px 9px; }
+.project-accord .accord-notice { font-size: 14px; margin-top: 8px; max-height: 58px; min-height: 38px; overflow-y: auto; scrollbar-width: thin; line-height: 1.35; }
+.project-accord .accord-resolution-stamp { font: 12px ui-monospace, Consolas, monospace; color: var(--accord-red); letter-spacing: .08em; text-transform: uppercase; padding-top: 6px; }
+.project-accord .accord-balance-sheet { margin: 20px 0; font-size: 15px; }
+.project-accord .accord-balance-sheet div { display: flex; justify-content: space-between; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--accord-line); }
+.project-accord .accord-balance-sheet dd { margin: 0; font-family: ui-monospace, Consolas, monospace; }
+.project-accord .accord-season-stamps { display: flex; gap: 6px; }
+.project-accord .accord-season-stamps span { flex: 1; border-top: 2px solid var(--accord-blue); padding: 5px; font-family: ui-monospace, Consolas, monospace; }
+.project-accord .accord-season-stamps b { display: block; font-weight: 400; color: var(--accord-red); }
+.project-accord .accord-footer { display: flex; align-items: center; min-width: 0; min-height: 54px; padding-right: 68px; gap: 16px; }
+.project-accord .accord-footer [data-agent-host] { flex: 1; min-width: 0; }
+.project-accord .accord-footer .agent-console > button { border-radius: 0; min-height: 36px; }
+.project-accord .accord-edition { font: 11px ui-monospace, Consolas, monospace; letter-spacing: .08em; white-space: nowrap; }
+.project-accord .accord-dialog { width: min(750px, calc(100vw - 24px)); border-radius: 0; background: var(--accord-paper); font-size: 16px; }
+.project-accord .accord-dialog-content p { margin: 0 0 15px; }
+.project-accord .accord-dialog-content h3 { margin: 23px 0 10px; }
+.project-accord .accord-dialog-lede { font: 31px/1.15 Georgia, serif; }
+.project-accord .accord-dialog-content li { margin-bottom: 12px; }
+.project-accord .accord-dialog-content ol { padding-left: 23px; }
+.project-accord .accord-dialog-content table { border-collapse: collapse; width: 100%; font-size: 14px; margin: 16px 0; }
+.project-accord .accord-dialog-content th, .project-accord .accord-dialog-content td { text-align: left; vertical-align: top; border-bottom: 1px solid var(--accord-line); padding: 9px 5px; overflow-wrap: anywhere; }
+.project-accord .accord-dialog-content th { font-weight: 600; }
+.project-accord .accord-current-row { background: #dde4d7; }
+.project-accord .accord-dialog-actions { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+.project-accord .accord-minute { border-top: 2px solid var(--accord-blue); margin-top: 24px; padding-top: 8px; }
+.project-accord blockquote { margin: 25px 0; padding: 13px 18px; border-left: 3px solid var(--accord-red); background: #e7e9dd; overflow-wrap: anywhere; }
+.project-accord blockquote footer { font: 14px ui-monospace, Consolas, monospace; }
+.project-accord[data-agent-busy="true"] .accord-council { background: repeating-linear-gradient(90deg, transparent, transparent 15px, #193e5905 16px); }
+.project-accord[data-reduced-motion="true"] *, .project-accord[data-reduced-motion="true"] *::before { animation: none !important; transition: none !important; }
+@media (min-width: 1400px) {
+  .project-accord .accord-workbench { grid-template-columns: minmax(0, 1fr) 390px; }
+  .project-accord .accord-policy-body { padding: 20px 26px; }
+  .project-accord .accord-policy-heading, .project-accord .accord-action-dock { padding-left: 26px; padding-right: 26px; }
+}
+@media (max-height: 700px) and (min-width: 641px) {
+  .project-accord { padding: 0 16px; }
+  .project-accord .accord-masthead { min-height: 64px; }
+  .project-accord h1 { font-size: 34px; }
+  .project-accord .accord-identity > svg { height: 40px; }
+  .project-accord .accord-chart-heading { min-height: 49px; padding: 8px 12px 0; }
+  .project-accord .accord-board { grid-template-rows: auto minmax(0, 1fr) 91px auto; }
+  .project-accord .accord-seat-seal { width: 25px; height: 25px; font-size: 17px; }
+  .project-accord .accord-ledger { padding: 7px 12px; }
+  .project-accord .accord-ledger strong { font-size: 18px; }
+  .project-accord .accord-policy-heading { padding: 9px 15px; }
+  .project-accord .accord-policy-heading h2 { font-size: 24px; margin-top: 3px; }
+  .project-accord .accord-mandate { margin-top: 5px; }
+  .project-accord .accord-policy-body { padding: 10px 15px; }
+  .project-accord .accord-allocation { margin-bottom: 5px; gap: 0; }
+  .project-accord .accord-allocation input { height: 32px; }
+  .project-accord .accord-action-dock { padding: 7px 15px; }
+  .project-accord .accord-notice { min-height: 19px; max-height: 38px; }
+  .project-accord .accord-footer { min-height: 46px; }
+  .project-accord .accord-intro { font-size: 30px; }
+}
+@media (max-width: 950px) and (min-width: 641px) {
+  .project-accord .accord-workbench { grid-template-columns: minmax(0, 1fr) 300px; }
+  .project-accord .accord-chart-heading > div { display: none; }
+  .project-accord .accord-forecast-button { width: 100%; justify-content: space-between; text-align: left; }
+  .project-accord .accord-edition { display: none; }
+}
+@media (max-width: 640px) {
+  .project-accord { padding: 0 10px; font-size: 14px; }
+  .project-accord .accord-masthead { min-height: 56px; gap: 4px; }
+  .project-accord .accord-identity { gap: 5px; }
+  .project-accord h1 { font-size: 31px; letter-spacing: -1.5px; }
+  .project-accord .accord-identity > svg { display: none; }
+  .project-accord .accord-identity .accord-eyebrow { display: none; }
+  .project-accord .accord-masthead nav { gap: 0; }
+  .project-accord .accord-masthead nav button { padding: 5px 6px; font-size: 14px; min-height: 40px; }
+  .project-accord .accord-workbench { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(205px, 1fr) minmax(0, 1.15fr); }
+  .project-accord .accord-board { grid-template-rows: 31px minmax(0, 1fr) 52px 45px; }
+  .project-accord .accord-chart-heading { min-height: 0; padding: 0 8px; }
+  .project-accord .accord-chart-heading > div { display: none; }
+  .project-accord .accord-forecast-button { width: 100%; justify-content: space-between; min-height: 31px; font-size: 14px; }
+  .project-accord .accord-spark { height: 21px; width: 57px; }
+  .project-accord .accord-city-svg { position: absolute; inset: 0; }
+  .project-accord .accord-view-switch { bottom: 2px; left: 5px; }
+  .project-accord .accord-view-switch button { min-height: 32px; padding: 3px 7px; font-size: 14px; }
+  .project-accord .accord-flood-tag { bottom: 5px; right: 4px; font-size: 14px; }
+  .project-accord .accord-council { margin: 0 7px; padding-top: 4px; }
+  .project-accord .accord-council-note { display: none; }
+  .project-accord .accord-seats { width: 98%; }
+  .project-accord .accord-seat { grid-template-columns: 24px 1fr; column-gap: 3px; padding: 6px 2px; text-align: left; }
+  .project-accord .accord-seat-seal { width: 24px; height: 24px; font-size: 16px; grid-row: span 2; }
+  .project-accord .accord-seat-name, .project-accord .accord-seat-vote { justify-self: start; font-size: 14px; }
+  .project-accord .accord-seat:nth-child(2) { transform: translateY(-4px); }
+  .project-accord .accord-seating-arc { height: 90%; }
+  .project-accord .accord-ledger { padding: 4px 8px; gap: 7px; }
+  .project-accord .accord-ledger strong { font-size: 15px; line-height: 1.25; }
+  .project-accord .accord-ledger > div > span:first-child { font-size: 14px; line-height: 1.1; }
+  .project-accord .accord-reserve-track { height: 2px; }
+  .project-accord .accord-policy { border-left: 0; border-top: 1px solid var(--accord-blue); }
+  .project-accord .accord-policy-heading { padding: 7px 9px; position: relative; }
+  .project-accord .accord-policy-heading .accord-eyebrow { font-size: 14px; max-width: 73%; }
+  .project-accord .accord-policy-heading h2 { font-size: 21px; line-height: 1.1; margin-top: 2px; max-width: 74%; }
+  .project-accord .accord-mandate { position: absolute; top: 7px; right: 7px; margin: 0; display: grid; gap: 0; font-size: 14px; text-align: right; }
+  .project-accord .accord-policy-body { padding: 7px 9px; }
+  .project-accord .accord-allocation-title { font-size: 14px; }
+  .project-accord .accord-allocation-title h3 { font-size: 14px; }
+  .project-accord .accord-edit-hint { margin: 2px 0 6px !important; }
+  .project-accord .accord-allocation-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px 14px; }
+  .project-accord .accord-allocation { margin-bottom: 0; gap: 0; grid-template-columns: minmax(0, 1fr) 16px; }
+  .project-accord .accord-allocation label { gap: 0; font-size: 14px; }
+  .project-accord .accord-sector-number { display: none; }
+  .project-accord .accord-allocation output { font-size: 16px; }
+  .project-accord .accord-allocation input { height: 32px; }
+  .project-accord .accord-pledge-label { margin-top: 7px; padding-top: 7px; }
+  .project-accord .accord-action-dock { padding: 6px 9px; }
+  .project-accord .accord-turn-budget { font-size: 14px; margin-bottom: 5px; }
+  .project-accord .accord-primary { min-height: 42px; }
+  .project-accord .accord-notice { min-height: 19px; max-height: 38px; margin-top: 5px; font-size: 14px; }
+  .project-accord .accord-intro { display: none; }
+  .project-accord .accord-policy-body .accord-setup > p { margin-bottom: 8px; }
+  .project-accord .accord-setup > label { margin-top: 7px; }
+  .project-accord .accord-footer { min-height: 52px; padding-right: 46px; }
+  .project-accord .accord-footer .agent-console { gap: 4px; }
+  .project-accord .accord-footer .agent-console > button { padding: 5px 7px; min-height: 36px; }
+  .project-accord .accord-footer .agent-console > p { font-size: 14px; }
+  .project-accord .accord-edition { display: none; }
+  .project-accord .accord-dialog-content table { font-size: 14px; }
+  .project-accord .accord-dialog-content th, .project-accord .accord-dialog-content td { padding: 7px 3px; }
+  .project-accord .accord-dialog-content h3 { font-size: 21px; }
+  .project-accord .accord-dialog-lede { font-size: 25px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .project-accord *, .project-accord *::before { animation: none !important; transition: none !important; }
+}

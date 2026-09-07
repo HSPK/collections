@@ -1,0 +1,172 @@
+.project-chorus {
+  --chorus-paper: #f4f0e5;
+  --chorus-ink: #252e35;
+  --workspace-paper: #f4f0e5;
+  --agent-paper: #f4f0e5;
+  --agent-ink: #252e35;
+  box-sizing: border-box;
+  height: 100dvh;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto auto minmax(110px, 1fr) auto auto auto;
+  gap: 0;
+  padding: 18px 30px 12px;
+  color: var(--chorus-ink);
+  background: var(--chorus-paper);
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+}
+.project-chorus *, .project-chorus *::before, .project-chorus *::after { box-sizing: border-box; }
+.project-chorus button, .project-chorus select {
+  font: inherit;
+  color: inherit;
+  border: 1px solid #28323a30;
+  border-radius: 3px;
+  background: transparent;
+}
+.project-chorus button { min-height: 40px; padding: 6px 12px; cursor: pointer; transition: background .2s, border-color .2s, color .2s; }
+.project-chorus button:hover:not(:disabled) { background: #e7e2d4; border-color: #28323a80; }
+.project-chorus button:disabled { opacity: .46; cursor: default; }
+.project-chorus :focus-visible { outline: 2px solid #244bce; outline-offset: 3px; }
+.project-chorus button[aria-pressed="true"] { border-color: #244bce; background: #244bce0b; }
+.project-chorus .chorus-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-bottom: 12px; }
+.project-chorus .chorus-wordmark { display: flex; align-items: baseline; gap: 22px; }
+.project-chorus h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; font-size: clamp(38px, 4.3vw, 65px); letter-spacing: -.065em; line-height: 1; margin: 0; }
+.project-chorus .chorus-wordmark > span { font-size: 11px; letter-spacing: .19em; }
+.project-chorus nav { display: flex; gap: 6px; }
+.project-chorus .chorus-campaign { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #28323a60; padding: 8px 0; }
+.project-chorus .chorus-campaign p { margin: 0; font-weight: 600; }
+.project-chorus .chorus-resources { display: flex; gap: 22px; font-variant-numeric: tabular-nums; }
+.project-chorus .chorus-resources span:first-child::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 7px; background: #d65e49; }
+.project-chorus .chorus-field { position: relative; min-height: 0; min-width: 0; overflow: hidden; display: grid; grid-template-rows: minmax(0, 1fr) auto auto auto; }
+.project-chorus .chorus-field-readout { text-align: center; font-size: 14px; line-height: 1.3; }
+.project-chorus .chorus-reserve-labels { display: flex; justify-content: space-around; font-size: 14px; padding: 3px 0; font-variant-numeric: tabular-nums; }
+.project-chorus .chorus-field[data-compact="true"] .chorus-stock-label,
+.project-chorus .chorus-field[data-compact="true"] .chorus-body-name { display: none; }
+.project-chorus .chorus-field[data-compact="false"] .chorus-reserve-labels { display: none; }
+.project-chorus .chorus-field-svg { display: block; width: 100%; height: 100%; min-height: 0; overflow: visible; }
+.project-chorus .chorus-floor { opacity: .2; }
+.project-chorus .chorus-wave-lines { opacity: .25; stroke-width: .9; }
+.project-chorus .chorus-body { cursor: pointer; transform-origin: center; transition: opacity .3s; }
+.project-chorus .chorus-body:hover { opacity: .6; }
+.project-chorus .chorus-body:focus-visible { outline-offset: 5px; }
+.project-chorus .chorus-field-label { font: 11px "Helvetica Neue", sans-serif; letter-spacing: .13em; fill: #65706e; }
+.project-chorus .chorus-incoming-label { font: 12px "Helvetica Neue", sans-serif; letter-spacing: .18em; fill: #65706e; }
+.project-chorus .chorus-signal-label { font: 16px "Helvetica Neue", sans-serif; letter-spacing: .035em; fill: #252e35; }
+.project-chorus .chorus-body-name { font: 13px "Helvetica Neue", sans-serif; letter-spacing: .16em; fill: #252e35; }
+.project-chorus .chorus-stock-label { font: 16px "Helvetica Neue", sans-serif; fill: #252e35; }
+.project-chorus .chorus-field-caption { min-height: 24px; text-align: center; font-size: 14px; padding: 3px 8px 6px; }
+.project-chorus .chorus-composer { border-top: 1px solid #28323a60; border-bottom: 1px solid #28323a60; padding: 10px 0 12px; }
+.project-chorus .chorus-draft-heading { display: flex; gap: 20px; align-items: baseline; margin-bottom: 10px; }
+.project-chorus .chorus-draft-heading > span { font-size: 11px; letter-spacing: .14em; white-space: nowrap; }
+.project-chorus .chorus-draft-heading output { font-size: 14px; color: #535f62; }
+.project-chorus .chorus-instrument { display: grid; grid-template-columns: minmax(126px, 1fr) minmax(165px, 1.2fr) 126px minmax(200px, 1.6fr) auto; grid-template-areas: "slots palette length phase send" "edit edit length phase send"; align-items: end; gap: 8px 20px; }
+.project-chorus .chorus-slots { grid-area: slots; display: flex; align-items: center; gap: 8px; }
+.project-chorus .chorus-slots button { position: relative; flex: 1; display: flex; align-items: center; justify-content: center; min-width: 44px; height: 54px; padding: 5px; }
+.project-chorus .chorus-slots button > span { position: absolute; left: 5px; top: 3px; font-size: 11px; color: #65706e; }
+.project-chorus .chorus-slots i { font-style: normal; display: flex; }
+.project-chorus .chorus-empty { font-size: 24px; color: #939790; font-weight: 200; }
+.project-chorus .chorus-order-arrow { color: #65706e; }
+.project-chorus .chorus-palette { grid-area: palette; display: flex; gap: 4px; }
+.project-chorus .chorus-palette button { display: grid; justify-items: center; padding: 3px 6px; flex: 1; }
+.project-chorus .chorus-palette span { font-size: 14px; }
+.project-chorus fieldset { margin: 0; border: 0; padding: 0; min-width: 0; align-self: stretch; display: flex; flex-direction: column; justify-content: center; }
+.project-chorus legend { padding: 0; font-size: 14px; margin-bottom: 6px; }
+.project-chorus fieldset > div { display: flex; gap: 4px; }
+.project-chorus fieldset button { flex: 1; padding: 6px 8px; }
+.project-chorus .chorus-duration { grid-area: length; }
+.project-chorus .chorus-phase { grid-area: phase; }
+.project-chorus .chorus-phase span { display: block; font-size: 23px; font-family: Georgia, serif; line-height: 1; }
+.project-chorus .chorus-edit { grid-area: edit; display: flex; gap: 5px; }
+.project-chorus .chorus-edit button { flex: 1; min-height: 34px; padding: 3px 10px; border-color: transparent; color: #535f62; }
+.project-chorus .chorus-transmit { grid-area: send; align-self: stretch; background: #244bce; color: #fff; border-color: #244bce; padding: 12px 22px; min-width: 150px; font-size: 16px; }
+.project-chorus .chorus-transmit:hover:not(:disabled) { background: #193aaf; color: #fff; }
+.project-chorus .chorus-feedback { display: flex; min-height: 64px; align-items: center; gap: 20px; padding-right: 64px; }
+.project-chorus .chorus-feedback p { margin: 7px 0; flex: 1; font-size: 14px; }
+.project-chorus .chorus-feedback button { flex-shrink: 0; }
+.project-chorus .chorus-footer { display: flex; gap: 24px; min-width: 0; padding-right: 155px; align-items: center; }
+.project-chorus .chorus-footer .agent-console { flex: 1; }
+.project-chorus .chorus-footer-actions { display: flex; gap: 5px; }
+.project-chorus .chorus-footer-actions button { padding: 5px 8px; min-height: 36px; white-space: nowrap; }
+.project-chorus .chorus-dialog { --workspace-paper: #f4f0e5; color: #252e35; font: 16px/1.55 "Helvetica Neue", Helvetica, Arial, sans-serif; }
+.project-chorus .chorus-dialog h3 { font-size: 16px; margin: 24px 0 8px; }
+.project-chorus .chorus-guide-lede { font: 32px/1.15 Georgia, serif; letter-spacing: -.03em; }
+.project-chorus .chorus-lexicon-entry { display: grid; grid-template-columns: 48px 1fr auto; align-items: center; gap: 8px 14px; padding: 15px 0; border-bottom: 1px solid #28323a30; }
+.project-chorus .chorus-lexicon-entry label { display: grid; grid-template-columns: 55px 1fr; align-items: center; gap: 6px; }
+.project-chorus .chorus-lexicon-entry select { min-height: 44px; padding: 5px; min-width: 0; font-size: 16px; }
+.project-chorus .chorus-lexicon-entry p { grid-column: 2 / -1; margin: 0; font-size: 14px; }
+.project-chorus .chorus-evidence { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #28323a20; }
+.project-chorus .chorus-evidence svg { flex-shrink: 0; }
+.project-chorus .chorus-notes ol { padding-left: 20px; }
+.project-chorus .chorus-notes li { padding-bottom: 12px; }
+.project-chorus [data-phase="won"] .chorus-wave-lines { opacity: .7; }
+@media (min-width: 1500px) {
+  .project-chorus { padding-inline: max(30px, calc((100vw - 1450px) / 2)); }
+}
+@media (max-width: 1050px) {
+  .project-chorus { padding: 12px 18px 10px; }
+  .project-chorus .chorus-wordmark > span { display: none; }
+  .project-chorus .chorus-instrument { grid-template-columns: 130px 165px 112px 1fr 140px; gap: 7px 10px; }
+  .project-chorus .chorus-transmit { min-width: 0; padding: 10px; }
+  .project-chorus .chorus-phase button { padding-inline: 4px; }
+  .project-chorus .chorus-footer { flex-wrap: wrap; gap: 5px; }
+  .project-chorus .chorus-footer .agent-console { flex-basis: 100%; }
+}
+@media (max-width: 700px) {
+  .project-chorus { padding: 10px 12px 8px; grid-template-rows: auto auto minmax(105px, 1fr) auto auto auto; }
+  .project-chorus .chorus-header { padding-bottom: 7px; }
+  .project-chorus h1 { font-size: 41px; }
+  .project-chorus nav { gap: 4px; }
+  .project-chorus nav button { padding: 5px 9px; }
+  .project-chorus .chorus-campaign { padding: 5px 0; }
+  .project-chorus .chorus-resources { gap: 10px; }
+  .project-chorus .chorus-resources span:first-child::before { display: none; }
+  .project-chorus .chorus-field-svg { min-height: 0; }
+  .project-chorus .chorus-field-caption { max-height: 44px; overflow: auto; line-height: 1.35; padding: 1px 0 4px; }
+  .project-chorus .chorus-draft-heading { margin-bottom: 6px; gap: 6px; }
+  .project-chorus .chorus-draft-heading > span { display: none; }
+  .project-chorus .chorus-draft-heading output { white-space: nowrap; overflow: auto; max-width: 100%; }
+  .project-chorus .chorus-composer { padding: 6px 0; }
+  .project-chorus .chorus-instrument { grid-template-columns: minmax(110px, 1fr) minmax(145px, 1.35fr); grid-template-areas: "slots palette" "length phase" "edit send"; gap: 5px 10px; }
+  .project-chorus .chorus-slots { gap: 5px; }
+  .project-chorus .chorus-slots button { height: 52px; }
+  .project-chorus .chorus-palette button { padding: 1px 3px; }
+  .project-chorus legend { margin-bottom: 2px; }
+  .project-chorus fieldset button { min-height: 44px; padding: 4px; }
+  .project-chorus .chorus-phase span { display: inline; font-size: 17px; }
+  .project-chorus .chorus-phase button { font-size: 14px; white-space: nowrap; }
+  .project-chorus .chorus-edit { gap: 0; }
+  .project-chorus .chorus-edit button { padding: 4px 3px; min-width: 0; min-height: 40px; }
+  .project-chorus .chorus-transmit { min-height: 40px; padding: 5px; font-size: 15px; }
+  .project-chorus .chorus-feedback { min-height: 58px; max-height: 74px; gap: 9px; padding: 4px 0; }
+  .project-chorus .chorus-feedback p { max-height: 63px; overflow: auto; margin: 0; }
+  .project-chorus .chorus-feedback button { max-width: 71px; padding: 4px 8px; line-height: 1.2; }
+  .project-chorus .chorus-footer { padding-right: 64px; gap: 5px; }
+  .project-chorus .chorus-footer-actions { padding-right: 0; gap: 4px; }
+  .project-chorus .chorus-footer-actions button { padding-inline: 6px; font-size: 14px; }
+  .project-chorus .chorus-field-label { display: none; }
+}
+@media (max-height: 540px) and (min-width: 701px) {
+  .project-chorus { padding: 8px 16px; grid-template-rows: auto auto minmax(90px, 1fr) auto auto auto; }
+  .project-chorus h1 { font-size: 36px; }
+  .project-chorus .chorus-header { padding-bottom: 3px; }
+  .project-chorus .chorus-campaign { padding: 3px 0; }
+  .project-chorus .chorus-instrument { grid-template-columns: 108px 140px 105px 1fr 124px; gap: 4px 9px; }
+  .project-chorus .chorus-composer { padding: 4px 0; }
+  .project-chorus .chorus-draft-heading { margin-bottom: 3px; }
+  .project-chorus .chorus-slots button { height: 44px; }
+  .project-chorus .chorus-edit button { min-height: 28px; }
+  .project-chorus .chorus-feedback { min-height: 42px; max-height: 50px; padding-right: 64px; }
+  .project-chorus .chorus-feedback p { max-height: 42px; overflow: auto; margin: 2px 0; }
+  .project-chorus .chorus-footer { flex-wrap: nowrap; padding-right: 128px; gap: 8px; }
+  .project-chorus .chorus-footer .agent-console { flex-basis: auto; }
+  .project-chorus .chorus-footer-actions { gap: 3px; }
+  .project-chorus .chorus-footer-actions button { padding-inline: 4px; }
+  .project-chorus .chorus-field-caption { max-height: 22px; overflow: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .project-chorus *, .project-chorus *::before, .project-chorus *::after { transition: none !important; animation: none !important; }
+}

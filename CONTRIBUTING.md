@@ -56,6 +56,29 @@ presets, models, rendering, and UI separated when doing so makes the
 website easier to extend. Use `src/core` helpers rather than copying
 browser lifecycle, storage, download, or audio workarounds.
 
+### Model-powered games
+
+Agent games are welcome too. Set `"runtime": "openai-compatible"` in the
+manifest so the library, search, and standalone metadata disclose the
+requirement before someone plays. Omitted runtime means local; do not label a
+local generator as a hosted model.
+
+Use the [shared agent and replay contracts](src/core/agents/README.md), not
+another hand-written API client. Keep model roles and tool schemas separate
+from pure, authoritative game rules and rendering. Validate every action's
+IDs, phases, budgets, and legality before an atomic revision-checked commit.
+Model prose must not decide scores or execute code. API failure must leave a
+recoverable, honest state, not silently substitute a scripted opponent.
+
+Provide a complete game loop, readable model-required setup, a playable
+ending and restart, deterministic native-tool fixtures, and cancellation and
+replay coverage. No external model requests in CI. Document the exact
+observations sent and meaningful agent decisions. Keys belong in a
+user-controlled server-side gateway, or optional browser memory only; never
+in source, URLs, storage, replays, screenshots, or fixture recordings.
+GitHub Pages does not run a backend. Explain a supported
+[connection path](docs/model-connections.md), including CORS and billing limits.
+
 Read [the authoring guide](src/projects/README.md) for the manifest and
 `mount(context)` contract. `format` is always `page`. Styles should be
 scoped to `.project-my-idea`; do not restyle the index or other websites.
