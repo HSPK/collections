@@ -21,7 +21,19 @@ import { ObservationClock } from './clock';
 import { createTimeAxis } from './time-axis';
 import { markup } from './ui';
 
-const number = (n: number, digits = 1) => n.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+const numberFormats = new Map<number, Intl.NumberFormat>();
+const number = (n: number, digits = 1) => {
+  let format = numberFormats.get(digits);
+  if (!format) {
+    format = new Intl.NumberFormat('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+    numberFormats.set(digits, format);
+  }
+  return format.format(n);
+};
+const sameSite = (a: Site, b: Site) => a.name === b.name && a.latitude === b.latitude &&
+  a.longitude === b.longitude && a.elevation === b.elevation;
+const altitudeLabel = (value: number) => `${value < 0 ? '' : '+'}${number(value, 2)}°`;
+const horizonLabels = { above: 'Above horizon', horizon: 'Horizon crossing', below: 'Below horizon' };
 const titleCase = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 const messageOf = (error: unknown) => error instanceof Error ? error.message : String(error);
 const aborted = (error: unknown) => error instanceof DOMException && error.name === 'AbortError';
@@ -35,7 +47,10 @@ export async function mount(context: ProjectContext): Promise<ProjectInstance> {
   page.root.setAttribute('aria-labelledby', 'helios-title');
   page.root.setAttribute('aria-busy', 'true');
   const get = <T extends Element>(selector: string) => query<T>(page.root, selector);
-  const text = (selector: string, value: string) => { get<HTMLElement>(selector).textContent = value; };
+  const text = (selector: string, value: string) => {
+    const element = get<HTMLElement>(selector);
+    if (element.textContent !== value) element.textContent = value;
+  };
   function report(message: string, error = false) {
     if (page.signal.aborted) return;
     const status = get<HTMLElement>('[data-h-status]');
@@ -74,6 +89,8 @@ export async function mount(context: ProjectContext): Promise<ProjectInstance> {
   const timeDialog = get<HTMLDialogElement>('[data-h-time-dialog]');
   const dockLayout = window.matchMedia('(min-width: 1000px) and (min-height: 600px)');
   let instrument: Instrument = 'eclipse';
+  let skyInstrument: Instrument = instrument;
+  let detailBody: BodyName | undefined, detailTime: number | undefined;
   let recordJSON = '', recordLink = '', recordDay = '';
   function fail(error: unknown) {
     if (aborted(error) || page.signal.aborted) return;
@@ -90,12 +107,17 @@ export async function mount(context: ProjectContext): Promise<ProjectInstance> {
     get<HTMLButtonElement>(`[data-h-action="${name}"]`).addEventListener('click', action(callback), { signal: page.signal });
   function invalidate() { dirty = true; loop?.requestRender(); }
   function finishDockAction() { if (!dockLayout.matches && dock.open) dock.close(); }
-  function showDock(panel: Instrument) {
+  function selectInstrument(panel: Instrument) {
     instrument = panel;
     for (const element of page.root.querySelectorAll<HTMLElement>('[data-h-instrument]')) element.hidden = element.dataset.hInstrument !== panel;
     for (const button of page.root.querySelectorAll<HTMLButtonElement>('[data-h-panel]')) button.setAttribute('aria-pressed', String(button.dataset.hPanel === panel));
+    page.root.dataset.instrument = panel;
+  }
+  function showDock(panel: Instrument) {
+    selectInstrument(panel);
+    if (state.view === 'sky' || panel !== 'observer') skyInstrument = panel;
     if (!dock.open) { if (dockLayout.matches) dock.show(); else dock.showModal(); }
-    page.root.dataset.instrument = panel; invalidate();
+    invalidate();
   }
   function adaptDock() {
     if (dock.open) dock.close();
@@ -107,6 +129,7 @@ export async function mount(context: ProjectContext): Promise<ProjectInstance> {
     for (const other of [timeDialog, keepDialog, notesDialog]) if (other !== dialog && other.open) other.close();
     if (!dialog.open) dialog.showModal();
   }
+  selectInstrument(state.view === 'sky' ? skyInstrument : 'observer');
   if (dockLayout.matches) {
     dock.show();
     if (document.activeElement instanceof HTMLElement && dock.contains(document.activeElement)) document.activeElement.blur();
@@ -125,7 +148,7 @@ export async function mount(context: ProjectContext): Promise<ProjectInstance> {
   page.onCleanup(map.destroy);
   let scene: ReturnType<typeof createRenderer>;
   try { scene = createRenderer({
-    host: get('[data-h-host]'), land, signal: page.signal, invalidate,
+    host: get('[data-h-host]'), zoomTarget: get<HTMLElement>('.h-stage'), land, signal: page.signal, invalidate,
     navigate(dx, dy, zoom) {
       action(() => {
         const next = history.state;
@@ -154,20 +177,28 @@ export async function mount(context: ProjectContext): Promise<ProjectInstance> {
   function chooseBody(name: BodyName) {
     apply({ ...history.state, body: name, view: state.view === 'sky' ? 'planet' : state.view });
     finishDockAction();
-    report(`${name} selected. Camera and body follow the physical ephemeris; clock mode is unchanged.`);
+    report(`${name} selected.`);
   }
   function setView(view: View) {
     apply({ ...history.state, view }); finishDockAction();
-    report(view === 'sky' ? 'Earth surface: topocentric disks, local-up orientation, opaque geometric horizon.' :
-      view === 'planet' ? 'A body-centered orbital reference view, not a surface observation.' :
-        'Geometric ephemeris positions. Overview distances are compressed and body radii enlarged.');
+    report(view === 'sky' ? 'Earth sky. Select a location and track the Sun, Moon, or horizon.' :
+      'Scroll to zoom, drag to orbit. Choose a world from the selector or its label.');
   }
   function apply(next: StudyState, remember = true, findEvent = true, automatic = false) {
-    if (!automatic && clock.mode !== 'manual') next = { ...next, time: clock.sample(Date.now()) };
-    const snapshot = observe(next.time, next.site);
+    // Camera-only edits use the held clock sample; timers own Live/Playback cadence.
+    if (!automatic && clock.mode !== 'manual' &&
+        (next.time !== state.time || !sameSite(next.site, state.site) || next.rate !== state.rate))
+      next = { ...next, time: clock.sample(Date.now()) };
+    const snapshot = next.time === observation.time && sameSite(next.site, observation.site) ?
+      observation : observe(next.time, next.site);
     const positions = next.time === state.time ? bodies : systemAt(next.time);
+    const previousView = state.view;
     if (automatic) history.advanceTime(next.time); else history.commit(next, remember);
     state = history.state; observation = snapshot; bodies = positions;
+    if (state.view !== previousView) {
+      if (previousView === 'sky') skyInstrument = instrument;
+      selectInstrument(state.view === 'sky' ? skyInstrument : 'observer');
+    }
     if (clock.mode === 'manual') clock.hold(state.time);
     const key = eventKey(state.time, state.site);
     if (key !== currentKey) {
@@ -213,7 +244,7 @@ export async function mount(context: ProjectContext): Promise<ProjectInstance> {
       contacts.append(line); return;
     }
     const duration = current.centralDuration;
-    text('[data-h-event-kind]', `${titleCase(current.kind)} event · ${current.site.name}`);
+    text('[data-h-event-kind]', `${titleCase(current.kind)} event`);
     text('[data-h-event-description]', duration === null ? 'Partial contacts at this observer. Choose a contact or scrub.' :
       `${current.kind === 'total' ? 'Totality' : 'Annularity'}: ${Math.floor(duration / 60)}m ${Math.round(duration % 60)}s in the library shadow model.`);
     for (const contact of current.contacts) {
@@ -242,18 +273,22 @@ export async function mount(context: ProjectContext): Promise<ProjectInstance> {
     for (const button of page.root.querySelectorAll<HTMLButtonElement>('[data-h-view]')) button.setAttribute('aria-pressed', String(button.dataset.hView === s.view));
     get<HTMLElement>('.h-sky-controls').hidden = !sky; get<HTMLElement>('.h-planet-controls').hidden = sky;
     get<HTMLElement>('.h-sky-quick').hidden = !sky; get<HTMLElement>('.h-world-quick').hidden = sky;
+    get<HTMLElement>('[data-h-sky-summary]').hidden = !sky;
+    get<HTMLElement>('[data-h-title]').hidden = sky;
+    get<HTMLElement>('[data-h-sky-altitudes]').hidden = !sky;
+    get<HTMLElement>('[data-h-world-measures]').hidden = sky;
+    get<HTMLSelectElement>('#h-camera-select').hidden = s.view !== 'planet';
     get<HTMLElement>('[data-h-optics]').hidden = !sky;
     get<SVGElement>('[data-h-leaders]').style.display = sky ? 'none' : '';
     get<HTMLElement>('[data-h-horizon-fields]').hidden = s.track !== 'horizon';
-    for (const button of page.root.querySelectorAll<HTMLButtonElement>('[data-h-track]')) button.setAttribute('aria-pressed', String(button.dataset.hTrack === s.track));
-    for (const button of page.root.querySelectorAll<HTMLButtonElement>('[data-h-camera]')) button.setAttribute('aria-pressed', String(button.dataset.hCamera === s.planetCamera && s.view === 'planet'));
     const updateInput = (selector: string, value: string) => {
       const input = get<HTMLInputElement | HTMLSelectElement>(selector);
-      if (document.activeElement !== input) input.value = value;
+      if (document.activeElement !== input && input.value !== value) input.value = value;
     };
     updateInput('#h-utc', utcInput(s.time));
     updateInput('#h-latitude', String(s.site.latitude)); updateInput('#h-longitude', String(s.site.longitude)); updateInput('#h-elevation', String(s.site.elevation));
-    const selectedSite = SITES.findIndex(site => site.latitude === s.site.latitude && site.longitude === s.site.longitude && site.elevation === s.site.elevation);
+    const selectedSite = SITES.findIndex(site => sameSite(site, s.site));
+    text('#h-site option[value="custom"]', selectedSite < 0 ? s.site.name : 'Custom observer');
     updateInput('#h-site', selectedSite < 0 ? 'custom' : String(selectedSite));
     updateInput('#h-body', s.body); updateInput('#h-track-select', s.track); updateInput('#h-camera-select', s.planetCamera);
     updateInput('#h-fov', String(Number(s.fov.toFixed(3))));
@@ -268,42 +303,48 @@ export async function mount(context: ProjectContext): Promise<ProjectInstance> {
     get<HTMLTimeElement>('[data-h-utc-display]').dateTime = new Date(s.time).toISOString();
     get('[data-h-action="live"]').setAttribute('aria-pressed', String(clock.mode === 'live'));
     const play = get<HTMLButtonElement>('[data-h-action="play"]');
-    play.textContent = playing ? 'Ⅱ Pause' : '▶ Run'; play.setAttribute('aria-label', playing ? 'Pause time' : 'Run time');
+    const playLabel = playing ? 'Ⅱ Pause' : '▶ Run';
+    if (play.textContent !== playLabel) play.textContent = playLabel;
+    play.setAttribute('aria-label', playing ? 'Pause time' : 'Run time');
     const stepValue = get<HTMLSelectElement>('#h-step').value;
     text('[data-h-step-display]', stepValue === '1' ? '1s' : stepValue === '60' ? '1m' : stepValue === '3600' ? '1h' : '1d');
-    text('[data-h-mode-label]', sky ? 'Topocentric · no refraction' : 'Geometric ephemeris · display scale');
-    text('[data-h-kicker]', sky ? 'EARTH / TOPOCENTRIC SKY' : s.view === 'system' ? 'J2000 ECLIPTIC / ORBITAL ATLAS' : `${s.body.toUpperCase()} / ${s.planetCamera === 'orbit' ? 'LOCAL ORBIT' : 'SYSTEM FOLLOW'}`);
-    text('[data-h-title]', sky ? s.site.name : s.view === 'system' ? 'The architecture of sunlight.' : s.body);
-    text('[data-h-subtitle]', sky ? s.track === 'Moon' ? 'One sphere. Light from the actual Sun.' : s.track === 'horizon' ? 'North is 0°; east is 90°. The geometric horizon is opaque.' : 'The Moon’s shadow, seen from where you stand.' : s.view === 'system' ? 'Sun, eight planets, and our Moon. Select a world to travel with it.' : b.subtitle);
-    text('[data-h-frame-label]', sky ? `${number(s.fov, 2)}° VERTICAL / TRUE ANGULAR` : s.view === 'system' || s.planetCamera === 'ride' ? 'COMPRESSED DISTANCE / ENLARGED BODIES' : 'REFERENCE SPHERE / IAU POLE');
+    text('[data-h-open="observer"]', sky ? 'Observe' : 'Details');
+    text('[data-h-panel="observer"]', sky ? 'Place' : 'Details');
+    text('[data-h-kicker]', sky ? 'True angular sky' : s.view === 'system' || s.planetCamera === 'ride' ?
+      'Schematic · not to scale' : 'Body-centered reference');
+    if (!sky) text('[data-h-title]', s.view === 'system' ? 'Solar system' : s.body);
     const target = s.track === 'Moon' ? observation.moon : observation.sun;
     if (sky) {
       const eclipse = observation.eclipse;
-      text('[data-h-instant-label]', s.track === 'Moon' ? 'TOPOCENTRIC LUNAR ILLUMINATION' : 'INSTANTANEOUS ALIGNMENT');
       text('[data-h-instant]', s.track === 'Moon' ? observation.phase.name : observation.sun.visibility === 'below' ? 'Below the horizon' : eclipse.kind === 'none' ? 'No solar overlap' : !eclipse.visible ? 'Overlap below horizon' : `${titleCase(eclipse.kind)} eclipse`);
-      text('[data-h-instant-detail]', s.track === 'Moon' ? `${number(observation.phase.fraction * 100)}% illuminated · Moon ${observation.moon.visibility === 'below' ? 'below the horizon' : observation.moon.visibility === 'horizon' ? 'crosses the horizon' : 'above the horizon'}` :
-        `${number(eclipse.obscuration * 100, 2)}% obscured · ${observation.sun.visibility === 'below' || eclipse.kind !== 'none' && !eclipse.visible ? `not visible (${eclipse.kind} geometry)` : observation.sun.visibility === 'horizon' ? 'horizon-clipped' : eclipse.kind === 'total' ? 'illustrative corona' : 'Sun above the horizon'}`);
-      text('[data-h-measure-one]', `${s.track === 'Moon' ? 'Moon' : 'Sun'} ALT ${number(target.altitude, 2)}°`);
-      text('[data-h-measure-two]', `AZ ${number(target.azimuth, 2)}° · N→E`);
-      text('[data-h-measure-three]', `MOON ${number(observation.moon.distanceKm, 0)} km`);
+      text('[data-h-instant-detail]', s.track === 'Moon' ? `${number(observation.phase.fraction * 100)}% illuminated` :
+        `${number(eclipse.obscuration * 100, 2)}% disk coverage${eclipse.kind === 'total' && observation.sun.visibility === 'above' ? ' · illustrative corona' : ''}`);
+      for (const [name, body] of [['sun', observation.sun], ['moon', observation.moon]] as const) {
+        text(`[data-h-${name}-altitude]`, altitudeLabel(body.altitude));
+        text(`[data-h-${name}-visibility]`, horizonLabels[body.visibility]);
+        get<HTMLElement>(`[data-h-altitude="${name === 'sun' ? 'Sun' : 'Moon'}"]`).dataset.visibility = body.visibility;
+      }
+      text('[data-h-azimuth-reading]', `Look azimuth ${number(s.track === 'horizon' ? s.skyAzimuth : target.azimuth, 2)}° · north 0°, east 90°`);
       const scaleDegrees = s.fov <= 3 ? 1 / 6 : s.fov <= 15 ? 1 : s.fov <= 60 ? 5 : 10;
       text('[data-h-scale]', scaleDegrees < 1 ? '10′' : `${scaleDegrees}°`);
     } else {
       const position = bodies.find(body => body.name === s.body);
       if (!position) throw new Error('Selected planet has no physical position.');
-      text('[data-h-instant-label]', s.view === 'system' ? 'SELECTED WORLD' : 'CAMERA REFERENCE');
-      text('[data-h-instant]', s.view === 'system' ? s.body : s.planetCamera === 'orbit' ? 'Traveling with this world.' : `Following ${s.body}`);
-      text('[data-h-instant-detail]', s.view === 'system' ? 'Choose Planet for a local view.' : b.reference);
-      text('[data-h-measure-one]', `SUN DISTANCE ${number(position.distanceAu, 4)} AU`); text('[data-h-measure-two]', `RADIUS ${number(b.radiusKm, 0)} km`); text('[data-h-measure-three]', 'GEOMETRIC / NOT TO SCALE');
+      text('[data-h-measure-one]', `Sun distance ${number(position.distanceAu, 4)} AU`);
+      text('[data-h-measure-two]', `Mean radius ${number(b.radiusKm, 0)} km`);
     }
-    const position = bodies.find(body => body.name === s.body);
-    text('[data-h-body-deck]', b.story); text('[data-h-reference]', b.reference);
-    text('[data-h-planet-distance]', `${number(position?.distanceAu ?? 0, 4)} AU`); text('[data-h-planet-radius]', `${number(b.radiusKm, 0)} km`);
-    const solarDiameter = sunAngularDiameterFrom(s.body, s.time);
-    text('[data-h-planet-sun]', solarDiameter === null ? 'At the source' : `${number(solarDiameter, 4)}°`);
+    if (!sky && (detailBody !== s.body || detailTime !== s.time)) {
+      text('[data-h-body-deck]', b.story); text('[data-h-reference]', b.reference);
+      const solarDiameter = sunAngularDiameterFrom(s.body, s.time);
+      text('[data-h-planet-sun]', solarDiameter === null ? 'At the source' : `${number(solarDiameter, 4)}°`);
+      detailBody = s.body; detailTime = s.time;
+    }
+    get<HTMLElement>('.h-phase-heading').hidden = sky && s.track === 'Moon';
+    get<HTMLElement>('[data-h-phase-observer]').hidden = sky;
     text('[data-h-phase-name]', observation.phase.name); text('[data-h-phase-observer]', `Earth observer · ${s.site.name}`);
     text('[data-h-angular-sizes]', `Diameters: Sun ${number(observation.sun.radius / DEG * 120, 2)}′ · Moon ${number(observation.moon.radius / DEG * 120, 2)}′`);
     text('[data-h-phase-fraction]', `${number(observation.phase.fraction * 100)}% lit`); text('[data-h-phase-angle]', `${number(observation.phase.angle, 2)}°`);
+    text('[data-h-moon-distance]', `Distance ${number(observation.moon.distanceKm, 0)} km`);
     text('[data-h-elongation]', `${number(observation.phase.elongation, 2)}°`); text('[data-h-limb-angle]', observation.phase.limbAngle === null ? 'Undefined' : `${number(observation.phase.limbAngle)}°`);
     if (current) {
       const scrub = get<HTMLInputElement>('#h-event-scrub'); scrub.value = String(clamp(s.time, Number(scrub.min), Number(scrub.max)));
@@ -392,13 +433,11 @@ export async function mount(context: ProjectContext): Promise<ProjectInstance> {
     apply({ ...history.state, track: value, ...(value === 'horizon' ? { fov: 90, skyAltitude: 15 } : {}) });
     report(`Tracking ${value}. Observer and camera edits preserve the current clock mode.`);
   };
-  for (const button of page.root.querySelectorAll<HTMLButtonElement>('[data-h-track]')) button.addEventListener('click', action(() => track(button.dataset.hTrack || '')), { signal: page.signal });
   get<HTMLSelectElement>('#h-track-select').addEventListener('change', action(() => track(get<HTMLSelectElement>('#h-track-select').value)), { signal: page.signal });
   const camera = (value: string) => {
     if (value !== 'orbit' && value !== 'ride') throw new Error('Unsupported planet camera.');
     apply({ ...history.state, view: 'planet', planetCamera: value, orbitZoom: 1 }); finishDockAction();
   };
-  for (const button of page.root.querySelectorAll<HTMLButtonElement>('[data-h-camera]')) button.addEventListener('click', action(() => camera(button.dataset.hCamera || '')), { signal: page.signal });
   get<HTMLSelectElement>('#h-camera-select').addEventListener('change', action(() => camera(get<HTMLSelectElement>('#h-camera-select').value)), { signal: page.signal });
   on('close-dock', () => dock.close());
   on('earth-surface', () => { apply({ ...history.state, body: 'Earth' }); setView('sky'); });
@@ -415,7 +454,7 @@ export async function mount(context: ProjectContext): Promise<ProjectInstance> {
     if (value === 'custom') { showDock('observer'); get<HTMLInputElement>('#h-latitude').focus(); return; }
     const site = SITES[Number(value)]; if (!site) throw new Error('Unsupported observer preset.');
     apply({ ...history.state, site: { ...site } });
-    report(`Observer: ${site.name}. ${clock.mode === 'live' ? 'Still synchronized with device UTC.' : 'UTC is unchanged.'}`);
+    report(site.elevation === 0 ? 'City-center coordinates use a 0 m reference height. Adjust the height for your observing location.' : 'Observer updated.');
   }), { signal: page.signal });
   get<HTMLFormElement>('[data-h-location-form]').addEventListener('submit', event => {
     event.preventDefault();

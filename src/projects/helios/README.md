@@ -28,6 +28,12 @@ used. Browser coverage checks actual hit targets and both right-hand drag corner
   at that body's physical heliocentric position. *Follow in system* follows its
   compressed display position instead. Every planet, the Sun, and Moon work.
   Earth alone provides a calibrated geodetic observing mode.
+- **Altitude:** the Sky strip always shows both Sun and Moon center altitudes,
+  with signed degrees and separate above / horizon-crossing / below labels.
+  Zero is the geometric horizon; disk visibility includes the angular radius,
+  so a slightly negative center altitude can still leave an upper limb visible.
+  Beijing and Shanghai are city-center presets at a reproducible **0 m reference
+  height**, not surveyed observing elevations. Set the actual height in Place.
 - **Keep:** version-1 JSON includes validated view state, UTC, site, physical
   readouts, conventions, and any available event contacts. Share links contain
   only versioned state. Imports ignore saved derived values and recompute them.
@@ -35,13 +41,22 @@ used. Browser coverage checks actual hit targets and both right-hand drag corner
   Click the UTC readout or step-size/settings button for exact date entry,
   playback rate, step size, Undo, and Reset.
 
-The desktop desk has **Place / Eclipse / Moon / History** tabs. On smaller or
+The desktop desk has one **Place / Eclipse / Moon / History** navigation, without
+a duplicate launcher row. On smaller or
 short-landscape viewports, the same instruments open in project-native dialogs;
 actions return directly to the still-dimensioned stage. Short event, Moon, and
 history panels fit without internal scrolling. Only long observer/optics forms,
 records, and notes scroll internally. Primary site/body/track/camera controls,
 zoom, Now/Live, transport, and the time axis never require document scrolling.
-Canvas arrows orbit/pan; + / - zoom. Dialogs provide keyboard semantics,
+World views select **Details** by default; returning to Sky restores the last
+Earth instrument. The camera selector appears only in Planet, where it applies.
+Fresh System/Planet share links initialize Details directly, while a fresh Sky
+arrival retains its Eclipse instrument default.
+Tracking and camera choices have one control each. Sky shows the alignment or
+phase once, rather than repeating the observer name and several frame captions.
+Scroll over the celestial stage to zoom, including over planet labels.
+Wheel pixels, lines, and pages are normalized; Ctrl/Command-wheel remains
+available to the browser. Canvas arrows orbit/pan; + / - also zoom. Dialogs provide keyboard semantics,
 Escape, and focus return.
 
 ### Now, Live, and the general UTC axis
@@ -237,7 +252,11 @@ spheres, not solid ground.
 
 System radial display is `12 log(1+2 distanceAU)`; radii are independently
 enlarged. The Moon's Earth-relative offset is expanded by 1050 display units/AU.
-These never enter physical distances, altitude, phase, eclipse, or angular-radius
+This is **not a common physical scale**: the displayed Sun/Earth radius ratio is
+about 3.1, versus about 109.2 physically. Local planet views frame each world
+individually, not as a size-comparison chart. A single view label distinguishes
+the schematic system, body-centered reference views, and true-angular Earth sky.
+These display transforms never enter physical distances, altitude, phase, eclipse, or angular-radius
 calculations. Lighting always comes from physical vectors, never the displaced
 display Sun. Orbit traces are sampled ephemerides over one approximate orbital
 period, cached by month; they are traces, not a circular Keplerian substitute.
@@ -252,6 +271,18 @@ only for actual geometric totality with the entire Sun above the horizon.
 Resting views render on demand. Clock sampling and RAF drawing are separate;
 no continuous resting/Live RAF loop is needed. Viewport changes resize the canvas
 and angular ruler; opening instruments never removes or zero-sizes the stage.
+Camera-only edits reuse the current physical observation when UTC and the full
+observer input are unchanged. They preserve Live/Playback without sampling the
+device clock faster than its existing timer cadence. Explicit time, site, and
+rate changes still refresh the required calculation; user-intent ownership is
+not bypassed. Number formatters and unchanged text are reused, and axis ticks
+are rebuilt only when the window, span, or label density changes.
+
+A controlled local 100-event camera burst fell from roughly 144 ms median to
+10 ms after these changes. Deterministic coverage checks the corresponding
+700-to-zero tick mutations and 300-to-zero unchanged-measurement mutations, plus
+no extra device-clock sampling during camera bursts. This measures JavaScript
+input work, not universal FPS or astronomical accuracy.
 If a next-event search interrupts pending current-date contacts, an intervening
 edit invalidates that future jump and restores the current observation's contact
 search. Canceled work cannot leave the timeline permanently marked as solving.
@@ -297,11 +328,13 @@ include Sydney 2014's below-horizon peak/visible C1 and Albuquerque 2012's
 next-day local peak. Screenshots and failure traces are test artifacts.
 
 Useful selectors: `.project-helios[data-ready=true]`, `[data-h-host] canvas`,
-`[data-h-view=system|planet|sky]`, `#h-body`, `[data-h-camera=orbit|ride]`,
+`[data-h-view=system|planet|sky]`, `#h-body`, `#h-camera-select`,
 `#h-site`, `#h-latitude`, `#h-longitude`, `#h-elevation`, `#h-utc`,
-`[data-h-action=set-time]`, `[data-h-track=Sun|Moon|horizon]`, `#h-fov`,
+`[data-h-action=set-time]`, `#h-track-select`, `#h-fov`,
 `[data-h-contact=Peak]`, `#h-event-scrub`, `[data-h-study=nazas|dallas|annular|partial|night]`,
 `[data-h-action=moon-study]`, `[data-h-action=keep]`, `#h-record`, `#h-file`.
+Altitude readouts: `[data-h-sun-altitude]`, `[data-h-moon-altitude]`,
+`[data-h-sun-visibility]`, and `[data-h-moon-visibility]`.
 
 New workspace selectors: `.h-time-readout`, `[data-h-action=now|live]`,
 `[data-h-time-axis]`, `#h-timespan`, `[data-h-axis-history]`,

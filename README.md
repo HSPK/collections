@@ -59,6 +59,9 @@ together. **Now** samples device time; **Live** stays synchronized without
 accumulating frame-time drift. Explore hours, days, or years, open computed
 historical studies, and pan or zoom the offline Earth picker. Shared records
 restore a fixed observation in Manual, not a running clock.
+Mouse-wheel zoom works across the celestial views. Beijing and Shanghai join
+the observer presets; signed Sun and Moon altitude readings remain visible
+together, with explicit horizon states rather than repeated status captions.
 
 Helios uses the locally bundled
 [Astronomy Engine](https://github.com/cosinekitty/astronomy) rather than a hosted

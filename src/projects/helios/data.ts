@@ -46,6 +46,8 @@ export const SITES: readonly Site[] = [
   { name: 'Sydney, Australia', latitude: -33.8688, longitude: 151.2093, elevation: 58 },
   { name: 'Cape Town, South Africa', latitude: -33.9249, longitude: 18.4241, elevation: 25 },
   { name: 'Tokyo, Japan', latitude: 35.6762, longitude: 139.6503, elevation: 40 },
+  { name: 'Beijing, China', latitude: 39.9042, longitude: 116.4074, elevation: 0 },
+  { name: 'Shanghai, China', latitude: 31.2304, longitude: 121.4737, elevation: 0 },
 ];
 export const STUDIES = [
   { id: 'nazas', title: '01 / In the Moon’s shadow', detail: 'Nazas · 08 Apr 2024 · total path', site: 0, day: '2024-04-08', seek: true },

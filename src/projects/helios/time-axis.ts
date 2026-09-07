@@ -26,6 +26,7 @@ export function createTimeAxis({ host, signal, time: initialTime, baseline, isLi
   let time = initialTime, span: TimeSpan = '6h', window = timelineWindow(time, span);
   let pointer: { id: number; window: typeof window } | null = null;
   let pending: number | null = null, timer = 0, closed = false;
+  let tickKey = '', liveMode = isLive();
 
   function draw() {
     const ratio = clamp(timeFraction(time, window), 0, 1);
@@ -37,13 +38,17 @@ export function createTimeAxis({ host, signal, time: initialTime, baseline, isLi
     endLabel.textContent = utcInput(window.end).slice(0, 16).replace('T', ' ');
     startLabel.title = `${utcInput(window.start)} UTC`;
     endLabel.title = `${utcInput(window.end)} UTC`;
-    ticks.replaceChildren();
     const count = axis.clientWidth < 500 ? 3 : 5;
-    for (let i = 0; i <= count; i++) {
-      const tick = document.createElement('span');
-      tick.style.left = `${i / count * 100}%`;
-      tick.textContent = axisLabel(timeAtFraction(i / count, window), span);
-      ticks.append(tick);
+    const nextTickKey = `${window.start}:${window.end}:${span}:${count}`;
+    if (nextTickKey !== tickKey) {
+      ticks.replaceChildren();
+      for (let i = 0; i <= count; i++) {
+        const tick = document.createElement('span');
+        tick.style.left = `${i / count * 100}%`;
+        tick.textContent = axisLabel(timeAtFraction(i / count, window), span);
+        ticks.append(tick);
+      }
+      tickKey = nextTickKey;
     }
     const historicRatio = timeFraction(baseline, window);
     historical.hidden = historicRatio < 0 || historicRatio > 1;
@@ -53,8 +58,9 @@ export function createTimeAxis({ host, signal, time: initialTime, baseline, isLi
     historical.style.left = `${axis.offsetLeft + axis.clientLeft + labelX}px`;
     historical.style.setProperty('--h-anchor-offset', `${anchorX - labelX}px`);
     const now = Date.now();
+    liveMode = isLive();
     const liveRatio = (now - window.start) / (window.end - window.start);
-    nowMarker.hidden = !isLive() || !Number.isFinite(liveRatio) || liveRatio < 0 || liveRatio > 1;
+    nowMarker.hidden = !liveMode || !Number.isFinite(liveRatio) || liveRatio < 0 || liveRatio > 1;
     nowMarker.style.left = `${clamp(liveRatio, 0, 1) * 100}%`;
   }
   function position(event: PointerEvent) {
@@ -120,6 +126,7 @@ export function createTimeAxis({ host, signal, time: initialTime, baseline, isLi
   signal.addEventListener('abort', destroy, { once: true, signal: listeners.signal });
   return {
     setTime(value: number, center = false) {
+      if (value === time && !center && isLive() === liveMode) return;
       time = value;
       if (!pointer && (center || timeFraction(time, window) < 0 || timeFraction(time, window) > 1))
         window = timelineWindow(time, span);

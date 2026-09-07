@@ -22,6 +22,7 @@ export interface RenderInfo { labels: Label[]; camera: Vec3; target: Vec3; frame
 interface RenderOptions {
   land: LandGeometry;
   host: HTMLElement; signal: AbortSignal; invalidate: () => void;
+  zoomTarget?: HTMLElement;
   navigate: (dx: number, dy: number, zoom?: number) => void;
   select: (body: BodyName) => void;
   report: (message: string) => void;
@@ -33,7 +34,7 @@ export function createRenderer(options: RenderOptions) {
   renderer.outputColorSpace = SRGBColorSpace;
   renderer.setClearColor('#05090f');
   const canvas = renderer.domElement;
-  canvas.setAttribute('aria-label', 'HELIOS interactive observatory. Drag to orbit or pan; use arrow keys and plus or minus.');
+  canvas.setAttribute('aria-label', 'HELIOS interactive observatory. Scroll to zoom; drag to orbit or pan. Arrow keys and plus or minus also work.');
   canvas.setAttribute('role', 'img'); canvas.tabIndex = 0;
   canvas.dataset.heliosCanvas = '';
   host.append(canvas);
@@ -277,6 +278,14 @@ export function createRenderer(options: RenderOptions) {
     const zoom = event.key === '+' || event.key === '=' ? .85 : event.key === '-' ? 1.18 : undefined;
     if (dx || dy || zoom) { event.preventDefault(); options.navigate(dx, dy, zoom); }
   }, { signal });
+  const wheelTarget = options.zoomTarget ?? canvas;
+  const onWheel = (event: WheelEvent) => {
+    if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.deltaY === 0) return;
+    event.preventDefault();
+    const pixels = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? height : 1);
+    options.navigate(0, 0, Math.exp(clamp(pixels, -240, 240) * .0015));
+  };
+  wheelTarget.addEventListener('wheel', onWheel, { signal, passive: false });
   canvas.addEventListener('webglcontextlost', event => {
     event.preventDefault(); options.report('Graphics context lost. Playback stopped; waiting for the browser to restore it.');
   }, { signal });
@@ -288,6 +297,7 @@ export function createRenderer(options: RenderOptions) {
     destroy() {
       if (disposed) return;
       disposed = true; resizeObserver.disconnect(); pointer = null;
+      wheelTarget.removeEventListener('wheel', onWheel);
       for (const g of geometries) g.dispose();
       for (const m of materials) m.dispose();
       atlas.dispose(); scene.clear(); planetScene.clear(); skyScene.clear();

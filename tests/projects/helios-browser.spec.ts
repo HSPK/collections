@@ -132,7 +132,8 @@ test.describe('HELIOS actual software-WebGL observatory', () => {
     await expect(page.locator('[data-h-event-description]')).toContainText('this UTC date');
 
     await desk(page, 'journeys'); await page.locator('[data-h-study=dallas]').click();
-    await expect(page.locator('[data-h-event-kind]')).toContainText('Total event · Dallas');
+    await expect(page.locator('[data-h-event-kind]')).toHaveText('Total event');
+    await expect(page.locator('#h-site option:checked')).toHaveText('Dallas, USA');
     await expect(page.locator('[data-h-instant]')).toHaveText('Total eclipse');
     await desk(page, 'journeys'); await page.locator('[data-h-study=annular]').click();
     await expect(page.locator('[data-h-event-kind]')).toContainText('Annular event');
@@ -148,13 +149,13 @@ test.describe('HELIOS actual software-WebGL observatory', () => {
     await expect(page.locator('[data-h-event-kind]')).toHaveText('No local event returned');
     await desk(page, 'moon'); await page.locator('[data-h-action=moon-study]').click();
     await expect(page.locator('[data-h-instant]')).toHaveText('Waxing gibbous');
-    await expect(page.locator('[data-h-instant-detail]')).toContainText('above the horizon');
+    await expect(page.locator('[data-h-moon-visibility]')).toHaveText('Above horizon');
     const southAngle = await page.locator('[data-h-limb-angle]').innerText();
     const south = await canvasPixels(page);
     expect(south.bright).toBeGreaterThan(1500);
     await screenshot(page, info, 'helios-moon-south');
     await page.locator('#h-site').selectOption('5');
-    await expect(page.locator('[data-h-instant-detail]')).toContainText('above the horizon');
+    await expect(page.locator('[data-h-moon-visibility]')).toHaveText('Above horizon');
     expect(await page.locator('[data-h-limb-angle]').innerText()).not.toBe(southAngle);
     const north = await canvasPixels(page);
     expect(north.raw.equals(south.raw)).toBe(false);
@@ -221,7 +222,7 @@ test.describe('HELIOS actual software-WebGL observatory', () => {
     await expect(root(page)).toHaveAttribute('data-ready', 'true');
     await expect(page.locator('[data-h-title]')).toHaveText('Neptune');
     await resetObservation(page);
-    await expect(page.locator('[data-h-title]')).toHaveText('Nazas, Mexico');
+    await expect(page.locator('#h-site option:checked')).toHaveText('Nazas, Mexico');
     const heldTime = await root(page).getAttribute('data-time');
     await page.waitForTimeout(250);
     await expect(root(page)).toHaveAttribute('data-time', heldTime!);
@@ -246,7 +247,7 @@ test.describe('HELIOS actual software-WebGL observatory', () => {
     await map.focus(); await page.keyboard.press('ArrowLeft');
     expect(Number(await page.locator('#h-longitude').inputValue())).toBeCloseTo(expectedLon - 1, 3);
     await page.locator('.h-optics-fields summary').click();
-    await page.locator('[data-h-track=horizon]').click();
+    await page.locator('#h-track-select').selectOption('horizon');
     await page.locator('#h-azimuth').fill('0'); await page.locator('#h-altitude').fill('0');
     await page.locator('[data-h-action=point]').click();
     const wide = await canvasPixels(page);
@@ -272,7 +273,7 @@ test.describe('HELIOS actual software-WebGL observatory', () => {
     await expect(page.locator('[data-h-keep-dialog]')).not.toBeVisible();
     await page.waitForTimeout(900);
     await expect(root(page)).toHaveAttribute('data-time', String(Date.UTC(2024, 3, 17, 18)));
-    await expect(page.locator('[data-h-track=Moon]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#h-track-select')).toHaveValue('Moon');
     await context.close();
   });
 
@@ -317,7 +318,7 @@ test.describe('HELIOS actual software-WebGL observatory', () => {
     const url = shareURL(new URL('./projects/helios/', baseURL).href, state);
     await page.goto(url);
     await expect(root(page)).toHaveAttribute('data-ready', 'true');
-    await expect(page.locator('[data-h-title]')).toHaveText('Cape Town');
+    await expect(page.locator('#h-site option:checked')).toHaveText('Cape Town');
     await expect(page.locator('[data-h-instant]')).toHaveText('Waxing gibbous');
     await expect(root(page)).toHaveAttribute('data-time', String(state.time));
     expect((await canvasPixels(page)).bright).toBeGreaterThan(1500);
@@ -347,7 +348,8 @@ test.describe('HELIOS actual software-WebGL observatory', () => {
         await desk(page, 'eclipse'); await page.locator('[data-h-contact=C1]').click();
         await page.locator('[data-h-action=step-forward]').click();
         await expect(page.locator('[data-h-instant]')).toHaveText('Partial eclipse');
-        await expect(page.locator('[data-h-measure-one]')).toHaveText('Sun ALT 11.17°');
+        await expect(page.locator('[data-h-sun-altitude]')).toHaveText('+11.17°');
+        await expect(page.locator('[data-h-sun-visibility]')).toHaveText('Above horizon');
         expect((await canvasPixels(page)).gold).toBeGreaterThan(800);
         const heldTime = await root(page).getAttribute('data-time');
         await desk(page, 'eclipse'); await page.locator('[data-h-action=next-eclipse]').click();
