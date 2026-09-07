@@ -52,11 +52,8 @@ export function createTimeAxis({ host, signal, time: initialTime, baseline, isLi
     }
     const historicRatio = timeFraction(baseline, window);
     historical.hidden = historicRatio < 0 || historicRatio > 1;
-    const anchorX = clamp(historicRatio, 0, 1) * axis.clientWidth;
-    const halfLabel = historical.offsetWidth / 2;
-    const labelX = clamp(anchorX, halfLabel + 4, Math.max(halfLabel + 4, axis.clientWidth - halfLabel - 4));
-    historical.style.left = `${axis.offsetLeft + axis.clientLeft + labelX}px`;
-    historical.style.setProperty('--h-anchor-offset', `${anchorX - labelX}px`);
+    historical.style.setProperty('--h-marker-ratio', String(clamp(historicRatio, 0, 1)));
+    historical.style.setProperty('--h-label-half', `${historical.offsetWidth / 2}px`);
     const now = Date.now();
     liveMode = isLive();
     const liveRatio = (now - window.start) / (window.end - window.start);

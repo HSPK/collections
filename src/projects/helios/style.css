@@ -159,7 +159,7 @@
 .h-span-label { display: flex; align-items: center; gap: 6px; margin-left: auto; }
 .h-span-label > span { font-size: 12px; color: var(--h-muted); white-space: nowrap; }
 .h-span-label select { width: 104px; }
-.h-time-axis-wrap { --h-menu-clearance: 72px; position: relative; display: grid; grid-template-rows: 17px minmax(0, 1fr); min-width: 0; height: 64px; padding-top: 8px; }
+.h-time-axis-wrap { --h-menu-clearance: 72px; container-type: inline-size; position: relative; display: grid; grid-template-rows: 17px minmax(0, 1fr); min-width: 0; height: 64px; padding-top: 8px; }
 .h-time-axis { position: relative; grid-row: 2; min-height: 0; height: 100%; width: calc(100% - var(--h-menu-clearance)); cursor: ew-resize; touch-action: none; border: 1px solid #3e504b; border-bottom-color: #788a6f; background: repeating-linear-gradient(90deg, transparent, transparent calc(5% - 1px), #6d806925 5%); }
 .h-axis-ticks { position: absolute; inset: 0; pointer-events: none; }
 .h-axis-ticks > span { position: absolute; top: 1px; transform: translateX(-50%); color: #b9c6bc; padding-top: 8px; font: 12px "Courier New", monospace; white-space: nowrap; }
@@ -168,7 +168,17 @@
 .h-time-cursor { position: absolute; height: 100%; top: 0; width: 2px; background: #ffe0a0; transform: translateX(-1px); pointer-events: none; }
 .h-time-cursor::before { content: ""; position: absolute; top: -5px; left: -4px; width: 10px; height: 10px; background: var(--h-gold); transform: rotate(45deg); }
 .h-axis-now { position: absolute; bottom: 0; color: #8ecabb; font: 10px "Courier New", monospace; border-left: 1px solid #8ecabb; padding: 1px 3px; pointer-events: none; }
-.project-helios .h-axis-history { position: absolute; bottom: 0; transform: translateX(-50%); border: 0; border-radius: 0; color: #d9c18c; font: 14px/1.2 "Courier New", monospace; background: #101e23; padding: 1px 4px; min-height: 18px; }
+.project-helios .h-axis-history {
+  --h-track-width: calc(100cqw - var(--h-menu-clearance) - 2px);
+  --h-marker-x: calc(var(--h-marker-ratio, .5) * var(--h-track-width));
+  --h-label-min: calc(var(--h-label-half, 42px) + 4px);
+  --h-label-max: max(var(--h-label-min), calc(var(--h-track-width) - var(--h-label-half, 42px) - 4px));
+  --h-label-x: clamp(var(--h-label-min), var(--h-marker-x), var(--h-label-max));
+  --h-anchor-offset: calc(var(--h-marker-x) - var(--h-label-x));
+  position: absolute; left: calc(1px + var(--h-label-x)); bottom: 0; transform: translateX(-50%);
+  border: 0; border-radius: 0; color: #d9c18c; font: 14px/1.2 "Courier New", monospace;
+  background: #101e23; padding: 1px 4px; min-height: 18px; white-space: nowrap;
+}
 .h-axis-history::before { content: ""; position: absolute; bottom: 100%; left: calc(50% + var(--h-anchor-offset, 0px)); height: 6px; border-left: 1px solid var(--h-gold); pointer-events: none; }
 .h-axis-extents { grid-row: 1; display: flex; justify-content: space-between; gap: 8px; color: var(--h-muted); font: 14px/1.1 "Courier New", monospace; white-space: nowrap; }
 .h-status-line { min-width: 0; display: flex; justify-content: space-between; gap: 14px; padding: 5px 12px; border-top: 1px solid var(--h-line); color: var(--h-muted); font-size: 12px; line-height: 1.4; overflow: hidden; }

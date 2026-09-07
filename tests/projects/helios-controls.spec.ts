@@ -241,3 +241,50 @@ for (const view of ['system', 'planet'] as const) {
     } finally { await fresh.close(); }
   });
 }
+
+test('HELIOS historical marker stays bounded and aligned before resize callbacks arrive', async ({ page }) => {
+  await page.addInitScript(() => {
+    const Native = ResizeObserver;
+    window.ResizeObserver = class extends Native {
+      constructor(callback: ResizeObserverCallback) {
+        super((entries, observer) => {
+          if (document.documentElement.dataset.holdAxisResize === 'true' &&
+              entries.some(entry => entry.target.hasAttribute('data-h-time-axis'))) return;
+          callback(entries, observer);
+        });
+      }
+    };
+  });
+  await ready(page);
+  const baseline = Number(await root(page).getAttribute('data-time'));
+  for (const offset of [0, 168 * 60000, -168 * 60000]) {
+    await page.evaluate(() => { delete document.documentElement.dataset.holdAxisResize; });
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.locator('.h-time-readout').click();
+    await page.locator('#h-utc').fill(new Date(baseline + offset).toISOString().slice(0, 19));
+    await page.locator('[data-h-action=set-time]').click();
+    await paint(page);
+    await page.evaluate(() => { document.documentElement.dataset.holdAxisResize = 'true'; });
+    for (const size of [{ width: 375, height: 812 }, { width: 320, height: 640 }, { width: 844, height: 390 }]) {
+      await page.setViewportSize(size);
+      const geometry = await page.evaluate(peak => {
+        const axis = document.querySelector<HTMLElement>('[data-h-time-axis]')!;
+        const label = document.querySelector<HTMLElement>('[data-h-axis-history]')!;
+        const track = axis.getBoundingClientRect(), marker = label.getBoundingClientRect();
+        const ratio = (peak - Number(axis.dataset.start)) / (Number(axis.dataset.end) - Number(axis.dataset.start));
+        const tick = marker.left + parseFloat(getComputedStyle(label, '::before').left);
+        return {
+          width: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth),
+          height: Math.max(document.documentElement.scrollHeight, document.body.scrollHeight),
+          left: marker.left, right: marker.right, minX: track.left, maxX: track.right,
+          tick, expectedTick: track.left + axis.clientLeft + axis.clientWidth * ratio,
+        };
+      }, baseline);
+      expect(geometry.width).toBe(size.width);
+      expect(geometry.height).toBe(size.height);
+      expect(geometry.left).toBeGreaterThanOrEqual(geometry.minX);
+      expect(geometry.right).toBeLessThanOrEqual(geometry.maxX);
+      expect(Math.abs(geometry.tick - geometry.expectedTick)).toBeLessThan(1);
+    }
+  }
+});

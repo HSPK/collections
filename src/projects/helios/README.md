@@ -10,6 +10,9 @@ The bottom timeline reserves a local 72 px right-hand safe area for the existing
 collection menu. Its pointer interval and historical marker share the reduced
 usable width; no document clipping, blank footer, or shared-header workaround is
 used. Browser coverage checks actual hit targets and both right-hand drag corners.
+Historical-label clamping and its time tick use container-relative CSS geometry,
+so a narrower viewport cannot inherit an offscreen desktop pixel position while
+waiting for a ResizeObserver callback.
 
 ## Workflows
 
