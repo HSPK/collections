@@ -236,7 +236,7 @@ test.describe('Palinode authored causal model', () => {
 
 async function open(page: Page) {
   await page.goto('./projects/palinode/');
-  await expect(page.locator('.project-palinode h1')).toContainText('A city that remembers');
+  await expect(page.locator('.project-palinode').getByRole('heading', { level: 1, name: 'Palinode', exact: true })).toBeVisible();
 }
 
 async function pane(page: Page, name: 'Read' | 'Decide' | 'Compare' | 'Ending') {

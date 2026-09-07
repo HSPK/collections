@@ -106,7 +106,9 @@ as fiction and distinguish a local generator from a hosted AI model.
 Interaction-led websites should solve their main workflow without document
 scrolling. Mark the project root with `data-workspace="true"` and allocate
 `100dvh` deliberately with grid or flexbox and `min-height: 0`. Keep the live
-result and primary actions together. On small screens, use a compact control
+result and primary actions together. Keep a visible page-level `h1` in the
+persistent shell rather than moving the only heading into a closed dialog.
+On small screens, use a compact control
 dock or explicit panes rather than stacking a full-size scene above its tools.
 Reading-category websites retain normal document reading.
 

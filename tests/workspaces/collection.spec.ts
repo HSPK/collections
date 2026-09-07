@@ -21,6 +21,7 @@ for (const project of projects.filter(project => project.category !== 'read')) {
     await expect(page.locator('#main-content > [data-stage]')).toHaveAttribute('data-ready', 'true');
     const root = page.locator(`.project-${project.id}`);
     await expect(root).toHaveAttribute('data-workspace', 'true');
+    await expect(root.getByRole('heading', { level: 1 }).first()).toBeVisible();
     for (const size of sizes) {
       await page.setViewportSize(size);
       await expectWorkspaceViewport(page, size.width, size.height);

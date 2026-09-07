@@ -34,14 +34,15 @@
 .project-palinode button { background: transparent; border: 0; border-radius: 0; }
 .project-palinode select { max-width: 100%; min-height: 40px; border: 1px solid var(--palinode-line); padding: 7px 28px 7px 9px; background: #f7f1e4; }
 .palinode-masthead { display: flex; justify-content: space-between; align-items: center; gap: 20px; border-bottom: 1px solid var(--palinode-ink); padding: 0 0 17px; }
+.palinode-site-title { display: flex; min-width: 0; font: inherit; }
 .palinode-wordmark { text-decoration: none; font-size: 21px; letter-spacing: .2em; font-weight: bold; }
 .palinode-wordmark span { font-size: 13px; letter-spacing: .025em; font-weight: normal; font-style: italic; margin-left: 13px; }
 .palinode-volume { font-family: 'Trebuchet MS', Arial, sans-serif; font-size: 10px; letter-spacing: .14em; }
 .palinode-volume i { font-family: Georgia, serif; font-size: 14px; text-transform: none; margin-left: 25px; letter-spacing: 0; }
 .palinode-introduction { display: flex; justify-content: space-between; align-items: center; gap: 28px; padding: 23px 0 22px; }
 .palinode-eyebrow { font-family: 'Trebuchet MS', Arial, sans-serif; font-size: 10px; line-height: 1.4; text-transform: uppercase; letter-spacing: .17em; color: var(--palinode-muted); }
-.palinode-introduction h1 { font-size: clamp(38px, 3.9vw, 60px); letter-spacing: -.055em; line-height: .99; margin-top: 12px; }
-.palinode-introduction h1 em { font-weight: normal; color: var(--palinode-teal); }
+.palinode-introduction h2 { font-size: clamp(38px, 3.9vw, 60px); letter-spacing: -.055em; line-height: .99; margin-top: 12px; }
+.palinode-introduction h2 em { font-weight: normal; color: var(--palinode-teal); }
 .palinode-opening-note { border-left: 1px solid var(--palinode-line); padding: 0 20px 0 32px; min-width: 265px; }
 .palinode-note-number { font-size: 41px; display: inline-block; font-style: italic; letter-spacing: -.05em; margin-right: 9px; }
 .palinode-opening-note > span:nth-child(2) { font-style: italic; font-size: 14px; }
@@ -243,7 +244,7 @@
   .palinode-volume { max-width: 105px; text-align: right; font-size: 9px; line-height: 1.8; }
   .palinode-volume i { display: none; }
   .palinode-introduction { padding: 27px 0; }
-  .palinode-introduction h1 { font-size: clamp(36px, 7vw, 52px); line-height: 1.05; }
+  .palinode-introduction h2 { font-size: clamp(36px, 7vw, 52px); line-height: 1.05; }
   .palinode-opening-note { display: none; }
   .palinode-toolbar { gap: 0; }
   .palinode-toolbar > div { width: 100%; gap: 4px 16px; }

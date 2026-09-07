@@ -58,11 +58,11 @@ export function mount(context: ProjectContext) {
 
   root.innerHTML = `
     <header class="palinode-masthead">
-      <a class="palinode-wordmark" href="#palinode-workspace" aria-label="Palinode, go to the folio">PALINODE<span> a civic palimpsest</span></a>
+      <h1 class="palinode-site-title" aria-label="Palinode"><a class="palinode-wordmark" href="#palinode-workspace" aria-label="Palinode, go to the folio">PALINODE<span> a civic palimpsest</span></a></h1>
       <span class="palinode-volume">AVEN MUNICIPAL ARCHIVE <i>Vol. 01</i></span>
     </header>
     <div class="palinode-introduction">
-      <div><p class="palinode-eyebrow">An original temporal mystery</p><h1>A city that remembers<br><em>differently.</em></h1></div>
+      <div><p class="palinode-eyebrow">An original temporal mystery</p><h2>A city that remembers<br><em>differently.</em></h2></div>
       <div class="palinode-opening-note"><span class="palinode-note-number">135</span><span>years, held in the margin.</span><p>A civic score ends in silence.<br>Change what the city keeps.<br>Discover whom the blank is for.</p></div>
     </div>
     <div class="palinode-toolbar" aria-label="Folio tools">
