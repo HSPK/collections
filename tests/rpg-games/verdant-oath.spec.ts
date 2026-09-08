@@ -18,6 +18,7 @@ import {
 import { CHARACTERS, QUEST_STORY, PLACE_STORY, ACTS, PROLOGUE, ENDING_STORY } from '../../src/projects/verdant-oath/story';
 
 const root = '.project-verdant-oath';
+const URL = './projects/verdant-oath/';
 const opening: Plan = { wild: '靠近', intention: '我愿先听听这条给幼灵留路的句子。', companions: [] };
 function layoutFor(s: State): Layout {
   return {
@@ -57,7 +58,7 @@ test('满额合法回放不会再发起付费灵应答，错误以中文呈现',
   await page.addInitScript(encoded => {
     localStorage.setItem('odd-index:game:verdant-oath:v1', JSON.stringify(encoded));
   }, replay);
-  await page.goto('./projects/verdant-oath/');
+  await page.goto(URL);
   await expect(page.locator('#main-content > [data-stage]')).toHaveAttribute('data-ready', 'true');
   await page.locator(`${root} [data-action="answer"]`).click();
   await expect(page.locator(`${root} [data-agent-status]`)).toContainText('游戏回放空间或行动条数不足');
@@ -349,7 +350,7 @@ async function importReplay(page: Page, encoded: string) {
 test('真实界面完整十三任务、三灵蜕变、成长制作、三种挣得的结局与导入', async ({ page }) => {
   test.setTimeout(240_000);
   const calls = await installAgentFixture(page, fixturePlan);
-  await page.goto('/projects/verdant-oath/');
+  await page.goto(URL);
   await expect(page.getByRole('heading', { name: '森语契约', exact: true })).toBeVisible();
   expect(calls).toHaveLength(0);
   await supplies(page);
@@ -415,7 +416,7 @@ test('真实界面完整十三任务、三灵蜕变、成长制作、三种挣�
 test('无效模型与服务错误不消耗；真实拒绝断契，重启无请求', async ({ page }) => {
   let mode: 'invalid' | 'resist' = 'invalid';
   const calls = await installAgentFixture(page, turn => mode === 'invalid' ? { ...fixturePlan(turn), wild: '直接胜利' } : { ...fixturePlan(turn), wild: '筑障' });
-  await page.goto('/projects/verdant-oath/');
+  await page.goto(URL);
   await travel(page, 'wood');
   await writeRitual(page, 'wood');
   const before = await exportReplay(page);
@@ -451,7 +452,7 @@ test('选择不废弃应答；取消、重置、导入拥有修订权，非法�
     if (block) await new Promise<void>(resolve => { release = resolve; });
     return fixturePlan(turn);
   });
-  await page.goto('/projects/verdant-oath/');
+  await page.goto(URL);
   await travel(page, 'wood');
   await writeRitual(page, 'wood');
   const before = await exportReplay(page);
@@ -496,7 +497,7 @@ test('选择不废弃应答；取消、重置、导入拥有修订权，非法�
 
 test('中文小屏、短横屏、键盘阵格、弹窗快捷键保护与动态偏好', async ({ page }, testInfo) => {
   await installAgentFixture(page, fixturePlan);
-  await page.goto('/projects/verdant-oath/');
+  await page.goto(URL);
   await travel(page, 'wood');
   await page.locator('[data-action="begin"]').click();
   for (const [width, height] of [[1440, 900], [1280, 800], [375, 812], [320, 640], [768, 480]]) {
