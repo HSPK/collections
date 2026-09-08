@@ -91,7 +91,7 @@ for (const project of websites) {
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), `${project.id} must not overflow the phone viewport`).toBe(true);
     await expect(page.locator('.project-trail, #app > .site-header')).toHaveCount(0);
     await openCollectionMenu(page);
-    await expect(page.getByRole('link', { name: 'Back to index', exact: true })).toBeVisible();
+    await expect(page.getByRole('link', { name: project.language === 'zh-CN' ? '返回合集' : 'Back to index', exact: true })).toBeVisible();
     expect(errors).toEqual([]);
   });
 }

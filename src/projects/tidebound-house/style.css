@@ -1,0 +1,182 @@
+.project-tidebound-house {
+  --tb-paper: #f0e6ce;
+  --tb-ink: #294852;
+  --workspace-paper: var(--tb-paper);
+  --agent-paper: var(--tb-paper);
+  --agent-ink: var(--tb-ink);
+  box-sizing: border-box;
+  width: 100%;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  background: #294c59;
+  color: var(--tb-paper);
+  font-family: "Noto Serif SC", "Songti SC", "STSong", Georgia, serif;
+  font-size: 16px;
+  line-height: 1.55;
+}
+.project-tidebound-house *, .project-tidebound-house *::before, .project-tidebound-house *::after { box-sizing: border-box; }
+.project-tidebound-house button, .project-tidebound-house select {
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-size: 16px;
+  min-height: 40px;
+  border: 1px solid #a9b7a77a;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.project-tidebound-house button:hover:not(:disabled) { background: #b8ccba20; border-color: #d6c69b; }
+.project-tidebound-house button:disabled { cursor: not-allowed; opacity: .48; }
+.project-tidebound-house select { background: #315865; width: 100%; min-width: 0; }
+.project-tidebound-house :focus-visible { outline: 3px solid #e6b887; outline-offset: 3px; }
+.project-tidebound-house [hidden] { display: none !important; }
+.project-tidebound-house .tb-header { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 15px 30px 10px; border-bottom: 1px solid #abc3b026; }
+.project-tidebound-house .tb-brand { display: flex; align-items: center; gap: 14px; }
+.project-tidebound-house .tb-brand-mark { border: 1px solid #c79672; color: #e4b589; font-size: 27px; line-height: 1; padding: 9px 7px; border-radius: 14px 14px 3px 3px; transform: rotate(-5deg); }
+.project-tidebound-house h1 { font-size: 29px; line-height: 1.2; margin: 0; font-weight: 500; letter-spacing: .2em; }
+.project-tidebound-house .tb-brand p { margin: 3px 0 0; font-size: 14px; color: #b5c7ba; letter-spacing: .12em; }
+.project-tidebound-house nav { display: flex; gap: 7px; }
+.project-tidebound-house .tb-progress { display: flex; align-items: center; gap: 30px; min-width: 0; padding: 7px 30px; font-size: 14px; letter-spacing: .05em; color: #c4d1bb; }
+.project-tidebound-house .tb-progress strong { color: #edc897; font-weight: 500; }
+.project-tidebound-house .tb-main { min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; }
+.project-tidebound-house .tb-world { position: relative; min-height: 0; overflow: hidden; border-block: 1px solid #92ad9c50; background: linear-gradient(#263f50, #588181 54%, #899881 77%, #719d9e 82%, #264f63); }
+.project-tidebound-house .tb-canvas { position: absolute; inset: 0; }
+.project-tidebound-house .tb-world-svg { display: block; width: 100%; height: 100%; }
+.project-tidebound-house .tb-hit { fill: #f6deb000; stroke: transparent; stroke-width: 2; }
+.project-tidebound-house [data-scene] { cursor: pointer; }
+.project-tidebound-house [data-scene]:hover .tb-hit, .project-tidebound-house [data-scene]:focus-visible .tb-hit { fill: #ffe2aa16; stroke: #e5d8b2; }
+.project-tidebound-house [data-scene] .tb-sign rect { fill: #294953ec; stroke: #d3bc8e80; stroke-width: 1.5; }
+.project-tidebound-house [data-scene] .tb-sign text { fill: #e8d9b2; font-family: "Noto Serif SC", "Songti SC", serif; font-size: 26px; letter-spacing: 1px; }
+.project-tidebound-house [data-scene][aria-pressed="true"] .tb-sign rect { fill: #b8765d; stroke: #edcfa0; stroke-width: 3; }
+.project-tidebound-house [data-scene][data-locked="true"] .tb-sign { opacity: .6; }
+.project-tidebound-house [data-portrait] { cursor: pointer; }
+.project-tidebound-house [data-portrait]:hover { filter: brightness(1.12); }
+.project-tidebound-house .tb-scene-top, .project-tidebound-house .tb-world-caption { position: absolute; display: flex; justify-content: space-between; align-items: center; gap: 12px; left: 22px; right: 22px; pointer-events: none; text-shadow: 0 1px 5px #1f3b48; }
+.project-tidebound-house .tb-scene-top { top: 12px; font-size: 16px; letter-spacing: .15em; }
+.project-tidebound-house .tb-scene-top button { pointer-events: auto; background: #294b58c7; font-size: 14px; min-height: 34px; }
+.project-tidebound-house .tb-world-caption { bottom: 11px; font-size: 14px; color: #e8dbb9; }
+.project-tidebound-house .tb-rain { animation: tb-rainfall 7s linear infinite; }
+@keyframes tb-rainfall { to { transform: translate(-23px, 75px); } }
+.project-tidebound-house .tb-dock { min-height: 0; padding: 12px 30px 10px; background: #284b56; display: grid; gap: 10px; border-top: 1px solid #aebda14d; }
+.project-tidebound-house .tb-objective { display: flex; align-items: center; min-width: 0; gap: 13px; }
+.project-tidebound-house .tb-objective > strong { flex-shrink: 0; font-size: 14px; color: #edbf91; font-weight: 400; }
+.project-tidebound-house .tb-objective p { font-size: 15px; margin: 0; min-width: 0; flex: 1; max-height: 3.1em; overflow: auto; scrollbar-width: thin; color: #e0ddc3; }
+.project-tidebound-house .tb-objective > button { flex-shrink: 0; background: #bd8066; border-color: #d6b289; color: #fff1cc; }
+.project-tidebound-house .tb-location-row { display: grid; grid-template-columns: minmax(180px, 1fr) auto auto auto; gap: 8px; }
+.project-tidebound-house .tb-location-row label { display: flex; align-items: center; gap: 12px; white-space: nowrap; color: #c1d0ba; }
+.project-tidebound-house .tb-action-row { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.project-tidebound-house .tb-primary { background: #d4b57e; color: #27464c; border-color: #e4ce9f; }
+.project-tidebound-house .tb-primary:hover:not(:disabled) { background: #e2c891; }
+.project-tidebound-house .tb-action-row > button { flex-shrink: 0; }
+.project-tidebound-house .tb-action-row > p { flex: 1; min-width: 0; margin: 0; font-size: 14px; color: #c1cdb7; max-height: 3.1em; overflow: auto; overflow-wrap: anywhere; scrollbar-width: thin; }
+.project-tidebound-house .tb-footer { min-width: 0; display: flex; gap: 8px; padding: 7px 84px 10px 30px; border-top: 1px solid #9fb3a43d; background: #23414c; }
+.project-tidebound-house .tb-footer > .agent-console { flex: 1; min-width: 0; }
+.project-tidebound-house .tb-footer > button { font-size: 14px; min-height: 36px; padding: 5px 9px; flex-shrink: 0; }
+.project-tidebound-house .tb-dialog { color: var(--tb-ink); width: min(750px, calc(100vw - 24px)); background: var(--tb-paper); border: 1px solid #b7a586; border-radius: 10px; font-size: 16px; line-height: 1.85; }
+.project-tidebound-house .tb-dialog .workspace-dialog-heading { background: #ece0c6; border-color: #bdaf9180; }
+.project-tidebound-house .tb-dialog .workspace-dialog-heading h2 { letter-spacing: .1em; font-family: inherit; }
+.project-tidebound-house .tb-dialog select { background: #faf3e1; color: var(--tb-ink); }
+.project-tidebound-house .tb-dialog button { border-color: #78958b; }
+.project-tidebound-house .tb-dialog button:disabled { opacity: .55; }
+.project-tidebound-house .tb-reading h3 { font-weight: 500; font-size: 25px; margin: 20px 0 9px; line-height: 1.5; }
+.project-tidebound-house .tb-reading h4 { font-size: 18px; margin: 12px 0 5px; }
+.project-tidebound-house .tb-reading p { margin: 8px 0 16px; overflow-wrap: anywhere; }
+.project-tidebound-house .tb-reading summary { cursor: pointer; padding: 10px 0; font-weight: 600; }
+.project-tidebound-house .tb-reading details { border-top: 1px solid #b9af93; margin-top: 16px; }
+.project-tidebound-house .tb-eyebrow { color: #7e765e; letter-spacing: .1em; font-size: 14px; }
+.project-tidebound-house .tb-reading blockquote { margin: 16px 0; padding: 10px 18px; border-left: 3px solid #ba8267; background: #e5d8ba70; }
+.project-tidebound-house .tb-work { display: grid; gap: 5px; margin: 8px 0; justify-items: start; }
+.project-tidebound-house .tb-work > span { font-size: 14px; line-height: 1.55; color: #696e5d; }
+.project-tidebound-house .tb-quest-line, .project-tidebound-house .tb-journal-quest { border-block-end: 1px solid #b9ae906b; padding: 9px 0 14px; }
+.project-tidebound-house .tb-inline { display: flex; gap: 8px; flex-wrap: wrap; }
+.project-tidebound-house .tb-invitation { display: grid; gap: 6px; }
+.project-tidebound-house .tb-guest-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+.project-tidebound-house .tb-guest-card { display: flex; align-items: center; text-align: left; gap: 9px; background: #e7d9ba; }
+.project-tidebound-house .tb-guest-card > svg { width: 72px; height: 110px; flex-shrink: 0; }
+.project-tidebound-house .tb-guest-card > span > span { display: block; font-size: 14px; line-height: 1.8; }
+.project-tidebound-house .tb-guest-card strong { font-size: 21px; font-weight: 500; }
+.project-tidebound-house .tb-person-heading { display: flex; align-items: center; gap: 22px; }
+.project-tidebound-house .tb-person-heading > svg { width: 120px; height: 170px; flex-shrink: 0; background: #d4d2b5; border-radius: 70px 70px 7px 7px; padding: 10px; }
+.project-tidebound-house .tb-person-heading h3 { margin: 0; font-size: 30px; letter-spacing: .15em; }
+.project-tidebound-house .tb-person-heading p { margin: 6px 0; }
+.project-tidebound-house .tb-public-intention { background: #dce0c3; padding: 10px 15px; border-radius: 6px; }
+.project-tidebound-house .tb-person-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; }
+.project-tidebound-house .tb-skill-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.project-tidebound-house .tb-skill-list p { font-size: 14px; margin: 4px 0 8px; }
+.project-tidebound-house .tb-inventory { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.project-tidebound-house .tb-inventory > div, .project-tidebound-house .tb-recipe { display: flex; gap: 12px; align-items: start; padding: 14px 0; border-bottom: 1px solid #bdad8f60; }
+.project-tidebound-house .tb-inventory svg, .project-tidebound-house .tb-recipe > svg { width: 52px; height: 52px; flex-shrink: 0; background: #dae0c5; border-radius: 9px; padding: 4px; }
+.project-tidebound-house .tb-inventory p, .project-tidebound-house .tb-recipe p { font-size: 14px; line-height: 1.65; margin: 5px 0; }
+.project-tidebound-house .tb-recipe h4 { margin-top: 0; }
+.project-tidebound-house .tb-build { padding: 8px 0 17px; border-bottom: 1px solid #b8ad9166; }
+.project-tidebound-house .tb-warning { color: #935640; font-weight: 600; }
+@media (prefers-reduced-motion: reduce) {
+  .project-tidebound-house .tb-rain { animation: none; }
+}
+@media (min-width: 1100px) and (min-height: 780px) {
+  .project-tidebound-house .tb-dock { padding-inline: max(30px, calc((100vw - 1160px) / 2)); }
+}
+@media (max-width: 650px) {
+  .project-tidebound-house .tb-header { padding: 10px 12px 8px; gap: 8px; }
+  .project-tidebound-house .tb-brand { gap: 7px; }
+  .project-tidebound-house .tb-brand-mark { display: none; }
+  .project-tidebound-house h1 { font-size: 23px; letter-spacing: .1em; white-space: nowrap; }
+  .project-tidebound-house .tb-brand p { display: none; }
+  .project-tidebound-house nav { gap: 3px; }
+  .project-tidebound-house nav button { padding: 5px 7px; font-size: 14px; min-height: 36px; }
+  .project-tidebound-house .tb-progress { gap: 0; justify-content: space-between; padding: 6px 12px; letter-spacing: 0; font-size: 14px; }
+  .project-tidebound-house .tb-progress [data-growth] { max-width: 70px; white-space: nowrap; overflow: hidden; }
+  .project-tidebound-house .tb-scene-top { inset: 8px 10px auto; font-size: 14px; letter-spacing: 0; }
+  .project-tidebound-house .tb-scene-top button { padding: 4px 7px; min-height: 32px; }
+  .project-tidebound-house .tb-world-caption { left: 12px; bottom: 8px; right: 12px; }
+  .project-tidebound-house .tb-free { display: none; }
+  .project-tidebound-house .tb-dock { padding: 9px 12px 8px; gap: 8px; }
+  .project-tidebound-house .tb-objective { align-items: start; gap: 8px; }
+  .project-tidebound-house .tb-objective > strong { flex: 0 0 2em; line-height: 1.5; font-size: 14px; }
+  .project-tidebound-house .tb-objective p { font-size: 14px; max-height: 3.1em; }
+  .project-tidebound-house .tb-objective > button { padding: 5px 7px; font-size: 14px; }
+  .project-tidebound-house .tb-location-row { grid-template-columns: minmax(0, 1fr) 104px; gap: 6px; }
+  .project-tidebound-house .tb-location-row label { font-size: 0; gap: 0; }
+  .project-tidebound-house .tb-location-row select { font-size: 16px; }
+  .project-tidebound-house .tb-location-row button { padding: 6px 7px; }
+  .project-tidebound-house .tb-action-row { display: grid; grid-template-columns: minmax(0, 1fr) 104px; gap: 6px; }
+  .project-tidebound-house .tb-action-row > button { padding: 6px 8px; }
+  .project-tidebound-house .tb-action-row > p { grid-column: 1 / -1; max-height: 2.8em; font-size: 14px; line-height: 1.4; }
+  .project-tidebound-house .tb-action-row > [data-ending] { grid-column: 1 / -1; }
+  .project-tidebound-house .tb-footer { padding: 7px 68px 9px 10px; gap: 5px; }
+  .project-tidebound-house .agent-console { gap: 4px; flex-wrap: wrap; }
+  .project-tidebound-house .agent-console > [data-agent-status] { order: 5; flex: 0 0 100%; }
+  .project-tidebound-house .agent-console > button { padding: 5px 8px; }
+  .project-tidebound-house .tb-footer > button { align-self: start; }
+  .project-tidebound-house .tb-guest-list, .project-tidebound-house .tb-person-actions, .project-tidebound-house .tb-inventory { grid-template-columns: 1fr; }
+  .project-tidebound-house .tb-person-heading { gap: 12px; }
+  .project-tidebound-house .tb-person-heading > svg { width: 86px; height: 135px; padding: 4px; }
+  .project-tidebound-house .tb-person-heading h3 { font-size: 26px; }
+  .project-tidebound-house .tb-person-heading p { font-size: 14px; }
+  .project-tidebound-house .tb-skill-list { gap: 7px; }
+  .project-tidebound-house .tb-skill-list button { padding: 7px; font-size: 14px; }
+  .project-tidebound-house .tb-dialog .workspace-dialog-content { padding: 14px; }
+}
+@media (max-height: 540px) and (min-width: 651px) {
+  .project-tidebound-house .tb-header { padding: 6px 18px; }
+  .project-tidebound-house .tb-brand-mark, .project-tidebound-house .tb-brand p { display: none; }
+  .project-tidebound-house h1 { font-size: 24px; }
+  .project-tidebound-house .tb-progress { padding: 3px 18px; }
+  .project-tidebound-house .tb-main { grid-template-columns: minmax(0, 1fr) 305px; grid-template-rows: minmax(0, 1fr); }
+  .project-tidebound-house .tb-dock { gap: 9px; padding: 10px 14px; align-content: start; }
+  .project-tidebound-house .tb-objective { display: block; }
+  .project-tidebound-house .tb-objective p { max-height: 4.65em; font-size: 14px; }
+  .project-tidebound-house .tb-location-row { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .project-tidebound-house .tb-location-row label { font-size: 0; gap: 0; }
+  .project-tidebound-house .tb-location-row button { padding: 5px 6px; font-size: 14px; }
+  .project-tidebound-house .tb-action-row { flex-wrap: wrap; gap: 6px; }
+  .project-tidebound-house .tb-action-row > button { font-size: 14px; padding: 5px 7px; }
+  .project-tidebound-house .tb-action-row > p { flex-basis: 100%; }
+  .project-tidebound-house .tb-world-caption { font-size: 14px; }
+  .project-tidebound-house .tb-free { display: none; }
+  .project-tidebound-house .tb-footer { padding-top: 5px; padding-bottom: 6px; }
+}

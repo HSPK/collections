@@ -4,6 +4,7 @@ import type { Plugin, ResolvedConfig } from 'vite';
 import { parseManifest, validateCollection } from '../src/core/manifest';
 import { escapeMarkup } from '../src/core/markup';
 import type { ProjectManifest } from '../src/core/types';
+import { projectLabels } from '../src/core/project-locale';
 
 export function readProjectManifests(root: string): ProjectManifest[] {
   const directory = resolve(root, 'src/projects');
@@ -27,10 +28,12 @@ export function readProjectManifests(root: string): ProjectManifest[] {
 export function renderProjectDocument(html: string, project: ProjectManifest, built: boolean): string {
   const title = escapeMarkup(`${project.title} - Odd Index`);
   const description = escapeMarkup(project.description + (project.runtime === 'openai-compatible' ?
-    ' Requires an OpenAI-compatible model connection.' : ''));
+    projectLabels(project.language).metaRequired : ''));
   const canonical = `https://hspk.github.io/collections/projects/${project.id}/`;
   const preview = `https://hspk.github.io/collections/${project.preview || `previews/${project.id}.jpg`}`;
   let result = html
+    .replace(/<html\b([^>]*)\blang="[^"]*"([^>]*)>/i, (_match, before: string, after: string) =>
+      `<html${before}lang="${project.language ?? 'en'}"${after}>`)
     .replace(/<body\b([^>]*)>/i, (_match, attributes: string) => `<body${attributes} data-project="${project.id}" data-runtime="${project.runtime ?? 'local'}">`)
     .replace(/<title>.*?<\/title>/, () => `<title>${title}</title>`)
     .replace(/<meta name="odd-index-base"[^>]*>/, '<meta name="odd-index-base" content="../../" />')

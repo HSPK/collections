@@ -31,6 +31,17 @@ await agent.turn({
 });
 ```
 
+Both `createAgentConsole(page, { gameId, host, locale?, onBusyChange? })` and
+`createGameNotebook(page, { gameId, session, trigger, beforeRestore, afterRestore,
+onNotice?, locale? })` accept `locale: 'en' | 'zh-CN'`, defaulting to `'en'`.
+Pass `locale: 'zh-CN'` to both for Chinese connection settings, public action-log
+controls, turn notices, and replay controls. This only changes shared UI copy,
+not model prompts, connection preferences, replay formats, or request limits.
+Game-authored labels, plans, custom cancellation messages, and notebook notices
+remain verbatim text; author those in the game's language. Chinese error summaries
+retain original validator/provider-client diagnostics as labelled technical detail.
+The operating system's file picker follows the user's system language.
+
 `turn` returns whether a plan committed. Configuration, network, protocol,
 timeout, and rule errors are reported explicitly. A bad plan gets one
 tool-feedback correction, never an offline substitute. Unknown programming
@@ -51,6 +62,11 @@ restart, import, and explicit new-world intents. Camera/selection-only edits
 should not change the world revision. Disable conflicting actions while a
 turn runs, and use `onBusyChange` if a view needs to update its controls.
 Never modify the world speculatively before an API-backed transition succeeds.
+An optional synchronous `preflight` on the console options checks local
+capacity before any request. RPGs use it to reserve replay space with
+`session.assertCanDispatch(32768)`; validation failures are reported normally
+without contacting a model. `GameSession.preview` also applies every
+count/size constraint used by the eventual commit.
 
 ## Replay and lifecycle
 

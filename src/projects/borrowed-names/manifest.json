@@ -1,0 +1,16 @@
+{
+  "id": "borrowed-names",
+  "order": 83,
+  "title": "借名之城",
+  "subtitle": "名字可以抵押，街道不该被遗忘。",
+  "description": "原创中文城市奇幻侦探与潜入角色扮演游戏。在雨夜雾津扮演听雨人、戏面师或巡夜客，借身份服饰穿行八处城区，与六位各有立场的角色交涉，完成十二项委托，用六件实物揭开封街案，并为三种黎明契约承担不同代价。",
+  "category": "play",
+  "format": "page",
+  "runtime": "openai-compatible",
+  "language": "zh-CN",
+  "medium": "雨夜城市、身份潜入与有限角色智能体",
+  "tags": ["Agent RPG", "RPG", "Agent games", "中文"],
+  "color": "#123b46",
+  "ink": "#e9d7b1",
+  "instruction": "选择职业，在名夹学习技能；主动与阮灯交涉，再勘验湿封套。模型只决定角色意图，物证、检定、成本与结局由本地规则裁决。"
+}

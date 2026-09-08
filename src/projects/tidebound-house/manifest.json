@@ -1,0 +1,16 @@
+{
+  "id": "tidebound-house",
+  "order": 86,
+  "title": "潮汐归客",
+  "subtitle": "七次潮水，一座借来的屋檐。",
+  "description": "一座会改主意的海屋，五位彼此藏着半封信的旅客。探索十处海岸与房间，修灯、制物、研习技艺，在七次潮水中兑现带走或放下的承诺。由真实模型安排旅客的相遇、外出与有限援助，本地规则决定三种可以亲手修成的生活。",
+  "category": "play",
+  "format": "page",
+  "runtime": "openai-compatible",
+  "language": "zh-CN",
+  "medium": "原创中文群像角色扮演",
+  "tags": ["Agent RPG", "RPG", "Agent games", "中文"],
+  "color": "#8dafac",
+  "ink": "#294852",
+  "instruction": "领取钥匙，在潮灯厅修炉座。明确邀请旅客安排议程，再看地图上的去处。辨读潮图，修好灯塔与屋心，亲手兑现人物约定；第七潮在屋心阁落款。查看和阅读免费，模型只在你邀请时行动。"
+}

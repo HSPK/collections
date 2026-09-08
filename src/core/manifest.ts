@@ -62,6 +62,10 @@ export function parseManifest(value: unknown, source = 'Project manifest'): Proj
   if (runtime !== undefined && runtime !== 'local' && runtime !== 'openai-compatible') {
     throw new Error(`${source}: runtime must be "local" or "openai-compatible".`);
   }
+  const language = value.language;
+  if (language !== undefined && language !== 'en' && language !== 'zh-CN') {
+    throw new Error(`${source}: language must be "en" or "zh-CN".`);
+  }
   return {
     id, order, color, ink,
     title: text('title'),
@@ -74,6 +78,7 @@ export function parseManifest(value: unknown, source = 'Project manifest'): Proj
     instruction: text('instruction', true),
     ...(preview ? { preview } : {}),
     ...(runtime ? { runtime } : {}),
+    ...(language ? { language } : {}),
   };
 }
 

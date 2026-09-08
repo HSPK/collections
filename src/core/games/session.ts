@@ -31,16 +31,27 @@ export class GameSession<S, C> {
   get seed(): number { return this.currentSeed; }
   get moveCount(): number { return this.commands.length; }
 
+  assertCanDispatch(reservedCharacters = 0): void {
+    requireRule(this.commands.length < MAX_GAME_COMMANDS, 'This session reached its move limit. Export it and start a new game.');
+    integer(reservedCharacters, 'Replay reservation', 0, MAX_SAVE_CHARACTERS);
+    requireRule(this.serialize().length + reservedCharacters + 1 <= MAX_SAVE_CHARACTERS,
+      'This session has insufficient replay space for another action. Export it and start a new game.');
+  }
+
+  private prepare(command: C): { parsed: C; next: S } {
+    this.assertCanDispatch();
+    const parsed = this.definition.parseCommand(structuredClone(command));
+    requireRule(JSON.stringify([...this.commands, parsed]).length + 200 <= MAX_SAVE_CHARACTERS,
+      'This session reached its replay size limit. Export it and start a new game.');
+    return { parsed, next: this.definition.reduce(this.current, parsed) };
+  }
+
   preview(command: C): S {
-    return this.definition.reduce(this.current, this.definition.parseCommand(command));
+    return this.prepare(command).next;
   }
 
   dispatch(command: C): S {
-    requireRule(this.commands.length < MAX_GAME_COMMANDS, 'This session reached its move limit. Export it and start a new game.');
-    const parsed = this.definition.parseCommand(structuredClone(command));
-    const next = this.definition.reduce(this.current, parsed);
-    requireRule(JSON.stringify([...this.commands, parsed]).length + 200 <= MAX_SAVE_CHARACTERS,
-      'This session reached its replay size limit. Export it and start a new game.');
+    const { parsed, next } = this.prepare(command);
     this.current = next;
     this.commands.push(parsed);
     this.changed();

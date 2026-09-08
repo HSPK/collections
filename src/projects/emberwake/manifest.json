@@ -1,0 +1,16 @@
+{
+  "id": "emberwake",
+  "order": 82,
+  "title": "余烬行旅",
+  "subtitle": "风停之后，谁来付清黎明",
+  "description": "驾驶载着最后一张余烬图的帆车，穿越九处悬空聚落。与三位各怀心事的同伴旅行，在三路战线上回应真实角色代理的公开意图，揭开天空借走记忆的代价，并亲手决定重启的方式。",
+  "category": "play",
+  "format": "page",
+  "runtime": "openai-compatible",
+  "language": "zh-CN",
+  "medium": "原创空岛幻想 · 战术行旅",
+  "tags": ["Agent RPG", "RPG", "Agent games", "中文", "Fantasy", "Tactics"],
+  "color": "#18233c",
+  "ink": "#edb482",
+  "instruction": "先与岚缇商议，再展开航路。战斗先聆听公开意图，随后选择站位、目标和技能；在行旅簿里追寻十二项记事与三种天空。"
+}

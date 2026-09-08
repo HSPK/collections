@@ -133,6 +133,7 @@ interface WorkspaceDialogOptions {
   content: readonly HTMLElement[];
   triggers?: readonly HTMLElement[];
   className?: string;
+  closeLabel?: string;
 }
 
 export function createWorkspaceDialog(page: WorkspaceLifecycle, options: WorkspaceDialogOptions) {
@@ -150,8 +151,8 @@ export function createWorkspaceDialog(page: WorkspaceLifecycle, options: Workspa
   title.textContent = options.title;
   const close = document.createElement('button');
   close.type = 'button';
-  close.textContent = 'Close';
-  close.setAttribute('aria-label', `Close ${options.title}`);
+  close.textContent = options.closeLabel ?? 'Close';
+  close.setAttribute('aria-label', `${options.closeLabel ?? 'Close'} ${options.title}`);
   close.addEventListener('click', () => dialog.close(), { signal: page.signal });
   heading.append(title, close);
   const body = document.createElement('div');

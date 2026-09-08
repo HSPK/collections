@@ -33,7 +33,7 @@ for (const project of projects.filter(project => project.category !== 'read')) {
       await expectWorkspaceViewport(page, size.width, size.height);
       expect(await visibleControlProblems(root), `${project.id}, default motion at ${size.width}x${size.height}`).toEqual([]);
     }
-    await expect(page.getByRole('button', { name: 'Collection menu', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: project.language === 'zh-CN' ? '项目导航' : 'Collection menu', exact: true })).toBeVisible();
     expect(errors).toEqual([]);
   });
 }

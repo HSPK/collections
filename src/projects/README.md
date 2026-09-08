@@ -58,6 +58,10 @@ The optional `runtime` is `"local"` (the default) or
 library, quick search, project information, and generated page metadata.
 It does not create a backend or perform a model request. Keep this marker
 accurate; existing local websites need no model configuration.
+Set `"language": "zh-CN"` for a Chinese-language project. Omitted language
+defaults to English. This sets the standalone document language and collection
+menu/search/feedback labels without changing other projects. Pass
+`locale: 'zh-CN'` to the shared model console and game notebook as well.
 The default cover is `public/previews/<id>.jpg`; an optional `preview`
 can point to another local image inside `previews/`.
 Add `data-project-preview` to the main workbench, exhibit, or content region

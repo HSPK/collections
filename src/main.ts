@@ -3,6 +3,7 @@ import { categories, categoryNames, isCategory, projects } from './catalog';
 import { escapeMarkup } from './core/markup';
 import { collectTags, matchesTags, normalizeTag } from './core/tags';
 import { projectUrl, siteBase, siteUrl } from './core/urls';
+import { projectCategory, projectLabels } from './core/project-locale';
 import type { Category, Project, ProjectInstance } from './core/types';
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
@@ -304,6 +305,7 @@ function resetFilters() {
 }
 
 function renderLibrary() {
+  document.documentElement.lang = 'en';
   routeController.abort();
   routeController = new AbortController();
   const signal = routeController.signal;
@@ -383,18 +385,19 @@ function renderLibrary() {
 }
 
 function floatingMenu(project: Project) {
+  const labels = projectLabels(project.language);
   const position = projects.indexOf(project);
   const previous = projects[(position + projects.length - 1) % projects.length];
   const next = projects[(position + 1) % projects.length];
   return `<div class="collection-menu" data-collection-menu>
-    <button class="collection-menu-toggle" type="button" aria-label="Collection menu" aria-expanded="false" aria-controls="collection-menu-panel" data-menu-toggle>${mark}</button>
-    <nav class="collection-menu-panel" id="collection-menu-panel" aria-label="Collection navigation" hidden>
-      <div class="collection-menu-heading"><strong>${escapeMarkup(project.title)}</strong><span>${categoryNames[project.category]}</span></div>
-      <a href="${siteUrl()}" aria-label="Back to index">${arrow}<span>All projects</span></a>
-      <button type="button" data-search>${searchIcon}<span>Search projects</span></button>
-      <button type="button" data-project-info aria-label="About this project"><span class="menu-info-icon" aria-hidden="true">i</span><span>About this project</span></button>
-      <a href="${sourceUrl(project)}" target="_blank" rel="noopener noreferrer">${codeIcon}<span>Source & notes</span></a>
-      <div class="collection-menu-pager"><a href="${projectUrl(previous.id)}" aria-label="Previous project: ${escapeMarkup(previous.title)}">${arrow}<span>Previous</span></a><a href="${projectUrl(next.id)}" aria-label="Next project: ${escapeMarkup(next.title)}"><span>Next</span>${arrow}</a></div>
+    <button class="collection-menu-toggle" type="button" aria-label="${labels.menu}" aria-expanded="false" aria-controls="collection-menu-panel" data-menu-toggle>${mark}</button>
+    <nav class="collection-menu-panel" id="collection-menu-panel" aria-label="${labels.navigation}" hidden>
+      <div class="collection-menu-heading"><strong>${escapeMarkup(project.title)}</strong><span>${projectCategory(project.category, project.language)}</span></div>
+      <a href="${siteUrl()}" aria-label="${labels.back}">${arrow}<span>${labels.all}</span></a>
+      <button type="button" data-search>${searchIcon}<span>${labels.search}</span></button>
+      <button type="button" data-project-info aria-label="${labels.about}"><span class="menu-info-icon" aria-hidden="true">i</span><span>${labels.about}</span></button>
+      <a href="${sourceUrl(project)}" target="_blank" rel="noopener noreferrer">${codeIcon}<span>${labels.source}</span></a>
+      <div class="collection-menu-pager"><a href="${projectUrl(previous.id)}" aria-label="${labels.previousProject}: ${escapeMarkup(previous.title)}">${arrow}<span>${labels.previous}</span></a><a href="${projectUrl(next.id)}" aria-label="${labels.nextProject}: ${escapeMarkup(next.title)}"><span>${labels.next}</span>${arrow}</a></div>
     </nav>
   </div>`;
 }
@@ -434,35 +437,40 @@ function destroyProject() {
 }
 
 async function renderProject(project: Project) {
+  const labels = projectLabels(project.language);
   const generation = ++mountGeneration;
   destroyProject();
   routeController = new AbortController();
   const signal = routeController.signal;
   activeProject = project;
+  document.documentElement.lang = project.language ?? 'en';
+  const skip = document.querySelector('.skip-link');
+  if (skip) skip.textContent = project.language === 'zh-CN' ? '跳到游戏内容' : 'Skip to content';
   document.body.classList.remove('library-mode');
   document.title = `${project.title} - Odd Index`;
   app.className = 'standalone-root';
   app.innerHTML = `
     <main id="main-content" class="standalone-site" tabindex="-1">
-      <div class="project-surface" data-stage data-experiment="${project.id}" data-format="${project.format}" aria-label="${escapeMarkup(project.title)} website">
-        <div class="project-loading" role="status"><span class="loading-orbit"></span>Opening ${escapeMarkup(project.title)}...</div>
+      <div class="project-surface" data-stage data-experiment="${project.id}" data-format="${project.format}" aria-label="${escapeMarkup(project.title)} ${labels.website}">
+        <div class="project-loading" role="status"><span class="loading-orbit"></span>${labels.opening} ${escapeMarkup(project.title)}...</div>
       </div>
       <div data-project-controls hidden></div>
     </main>
     ${floatingMenu(project)}
-    <div class="project-feedback" data-feedback hidden><p role="status" aria-live="polite" data-report></p><button type="button" aria-label="Dismiss message" data-dismiss-feedback>&times;</button></div>`;
+    <div class="project-feedback" data-feedback hidden><p role="status" aria-live="polite" data-report></p><button type="button" aria-label="${labels.dismiss}" data-dismiss-feedback>&times;</button></div>`;
   bindFloatingMenu(signal);
   bindCommon(signal);
   app.querySelector('[data-project-info]')?.addEventListener('click', () => {
     closeFloatingMenu?.(true);
     projectInfo.querySelector('h2')!.textContent = project.title;
     projectInfo.querySelector('[data-info-description]')!.textContent = project.description;
-    projectInfo.querySelector('[data-info-medium]')!.textContent = `${categoryNames[project.category]} / ${project.medium}`;
+    projectInfo.querySelector('[data-info-medium]')!.textContent = `${projectCategory(project.category, project.language)} / ${project.medium}`;
     projectInfo.querySelector('[data-info-runtime]')!.textContent = project.runtime === 'openai-compatible' ?
-      'Requires your own OpenAI-compatible model connection. Game observations are sent only when you request a turn. The collection does not provide hosted inference; provider charges may apply.' :
-      'This project runs locally in your browser and does not require a hosted model.';
+      labels.modelRequired : labels.localOnly;
+    projectInfo.querySelector('.dialog-close')!.setAttribute('aria-label', labels.closeInfo);
     const link = projectInfo.querySelector<HTMLAnchorElement>('a')!;
     link.href = sourceUrl(project);
+    link.textContent = labels.sourceNotes;
     projectInfo.showModal();
   }, { signal });
   const container = app.querySelector<HTMLElement>('[data-stage]')!;
@@ -493,9 +501,9 @@ async function renderProject(project: Project) {
     if (signal.aborted) return;
     console.error(`Could not open ${project.title}.`, error);
     controls.replaceChildren();
-    container.innerHTML = `<div class="project-error" role="alert"><h1>This website could not be opened.</h1><p data-error-message></p><p>Try a current browser with hardware acceleration for 3D projects, or explore a Canvas website instead.</p><div><a class="app-button" href="${projectUrl('flow')}">Try Flow State instead</a><a class="app-button app-button--quiet" href="${siteUrl()}">All projects</a></div></div>`;
-    container.querySelector('[data-error-message]')!.textContent = error instanceof Error ? error.message : 'The project could not be started.';
-    reportElement.textContent = 'Project unavailable. See the message above.';
+    container.innerHTML = `<div class="project-error" role="alert"><h1>${labels.unavailable}</h1><p data-error-message></p><p>${labels.unavailableAdvice}</p><div><a class="app-button" href="${projectUrl('flow')}">${labels.tryFlow}</a><a class="app-button app-button--quiet" href="${siteUrl()}">${labels.all}</a></div></div>`;
+    container.querySelector('[data-error-message]')!.textContent = error instanceof Error ? error.message : labels.openFailed;
+    reportElement.textContent = labels.unavailableStatus;
   }
 }
 
@@ -548,14 +556,21 @@ const searchInput = searchDialog.querySelector<HTMLInputElement>('input')!;
 const searchResults = searchDialog.querySelector<HTMLElement>('.search-results')!;
 
 function updateSearch() {
+  const labels = projectLabels(activeProject?.language);
   const query = searchInput.value.trim().toLowerCase();
   const results = projects.filter((project) => projectSearchText(project).includes(query));
-  searchDialog.querySelector('.search-result-count')!.textContent = `${results.length} projects`;
-  searchResults.innerHTML = results.length ? results.map((project) => `<a class="search-result" href="${projectUrl(project.id)}"><span class="search-project-icon" style="--icon-color:${project.color};--icon-ink:${project.ink}">${categoryIcon(project.category)}</span><span><strong>${escapeMarkup(project.title)}</strong><small>${escapeMarkup(project.medium)}${project.runtime === 'openai-compatible' ? ' / API required' : ''}</small></span>${diagonal}</a>`).join('') : '<p class="search-empty">No projects by that name. Try a different word or idea.</p>';
+  searchDialog.querySelector('.search-result-count')!.textContent = `${results.length} ${labels.projectUnit}`;
+  searchResults.innerHTML = results.length ? results.map((project) => `<a class="search-result" href="${projectUrl(project.id)}"><span class="search-project-icon" style="--icon-color:${project.color};--icon-ink:${project.ink}">${categoryIcon(project.category)}</span><span><strong>${escapeMarkup(project.title)}</strong><small>${escapeMarkup(project.medium)}${project.runtime === 'openai-compatible' ? ` / ${labels.apiBadge}` : ''}</small></span>${diagonal}</a>`).join('') : `<p class="search-empty">${labels.searchEmpty}</p>`;
 }
 
 function openSearch() {
+  const labels = projectLabels(activeProject?.language);
   closeFloatingMenu?.(true);
+  searchDialog.querySelector('h2')!.textContent = labels.searchTitle;
+  searchDialog.querySelector('.dialog-close')!.setAttribute('aria-label', labels.closeSearch);
+  searchDialog.querySelector('label')!.textContent = labels.searchLabel;
+  searchDialog.querySelector('.search-help')!.textContent = labels.searchHelp;
+  searchInput.placeholder = labels.searchPlaceholder;
   searchInput.value = '';
   updateSearch();
   searchDialog.showModal();

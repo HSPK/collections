@@ -1,0 +1,16 @@
+{
+  "id": "verdant-oath",
+  "order": 84,
+  "title": "森语契约",
+  "subtitle": "借暖留阴，借水留路，借火许熄。",
+  "description": "化身祈芽岭的见习缔灵师，在迁徙的四季中书写空间元素阵句，与有独立愿望的精灵结契同行。穿越八处手绘地景，履行十三项约定，训练并蜕变伙伴，亲自承担修复旧约的代价，走向三种挣得的结局。",
+  "category": "play",
+  "format": "page",
+  "runtime": "openai-compatible",
+  "language": "zh-CN",
+  "medium": "水彩剪纸仙境 · 空间缔灵冒险",
+  "tags": ["Agent RPG", "RPG", "Agent games", "中文"],
+  "color": "#e4efda",
+  "ink": "#284f46",
+  "instruction": "先拾落物，再沿地图去苔林。木起、水收，火水之间以木相承；安排伙伴站位并落笔，只有「请灵应答」会请求模型并推进仪式。可撤阵休息，旧地可回访；在约簿履行承诺，选择自己愿意承担的未来。"
+}

@@ -8,6 +8,8 @@ import {
 import { listModels, runAgent } from './client';
 import type { AgentRequest } from './client';
 import { AgentError } from './errors';
+import { agentLocale } from './locale';
+import type { AgentLocale } from './locale';
 
 interface AgentPage extends WorkspaceLifecycle {
   report(message: string): void;
@@ -16,6 +18,8 @@ interface AgentPage extends WorkspaceLifecycle {
 interface ConsoleOptions {
   gameId: string;
   host: HTMLElement;
+  locale?: AgentLocale;
+  preflight?(): void;
   onBusyChange?(busy: boolean): void;
 }
 
@@ -36,32 +40,34 @@ interface Trace {
 export function createAgentConsole(page: AgentPage, options: ConsoleOptions) {
   page.signal.throwIfAborted();
   if (!/^[a-z][a-z0-9-]*$/.test(options.gameId)) throw new Error('Agent consoles need a valid game identifier.');
+  const locale = agentLocale(options.locale);
+  const copy = locale.console;
   const host = options.host;
   host.classList.add('agent-console');
-  host.innerHTML = `<button type="button" data-agent-connect aria-label="Model settings">Model</button>
+  host.innerHTML = `<button type="button" data-agent-connect aria-label="${copy.modelSettings}">${copy.model}</button>
     <p data-agent-status role="status" aria-live="polite" aria-atomic="true"></p>
-    <button type="button" data-agent-log aria-label="Agent action log">Log</button>
-    <button type="button" data-agent-cancel hidden>Cancel</button>`;
+    <button type="button" data-agent-log aria-label="${copy.actionLog}">${copy.log}</button>
+    <button type="button" data-agent-cancel hidden>${copy.cancel}</button>`;
   const status = query<HTMLElement>(host, '[data-agent-status]');
   const cancelButton = query<HTMLButtonElement>(host, '[data-agent-cancel]');
   const settings = document.createElement('section');
   settings.className = 'agent-settings';
   settings.innerHTML = `
-    <p>This game needs a model that supports OpenAI-compatible Chat Completions and function tools. Nothing is sent until you request a turn or fetch models.</p>
+    <p>${copy.introduction}</p>
     <form data-agent-settings-form>
-      <label>Endpoint <input name="endpoint" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://your-gateway.example/v1" required data-agent-endpoint></label>
-      <p class="agent-help">Include the base path, usually /v1. On this repository's local game server, use its /api/openai/v1 endpoint. Public HTTPS pages cannot reach every local server; CORS and local-network permissions still apply.</p>
-      <label>Model <input name="model" autocomplete="off" spellcheck="false" maxlength="200" required data-agent-model></label>
-      <label>API key <input name="key" type="password" autocomplete="off" spellcheck="false" maxlength="4096" data-agent-key placeholder="Optional; memory only"></label>
-      <p class="agent-help">Prefer your own server-side gateway for keys. A browser key stays in this tab's memory, disappears on reload, and is never saved or exported. Leaving it blank keeps a key only for the same endpoint.</p>
+      <label>${copy.endpoint} <input name="endpoint" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://your-gateway.example/v1" required data-agent-endpoint></label>
+      <p class="agent-help">${copy.endpointHelp}</p>
+      <label>${copy.model} <input name="model" autocomplete="off" spellcheck="false" maxlength="200" required data-agent-model></label>
+      <label>${copy.key} <input name="key" type="password" autocomplete="off" spellcheck="false" maxlength="4096" data-agent-key placeholder="${copy.keyPlaceholder}"></label>
+      <p class="agent-help">${copy.keyHelp}</p>
       <div class="agent-settings-actions">
-        <button type="button" data-agent-models>Fetch models</button>
-        <button type="submit">Save connection</button>
-        <button type="button" data-agent-forget>Forget key</button>
+        <button type="button" data-agent-models>${copy.fetchModels}</button>
+        <button type="submit">${copy.save}</button>
+        <button type="button" data-agent-forget>${copy.forget}</button>
       </div>
     </form>
     <p data-agent-settings-status role="status" aria-live="polite"></p>
-    <p class="agent-help">Each game decision uses at most two bounded requests: one plan and, only if its rules are invalid, one correction. A provider may charge for both. Cancelling prevents a game commit but cannot undo tokens already processed. Model output is untrusted; the local rules decide what is legal.</p>`;
+    <p class="agent-help">${copy.boundsHelp}</p>`;
   const settingsStatus = query<HTMLElement>(settings, '[data-agent-settings-status]');
   const endpointInput = query<HTMLInputElement>(settings, '[data-agent-endpoint]');
   const modelInput = query<HTMLInputElement>(settings, '[data-agent-model]');
@@ -72,26 +78,26 @@ export function createAgentConsole(page: AgentPage, options: ConsoleOptions) {
   modelInput.setAttribute('list', datalist.id);
   settings.append(datalist);
   const settingsDialog = createWorkspaceDialog(page, {
-    id: `${options.gameId}-model-connection`, title: 'Model connection', content: [settings], className: 'agent-dialog',
+    id: `${options.gameId}-model-connection`, title: copy.connection, content: [settings], className: 'agent-dialog', closeLabel: locale.close,
   });
   const traceContent = document.createElement('section');
   traceContent.className = 'agent-trace';
   const traceIntro = document.createElement('p');
-  traceIntro.textContent = 'Public intentions and accepted game actions only. No private model reasoning is requested or displayed.';
+  traceIntro.textContent = copy.traceIntroduction;
   const traceList = document.createElement('ol');
   const traceStatus = document.createElement('p');
   traceStatus.setAttribute('role', 'status');
-  traceStatus.textContent = 'No model turns yet.';
+  traceStatus.textContent = copy.noTurns;
   traceContent.append(traceIntro, traceStatus, traceList);
   const traceDialog = createWorkspaceDialog(page, {
-    id: `${options.gameId}-agent-log`, title: 'Agent action log', content: [traceContent], className: 'agent-dialog',
+    id: `${options.gameId}-agent-log`, title: copy.actionLog, content: [traceContent], className: 'agent-dialog', closeLabel: locale.close,
     triggers: [query(host, '[data-agent-log]')],
   });
   const traces: Trace[] = [];
   let running: AbortController | undefined;
   let modelRequest: AbortController | undefined;
   let generation = 0;
-  let lastStatus = 'Model required. Ready when you are.';
+  let lastStatus = copy.ready;
   let disposed = false;
 
   function setStatus(message: string, error = false) {
@@ -120,12 +126,12 @@ export function createAgentConsole(page: AgentPage, options: ConsoleOptions) {
       if (trace.requests !== undefined) {
         const detail = document.createElement('p');
         detail.className = 'agent-help';
-        detail.textContent = `${trace.requests} request${trace.requests === 1 ? '' : 's'}${trace.tokens ? ` / ${trace.tokens} reported tokens` : ''}`;
+        detail.textContent = copy.usage(trace.requests, trace.tokens);
         item.append(detail);
       }
       return item;
     }));
-    traceStatus.textContent = entry.outcome === 'accepted' ? 'Latest plan accepted by the game rules.' : entry.message;
+    traceStatus.textContent = entry.outcome === 'accepted' ? copy.accepted : entry.message;
   }
 
   function busyChanged() {
@@ -136,28 +142,31 @@ export function createAgentConsole(page: AgentPage, options: ConsoleOptions) {
     options.onBusyChange?.(Boolean(running));
   }
 
-  function cancel(message = 'Turn cancelled. No pending model actions were committed.') {
+  function cancel(message = copy.cancelled) {
     generation++;
     if (running) {
       running.abort();
       running = undefined;
       setStatus(message);
-      addTrace({ label: 'Cancelled', message, outcome: 'cancelled' });
+      addTrace({ label: copy.cancelledLabel, message, outcome: 'cancelled' });
       busyChanged();
     }
   }
 
   function openSettings() {
-    const connection = readConnection(message => setStatus(message, true));
+    const connection = readConnection(message => setStatus(locale.storageNotice(message), true));
     endpointInput.value = connection.endpoint;
     modelInput.value = connection.model;
     keyInput.value = '';
-    settingsStatus.textContent = connection.apiKey ? 'A key is currently held in this tab for this endpoint.' :
-      'Only the endpoint and model preference are saved. Keys are never stored.';
+    if (options.locale === 'zh-CN') {
+      endpointInput.setCustomValidity('');
+      modelInput.setCustomValidity('');
+    }
+    settingsStatus.textContent = connection.apiKey ? copy.keyHeld : copy.preferencesOnly;
     settingsDialog.open();
   }
 
-  function invalidateModels(message = 'Connection details changed. Fetch models again for this connection.', clearList = true) {
+  function invalidateModels(message = copy.connectionEdited, clearList = true) {
     const pending = Boolean(modelRequest);
     modelRequest?.abort();
     modelRequest = undefined;
@@ -167,38 +176,49 @@ export function createAgentConsole(page: AgentPage, options: ConsoleOptions) {
   }
 
   for (const input of [endpointInput, keyInput, modelInput]) {
-    input.addEventListener('input', () => invalidateModels(undefined, input !== modelInput), { signal: page.signal });
+    input.addEventListener('input', () => {
+      if (options.locale === 'zh-CN') input.setCustomValidity('');
+      invalidateModels(undefined, input !== modelInput);
+    }, { signal: page.signal });
+  }
+  if (options.locale === 'zh-CN') {
+    for (const input of [endpointInput, modelInput]) {
+      input.addEventListener('invalid', () => {
+        if (input.validity.valueMissing) input.setCustomValidity(input === endpointInput ? copy.endpointRequired : copy.modelRequired);
+        else if (input.validity.typeMismatch) input.setCustomValidity(copy.endpointInvalid);
+      }, { signal: page.signal });
+    }
   }
   query(host, '[data-agent-connect]').addEventListener('click', openSettings, { signal: page.signal });
   cancelButton.addEventListener('click', () => cancel(), { signal: page.signal });
   query(settings, '[data-agent-settings-form]').addEventListener('submit', event => {
     event.preventDefault();
     try {
-      const saved = saveConnection(endpointInput.value, modelInput.value, keyInput.value, message => { settingsStatus.textContent = message; });
+      const saved = saveConnection(endpointInput.value, modelInput.value, keyInput.value, message => { settingsStatus.textContent = locale.storageNotice(message); });
       if (saved) {
         keyInput.value = '';
-        settingsStatus.textContent = 'Connection saved. Return to the game and choose your next action; saving does not start a model turn.';
-        setStatus('Connection saved. Choose a game action to request a model turn.');
+        settingsStatus.textContent = copy.savedHelp;
+        setStatus(copy.saved);
       } else {
         keyInput.value = '';
-        setStatus('Connection is available for this tab, but browser storage failed. Keep the tab open or export your work.', true);
+        setStatus(copy.storageFailed, true);
       }
     } catch (error) {
       if (!(error instanceof AgentError)) throw error;
-      settingsStatus.textContent = error.message;
+      settingsStatus.textContent = copy.error(error);
     }
   }, { signal: page.signal });
   query(settings, '[data-agent-forget]').addEventListener('click', () => {
     forgetApiKey();
     keyInput.value = '';
-    settingsStatus.textContent = 'The in-memory key has been forgotten. Your server may still provide its own authentication.';
+    settingsStatus.textContent = copy.forgotten;
   }, { signal: page.signal });
   modelButton.addEventListener('click', async () => {
     invalidateModels();
     const controller = new AbortController();
     modelRequest = controller;
     modelButton.disabled = true;
-    settingsStatus.textContent = 'Requesting the available model IDs...';
+    settingsStatus.textContent = copy.fetching;
     try {
       const connection = transientConnection(endpointInput.value, modelInput.value || 'model-list', keyInput.value);
       const models = await listModels(connection, controller.signal);
@@ -208,11 +228,11 @@ export function createAgentConsole(page: AgentPage, options: ConsoleOptions) {
         option.value = id;
         return option;
       }));
-      settingsStatus.textContent = `${models.length} model IDs loaded. Choose a text model with function-tool support, then save. A model listing does not prove tool support.`;
+      settingsStatus.textContent = copy.modelsLoaded(models.length);
       modelInput.focus();
     } catch (error) {
       if (!(error instanceof AgentError)) throw error;
-      if (modelRequest === controller && !disposed && !page.signal.aborted) settingsStatus.textContent = error.message;
+      if (modelRequest === controller && !disposed && !page.signal.aborted) settingsStatus.textContent = copy.error(error);
     } finally {
       if (modelRequest === controller) {
         modelRequest = undefined;
@@ -221,12 +241,12 @@ export function createAgentConsole(page: AgentPage, options: ConsoleOptions) {
     }
   }, { signal: page.signal });
   settingsDialog.dialog.addEventListener('close', () => {
-    invalidateModels('Model discovery cancelled.');
+    invalidateModels(copy.discoveryCancelled);
     keyInput.value = '';
   }, { signal: page.signal });
   function connectionChanged() {
     invalidateModels();
-    cancel('Connection changed. The pending turn was cancelled; choose an action to try again.');
+    cancel(copy.connectionChanged);
   }
   connectionEvents.addEventListener('change', connectionChanged, { signal: page.signal });
   window.addEventListener('storage', event => {
@@ -249,13 +269,13 @@ export function createAgentConsole(page: AgentPage, options: ConsoleOptions) {
   async function turn<T>(request: GameAgentTurn<T>): Promise<boolean> {
     if (disposed || page.signal.aborted) return false;
     if (running) {
-      setStatus('A model turn is already running. Wait for it or choose Cancel.');
+      setStatus(copy.alreadyRunning);
       return false;
     }
-    const connection = readConnection(message => setStatus(message, true));
+    const connection = readConnection(message => setStatus(locale.storageNotice(message), true));
     if (!connection.endpoint || !connection.model) {
       openSettings();
-      setStatus('Set your endpoint and model, save the connection, then retry the game action.');
+      setStatus(copy.configure);
       return false;
     }
     const controller = new AbortController();
@@ -264,13 +284,14 @@ export function createAgentConsole(page: AgentPage, options: ConsoleOptions) {
     const revision = request.getRevision();
     busyChanged();
     try {
+      options.preflight?.();
       const result = await runAgent(connection, request, controller.signal, progress => {
         if (running !== controller) return;
-        setStatus(progress.repairing ? `${request.label}: correcting an illegal plan (2/2).` : `${request.label}: requesting a plan (1/2).`);
+        setStatus(progress.repairing ? copy.correcting(request.label) : copy.requesting(request.label));
       });
       if (disposed || page.signal.aborted || controller.signal.aborted || generation !== ticket ||
           request.getRevision() !== revision) {
-        throw new AgentError('cancelled', 'The game changed before the model finished. Its stale plan was discarded.');
+        throw new AgentError('cancelled', copy.stalePlan);
       }
       request.commit(result.plan);
       addTrace({
@@ -282,8 +303,9 @@ export function createAgentConsole(page: AgentPage, options: ConsoleOptions) {
     } catch (error) {
       if (!(error instanceof AgentError)) throw error;
       if (running === controller && !disposed && !page.signal.aborted) {
-        setStatus(error.message, error.code !== 'cancelled');
-        addTrace({ label: request.label, message: error.message, outcome: error.code === 'cancelled' ? 'cancelled' : 'error' });
+        const message = copy.error(error);
+        setStatus(message, error.code !== 'cancelled');
+        addTrace({ label: request.label, message, outcome: error.code === 'cancelled' ? 'cancelled' : 'error' });
       }
       return false;
     } finally {

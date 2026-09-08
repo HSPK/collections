@@ -20,7 +20,7 @@ viewport. Collection navigation lives in a collapsible floating menu, not
 an injected page header.
 
 Every website is statically hosted. The original 71 projects run locally;
-ten **API-required agent games** also use a model endpoint supplied by the
+the **API-required agent games and RPGs** also use a model endpoint supplied by the
 player. The index labels that requirement before you open them. There is
 no collection account, analytics, shared API key, or hosted inference
 service. Game rules and rendering remain in the browser; optional model
@@ -45,6 +45,26 @@ Replace the starter with your idea and
 the site publishes automatically after the main-branch quality gate.
 
 ## The websites
+
+### 五款中文 Agent RPG
+
+原创世界、角色与多幕剧情，不套用现有动漫或小说的角色台词。
+每款都有角色成长、装备或道具、任务链、分支选择和完整结局；
+模型决定队友、敌人或 NPC 的合法行动，本地规则负责代价与结果。
+在合集选择 **Agent RPG** 标签即可找到这一组。
+
+| 项目 | 世界与玩法 |
+|------|------------|
+| [余烬行旅](https://hspk.github.io/collections/projects/emberwake/) | 穿行停风天空的奇幻商队，伙伴分歧、装备成长与队伍战术。 |
+| [借名之城](https://hspk.github.io/collections/projects/borrowed-names/) | 姓名可以抵押的都市异闻，身份伪装、派系交涉与潜入调查。 |
+| [森语契约](https://hspk.github.io/collections/projects/verdant-oath/) | 驯灵、探索与元素仪式，伙伴羁绊改变道路和森林的未来。 |
+| [铁穹回声](https://hspk.github.io/collections/projects/iron-choir/) | 原创机甲与驾驶员群像，3D 战场、掩体视线、热量和协同技能。 |
+| [潮汐归客](https://hspk.github.io/collections/projects/tidebound-house/) | 海边旅馆的七次潮汐，住客自主行动、遗物制作与交织的人物支线。 |
+
+界面、任务、剧情、角色对白及模型设置均支持中文。其他已有项目
+保留各自的英文界面。连接方式与其他 Agent 游戏相同，见
+[中文游戏与连接说明](docs/rpg-guide.zh-CN.md)；没有内置共享密钥，也没有
+在接口失败时冒充模型的离线角色。
 
 ### Ten games with agents on the other side
 

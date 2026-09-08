@@ -11,6 +11,7 @@ const gameIds = [
 ];
 const projects = readProjectManifests(process.cwd());
 const games = projects.filter(project => project.runtime === 'openai-compatible');
+const firstEdition = games.filter(project => project.order >= 72 && project.order <= 81);
 
 test('model runtime metadata is explicit, validated, backwards compatible, and carried into static documents', () => {
   const original = projects.find(project => project.id === 'nonogram')!;
@@ -30,8 +31,8 @@ test('model runtime metadata is explicit, validated, backwards compatible, and c
 });
 
 test('the ten agent games are distinct independently registered projects after the original local collection', () => {
-  expect(games.map(project => project.id).sort()).toEqual([...gameIds].sort());
-  expect(games.map(project => project.order).sort((a, b) => a - b)).toEqual(Array.from({ length: 10 }, (_, index) => index + 72));
+  expect(firstEdition.map(project => project.id).sort()).toEqual([...gameIds].sort());
+  expect(firstEdition.map(project => project.order).sort((a, b) => a - b)).toEqual(Array.from({ length: 10 }, (_, index) => index + 72));
   expect(projects.filter(project => project.order <= 71).every(project => project.runtime !== 'openai-compatible')).toBe(true);
   for (const game of games) {
     expect(game.tags).toContain('Agent games');
@@ -44,8 +45,8 @@ test('library cards disclose required models without loading game engines or con
   page.on('request', request => requests.push(request.url()));
   await page.goto('./');
   await expect(page.locator('.project-card')).toHaveCount(projects.length);
-  await expect(page.locator('.project-card[data-runtime="openai-compatible"]')).toHaveCount(10);
-  await expect(page.locator('.card-requirement')).toHaveCount(10);
+  await expect(page.locator('.project-card[data-runtime="openai-compatible"]')).toHaveCount(games.length);
+  await expect(page.locator('.card-requirement')).toHaveCount(games.length);
   expect(requests.filter(url => /\/(?:chat\/completions|models)(?:\?|$)|\/core\/agents\/|\/projects\/[^/]+\/(?:index|agent|engine)\.ts/.test(url))).toEqual([]);
   for (const layout of ['List view', 'Grid view']) {
     await page.getByRole('button', { name: layout, exact: true }).click();
@@ -61,10 +62,10 @@ test('library cards disclose required models without loading game engines or con
 test('model requirements are searchable and About describes explicit endpoint use rather than promising no uploads', async ({ page }) => {
   await page.goto('./');
   await page.locator('[data-library-search]').fill('model required');
-  await expect(page.locator('.project-card')).toHaveCount(10);
+  await expect(page.locator('.project-card')).toHaveCount(games.length);
   await expect(page.locator('.project-card[data-runtime="local"]')).toHaveCount(0);
   await page.locator('[data-library-search]').fill('openai-compatible');
-  await expect(page.locator('.project-card')).toHaveCount(10);
+  await expect(page.locator('.project-card')).toHaveCount(games.length);
   await page.getByRole('button', { name: 'About', exact: true }).click();
   const about = page.getByRole('dialog', { name: 'A collection, not a template.', exact: true });
   await expect(about).toContainText('API required');

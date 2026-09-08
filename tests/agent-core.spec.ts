@@ -213,7 +213,10 @@ async function consoleFixture(page: Page) {
     lifecycle.root.style.cssText = 'position:fixed;inset:0;z-index:100;background:#f5f1e8;color:#202b31;padding:20px;display:flex;flex-direction:column;gap:20px';
     lifecycle.root.innerHTML = '<h1>Agent fixture</h1><div data-console></div><button data-turn>Request turn</button><button data-world>Change world</button><button data-reset>Reset game</button><button data-dispose>Dispose</button><output data-position>0</output>';
     let position = 0, revision = 0;
-    const agent = createAgentConsole(lifecycle, { gameId: 'agent-fixture', host: query(lifecycle.root, '[data-console]') });
+    const agent = createAgentConsole(lifecycle, {
+      gameId: 'agent-fixture', host: query(lifecycle.root, '[data-console]'),
+      preflight: () => requireRule(!lifecycle.root.hasAttribute('data-budget-full'), 'Replay budget is full. Export and restart.'),
+    });
     const tool = defineTool({
       name: 'take_step',
       description: 'A legal fictional board-game step.',
@@ -305,6 +308,22 @@ test('connection errors remain inside the model dialog and keyboard focus does n
   await expect(dialog.getByRole('button', { name: 'Forget key', exact: true })).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(root.getByRole('button', { name: 'Model settings', exact: true })).toBeFocused();
+});
+
+test('agent preflight rejects exhausted local budgets before any paid model request', async ({ page }) => {
+  const calls = await installAgentFixture(page, () => ({ step: 1, intention: 'A legal step.' }));
+  await consoleFixture(page);
+  const root = page.locator('.project-agent-fixture');
+  await root.evaluate(element => element.setAttribute('data-budget-full', ''));
+  await root.getByRole('button', { name: 'Request turn', exact: true }).click();
+  await expect(root.locator('[data-agent-status]')).toContainText('Replay budget is full');
+  await expect(root).toHaveAttribute('data-agent-busy', 'false');
+  await expect(root.locator('[data-position]')).toHaveText('0');
+  expect(calls).toHaveLength(0);
+  await root.evaluate(element => element.removeAttribute('data-budget-full'));
+  await root.getByRole('button', { name: 'Request turn', exact: true }).click();
+  await expect(root.locator('[data-position]')).toHaveText('1');
+  expect(calls).toHaveLength(1);
 });
 
 for (const change of ['edit endpoint', 'save connection', 'forget key'] as const) {

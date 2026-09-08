@@ -1,0 +1,16 @@
+{
+  "id": "iron-choir",
+  "order": 85,
+  "title": "铁穹回声",
+  "subtitle": "为一场没有结束时间的战争，写下最后的命令。",
+  "description": "原创中文机甲远征角色扮演游戏：六名同行者、十处穹城场景、三幕六场战术任务。整备白陶机体，在真实三维掩体与炮线间指挥远征，与有界代理驾驶员共同抵达三种赢得的结局。",
+  "category": "play",
+  "format": "page",
+  "runtime": "openai-compatible",
+  "language": "zh-CN",
+  "medium": "三维微缩机甲战场与中文代理远征战记",
+  "tags": ["Agent RPG", "RPG", "Agent games", "中文"],
+  "color": "#152733",
+  "ink": "#e8e8de",
+  "instruction": "先在机库整备，再去白窑街听取同伴的条件。主动截获守机意图，以真实几何和有限行动守住回家的路。"
+}

@@ -9,6 +9,7 @@ import { isRecord } from '../src/core/agents/schema';
 const ids = [
   'ghost-courier', 'custodian', 'mnemosyne', 'accord', 'graft',
   'sigil', 'afterlight', 'mise', 'chorus', 'takes',
+  'emberwake', 'borrowed-names', 'verdant-oath', 'iron-choir', 'tidebound-house',
 ];
 const endpoint = process.env.ODD_MODEL_BASE_URL;
 
