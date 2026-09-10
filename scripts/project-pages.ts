@@ -34,7 +34,7 @@ export function renderProjectDocument(html: string, project: ProjectManifest, bu
   let result = html
     .replace(/<html\b([^>]*)\blang="[^"]*"([^>]*)>/i, (_match, before: string, after: string) =>
       `<html${before}lang="${project.language ?? 'en'}"${after}>`)
-    .replace(/<body\b([^>]*)>/i, (_match, attributes: string) => `<body${attributes} data-project="${project.id}" data-runtime="${project.runtime ?? 'local'}">`)
+    .replace(/<body\b([^>]*)>/i, (_match, attributes: string) => `<body${attributes} data-project="${project.id}" data-runtime="${project.runtime ?? 'local'}" data-platform="${project.platform ?? 'universal'}">`)
     .replace(/<title>.*?<\/title>/, () => `<title>${title}</title>`)
     .replace(/<meta name="odd-index-base"[^>]*>/, '<meta name="odd-index-base" content="../../" />')
     .replace(/<meta name="description"[^>]*>/, () => `<meta name="description" content="${description}" />`)

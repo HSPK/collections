@@ -94,7 +94,9 @@ changes in an issue before coupling a small contribution to a new stack.
   explicit errors, reset/back paths, and keyboard or touch alternatives.
 - Keep essential UI readable: roughly 16-18px body copy and at least 14px
   controls and labels. A 320px screen should not acquire document-level horizontal
-  scrolling.
+  scrolling for universal projects. A deliberately keyboard/mouse-only game
+  may declare `"platform": "desktop"`; the library labels that limitation and
+  its supported layout contract is tested at desktop sizes instead.
 - Keep interaction-led sites in one viewport, with primary controls beside
   their result. Use compact docks or explicit panes on phones and bounded
   panels/dialogs for long notes or inspectors. Do not conceal offscreen controls
@@ -105,6 +107,9 @@ changes in an issue before coupling a small contribution to a new stack.
   requirement; include a non-microphone alternative.
 - Release animation frames, timers, listeners, media tracks, audio graphs,
   renderers, geometry, textures, and observers when leaving the site.
+  Phaser projects should reuse `src/core/phaser/` for scene ownership, modal
+  and visibility pausing, fixed-step timing and teardown. Keep renderer
+  dependencies lazy, pool effects, and document measurable resource budgets.
 - Do not include API keys, credentials, private prompts, personal data,
   trackers, or undocumented network calls.
 - Explain approximations. A toy model is welcome; fake scientific results

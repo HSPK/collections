@@ -1,0 +1,17 @@
+{
+  "id": "cloud-rescue",
+  "order": 90,
+  "title": "云朵合伙人",
+  "subtitle": "和一阵爱给云梳刘海的风，开一家小天气公司。",
+  "description": "用键鼠滑动、合并与修剪云朵，为五座剪纸浮岛送齐雨剂。每三步和有自己性格的风灵卷卷订一次真实模型风单，在有限步数、播种金、岩石与雷格之间，把百花开业祭亲手办成。",
+  "category": "play",
+  "format": "page",
+  "runtime": "openai-compatible",
+  "language": "zh-CN",
+  "platform": "desktop",
+  "medium": "剪纸天气实验室 · 合伙送雨拼图",
+  "tags": ["Phaser", "Agent games", "桌面键鼠"],
+  "color": "#f5edce",
+  "ink": "#345c61",
+  "instruction": "先请卷卷订开工风，按左合云、按下送雨；每三步休息时选择目标，再让风灵真正播云、侧移或修剪。方向键与按钮都可移动，点顶排空格可花金播种。玩法、暂停、雨簿与重新开业始终在顶部。"
+}

@@ -29,6 +29,7 @@ export interface ExperimentModule {
 export type Category = 'create' | 'play' | 'read' | 'learn' | 'explore' | 'art';
 export type ProjectRuntime = 'local' | 'openai-compatible';
 export type ProjectLanguage = 'en' | 'zh-CN';
+export type ProjectPlatform = 'universal' | 'desktop';
 
 export interface ProjectManifest {
   id: string;
@@ -46,6 +47,7 @@ export interface ProjectManifest {
   preview?: string;
   runtime?: ProjectRuntime;
   language?: ProjectLanguage;
+  platform?: ProjectPlatform;
 }
 
 export interface Project extends ProjectManifest {

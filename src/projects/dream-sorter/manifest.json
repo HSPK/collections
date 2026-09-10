@@ -1,0 +1,17 @@
+{
+  "id": "dream-sorter",
+  "order": 89,
+  "title": "梦境分拣局",
+  "subtitle": "把白昼和黑夜，寄回各自的梦里。",
+  "description": "原创中文桌面邮政街机。左右分拣折纸梦邮，夜班督导根据公开错单切换真实规则、编组与节奏。四个短班、有限暂存与可复核的固定步回放。",
+  "category": "play",
+  "format": "page",
+  "runtime": "openai-compatible",
+  "language": "zh-CN",
+  "platform": "desktop",
+  "medium": "复古未来邮政街机",
+  "tags": ["Phaser", "Agent games", "桌面键鼠"],
+  "color": "#272344",
+  "ink": "#ff985d",
+  "instruction": "请督导派件，读完一条规则再开带。← / A 送白昼，→ / D 送黑夜；四班交接，三次退件结束。模型只在班次之间调用，等待时不会计时。"
+}

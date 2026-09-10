@@ -1,0 +1,17 @@
+{
+  "id": "cat-shift",
+  "order": 87,
+  "title": "猫咪借位",
+  "subtitle": "馆藏不动，只是换个位置。",
+  "description": "团团要在天亮前借走月牙沙丁鱼。点击行走，与展品和纸猫借位，用雕塑挡灯、压板开门，破解真实模型巡夜员提前公布的脚印，穿过五间原创纸馆展室。",
+  "category": "play",
+  "format": "page",
+  "runtime": "openai-compatible",
+  "language": "zh-CN",
+  "platform": "desktop",
+  "medium": "Phaser 纸馆借位谜题",
+  "tags": ["Phaser", "Agent games", "桌面键鼠", "战术解谜", "原创角色"],
+  "color": "#f4e8cb",
+  "ink": "#213e3b",
+  "instruction": "每室先请巡夜员落脚印。点击相邻地板或用方向键 / WASD 行走；点「借位」或按 Shift 后与相邻展品交换。拿到月牙签再出门，红格预告下一步灯光。"
+}

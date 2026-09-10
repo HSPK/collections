@@ -1,0 +1,17 @@
+{
+  "id": "paper-watch",
+  "order": 91,
+  "title": "纸上守夜",
+  "subtitle": "三盏折灯，把一座纸城守到天亮。",
+  "description": "一场原创纸雕夜巡街机：用三盏朱砂折灯，把淘气墨影照成星屑。真实模型在五更之间编排分布与假动作，你掌握闪光时机、蓄光与连锁，守住三道城折，迎来可重放的黎明。",
+  "category": "play",
+  "format": "page",
+  "runtime": "openai-compatible",
+  "language": "zh-CN",
+  "platform": "desktop",
+  "medium": "纸雕夜城街机",
+  "tags": ["Phaser", "Agent games", "桌面键鼠"],
+  "color": "#101f35",
+  "ink": "#f2e4c5",
+  "instruction": "连接模型并查看墨影预告，准备好了再开更。1/2/3选灯，空格或点击巷道闪光；金边再照，闲灯回能散热。P暂停，守完五更迎接黎明。"
+}

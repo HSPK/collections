@@ -66,6 +66,10 @@ export function parseManifest(value: unknown, source = 'Project manifest'): Proj
   if (language !== undefined && language !== 'en' && language !== 'zh-CN') {
     throw new Error(`${source}: language must be "en" or "zh-CN".`);
   }
+  const platform = value.platform;
+  if (platform !== undefined && platform !== 'universal' && platform !== 'desktop') {
+    throw new Error(`${source}: platform must be "universal" or "desktop".`);
+  }
   return {
     id, order, color, ink,
     title: text('title'),
@@ -79,6 +83,7 @@ export function parseManifest(value: unknown, source = 'Project manifest'): Proj
     ...(preview ? { preview } : {}),
     ...(runtime ? { runtime } : {}),
     ...(language ? { language } : {}),
+    ...(platform ? { platform } : {}),
   };
 }
 

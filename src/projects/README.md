@@ -62,6 +62,10 @@ Set `"language": "zh-CN"` for a Chinese-language project. Omitted language
 defaults to English. This sets the standalone document language and collection
 menu/search/feedback labels without changing other projects. Pass
 `locale: 'zh-CN'` to the shared model console and game notebook as well.
+`"platform": "desktop"` explicitly limits a project's supported input/layout
+contract to desktop keyboard and mouse. The library labels those projects.
+Omitted platform remains universal and retains the existing phone coverage.
+Do not claim touch support without implementing it.
 The default cover is `public/previews/<id>.jpg`; an optional `preview`
 can point to another local image inside `previews/`.
 Add `data-project-preview` to the main workbench, exhibit, or content region

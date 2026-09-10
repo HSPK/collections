@@ -1,0 +1,17 @@
+{
+  "id": "marble-parley",
+  "order": 88,
+  "title": "弹珠外交",
+  "subtitle": "不必争吵，让弹珠决定月亮的归属。",
+  "description": "原创太空使馆弹珠游戏。真实模型依据你的公开发射记录，选择会改变实际碰撞的弹台和铜盾；拖球、瞄准、折返，五轮签下属于每个人的月亮。",
+  "category": "play",
+  "format": "page",
+  "runtime": "openai-compatible",
+  "language": "zh-CN",
+  "platform": "desktop",
+  "medium": "原创太空弹珠 · 模型策略对手",
+  "tags": ["Phaser", "Agent games", "桌面键鼠"],
+  "color": "#091f2e",
+  "ink": "#e0f780",
+  "instruction": "邀请模型公开布阵，拖住底部弹珠后拉松手，或方向键瞄准、空格发射。每轮三球签两份契约，终章签三份；E 装填一次连签电荷，P 暂停。"
+}

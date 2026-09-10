@@ -37,7 +37,7 @@ test('The library gives the first screen to readable project content, not a hero
   expect(visible).toBeGreaterThanOrEqual(6);
   expect(await page.locator('.card-copy p').first().evaluate((element) => parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(14);
   expect(await page.locator('.card-tags span').first().evaluate((element) => parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(12);
-  expect(requested.filter((url) => /\/(?:three|astronomy)[^/]*\.js|\/deps\/(?:three|astronomy-engine)\.js/.test(url))).toEqual([]);
+  expect(requested.filter((url) => /\/(?:three|astronomy|phaser)[^/]*\.js|\/deps\/(?:three|astronomy-engine|phaser)\.js/.test(url))).toEqual([]);
 });
 
 test('Old shared links lead to real standalone pages and survive direct refresh', async ({ page }) => {
@@ -72,7 +72,7 @@ test('Manifest and HTML generation are data-driven, validated, and safely rebase
 });
 
 for (const project of websites) {
-  test(`${project.id}: independent website loads, refreshes, and fits a phone`, async ({ page }) => {
+  test(`${project.id}: independent website loads, refreshes, and fits ${project.platform === 'desktop' ? 'a desktop' : 'a phone'}`, async ({ page }) => {
     if (project.tags.some((tag) => tag.toLowerCase().includes('3d'))) test.setTimeout(90_000);
     const errors: string[] = [];
     page.on('pageerror', (error) => errors.push(error.message));
@@ -86,9 +86,9 @@ for (const project of websites) {
     await expect(page.locator('.project-app').getByRole('heading', { level: 1 }).first()).toBeVisible();
     await page.reload();
     await expect(surface).toHaveAttribute('data-ready', 'true');
-    await page.setViewportSize({ width: 375, height: 812 });
+    await page.setViewportSize(project.platform === 'desktop' ? { width: 1280, height: 720 } : { width: 375, height: 812 });
     await page.waitForTimeout(100);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), `${project.id} must not overflow the phone viewport`).toBe(true);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), `${project.id} must not overflow its supported viewport`).toBe(true);
     await expect(page.locator('.project-trail, #app > .site-header')).toHaveCount(0);
     await openCollectionMenu(page);
     await expect(page.getByRole('link', { name: project.language === 'zh-CN' ? '返回合集' : 'Back to index', exact: true })).toBeVisible();

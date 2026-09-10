@@ -46,6 +46,27 @@ the site publishes automatically after the main-branch quality gate.
 
 ## The websites
 
+### Phaser: five short, desktop-first Agent games
+
+Simple rules, quick rounds, and original Chinese worlds. This edition uses
+real **Phaser 4.2.1** scenes and game objects, not a decorative engine wrapper.
+The model commits a bounded strategy before a round; keyboard and mouse
+play remains local and responsive. Search **Phaser** to find the edition.
+
+| Game | The idea |
+|------|----------|
+| [猫咪借位](https://hspk.github.io/collections/projects/cat-shift/) | Swap places with museum exhibits while an agent guard chooses its patrol. |
+| [弹珠外交](https://hspk.github.io/collections/projects/marble-parley/) | Settle a moon-sized disagreement with ricochets against agent-arranged defenses. |
+| [梦境分拣局](https://hspk.github.io/collections/projects/dream-sorter/) | Two-button dream sorting against an adaptive supervisor's rules and rhythms. |
+| [云朵合伙人](https://hspk.github.io/collections/projects/cloud-rescue/) | Slide, merge and harvest rain with a wind spirit that makes real choices. |
+| [纸上守夜](https://hspk.github.io/collections/projects/paper-watch/) | Keep three folding lamps alive against a shadow conductor's telegraphed waves. |
+
+These games explicitly target **desktop keyboard and mouse**, with no touch
+control layer. Shared lifecycle, fixed-step simulation, bounded assets and
+verified replays support repeatable development; they are not claims of
+multiplayer anti-cheat or a hosted commercial backend. Read the
+[Chinese playing and production guide](docs/phaser-games.zh-CN.md).
+
 ### 五款中文 Agent RPG
 
 原创世界、角色与多幕剧情，不套用现有动漫或小说的角色台词。
@@ -317,6 +338,8 @@ All project manifests use `format: "page"`.
 - API-required games are labeled in both library layouts, quick search,
   and project information. Existing local projects remain usable without
   model configuration. Game notebooks keep validated replays, not API keys.
+- Desktop-only games also carry a Desktop label and an explicit platform
+  contract. Existing universal projects retain their phone layouts.
 - Controls, labels, and body copy use readable sizes. Sites are designed
   for narrow screens and provide keyboard or touch alternatives.
 - Interactive sites use viewport-height workspaces: primary controls stay

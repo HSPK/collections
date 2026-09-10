@@ -22,13 +22,16 @@ for (const project of projects.filter(project => project.category !== 'read')) {
     const root = page.locator(`.project-${project.id}`);
     await expect(root).toHaveAttribute('data-workspace', 'true');
     await expect(root.getByRole('heading', { level: 1 }).first()).toBeVisible();
-    for (const size of sizes) {
+    const supportedSizes = project.platform === 'desktop' ?
+      [{ width: 1440, height: 900 }, { width: 1280, height: 720 }, { width: 1920, height: 1080 }] : sizes;
+    for (const size of supportedSizes) {
       await page.setViewportSize(size);
       await expectWorkspaceViewport(page, size.width, size.height);
       expect(await visibleControlProblems(root), `${project.id} at ${size.width}x${size.height}`).toEqual([]);
     }
     await page.emulateMedia({ reducedMotion: 'no-preference' });
-    for (const size of sizes.filter(size => size.width === 1440 || size.width === 320)) {
+    for (const size of supportedSizes.filter(size => size.width === 1440 || size.width === 320 ||
+      (project.platform === 'desktop' && size.width === 1280))) {
       await page.setViewportSize(size);
       await expectWorkspaceViewport(page, size.width, size.height);
       expect(await visibleControlProblems(root), `${project.id}, default motion at ${size.width}x${size.height}`).toEqual([]);

@@ -1,0 +1,17 @@
+.project-app .phaser-stage {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: clip;
+  isolation: isolate;
+}
+.project-app .phaser-stage > canvas {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  touch-action: none;
+}
+.project-app .phaser-stage > canvas:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: -4px;
+}

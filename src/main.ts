@@ -146,14 +146,14 @@ function discoveryOrder(items: Project[]): Project[] {
 
 function card(project: Project) {
   const requiresModel = project.runtime === 'openai-compatible';
-  return `<article class="project-card" data-category="${project.category}" data-runtime="${project.runtime ?? 'local'}">
+  return `<article class="project-card" data-category="${project.category}" data-runtime="${project.runtime ?? 'local'}" data-platform="${project.platform ?? 'universal'}">
     <a class="project-open" data-project="${project.id}" href="${projectUrl(project.id)}" aria-label="${escapeMarkup(project.title)}: ${escapeMarkup(project.subtitle)}"${requiresModel ? ` aria-describedby="requirement-${project.id}"` : ''}>
       <div class="card-art" style="--art-color:${project.color};--art-ink:${project.ink}">
         <div class="card-placeholder" aria-hidden="true"><span>${escapeMarkup(project.medium)}</span><strong>${escapeMarkup(project.title)}</strong></div>
         <img src="${siteUrl(project.preview || `previews/${project.id}.jpg`)}" alt="${escapeMarkup(project.title)} website preview" loading="lazy" decoding="async" width="1200" height="800" />
         <span class="card-open-indicator">${diagonal}</span>
       </div>
-      <div class="card-copy"><div class="card-heading"><h2>${escapeMarkup(project.title)}</h2>${requiresModel ? `<span class="card-requirement" id="requirement-${project.id}" title="Bring your own OpenAI-compatible model connection.">API required</span>` : ''}</div><p>${escapeMarkup(project.description)}</p></div>
+      <div class="card-copy"><div class="card-heading"><h2>${escapeMarkup(project.title)}</h2>${requiresModel ? `<span class="card-requirement" id="requirement-${project.id}" title="Bring your own OpenAI-compatible model connection.">API required</span>` : ''}${project.platform === 'desktop' ? '<span class="card-platform">Desktop</span>' : ''}</div><p>${escapeMarkup(project.description)}</p></div>
     </a>
     <div class="card-tags">${project.tags.slice(0, 3).map((tag) => `<span>${escapeMarkup(tag)}</span>`).join('')}</div>
     <footer class="card-footer"><span>${categoryIcon(project.category)}${categoryNames[project.category]}</span><a href="${sourceUrl(project)}" target="_blank" rel="noopener noreferrer" aria-label="View source for ${escapeMarkup(project.title)}">${codeIcon}</a></footer>
@@ -465,6 +465,7 @@ async function renderProject(project: Project) {
     projectInfo.querySelector('h2')!.textContent = project.title;
     projectInfo.querySelector('[data-info-description]')!.textContent = project.description;
     projectInfo.querySelector('[data-info-medium]')!.textContent = `${projectCategory(project.category, project.language)} / ${project.medium}`;
+    if (project.platform === 'desktop') projectInfo.querySelector('[data-info-medium]')!.textContent += project.language === 'zh-CN' ? ' / 桌面键盘与鼠标' : ' / Desktop keyboard & mouse';
     projectInfo.querySelector('[data-info-runtime]')!.textContent = project.runtime === 'openai-compatible' ?
       labels.modelRequired : labels.localOnly;
     projectInfo.querySelector('.dialog-close')!.setAttribute('aria-label', labels.closeInfo);

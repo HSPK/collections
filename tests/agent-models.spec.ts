@@ -10,6 +10,7 @@ const ids = [
   'ghost-courier', 'custodian', 'mnemosyne', 'accord', 'graft',
   'sigil', 'afterlight', 'mise', 'chorus', 'takes',
   'emberwake', 'borrowed-names', 'verdant-oath', 'iron-choir', 'tidebound-house',
+  'cat-shift', 'marble-parley', 'dream-sorter', 'cloud-rescue', 'paper-watch',
 ];
 const endpoint = process.env.ODD_MODEL_BASE_URL;
 

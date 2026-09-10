@@ -1,0 +1,121 @@
+.project-cat-shift {
+  --cs-ink: #213e3b;
+  --cs-red: #b94734;
+  --cs-teal: #35756d;
+  --workspace-paper: #fff1d1;
+  --agent-paper: #fff1d1;
+  --agent-ink: #213e3b;
+  height: 100dvh;
+  min-height: 620px;
+  color: var(--cs-ink);
+  background: #f4e8cb;
+  font: 15px/1.5 "Noto Sans SC", "Microsoft YaHei", "PingFang SC", sans-serif;
+}
+.project-cat-shift * { box-sizing: border-box; }
+.project-cat-shift [hidden] { display: none !important; }
+.project-cat-shift button {
+  border: 1px solid #b0a17f;
+  border-radius: 7px;
+  background: #fff5dd;
+  color: var(--cs-ink);
+  padding: 8px 12px;
+  min-height: 38px;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background .15s, box-shadow .15s;
+}
+.project-cat-shift button:hover:not(:disabled) { background: #e5d8b6; box-shadow: 0 3px 0 #213e3b21; }
+.project-cat-shift button:disabled { opacity: .5; cursor: not-allowed; }
+.project-cat-shift :focus-visible { outline: 3px solid var(--cs-red); outline-offset: 3px; }
+.project-cat-shift h1, .project-cat-shift h2, .project-cat-shift h3, .project-cat-shift p { margin: 0; }
+.project-cat-shift .cs-shell {
+  height: 100%;
+  padding: 15px 24px 10px;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: 13px;
+  max-width: 1920px;
+  margin: auto;
+}
+.project-cat-shift .cs-header { display: flex; gap: 24px; align-items: center; }
+.project-cat-shift .cs-brand { display: flex; align-items: center; gap: 14px; }
+.project-cat-shift .cs-seal {
+  display: grid;
+  place-content: center;
+  width: 58px;
+  height: 58px;
+  border: 2px solid var(--cs-red);
+  outline: 1px solid var(--cs-red);
+  outline-offset: 3px;
+  color: var(--cs-red);
+  font: 39px/1 serif;
+  transform: rotate(-7deg);
+}
+.project-cat-shift h1 { font-size: 36px; letter-spacing: 3px; line-height: 1.25; font-weight: 850; }
+.project-cat-shift .cs-eyebrow { font-size: 13px; letter-spacing: 1.3px; font-weight: 700; color: #71634c; }
+.project-cat-shift .cs-tagline { padding-left: 22px; border-left: 1px solid #bbaa86; font-size: 14px; color: #7a674d; }
+.project-cat-shift .cs-header nav { margin-left: auto; display: flex; gap: 7px; }
+.project-cat-shift .cs-room-strip { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, 1fr); border-block: 1px solid #ac9c7e; }
+.project-cat-shift .cs-room-strip li { display: grid; grid-template-columns: auto 1fr; column-gap: 9px; padding: 7px 12px; color: #827761; border-right: 1px solid #c9bba0; }
+.project-cat-shift .cs-room-strip li:last-child { border-right: 0; }
+.project-cat-shift .cs-room-strip li > span { grid-row: span 2; font: 29px/1.5 Georgia, serif; }
+.project-cat-shift .cs-room-strip strong { font-size: 14px; font-weight: 650; white-space: nowrap; }
+.project-cat-shift .cs-room-strip small { font-size: 12px; letter-spacing: 1px; }
+.project-cat-shift .cs-room-strip [data-current="true"] { color: #fff1d1; background: var(--cs-teal); }
+.project-cat-shift .cs-main { display: grid; grid-template-columns: minmax(0, 1fr) 252px; gap: 18px; min-height: 0; }
+.project-cat-shift .cs-play { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; gap: 10px; min-height: 0; min-width: 0; }
+.project-cat-shift .cs-room-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.project-cat-shift h2 { font-size: 24px; }
+.project-cat-shift .cs-resources { display: flex; gap: 8px; font-size: 14px; }
+.project-cat-shift .cs-resources > span { display: flex; flex-direction: column; padding: 0 12px; border-left: 1px solid #cbbd9d; }
+.project-cat-shift .cs-resources b { font-size: 18px; font-variant-numeric: tabular-nums; }
+.project-cat-shift [data-alarm] { color: var(--cs-red); }
+.project-cat-shift .cs-stage { background: #e6d6b4; border: 2px solid var(--cs-ink); border-radius: 13px; box-shadow: 0 5px 0 #b8a688; min-height: 0; }
+.project-cat-shift .cs-controls { display: flex; align-items: center; gap: 9px; padding-top: 4px; }
+.project-cat-shift .cs-controls button { min-height: 47px; padding: 9px 16px; font-size: 16px; }
+.project-cat-shift .cs-controls p { margin-left: auto; color: #635a48; font-size: 14px; }
+.project-cat-shift .cs-controls p span { font-size: 12px; }
+.project-cat-shift kbd { font: 12px/1.2 inherit; opacity: .8; margin-left: 8px; }
+.project-cat-shift .cs-swap[aria-pressed="true"] { background: var(--cs-teal); color: #fff1d1; border-color: var(--cs-ink); box-shadow: inset 0 -3px 0 #173b37; }
+.project-cat-shift .cs-sidebar { display: flex; flex-direction: column; min-height: 0; padding: 14px 16px; border: 1px solid #bdaa88; border-radius: 12px; background: #fff1d1; }
+.project-cat-shift .cs-night-number { display: flex; position: relative; flex-direction: column; border-bottom: 2px solid var(--cs-red); padding-bottom: 9px; color: var(--cs-red); }
+.project-cat-shift .cs-night-number > span { font-size: 13px; letter-spacing: 2px; }
+.project-cat-shift .cs-night-number b { font-size: 25px; line-height: 1.2; letter-spacing: 2px; }
+.project-cat-shift .cs-night-number i { position: absolute; right: 4px; top: 7px; width: 57px; height: 57px; border-radius: 50%; background: var(--cs-red); transform: rotate(-16deg); }
+.project-cat-shift .cs-night-number i::after { content: ""; position: absolute; left: 16px; top: -8px; width: 51px; height: 51px; border-radius: 50%; background: #fff1d1; }
+.project-cat-shift .cs-story { font-size: 13px; color: #74644d; margin: 10px 0; line-height: 1.6; }
+.project-cat-shift .cs-goal { border-block: 1px dashed #b8a98a; padding: 10px 0; }
+.project-cat-shift .cs-goal p { margin: 4px 0 8px; font-size: 15px; }
+.project-cat-shift .cs-goal strong { font-size: 14px; color: var(--cs-teal); }
+.project-cat-shift .cs-patrol { padding-top: 10px; min-height: 0; overflow: auto; scrollbar-width: thin; }
+.project-cat-shift h3 { font-size: 16px; }
+.project-cat-shift [data-intention] { margin: 5px 0; font-size: 14px; overflow-wrap: anywhere; }
+.project-cat-shift [data-forecast] { display: grid; grid-template-columns: 1fr 1fr; padding: 0; gap: 4px; list-style: none; margin: 8px 0; }
+.project-cat-shift [data-forecast] li { padding: 5px; font-size: 13px; white-space: nowrap; background: #e9debd; border-radius: 4px; }
+.project-cat-shift [data-forecast] li:first-child { background: var(--cs-red); color: #fff1d1; }
+.project-cat-shift .cs-primary { margin-top: auto; width: 100%; background: var(--cs-red); border-color: #883425; color: #fff1d1; font-size: 16px; font-weight: 700; min-height: 46px; }
+.project-cat-shift .cs-primary:hover:not(:disabled) { background: #993b2b; }
+.project-cat-shift .cs-call-note { font-size: 12px; text-align: center; margin-top: 6px; color: #79674c; }
+.project-cat-shift .cs-footer { display: grid; grid-template-columns: minmax(220px, .9fr) minmax(0, 1fr); gap: 16px; align-items: center; padding-top: 5px; padding-right: 70px; border-top: 1px solid #bfae8b; }
+.project-cat-shift [data-notice] { font-size: 14px; line-height: 1.4; }
+.project-cat-shift [data-connection] { min-width: 0; }
+.project-cat-shift [data-connection] > button { min-height: 32px; padding: 5px 9px; }
+.project-cat-shift [data-connection] > p { min-width: 0; font-size: 12px; }
+.project-cat-shift .cs-dialog { max-width: 700px; }
+.project-cat-shift .cs-help-rules { padding-left: 24px; margin: 0; }
+.project-cat-shift .cs-help-rules li { margin-bottom: 14px; }
+.project-cat-shift .cs-dialog p { margin-block: 12px; }
+@media (max-height: 780px) and (min-width: 1000px) {
+  .project-cat-shift .cs-shell { padding: 10px 18px 8px; gap: 8px; }
+  .project-cat-shift h1 { font-size: 31px; }
+  .project-cat-shift .cs-seal { width: 49px; height: 49px; font-size: 34px; }
+  .project-cat-shift .cs-room-strip li { padding-block: 4px; }
+  .project-cat-shift .cs-night-number b { font-size: 21px; }
+  .project-cat-shift .cs-night-number b br { display: none; }
+  .project-cat-shift .cs-night-number i { display: none; }
+  .project-cat-shift .cs-story { margin: 7px 0; font-size: 12px; }
+  .project-cat-shift .cs-sidebar { padding: 10px 13px; }
+  .project-cat-shift .cs-goal { padding-block: 7px; }
+  .project-cat-shift .cs-main { grid-template-columns: minmax(0, 1fr) 250px; gap: 13px; }
+}
