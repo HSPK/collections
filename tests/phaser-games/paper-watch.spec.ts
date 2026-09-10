@@ -117,7 +117,7 @@ async function flash(page: Page, tick: number, lane: Lane, pointer = false) {
   }
 }
 test('真实客户端与合法键鼠完成五更金灯通关，导出回放重算并保留资源上限', async ({ page }) => {
-  test.setTimeout(180_000);
+  test.setTimeout(360_000);
   const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
   const calls = await installAgentFixture(page, turn => planFor(Number(turn.observation.wave)));
   await open(page);

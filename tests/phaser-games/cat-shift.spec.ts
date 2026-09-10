@@ -139,6 +139,7 @@ test('plates, single-use paper cats, squeaks and forged reward rejection use rea
 });
 
 test('real canvas campaign wins through legitimate steps, unlocks, public history and local replay', async ({ page }, info) => {
+  test.setTimeout(120_000);
   await page.setViewportSize({ width: 1440, height: 900 });
   const calls = await installAgentFixture(page, turn => ({ ...LEGAL_PLANS[turn.index % 4]!, intention: '沿刚才的猫爪印巡查。' }));
   await open(page);

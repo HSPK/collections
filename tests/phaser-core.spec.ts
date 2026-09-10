@@ -54,6 +54,8 @@ async function fixture(page: Page, renderer: 'auto' | 'canvas' = 'auto', navigat
         };
       },
     });
+    let renders = 0;
+    stage.game.events.on('postrender', () => { page.root.dataset.renders = String(++renders); });
     query(page.root, '[data-pause]').addEventListener('click', () => stage.setPaused(true), { signal: page.signal });
     query(page.root, '[data-resume]').addEventListener('click', () => stage.setPaused(false), { signal: page.signal });
     query(page.root, '[data-remove]').addEventListener('click', () => page.destroy(), { signal: page.signal });
@@ -175,4 +177,26 @@ test('lost graphics context always pauses and reports a visible recovery path', 
   await expect(root).toHaveAttribute('data-reported', /画面连接已中断/);
   await root.dispatchEvent('destroy-stage');
   await expect(root.locator('canvas')).toHaveCount(0);
+});
+
+test('manual and modal pauses stop GPU submissions, not only the scene simulation', async ({ page }) => {
+  await fixture(page);
+  const root = page.locator('.project-phaser-fixture');
+  await expect.poll(async () => Number(await root.getAttribute('data-renders'))).toBeGreaterThan(1);
+  await page.clock.install();
+  await page.clock.pauseAt(new Date(Date.now() + 1000));
+  await root.getByRole('button', { name: 'Pause', exact: true }).click();
+  const pausedRenders = await root.getAttribute('data-renders');
+  await page.clock.runFor(3000);
+  await expect(root).toHaveAttribute('data-renders', pausedRenders!);
+  await root.getByRole('button', { name: 'Resume', exact: true }).click();
+  await page.clock.runFor(100);
+  expect(Number(await root.getAttribute('data-renders'))).toBeGreaterThan(Number(pausedRenders));
+  await root.getByRole('button', { name: 'Help', exact: true }).click();
+  const modalRenders = await root.getAttribute('data-renders');
+  await page.clock.runFor(3000);
+  await expect(root).toHaveAttribute('data-renders', modalRenders!);
+  await page.keyboard.press('Escape');
+  await page.clock.runFor(100);
+  expect(Number(await root.getAttribute('data-renders'))).toBeGreaterThan(Number(modalRenders));
 });

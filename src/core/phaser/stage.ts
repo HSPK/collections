@@ -82,8 +82,13 @@ export function createPhaserStage<V extends PhaserView>(
     const next = explicitPause || document.hidden || Boolean(document.querySelector('dialog:modal'));
     if (next === paused) return;
     paused = next;
-    if (paused) scene.scene.pause();
-    else scene.scene.resume();
+    if (paused) {
+      scene.scene.pause();
+      scene.game.pause();
+    } else {
+      scene.game.resume();
+      scene.scene.resume();
+    }
     view?.pauseChanged?.(paused);
     host.dataset.phaserPaused = String(paused);
   }

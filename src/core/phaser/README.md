@@ -35,6 +35,8 @@ is created on load. Optional sound must be explicitly opted into using the
 existing audio lifecycle. `runtime.canInteract()` gates pointer callbacks;
 `gameKey(event, root, stage.canInteract())` guards keyboard shortcuts.
 Do not install Phaser's document-global keyboard capture or another RAF loop.
+Pausing stops both scene simulation and the game's render submissions, so
+opening a notebook does not keep repainting an unchanged GPU canvas.
 
 `stage.metrics()` reports actual update count, scene object count, texture
 count and tween count. Test resource counts after repeated rounds/restarts.

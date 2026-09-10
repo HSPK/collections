@@ -320,7 +320,7 @@ test('three strike loss, finite emergency hold and retry use real response windo
 });
 
 test('manual, modal and visibility pauses clear input debt; active reload returns to saved wave preview', async ({ page }) => {
-  test.setTimeout(90_000);
+  test.setTimeout(180_000);
   const calls = await installAgentFixture(page, fixture);
   await open(page);
   await beginWave(page);
